@@ -188,12 +188,12 @@ def parse_config(conf):
                 
 def main():
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print 'usage: %s -f config' % sys.argv[0]
         raise SystemExit
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "f:")
+        opts, args = getopt.getopt(sys.argv[1:], "f:DH")
     except getopt.GetoptError, e:
         print 'usage: %s -f config' % sys.argv[0]
         raise SystemExit
@@ -201,14 +201,22 @@ def main():
     for opt, arg in opts:
         if opt == '-f':
             myConfig = arg
+        elif opt == '-D':
+            pollInfo = 'datastores'
+        elif opt == '-H':
+            pollInfo = 'hosts'
 
     config = parse_config(myConfig)
     poller = VMPoller(config)
 
     # Let's dance ...
     poller.connect()
-    poller.poll_hosts()
-    #    poller.poll_datastores()
+
+    if pollInfo == 'datastores':
+        poller.poll_datastores()
+    elif pollInfo == 'hosts':
+        poller.poll_hosts()
+        
     poller.disconnect()
    
 if __name__ == '__main__':
