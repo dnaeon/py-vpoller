@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-'vm-poller' is an application used for polling information from a VMware vCenter server.
+'vm-discoverer' is an application used for polling information from a VMware vCenter server.
 
-It is intended to be integrated into a Zabbix template for auto discovery of ESX hosts and VMs.
+It is intended to be integrated into a Zabbix template for auto discovery of ESX hosts and datastores.
 
 The data is returned in JSON format that is recognizable by Zabbix and ready for importing by the
 auto discovery protocol used by Zabbix.
@@ -16,7 +16,6 @@ Author: mnikolov@vmware.com
 import os
 import sys
 import json
-import time
 import getopt
 import syslog
 import ConfigParser
@@ -64,7 +63,6 @@ class VMPoller(object):
     def disconnect(self):
         syslog.syslog('Disconnecting from vCenter %s' % self._vcenter)
 
-        # remove the lock file
         os.unlink(self._lockfile)
 
         self._viserver.disconnect()
@@ -73,44 +71,12 @@ class VMPoller(object):
         syslog.syslog('Polling hosts information from vCenter %s' % self._vcenter)
 
         property_names = ['name',
-                          'hardware.memorySize',
-                          'hardware.cpuInfo.hz',
-                          'hardware.cpuInfo.numCpuCores',
-                          'hardware.cpuInfo.numCpuPackages',
-                          'runtime.bootTime',
-                          'runtime.connectionState',
-                          'runtime.inMaintenanceMode',
                           'runtime.powerState',
-                          'summary.config.vmotionEnabled',
-                          'summary.managementServerIp',
-                          'summary.overallStatus',
-                          'summary.rebootRequired',
-                          'summary.quickStats.distributedCpuFairness',
-                          'summary.quickStats.distributedMemoryFairness',
-                          'summary.quickStats.overallCpuUsage',
-                          'summary.quickStats.overallMemoryUsage',
-                          'summary.quickStats.uptime',
                           ]
 
-        property_macros = {'name': 						'{#ESX_NAME}',
-                           'hardware.memorySize':				'{#ESX_MEMORY_SIZE}',
-                           'hardware.cpuInfo.hz':				'{#ESX_CPU_INFO_HZ}',
-                           'hardware.cpuInfo.numCpuCores':			'{#ESX_CPU_NUM_CORES}',
-                           'hardware.cpuInfo.numCpuPackages':			'{#ESX_CPU_NUM_PKGS}',
-                           'runtime.bootTime':					'{#ESX_BOOT_TIME}',
-                           'runtime.connectionState':				'{#ESX_CONNECTION_STATE}',
-                           'runtime.inMaintenanceMode':				'{#ESX_IN_MAINTENANCE_MODE}',
-                           'runtime.powerState':				'{#ESX_POWERSTATE}',
-                           'summary.config.vmotionEnabled':			'{#ESX_VMOTION_ENABLED}',
-                           'summary.managementServerIp':			'{#ESX_MGMT_IP}',
-                           'summary.overallStatus':				'{#ESX_OVERALL_STATUS}',
-                           'summary.rebootRequired':				'{#ESX_REBOOT_REQUIRED}',
-                           'summary.quickStats.distributedCpuFairness':		'{#ESX_DISTRIBUTED_CPU_FAIRNESS}',
-                           'summary.quickStats.distributedMemoryFairness':	'{#ESX_DISTRIBUTED_MEM_FAIRNESS}',
-                           'summary.quickStats.overallCpuUsage':		'{#ESX_OVERALL_CPU_USAGE}',
-                           'summary.quickStats.overallMemoryUsage':		'{#ESX_OVERALL_MEM_USAGE}',
-                           'summary.quickStats.uptime':				'{#ESX_UPTIME}',
-                          }
+        property_macros = {'name': 		 '{#ESX_NAME}',
+                           'runtime.powerState': '{#ESX_POWERSTATE}',
+                           }
 
         results = self._viserver._retrieve_properties_traversal(property_names=property_names,
                                                                 obj_type=pysphere.MORTypes.HostSystem)
@@ -121,12 +87,11 @@ class VMPoller(object):
             d = {}
 
             for p in item.PropSet:
-                if p.Name == 'runtime.bootTime':
-                    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', p.Val)
-                    d[property_macros[p.Name]] = timestamp
-                else:
-                    d[property_macros[p.Name]] = p.Val
+                d[property_macros[p.Name]] = p.Val
 
+            # remember on which vCenter this ESX host runs on
+            d['{#VCENTER_SERVER}'] = self._vcenter
+                
             json_data.append(d)
         
         print json.dumps({ 'data': json_data}, indent=4)
@@ -135,27 +100,13 @@ class VMPoller(object):
         syslog.syslog('Polling datastores information from vCenter %s' % self._vcenter)
 
         property_names = ['info.name',
-                          'info.maxFileSize',
-                          'info.timestamp',
                           'info.url',
                           'summary.accessible',
-                          'summary.capacity',
-                          'summary.freeSpace',
-                          'summary.maintenanceMode',
-                          'summary.type',
-                          'summary.uncommitted'
                           ]
 
-        property_macros = {'info.name':			'{#DS_NAME}',
-                           'info.maxFileSize':		'{#DS_MAXFILE_SIZE}',
-                           'info.timestamp':		'{#DS_TIMESTAMP}',
-                           'info.url':			'{#DS_URL}',
-                           'summary.accessible':	'{#DS_ACCESSIBLE}',
-                           'summary.capacity':		'{#DS_CAPACITY}',
-                           'summary.freeSpace':		'{#DS_FREESPACE}',
-                           'summary.maintenanceMode':	'{#DS_MAINTENANCE_MODE}',
-                           'summary.type':		'{#DS_TYPE}',
-                           'summary.uncommitted':	'{#DS_UNCOMMITTED}',
+        property_macros = {'info.name': 	 '{#DS_NAME}',
+                           'info.url':		 '{#DS_URL}',
+                           'summary.accessible': '{#DS_ACCESSIBLE}',
                            }
         
         results = self._viserver._retrieve_properties_traversal(property_names=property_names,
@@ -167,14 +118,10 @@ class VMPoller(object):
             d = {}
 
             for p in item.PropSet:
-                if p.Name == 'info.timestamp':
-                    timestamp = time.strftime('%Y-%m-%d %H:%M:%S', p.Val)
-                    d[property_macros[p.Name]] = timestamp
-                else:
-                    d[property_macros[p.Name]] = p.Val
+                d[property_macros[p.Name]] = p.Val
 
-            # calculate the used space in percentage
-            d['{#DS_USED_SPACE}'] = round(100 - ((float(d['{#DS_FREESPACE}']) / float(d['{#DS_CAPACITY}']) * 100)), 2)
+            # remember on which vCenter is this datastore
+            d['{#VCENTER_SERVER}'] = self._vcenter
 
             json_data.append(d)
 
