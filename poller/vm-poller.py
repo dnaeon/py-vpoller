@@ -172,9 +172,12 @@ class VMPoller(object):
                     d[property_macros[p.Name]] = timestamp
                 else:
                     d[property_macros[p.Name]] = p.Val
-                
+
+            # calculate the used space in percentage
+            d['{#DS_USED_SPACE}'] = round(100 - ((float(d['{#DS_FREESPACE}']) / float(d['{#DS_CAPACITY}']) * 100)), 2)
+
             json_data.append(d)
-                    
+
         print json.dumps({ 'data': json_data}, indent=4)
 
 def parse_config(conf):
@@ -189,13 +192,13 @@ def parse_config(conf):
 def main():
 
     if len(sys.argv) != 4:
-        print 'usage: %s -f config' % sys.argv[0]
+        print 'usage: %s [-D|-H] -f config' % sys.argv[0]
         raise SystemExit
     
     try:
         opts, args = getopt.getopt(sys.argv[1:], "f:DH")
     except getopt.GetoptError, e:
-        print 'usage: %s -f config' % sys.argv[0]
+        print 'usage: %s [-D|-H] -f config' % sys.argv[0]
         raise SystemExit
 
     for opt, arg in opts:
