@@ -22,8 +22,6 @@ import ConfigParser
 
 import pysphere
 
-LOCK_DIR = '/var/run/vm-poller'
-
 class VMPollerException(Exception):
     pass
 
@@ -32,27 +30,13 @@ class VMPoller(object):
         self._vcenter  = config.get('Default', 'vcenter')
         self._username = config.get('Default', 'username')
         self._password = config.get('Default', 'password')
-
-        self._lockfile = '%s/%s.lock' % (LOCK_DIR, self._vcenter)
-        
         self._viserver = pysphere.VIServer()
 
-        if not os.path.exists(LOCK_DIR):
-            os.mkdir(LOCK_DIR)
-        
     def vcenter(self):
         return self._vcenter
     
     def connect(self):
-        if os.path.exists(self._lockfile):
-            syslog.syslog('Lock file exists for vCenter %s, aborting ...' % self._vcenter)
-            raise SystemExit
-
         syslog.syslog('Connecting to vCenter %s' % self._vcenter)
-        
-        # create a lock file
-        with open(self._lockfile, 'w') as lockfile:
-            lockfile.write(str(os.getpid()))
         
         try:
             self._viserver.connect(host=self._vcenter, user=self._username, password=self._password)
@@ -62,13 +46,10 @@ class VMPoller(object):
 
     def disconnect(self):
         syslog.syslog('Disconnecting from vCenter %s' % self._vcenter)
-
-        os.unlink(self._lockfile)
-
         self._viserver.disconnect()
 
-    def poll_hosts(self):
-        syslog.syslog('Polling hosts information from vCenter %s' % self._vcenter)
+    def discover_hosts(self):
+        syslog.syslog('Discovering ESX hosts on vCenter %s' % self._vcenter)
 
         property_names = ['name',
                           'runtime.powerState',
@@ -96,8 +77,8 @@ class VMPoller(object):
         
         print json.dumps({ 'data': json_data}, indent=4)
 
-    def poll_datastores(self):
-        syslog.syslog('Polling datastores information from vCenter %s' % self._vcenter)
+    def discover_datastores(self):
+        syslog.syslog('Discovering datastores on vCenter %s' % self._vcenter)
 
         property_names = ['info.name',
                           'info.url',
@@ -143,9 +124,9 @@ def main():
         raise SystemExit
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "f:DH")
+        opts, args = getopt.getopt(sys.argv[1:], "DHf:")
     except getopt.GetoptError, e:
-        print 'usage: %s [-D|-H] -f config' % sys.argv[0]
+        print 'usage: %s [-D|-H] -f <config>' % sys.argv[0]
         raise SystemExit
 
     for opt, arg in opts:
@@ -163,9 +144,9 @@ def main():
     poller.connect()
 
     if pollInfo == 'datastores':
-        poller.poll_datastores()
+        poller.discover_datastores()
     elif pollInfo == 'hosts':
-        poller.poll_hosts()
+        poller.discover_hosts()
         
     poller.disconnect()
    
