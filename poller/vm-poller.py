@@ -186,12 +186,19 @@ def main():
     poller.connect()
 
     if pollInfo == 'datastores':
-        print poller.get_datastore_property(name, ds_url, myProperty)
+        result = poller.get_datastore_property(name, ds_url, myProperty)
     elif pollInfo == 'hosts':
-        print poller.get_host_property(name, myProperty)
-        
+        result = poller.get_host_property(name, myProperty)
+
     poller.disconnect()
-   
+
+    # Make sure to cast bools to int's so that Zabbix can understand them
+    if isinstance(result, bool):
+        print int(result)
+    else:
+        print result
+        
+    
 if __name__ == '__main__':
     main()
 

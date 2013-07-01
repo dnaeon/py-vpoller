@@ -68,7 +68,10 @@ class VMPoller(object):
             d = {}
 
             for p in item.PropSet:
-                d[property_macros[p.Name]] = p.Val
+                if isinstance(p.Val, bool):
+                    d[property_macros[p.Name]] = int(p.Val)
+                else:
+                    d[property_macros[p.Name]] = p.Val
 
             # remember on which vCenter this ESX host runs on
             d['{#VCENTER_SERVER}'] = self._vcenter
@@ -99,7 +102,10 @@ class VMPoller(object):
             d = {}
 
             for p in item.PropSet:
-                d[property_macros[p.Name]] = p.Val
+                if isinstance(p.Val, bool):
+                    d[property_macros[p.Name]] = int(p.Val)
+                else:
+                    d[property_macros[p.Name]] = p.Val
 
             # remember on which vCenter is this datastore
             d['{#VCENTER_SERVER}'] = self._vcenter
