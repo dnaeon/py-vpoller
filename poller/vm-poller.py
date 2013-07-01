@@ -12,11 +12,47 @@ Author: Marin Atanasov Nilolov <mnikolov@vmware.com>
 
 import os
 import sys
+import time
 import getopt
 import syslog
 import ConfigParser
 
 import pysphere
+
+def return_as_is(val):
+    """
+    Helper function, which returns property value as-is
+
+    """
+    return val
+
+def return_as_time(val):
+    """
+    Helper function, which returns property value as time
+
+    """
+    return time.strftime('%Y-%m-%d %H:%M:%S', val)
+
+def return_as_int(val):
+    """
+    Helper function, which returns property value as integer
+
+    """
+    return int(val)
+
+def return_as_bytes(val):
+    """
+    Helper function, which returns property value as bytes
+
+    """
+    return val * 1048576
+
+def return_as_hz(val):
+    """
+    Helper function, which returns property value as hz
+
+    """
+    return val * 1048576
 
 class VMPollerException(Exception):
     """
@@ -79,6 +115,34 @@ class VMPoller(object):
             The requested property value
 
         """
+
+        # dictionary mapping for properties and helper functions used for
+        # converting property values to proper types before passing the values to Zabbix
+        zabbix_host_properties = {
+            'name':						return_as_is,
+            'hardware.memorySize':				return_as_is,
+            'hardware.cpuInfo.hz':				return_as_is,
+            'hardware.cpuInfo.numCpuCores':			return_as_is,
+            'hardware.cpuInfo.numCpuPackages':			return_as_is,
+            'runtime.connectionState':				return_as_is,
+            'runtime.powerState':				return_as_is,
+            'summary.managementServerIp':			return_as_is,
+            'summary.overallStatus':				return_as_is,
+            'summary.rebootRequired':				return_as_is,
+            'summary.quickStats.distributedCpuFairness':	return_as_is,
+            'summary.quickStats.uptime':			return_as_is,
+            'summary.quickStats.overallCpuUsage':		return_as_hz,
+            'summary.quickStats.overallMemoryUsage':		return_as_bytes,
+            'summary.quickStats.distributedMemoryFairness':	return_as_bytes,
+            'runtime.inMaintenanceMode':			return_as_int,
+            'summary.config.vmotionEnabled':			return_as_int,
+            'runtime.bootTime':					return_as_time,
+            }
+
+        if prop not in zabbix_host_properties:
+            syslog.syslog('Invalid property name passed: %s' % prop)
+            return None
+        
         syslog.syslog('Getting property %s for %s from vCenter %s' % (prop, name, self._vcenter))
 
         property_names = ['name',
@@ -101,7 +165,7 @@ class VMPoller(object):
 
             # return the property if found and break
             if d['name'] == name:
-                return d[prop]
+                return zabbix_host_properties[prop](d[prop])
 
         return None
             
@@ -118,6 +182,26 @@ class VMPoller(object):
             The requested property value
 
         """
+
+        # dictionary mapping for properties and helper functions used for
+        # converting property values to proper types before passing the values to Zabbix
+        zabbix_datastore_properties = {
+            'info.name':					return_as_is,
+            'info.maxFileSize':					return_as_is,
+            'info.url':						return_as_is,
+            'summary.capacity':					return_as_is,
+            'summary.freeSpace':				return_as_is,
+            'summary.maintenanceMode':				return_as_is,
+            'summary.type':					return_as_is,
+            'summary.uncommitted':				return_as_is,
+            'summary.accessible':				return_as_int,
+            'info.timestamp':					return_as_time,
+            }
+        
+        if prop not in zabbix_datastore_properties:
+            syslog.syslog('Invalid property name passed: %s' % prop)
+            return None
+        
         syslog.syslog('Getting property %s for %s from vCenter %s' % (prop, name, self._vcenter))
 
         property_names = ['info.name',
@@ -140,7 +224,7 @@ class VMPoller(object):
                 d[p.Name] = p.Val
 
             if d['info.name'] == name and d['info.url'] == url:
-                return d[prop]
+                return zabbix_datastore_properties[prop](d[prop])
 
         return None
                 
@@ -192,12 +276,7 @@ def main():
 
     poller.disconnect()
 
-    # Make sure to cast bools to int's so that Zabbix can understand them
-    if isinstance(result, bool):
-        print int(result)
-    else:
-        print result
-        
+    print result
     
 if __name__ == '__main__':
     main()
