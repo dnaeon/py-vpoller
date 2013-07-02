@@ -165,7 +165,11 @@ class VMPoller(object):
 
             # return the property if found and break
             if d['name'] == name:
-                return zabbix_host_properties[prop](d[prop])
+                # make sure we have the property, if not pass it zero value
+                if prop not in d:
+                    return zabbix_host_properties[prop](0)
+                else:
+                    return zabbix_host_properties[prop](d[prop])
 
         return None
             
@@ -224,7 +228,10 @@ class VMPoller(object):
                 d[p.Name] = p.Val
 
             if d['info.name'] == name and d['info.url'] == url:
-                return zabbix_datastore_properties[prop](d[prop])
+                if prop not in d:
+                    return zabbix_datastore_properties[prop](0)
+                else:
+                    return zabbix_datastore_properties[prop](d[prop])
 
         return None
                 
