@@ -128,7 +128,7 @@ class VMPoller(object):
             'runtime.powerState':				return_as_is,
             'summary.managementServerIp':			return_as_is,
             'summary.overallStatus':				return_as_is,
-            'summary.rebootRequired':				return_as_is,
+            'summary.rebootRequired':				return_as_int,
             'summary.quickStats.distributedCpuFairness':	return_as_is,
             'summary.quickStats.uptime':			return_as_is,
             'summary.quickStats.overallCpuUsage':		return_as_hz,
