@@ -137,17 +137,29 @@ class VMPoller(object):
             'runtime.inMaintenanceMode':			return_as_int,
             'summary.config.vmotionEnabled':			return_as_int,
             'runtime.bootTime':					return_as_time,
-            }
+        }
 
-        if prop not in zabbix_host_properties:
+        # Custom properties, which are not available in the vSphere Web SDK
+        # Keys are the property names and values are a list of the properties required to
+        # calculate the custom properties
+        custom_zabbix_host_properties = {}
+
+        # Basic set of required properties, which are needed to find the host in question
+        property_names = ['name']
+
+        # Flag to indicate whether a custom property has been requested or a standard one
+        custom_property_requested = False
+        
+        if prop in zabbix_host_properties:
+            property_names.append(prop)
+        elif prop in custom_zabbix_host_properties:
+            property_names = property_names + custom_zabbix_host_properties[prop]['properties']
+            custom_property_requested = True
+        else:
             syslog.syslog('Invalid property name passed: %s' % prop)
             return None
-        
-        syslog.syslog('Getting property %s for %s from vCenter %s' % (prop, name, self._vcenter))
 
-        property_names = ['name',
-                          prop
-                          ]
+        syslog.syslog('Getting property %s for %s from vCenter %s' % (prop, name, self._vcenter))
 
         try:
             results = self._viserver._retrieve_properties_traversal(property_names=property_names,
@@ -160,18 +172,21 @@ class VMPoller(object):
         for item in results:
             d = {}
 
+            # fill up the properties in the dictionary
             for p in item.PropSet:
                 d[p.Name] = p.Val
 
             # return the property if found and break
             if d['name'] == name:
-                # make sure we have the property, if not pass it zero value
                 if prop not in d:
-                    return zabbix_host_properties[prop](0)
+                    return 0 # Return zero here and not None, so that Zabbix can understand the value
+
+                if custom_property_requested:
+                    return custom_zabbix_host_properties[prop]['function'](d)
                 else:
                     return zabbix_host_properties[prop](d[prop])
 
-        return None
+        return 0
             
     def get_datastore_property(self, name, url, prop):
         """
@@ -200,18 +215,34 @@ class VMPoller(object):
             'summary.uncommitted':				return_as_is,
             'summary.accessible':				return_as_int,
             'info.timestamp':					return_as_time,
-            }
+        }
+
+        # Custom properties, which are not available in the vSphere Web SDK
+        # Keys are the property names and values are a list of the properties required to
+        # calculate the custom properties
+        custom_zabbix_datastore_properties = {
+            'datastore_used_space_percentage': {
+                'properties': ['summary.freeSpace', 'summary.capacity'],
+                'function'  : datastore_used_space_percentage,
+             }
+        }
+
+        # Basic set of required properties, which are needed to find the datastore in question
+        property_names = ['info.name', 'info.url']
+
+        # Flag to indicate whether a custom property has been requested or a standard one
+        custom_property_requested = False
         
-        if prop not in zabbix_datastore_properties:
+        if prop in zabbix_datastore_properties:
+            property_names.append(prop)
+        elif prop in custom_zabbix_datastore_properties:
+            property_names = property_names + custom_zabbix_datastore_properties[prop]['properties']
+            custom_property_requested = True
+        else:
             syslog.syslog('Invalid property name passed: %s' % prop)
             return None
         
         syslog.syslog('Getting property %s for %s from vCenter %s' % (prop, name, self._vcenter))
-
-        property_names = ['info.name',
-                          'info.url',
-                          prop
-                          ]
 
         try:
             results = self._viserver._retrieve_properties_traversal(property_names=property_names,
@@ -224,16 +255,21 @@ class VMPoller(object):
         for item in results:
             d = {}
 
+            # fill up all properties in the dictionary
             for p in item.PropSet:
                 d[p.Name] = p.Val
 
+            # return the result back to Zabbix if we have a match
             if d['info.name'] == name and d['info.url'] == url:
                 if prop not in d:
-                    return zabbix_datastore_properties[prop](0)
+                    return 0 # Return zero here and not None so that Zabbix understands the value
+
+                if custom_property_requested:
+                    return custom_zabbix_datastore_properties[prop]['function'](d)
                 else:
                     return zabbix_datastore_properties[prop](d[prop])
 
-        return None
+        return 0
                 
 def parse_config(conf):
     if not os.path.exists(conf):
