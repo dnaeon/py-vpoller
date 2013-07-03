@@ -19,41 +19,6 @@ import ConfigParser
 
 import pysphere
 
-def return_as_is(val):
-    """
-    Helper function, which returns property value as-is
-
-    """
-    return val
-
-def return_as_time(val):
-    """
-    Helper function, which returns property value as time
-
-    """
-    return time.strftime('%Y-%m-%d %H:%M:%S', val)
-
-def return_as_int(val):
-    """
-    Helper function, which returns property value as integer
-
-    """
-    return int(val)
-
-def return_as_bytes(val):
-    """
-    Helper function, which returns property value as bytes
-
-    """
-    return val * 1048576
-
-def return_as_hz(val):
-    """
-    Helper function, which returns property value as hz
-
-    """
-    return val * 1048576
-
 class VMPollerException(Exception):
     """
     Generic VMPoller exception.
@@ -270,7 +235,42 @@ class VMPoller(object):
                     return zabbix_datastore_properties[prop](d[prop])
 
         return 0
-                
+
+def return_as_is(val):
+    """
+    Helper function, which returns property value as-is
+
+    """
+    return val
+
+def return_as_time(val):
+    """
+    Helper function, which returns property value as time
+
+    """
+    return time.strftime('%Y-%m-%d %H:%M:%S', val)
+
+def return_as_int(val):
+    """
+    Helper function, which returns property value as integer
+
+    """
+    return int(val)
+
+def return_as_bytes(val):
+    """
+    Helper function, which returns property value as bytes
+
+    """
+    return val * 1048576
+
+def return_as_hz(val):
+    """
+    Helper function, which returns property value as hz
+
+    """
+    return val * 1048576
+    
 def parse_config(conf):
     if not os.path.exists(conf):
         raise IOError, 'Config file %s does not exists' % conf
