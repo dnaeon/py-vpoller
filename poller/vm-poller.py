@@ -143,13 +143,12 @@ class VMPoller(object):
 
             # return the property if found and break
             if d['name'] == name:
-                if prop not in d:
-                    return 0 # Return zero here and not None, so that Zabbix can understand the value
-
                 if custom_property_requested:
                     return custom_zabbix_host_properties[prop]['function'](d)
-                else:
+                elif prop in d and not custom_property_requested:
                     return zabbix_host_properties[prop](d[prop])
+                else:
+                    return 0 # Return zero here and not None, so that Zabbix can understand the value
 
         return 0
             
@@ -226,13 +225,13 @@ class VMPoller(object):
 
             # return the result back to Zabbix if we have a match
             if d['info.name'] == name and d['info.url'] == url:
-                if prop not in d:
-                    return 0 # Return zero here and not None so that Zabbix understands the value
 
                 if custom_property_requested:
                     return custom_zabbix_datastore_properties[prop]['function'](d)
-                else:
+                elif prop in d and not custom_property_requested:
                     return zabbix_datastore_properties[prop](d[prop])
+                else:
+                    return 0
 
         return 0
 
@@ -272,6 +271,10 @@ def return_as_hz(val):
     return val * 1048576
     
 def parse_config(conf):
+    """
+    Parse the provided configuration file and return a ConfigParser object
+
+    """
     if not os.path.exists(conf):
         raise IOError, 'Config file %s does not exists' % conf
 
@@ -279,7 +282,14 @@ def parse_config(conf):
     config.read(conf)
 
     return config
-                
+
+def datastore_used_space_percentage(d):
+    """
+    Calculate the used datastore space in percentage
+
+    """
+    return round(100 - (float(d['summary.freeSpace']) / float(d['summary.capacity']) * 100), 2)
+    
 def main():
 
     if len(sys.argv) != 10:
