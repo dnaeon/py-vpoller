@@ -39,67 +39,27 @@ import sys
 import json
 import getopt
 import syslog
-import ConfigParser
-import pysphere
+import vmconnector
+from pysphere import MORTypes
 
-class VMPollerException(Exception):
+class VMDiscoverer(Exception):
     """
-    Generic VMPoller exception.
+    Generic VMDiscoverer exception.
 
     """
     pass
 
-class VMPoller(object):
+class VMDiscoverer(vmconnector.VMConnector):
     """
-    VMPoller class.
+    VMDiscoverer object.
 
-    The VMPoller class defines methods for auto-discovery of
-    VMware vSphere objects.
+    The VMDiscoverer class defines methods for auto-discovery of
+    VMware vSphere objects, e.g. ESX hosts, VMs, datastores, etc.
 
-    Uses the VMware vSphere Web SDK API.
+    Extends:
+        VMConnector
 
     """
-    def __init__(self, config):
-        """
-        Initializes a new VMPoller object.
-
-        """
-        self._vcenter  = config.get('Default', 'vcenter')
-        self._username = config.get('Default', 'username')
-        self._password = config.get('Default', 'password')
-        self._viserver = pysphere.VIServer()
-
-    def vcenter(self):
-        """
-        Returns the VMware vCenter server the poller is connected to.
-
-        """
-        return self._vcenter
-    
-    def connect(self):
-        """
-        Connect to a VMware vCenter server.
-
-        Raises:
-             VMPollerException
-        
-        """
-        syslog.syslog('Connecting to vCenter %s' % self._vcenter)
-        
-        try:
-            self._viserver.connect(host=self._vcenter, user=self._username, password=self._password)
-        except:
-            syslog.syslog(syslog.LOG_ERR, 'Failed to connect to vCenter %s' % self._vcenter)
-            raise VMPollerException, 'Cannot connect to vCenter %s' % self._vcenter
-
-    def disconnect(self):
-        """
-        Disconnect from a VMware vCenter server.
-
-        """
-        syslog.syslog('Disconnecting from vCenter %s' % self._vcenter)
-        self._viserver.disconnect()
-
     def discover_hosts(self):
         """
         Discoveres all ESX hosts registered in the VMware vCenter server.
@@ -108,21 +68,21 @@ class VMPoller(object):
             The returned data is a JSON object, containing the discovered ESX hosts.
 
         """
-        syslog.syslog('Discovering ESX hosts on vCenter %s' % self._vcenter)
+        syslog.syslog('Discovering ESX hosts on vCenter %s' % self.vcenter)
 
         # Properties we will poll from the vCenter
         property_names = ['name',
                           'runtime.powerState',
                           ]
 
-        # Property macros for Zabbix use
+        # Property <name>-<macros> mappings that Zabbix uses
         property_macros = {'name': 		 '{#ESX_NAME}',
                            'runtime.powerState': '{#ESX_POWERSTATE}',
                            }
 
         # Retrieve the data
-        results = self._viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                obj_type=pysphere.MORTypes.HostSystem)
+        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                obj_type=MORTypes.HostSystem)
 
         json_data = []
         for item in results:
@@ -136,7 +96,7 @@ class VMPoller(object):
                     d[property_macros[p.Name]] = p.Val
 
             # remember on which vCenter this ESX host runs on
-            d['{#VCENTER_SERVER}'] = self._vcenter
+            d['{#VCENTER_SERVER}'] = self.vcenter
             json_data.append(d)
 
         # print what we've discovered
@@ -150,7 +110,7 @@ class VMPoller(object):
             The returned data is a JSON object, containing the discovered datastores.
 
         """
-        syslog.syslog('Discovering datastores on vCenter %s' % self._vcenter)
+        syslog.syslog('Discovering datastores on vCenter %s' % self.vcenter)
 
         # Properties we will poll from the VMware vCenter server
         property_names = ['info.name',
@@ -158,15 +118,15 @@ class VMPoller(object):
                           'summary.accessible',
                           ]
 
-        # Property <name>-<macro> mappings for use by Zabbix
+        # Property <name>-<macro> mappings Zabbix use
         property_macros = {'info.name': 	 '{#DS_NAME}',
                            'info.url':		 '{#DS_URL}',
                            'summary.accessible': '{#DS_ACCESSIBLE}',
                            }
 
         # Retrieve the data
-        results = self._viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                obj_type=pysphere.MORTypes.Datastore)
+        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                obj_type=MORTypes.Datastore)
 
         json_data = []
         for item in results:
@@ -180,30 +140,11 @@ class VMPoller(object):
                     d[property_macros[p.Name]] = p.Val
 
             # remember on which vCenter is this datastore
-            d['{#VCENTER_SERVER}'] = self._vcenter
+            d['{#VCENTER_SERVER}'] = self.vcenter
             json_data.append(d)
 
         # print what we've discovered
         print json.dumps({ 'data': json_data}, indent=4)
-
-def parse_config(conf):
-    """
-    Parses a configuration file.
-
-    Returns:
-        ParserConfig object containing the configuration details for this poller connection.
-
-    Raises:
-        IOError
-
-    """
-    if not os.path.exists(conf):
-        raise IOError, 'Config file %s does not exists' % conf
-
-    config = ConfigParser.ConfigParser()
-    config.read(conf)
-
-    return config
                 
 def main():
     """
@@ -228,11 +169,11 @@ def main():
         elif opt == '-H':
             pollInfo = 'hosts'
 
-    config = parse_config(myConfig)
-    poller = VMPoller(config)
+    config = vmconnector.load_config(myConfig)
+    poller = VMDiscoverer(config)
 
     # Let's dance ...
-    poller.connect()
+    poller.connect(ignore_locks=True)
 
     if pollInfo == 'datastores':
         poller.discover_datastores()
