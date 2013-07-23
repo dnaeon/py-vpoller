@@ -24,18 +24,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 """
-'vm-discoverer' is an application used for polling information from a VMware vCenter server.
+vm-discoverer.py is an application used for auto-discovery of VMware vSphere objects.
 
-It is intended to be integrated into a Zabbix template for auto discovery of ESX hosts and datastores.
+It is intended to be integrated into a Zabbix template for auto-discovery of VMware vSphere objects,
+which makes it suitable for auto-discovering VMware ESX hosts, VMs, Datastores, etc.
 
 The data is returned in JSON format that is recognizable by Zabbix and ready for importing by the
-auto discovery protocol used by Zabbix.
-
-The current poller is based on the vm-poller.py used by the VMware Stats App.
-
-Author: mnikolov@vmware.com
+auto-discovery protocol used by Zabbix.
 """
 
 import os
@@ -44,23 +40,50 @@ import json
 import getopt
 import syslog
 import ConfigParser
-
 import pysphere
 
 class VMPollerException(Exception):
+    """
+    Generic VMPoller exception.
+
+    """
     pass
 
 class VMPoller(object):
+    """
+    VMPoller class.
+
+    The VMPoller class defines methods for auto-discovery of
+    VMware vSphere objects.
+
+    Uses the VMware vSphere Web SDK API.
+
+    """
     def __init__(self, config):
+        """
+        Initializes a new VMPoller object.
+
+        """
         self._vcenter  = config.get('Default', 'vcenter')
         self._username = config.get('Default', 'username')
         self._password = config.get('Default', 'password')
         self._viserver = pysphere.VIServer()
 
     def vcenter(self):
+        """
+        Returns the VMware vCenter server the poller is connected to.
+
+        """
         return self._vcenter
     
     def connect(self):
+        """
+        Connect to a VMware vCenter server.
+
+        Raises:
+             VMPollerException
+        
+        """
         syslog.syslog('Connecting to vCenter %s' % self._vcenter)
         
         try:
@@ -70,29 +93,43 @@ class VMPoller(object):
             raise VMPollerException, 'Cannot connect to vCenter %s' % self._vcenter
 
     def disconnect(self):
+        """
+        Disconnect from a VMware vCenter server.
+
+        """
         syslog.syslog('Disconnecting from vCenter %s' % self._vcenter)
         self._viserver.disconnect()
 
     def discover_hosts(self):
+        """
+        Discoveres all ESX hosts registered in the VMware vCenter server.
+
+        Returns:
+            The returned data is a JSON object, containing the discovered ESX hosts.
+
+        """
         syslog.syslog('Discovering ESX hosts on vCenter %s' % self._vcenter)
 
+        # Properties we will poll from the vCenter
         property_names = ['name',
                           'runtime.powerState',
                           ]
 
+        # Property macros for Zabbix use
         property_macros = {'name': 		 '{#ESX_NAME}',
                            'runtime.powerState': '{#ESX_POWERSTATE}',
                            }
 
+        # Retrieve the data
         results = self._viserver._retrieve_properties_traversal(property_names=property_names,
                                                                 obj_type=pysphere.MORTypes.HostSystem)
 
         json_data = []
-        
         for item in results:
             d = {}
 
             for p in item.PropSet:
+                # convert bool objects to integers, so that Zabbix can recognize them
                 if isinstance(p.Val, bool):
                     d[property_macros[p.Name]] = int(p.Val)
                 else:
@@ -100,33 +137,43 @@ class VMPoller(object):
 
             # remember on which vCenter this ESX host runs on
             d['{#VCENTER_SERVER}'] = self._vcenter
-                
             json_data.append(d)
-        
+
+        # print what we've discovered
         print json.dumps({ 'data': json_data}, indent=4)
 
     def discover_datastores(self):
+        """
+        Discovers all datastores registered in a VMware vCenter server.
+
+        Returns:
+            The returned data is a JSON object, containing the discovered datastores.
+
+        """
         syslog.syslog('Discovering datastores on vCenter %s' % self._vcenter)
 
+        # Properties we will poll from the VMware vCenter server
         property_names = ['info.name',
                           'info.url',
                           'summary.accessible',
                           ]
 
+        # Property <name>-<macro> mappings for use by Zabbix
         property_macros = {'info.name': 	 '{#DS_NAME}',
                            'info.url':		 '{#DS_URL}',
                            'summary.accessible': '{#DS_ACCESSIBLE}',
                            }
-        
+
+        # Retrieve the data
         results = self._viserver._retrieve_properties_traversal(property_names=property_names,
                                                                 obj_type=pysphere.MORTypes.Datastore)
 
         json_data = []
-        
         for item in results:
             d = {}
 
             for p in item.PropSet:
+                # Convert bool objects to integers, so that Zabbix can recognize the data
                 if isinstance(p.Val, bool):
                     d[property_macros[p.Name]] = int(p.Val)
                 else:
@@ -134,12 +181,22 @@ class VMPoller(object):
 
             # remember on which vCenter is this datastore
             d['{#VCENTER_SERVER}'] = self._vcenter
-
             json_data.append(d)
 
+        # print what we've discovered
         print json.dumps({ 'data': json_data}, indent=4)
 
 def parse_config(conf):
+    """
+    Parses a configuration file.
+
+    Returns:
+        ParserConfig object containing the configuration details for this poller connection.
+
+    Raises:
+        IOError
+
+    """
     if not os.path.exists(conf):
         raise IOError, 'Config file %s does not exists' % conf
 
@@ -149,7 +206,10 @@ def parse_config(conf):
     return config
                 
 def main():
+    """
+    Main
 
+    """
     if len(sys.argv) != 4:
         print 'usage: %s [-D|-H] -f config' % sys.argv[0]
         raise SystemExit
