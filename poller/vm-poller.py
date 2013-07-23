@@ -35,8 +35,8 @@ import sys
 import time
 import getopt
 import syslog
-import ConfigParser
-import pysphere
+import vmconnector
+from pysphere import MORTypes
 
 class VMPollerException(Exception):
     """
@@ -45,55 +45,22 @@ class VMPollerException(Exception):
     """
     pass
 
-class VMPoller(object):
-    def __init__(self, config):
-        """
-        Initialize the VMPoller object.
+class VMPoller(vmconnector.VMConnector):
+    """
+    VMPoller class.
 
-        """
-        self._vcenter  = config.get('Default', 'vcenter')
-        self._username = config.get('Default', 'username')
-        self._password = config.get('Default', 'password')
-        self._viserver = pysphere.VIServer()
+    Defines methods for retrieving vSphere objects' properties.
 
-    def vcenter(self):
-        """
-        Returns the VMware vCenter server the poller is connected to.
+    Extends:
+        VMConnector
 
-        """
-        return self._vcenter
-    
-    def connect(self):
-        """
-        Connect to a VMware vCenter server.
-
-        Raises:
-             VMPollerException
-
-        """
-        syslog.syslog('Connecting to vCenter %s' % self._vcenter)
-
-        # TODO: Locking
-        try:
-            self._viserver.connect(host=self._vcenter, user=self._username, password=self._password)
-        except:
-            syslog.syslog(syslog.LOG_ERR, 'Failed to connect to vCenter %s' % self._vcenter)
-            raise VMPollerException, 'Cannot connect to vCenter %s' % self._vcenter
-
-    def disconnect(self):
-        """
-        Disconnect from a VMware vCenter server.
-
-        """
-        syslog.syslog('Disconnecting from vCenter %s' % self._vcenter)
-        self._viserver.disconnect()
-
+    """
     def get_host_property(self, name, prop):
         """
         Get property of an object of type HostSystem and return it.
 
         Args:
-            name    (str): Name of the host object
+            name    (str): Name of the host
             prop    (str): Name of the property as defined by the vSphere SDK API
 
         Returns:
@@ -124,8 +91,8 @@ class VMPoller(object):
         }
 
         # Custom properties, which are not available in the vSphere Web SDK
-        # Keys are the property names and values are a list of the properties required to
-        # calculate the custom properties
+        # Keys are the property names and the value is a dict defining the basic
+        # set of properties required and a handler which returns the result
         custom_zabbix_host_properties = {}
 
         # Basic set of required properties, which are needed to find the host in question
@@ -141,17 +108,14 @@ class VMPoller(object):
             property_names = property_names + custom_zabbix_host_properties[prop]['properties']
             custom_property_requested = True
         else:
-            syslog.syslog('Invalid property name passed: %s' % prop)
+            syslog.syslog('[%s] Invalid property name passed: %s' % (self.vcenter, prop))
             return None
 
-        syslog.syslog('Getting property %s for %s from vCenter %s' % (prop, name, self._vcenter))
+        syslog.syslog('[%s] Retrieving %s for host %s' % (self.vcenter, prop, name))
 
-        try:
-            results = self._viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                obj_type=pysphere.MORTypes.HostSystem)
-        except pysphere.resources.vi_exception.VIApiException, e:
-            syslog.syslog(syslog.LOG_ERR, 'Failed to get properties for %s' % name)
-            raise VMPollerException, 'Cannot get properties: %s' % e
+        # retrieve the properties
+        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                               obj_type=MORTypes.HostSystem)
 
         # iterate over the results and find our host with 'name'
         for item in results:
@@ -223,18 +187,14 @@ class VMPoller(object):
             property_names = property_names + custom_zabbix_datastore_properties[prop]['properties']
             custom_property_requested = True
         else:
-            syslog.syslog('Invalid property name passed: %s' % prop)
+            syslog.syslog('[%s] Invalid property name passed: %s' % (self.vcenter, prop))
             return None
         
-        syslog.syslog('Getting property %s for %s from vCenter %s' % (prop, name, self._vcenter))
+        syslog.syslog('[%s] Retrieving %s for datastore %s' % (self.vcenter, prop, name))
 
-        try:
-            results = self._viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                obj_type=pysphere.MORTypes.Datastore)
-        except pysphere.resources.vi_exception.VIApiException, e:
-            syslog.syslog(syslog.LOG_ERR, 'Failed to get properties for %s' % name)
-            raise VMPollerException, 'Cannot get properties: %s' % e
-
+        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                               obj_type=MORTypes.Datastore)
+        
         # iterate over the results and find our datastore with 'name' and 'url'
         for item in results:
             d = {}
@@ -289,19 +249,6 @@ def return_as_hz(val):
 
     """
     return val * 1048576
-    
-def parse_config(conf):
-    """
-    Parse the provided configuration file and return a ConfigParser object
-
-    """
-    if not os.path.exists(conf):
-        raise IOError, 'Config file %s does not exists' % conf
-
-    config = ConfigParser.ConfigParser()
-    config.read(conf)
-
-    return config
 
 def datastore_used_space_percentage(d):
     """
@@ -336,11 +283,11 @@ def main():
         elif opt == '-H':
             pollInfo = 'hosts'
 
-    config = parse_config(myConfig)
+    config = vmconnector.load_config(myConfig)
     poller = VMPoller(config)
 
     # Let's dance ...
-    poller.connect()
+    poller.connect(ignore_locks=True)
 
     if pollInfo == 'datastores':
         result = poller.get_datastore_property(name, ds_url, myProperty)
