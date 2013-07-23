@@ -284,10 +284,10 @@ def main():
             pollInfo = 'hosts'
 
     config = vmconnector.load_config(myConfig)
-    poller = VMPoller(config)
+    poller = VMPoller(config, ignore_locks=True)
 
     # Let's dance ...
-    poller.connect(ignore_locks=True)
+    poller.connect()
 
     if pollInfo == 'datastores':
         result = poller.get_datastore_property(name, ds_url, myProperty)
