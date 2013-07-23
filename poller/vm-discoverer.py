@@ -170,10 +170,10 @@ def main():
             pollInfo = 'hosts'
 
     config = vmconnector.load_config(myConfig)
-    discoverer = VMDiscoverer(config)
+    discoverer = VMDiscoverer(config, ignore_locks=True)
 
     # Let's dance ...
-    discoverer.connect(ignore_locks=True)
+    discoverer.connect()
 
     if pollInfo == 'datastores':
         discoverer.discover_datastores()
