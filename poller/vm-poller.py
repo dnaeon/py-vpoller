@@ -1,13 +1,33 @@
 #!/usr/bin/env python
+#
+# Copyright (c) 2013 Marin Atanasov Nikolov <dnaeon@gmail.com>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer
+#    in this position and unchanged.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-'vm-poller' is an application used for polling information from a VMware vCenter server.
+vm-poller.py is an application used for polling objects' information from a VMware vCenter server.
 
-It is intended to be integrated into a Zabbix template for polling ESX hosts and Datastores properties.
-
-The current poller is based on the vm-poller.py used by the VMware Stats App.
-
-Author: Marin Atanasov Nilolov <mnikolov@vmware.com>
+It is intended to be integrated into a Zabbix template for polling of ESX hosts and Datastores properties.
 """
 
 import os
@@ -16,7 +36,6 @@ import time
 import getopt
 import syslog
 import ConfigParser
-
 import pysphere
 
 class VMPollerException(Exception):
@@ -39,21 +58,22 @@ class VMPoller(object):
 
     def vcenter(self):
         """
-        Return the vCenter name we are running the poller against.
+        Returns the VMware vCenter server the poller is connected to.
 
         """
         return self._vcenter
     
     def connect(self):
         """
-        Connect to the vCenter we run the poller against.
+        Connect to a VMware vCenter server.
 
         Raises:
-            VMPollerException
+             VMPollerException
 
         """
         syslog.syslog('Connecting to vCenter %s' % self._vcenter)
-        
+
+        # TODO: Locking
         try:
             self._viserver.connect(host=self._vcenter, user=self._username, password=self._password)
         except:
@@ -62,7 +82,7 @@ class VMPoller(object):
 
     def disconnect(self):
         """
-        Disconnect the poller from the vCenter.
+        Disconnect from a VMware vCenter server.
 
         """
         syslog.syslog('Disconnecting from vCenter %s' % self._vcenter)
@@ -80,8 +100,7 @@ class VMPoller(object):
             The requested property value
 
         """
-
-        # dictionary mapping for properties and helper functions used for
+        # dictionary mapping of properties and helper functions used for
         # converting property values to proper types before passing the values to Zabbix
         zabbix_host_properties = {
             'name':						return_as_is,
@@ -93,7 +112,6 @@ class VMPoller(object):
             'runtime.powerState':				return_as_is,
             'summary.managementServerIp':			return_as_is,
             'summary.overallStatus':				return_as_is,
-            'summary.rebootRequired':				return_as_int,
             'summary.quickStats.distributedCpuFairness':	return_as_is,
             'summary.quickStats.uptime':			return_as_is,
             'summary.quickStats.overallCpuUsage':		return_as_hz,
@@ -101,6 +119,7 @@ class VMPoller(object):
             'summary.quickStats.distributedMemoryFairness':	return_as_bytes,
             'runtime.inMaintenanceMode':			return_as_int,
             'summary.config.vmotionEnabled':			return_as_int,
+            'summary.rebootRequired':				return_as_int,
             'runtime.bootTime':					return_as_time,
         }
 
@@ -114,7 +133,8 @@ class VMPoller(object):
 
         # Flag to indicate whether a custom property has been requested or a standard one
         custom_property_requested = False
-        
+
+        # Sanity check of the provided property name
         if prop in zabbix_host_properties:
             property_names.append(prop)
         elif prop in custom_zabbix_host_properties:
