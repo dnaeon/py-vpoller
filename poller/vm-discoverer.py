@@ -82,7 +82,7 @@ class VMDiscoverer(vmconnector.VMConnector):
 
         # Retrieve the data
         results = self.viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                obj_type=MORTypes.HostSystem)
+                                                               obj_type=MORTypes.HostSystem)
 
         json_data = []
         for item in results:
