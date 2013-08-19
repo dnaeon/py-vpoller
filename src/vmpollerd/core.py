@@ -58,14 +58,14 @@ class VMPollerDaemon(object):
         if not os.path.exists(config_dir) or not os.path.isdir(config_dir):
             raise VMPollerException, "%s does not exists or is not a directory"
 
-        self._agents = dict()
+        self.agents = dict()
         self.zcontext = zmq.Context()
         path = os.path.join(config_dir, "*.conf")
         confFiles = glob.glob(path)
         
         for eachConf in confFiles:
             agent = VMPollerAgent(eachConf, ignore_locks=True, lockdir="/var/run/vm-poller", keep_alive=True)
-            self._agents[agent.vcenter] = agent
+            self.agents[agent.vcenter] = agent
 
     def run(self):
         self.start_agents()
@@ -74,7 +74,7 @@ class VMPollerDaemon(object):
         print "Starting a REP socket on *:9999 ..."
 
         # TODO: This should be set as a attribute
-        socket  = context.socket(zmq.REP)
+        socket  = self.zcontext.socket(zmq.REP)
         socket.bind("tcp://*:9999")
 
         while True:
@@ -91,18 +91,15 @@ class VMPollerDaemon(object):
             
     def start_agents(self):
         # TODO: Check for exceptions here
-        for eachAgent in self._agents:
+        for eachAgent in self.agents:
             try:
-                self._agents[eachAgent].connect(timeout=3)
+                self.agents[eachAgent].connect(timeout=3)
             except Exception as e:
                 print 'Cannot connect to %s: %s' % (eachAgent, e)
 
     def shutdown_agents(self):
-        for eachAgent in self._agents:
-            self._agents[eachAgent].disconnect()
-
-    def agents(self):
-        return self._agents
+        for eachAgent in self.agents:
+            self.agents[eachAgent].disconnect()
 
     def process_request(self, msg):
         commands = { "status": "no-command-here-yet",
@@ -118,12 +115,11 @@ class VMPollerDaemon(object):
         return commands[msg['cmd']](msg)
 
     def process_poll_cmd(self, msg):
-        # check if the properties are provided
-        
+        # TODO: sanity check of the received message
         if msg['type'] == 'datastores':
-            return self._agents[msg['vcenter']].get_datastore_property(msg['name'], msg['ds_url'], msg['property'])
+            return self.agents[msg['vcenter']].get_datastore_property(msg['name'], msg['ds_url'], msg['property'])
         elif msg['type'] == 'hosts':
-            return self._agents[msg['vcenter']].get_host_property(msg['name'], msg['property'])
+            return self.agents[msg['vcenter']].get_host_property(msg['name'], msg['property'])
         else:
             return {'status': -1, 'reason': 'Unknown poll command'}
     
@@ -185,7 +181,7 @@ class VMPollerAgent(VMConnector):
         # Get the property value
         val = [x.Val for x in results.PropSet if x.Name == prop].pop()
 
-        return { "status": 0, "value": val }
+        return { "status": 0, "host": name, "property": prop, "value": val }
             
     def get_datastore_property(self, name, url, prop):
         """
@@ -232,5 +228,5 @@ class VMPollerAgent(VMConnector):
         else:
             return -1 # We didn't find the datastore we were looking for
 
-        return { "status": 0, "value": d[prop] } # Return the requested property
+        return { "status": 0, "datastore": name, "property": prop, "value": d[prop] } # Return the requested property
     
