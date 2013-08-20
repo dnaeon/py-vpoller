@@ -25,31 +25,17 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vm-pollerd-proxy is a ZeroMQ proxy that load balances requests between clients and workers.
+vm-pollerd-proxy is a ZeroMQ proxy that load balances requests
+between clients and workers.
 
 TODO: Better document this module
 """
 
-import zmq
+from vmpollerd.core import VMPollerProxy
 
 def main():
-    context = zmq.Context()
-
-    # Socket facing clients
-    frontend = context.socket(zmq.ROUTER)
-    frontend.bind("tcp://*:11555")
-
-    # Socket facing workers
-    backend = context.socket(zmq.DEALER)
-    backend.bind("tcp://*:11556")
-
-    # Run the proxy 
-    zmq.proxy(frontend, backend)
-
-    # Never reached...
-    frontend.close()
-    backend.close()
-    context.term()
-
+    proxy = VMPollerProxy("/var/run/vm-pollerd-proxy.pid")
+    proxy.start()
+    
 if __name__ == '__main__':
     main()
