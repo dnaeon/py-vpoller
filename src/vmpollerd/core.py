@@ -43,56 +43,101 @@ class VMPollerException(Exception):
     """
     pass
 
-class VMPollerDaemon(object):
-    def __init__(self, config_dir):
+class VMPollerDaemon(Daemon):
+    """
+    VMPollerDaemon object
+
+    Prepares all VMPoller Agents to be ready for polling from the vCenters.
+
+    Extends:
+        Daemon class
+
+    Overrides:
+        run() method
+
+    """
+    def run(self, config_dir="/etc/vm-poller"):
         """
-        VMPollerDaemon object
+        The main daemon loop.
 
-        Prepares all VMPoller Agents to be ready for polling from multiple vCenters.
-
+        The 'config_dir' argument should point to a directory containing all *.conf files
+        for the different vCenters we are connecting our VMPollerAgents to.
+        
         Args:
             config_dir (str): A directory containing configuration files for the Agents
-
+        
         Raises:
             VMPollerException
-        
-        """
-        if not os.path.exists(config_dir) or not os.path.isdir(config_dir):
-            raise VMPollerException, "%s does not exists or is not a directory"
 
+        """
+        # Get the configuration files for our vCenters
+        confFiles = self.load_configs(config_dir)
+ 
+        # Our Agents and ZeroMQ context
         self.agents = dict()
         self.zcontext = zmq.Context()
-        path = os.path.join(config_dir, "*.conf")
-        confFiles = glob.glob(path)
-        
+
+        # Load the config for every Agent and vCenter
         for eachConf in confFiles:
             agent = VMPollerAgent(eachConf, ignore_locks=True, lockdir="/var/run/vm-poller", keep_alive=True)
             self.agents[agent.vcenter] = agent
 
-    def run(self):
+        # Time to fire up our poller Agents
         self.start_agents()
 
-        # TODO: This should be a poller instead of REQ/REP sockets
-        print "Starting a REP socket on *:9999 ..."
-
-        # TODO: This should be set as a attribute
-        socket  = self.zcontext.socket(zmq.REP)
-        socket.bind("tcp://*:9999")
+        # Bind to our ZeroMQ proxy as a worker
+        # TODO: The endpoint we bind should be configurable
+        # TODO: Exceptions
+        syslog.syslog("Connecting to the VMPoller Proxy server")
+        self.worker = self.zcontext.socket(zmq.REP)
+        self.worker.bind("tcp://localhost:15556")
 
         while True:
-            msg = socket.recv_json()
+            msg = self.worker.recv_json()
 
             print "Received: %s" % msg
             result = self.process_request(msg)
 
             print "Sending: ", result
-            socket.send_pyobj(result)
+            self.worker.send_json(result)
 
         # TODO: Proper shutdown and zmq context termination
         self.shutdown_agents()
+
+    def load_configs(self, config_dir):
+        """
+        Loads the configuration files for vCenters
+        
+        The 'config_dir' argument should point to a directory containing all .conf files
+        for the different vCenters we are connecting our VMPollerAgents to.
+        
+        Args:
+            config_dir (str): A directory containing configuration files for the Agents
+
+        Returns:
+            A list of all configuration files found in the config directory
+        
+        Raises:
+            VMPollerException
             
+        """
+        if not os.path.exists(config_dir) or not os.path.isdir(config_dir):
+            raise VMPollerException, "%s does not exists or is not a directory" % config_dir
+        
+        # Get all *.conf files for the different vCenters
+        path = os.path.join(config_dir, "*.conf")
+        confFiles = glob.glob(path)
+
+        if not confFiles:
+            raise VMPollerException, "No config files found in %s" % config_dir
+
+        return confFiles
+
     def start_agents(self):
-        # TODO: Check for exceptions here
+        """
+        Connects all VMPoller Agents to their vCenters
+
+        """
         for eachAgent in self.agents:
             try:
                 self.agents[eachAgent].connect(timeout=3)
@@ -100,11 +145,23 @@ class VMPollerDaemon(object):
                 print 'Cannot connect to %s: %s' % (eachAgent, e)
 
     def shutdown_agents(self):
+        """
+        Disconnects all VMPoller Agents from their vCenters
+
+        """
         for eachAgent in self.agents:
             self.agents[eachAgent].disconnect()
 
     def process_request(self, msg):
-        commands = { "status": "no-command-here-yet",
+        """
+        Processes a client request message
+
+        Args:
+            msg (dict): A dictionary containing the client request message
+
+        """
+        # Valid commands that the VMPoller Agent processes
+        commands = { "status": "no-command-here-yet", # TODO: Implement a status command
                      "poll"  : self.process_poll_cmd
                    }
 
