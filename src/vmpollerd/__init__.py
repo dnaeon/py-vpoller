@@ -1,2 +1,2 @@
 __name__ = 'vmpollerd'
-__all__ = [ 'core', 'external', 'zbx_helpers' ] 
+__all__ = [ 'core', 'daemon', 'zbx_helpers' ] 
