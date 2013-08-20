@@ -50,7 +50,7 @@ class VMPollerDaemon(Daemon):
     Prepares all VMPoller Agents to be ready for polling from the vCenters.
 
     Creates two sockets, one connected to the ZeroMQ proxy to receive client requests,
-    the second socket is bound to tcp://localhost:15560 and is used for management.
+    the second socket is bound to tcp://localhost:11560 and is used for management.
     
     Extends:
         Daemon class
@@ -94,7 +94,7 @@ class VMPollerDaemon(Daemon):
         self.worker = self.zcontext.socket(zmq.REP)
 
         try:
-            self.worker.connect("tcp://localhost:15556")
+            self.worker.connect("tcp://localhost:11556")
         except zmq.ZMQError as e:
             raise VMPollerException, "Cannot connect worker to proxy: %s" % e
 
@@ -102,8 +102,8 @@ class VMPollerDaemon(Daemon):
         self.mgmt = self.zcontext.socket(zmq.REP)
 
         try:
-            self.mgmt.bind("tcp://localhost:15560")
-        except zmq.ZMQError as we:
+            self.mgmt.bind("tcp://127.0.0.1:11560")
+        except zmq.ZMQError as e:
             raise VMPollerException, "Cannot bind management socket: %s" % e
 
         # Create a poll set for our two sockets
@@ -113,7 +113,7 @@ class VMPollerDaemon(Daemon):
 
         # Process messages from both sockets
         while True:
-            socks = self.zpoller.poll()
+            socks = dict(self.zpoller.poll())
 
             # Process worker message
             if socks.get(self.worker) == zmq.POLLIN:
@@ -338,7 +338,7 @@ class VMPollerAgent(VMConnector):
             d = dict(props)
 
             # break if we have a match
-            if d['info.name'] == name and d['info.url'] == url:
+            if d['info.name'] == msg['name'] and d['info.url'] == msg['ds_url']:
                 break
         else:
             return { "status": -1, "reason": "Unable to find the datastore" }
@@ -371,7 +371,7 @@ class VMPollerProxy(Daemon):
         # Socket facing workers
         # TODO: The endpoint we bind should be configurable
         self.backend = self.zcontext.socket(zmq.DEALER)
-        self.backend.bind("tcp://*:15556")
+        self.backend.bind("tcp://*:11556")
 
         # Start the proxy
         syslog.syslog("Starting the VMPoller Proxy")

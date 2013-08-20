@@ -36,18 +36,17 @@ def main():
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
     
-    socket.connect("tcp://localhost:9999")
+    socket.connect("tcp://localhost:11555")
 
     msg = { "type": "datastores",
 	    "vcenter": "sof-vc0-mnik",
             "name": "datastore1",
             "ds_url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
             "property": "summary.capacity",
-	    "cmd": "poll",
           }
 
     socket.send_json(msg)
-    msg_in = socket.recv_pyobj()
+    msg_in = socket.recv_json()
 
     if msg_in['status'] != 0:
 	print msg_in['reason']
