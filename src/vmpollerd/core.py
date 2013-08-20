@@ -23,7 +23,8 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-Core module of the VMware vSphere Poller Daemon
+Core module for the VMware vSphere Poller
+
 """
 
 import os
@@ -32,6 +33,7 @@ import syslog
 
 import zmq
 from vmconnector.core import VMConnector
+from vmpollerd.daemon import Daemon
 from pysphere import MORTypes
 
 class VMPollerException(Exception):
@@ -230,3 +232,38 @@ class VMPollerAgent(VMConnector):
 
         return { "status": 0, "datastore": name, "property": prop, "value": d[prop] } # Return the requested property
     
+class VMPollerProxy(Daemon):
+    """
+    VMPoller Proxy object.
+
+    ZeroMQ proxy which load-balances all client requests to a
+    pool of connected ZeroMQ workers.
+
+    Extends:
+        Daemon
+
+    Overrides:
+        run() method
+
+    """
+    def run(self):
+        # ZeroMQ context
+        self.zcontext = zmq.Context()
+
+        # Socket facing clients
+        # TODO: The endpoint we bind to should be configurable
+        self.frontend = self.zcontext.socket(zmq.ROUTER)
+        self.frontend.bind("tcp://*:11555")
+
+        # Socket facing workers
+        # TODO: The endpoint we bind should be configurable
+        self.backend = self.zcontext.socket(zmq.DEALER)
+        self.backend.bind("tcp://*:15556")
+
+        # Start the proxy
+        zmq.proxy(self.frontend, self.backend)
+
+        # This is never reached...
+        self.frontend.close()
+        self.backend.close()
+        self.zcontext.term()
