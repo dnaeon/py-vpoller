@@ -261,6 +261,7 @@ class VMPollerProxy(Daemon):
         self.backend.bind("tcp://*:15556")
 
         # Start the proxy
+        syslog.syslog("Starting the VMPoller Proxy")
         zmq.proxy(self.frontend, self.backend)
 
         # This is never reached...
