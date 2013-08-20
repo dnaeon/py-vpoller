@@ -279,9 +279,12 @@ class VMPollerAgent(VMConnector):
             mor = mor.pop()
             
         # Get the properties
-        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
-                                                               from_node=mor,
-                                                               obj_type=MORTypes.HostSystem).pop()
+        try:
+            results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                   from_node=mor,
+                                                                   obj_type=MORTypes.HostSystem).pop()
+        except Exception as e:
+            return { "status": -1, "reason": "Cannot get property: %s" % e }
 
         # Get the property value
         val = [x.Val for x in results.PropSet if x.Name == msg['property']].pop()
@@ -328,10 +331,13 @@ class VMPollerAgent(VMConnector):
 
         # TODO: Custom zabbix properties and convertors
         # TODO: Exceptions, e.g. pysphere.resources.vi_exception.VIApiException:
-        
-        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
-                                                               obj_type=MORTypes.Datastore)
-        
+
+        try:
+            results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                   obj_type=MORTypes.Datastore)
+        except Exception as e:
+            return { "status": -1, "reason": "Cannot get property: %s" % e }
+            
         # Iterate over the results and find our datastore with 'info.name' and 'info.url' properties
         for item in results:
             props = [(p.Name, p.Val) for p in item.PropSet]
