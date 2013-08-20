@@ -45,10 +45,13 @@ class VMPollerException(Exception):
 
 class VMPollerDaemon(Daemon):
     """
-    VMPollerDaemon object
+    VMPollerDaemon class
 
     Prepares all VMPoller Agents to be ready for polling from the vCenters.
 
+    Creates two sockets, one connected to the ZeroMQ proxy to receive client requests,
+    the second socket is bound to tcp://localhost:15560 and is used for management.
+    
     Extends:
         Daemon class
 
@@ -71,7 +74,7 @@ class VMPollerDaemon(Daemon):
 
         """
         # Get the configuration files for our vCenters
-        confFiles = self.load_configs(config_dir)
+        confFiles = self.get_configs(config_dir)
  
         # Our Agents and ZeroMQ context
         self.agents = dict()
@@ -79,7 +82,7 @@ class VMPollerDaemon(Daemon):
 
         # Load the config for every Agent and vCenter
         for eachConf in confFiles:
-            agent = VMPollerAgent(eachConf, ignore_locks=True, lockdir="/var/run/vm-poller", keep_alive=True)
+            agent = VMPollerAgent(eachConf, ignore_locks=True, lockdir="/var/run/vm-pollerd", keep_alive=True)
             self.agents[agent.vcenter] = agent
 
         # Time to fire up our poller Agents
@@ -87,26 +90,52 @@ class VMPollerDaemon(Daemon):
 
         # Bind to our ZeroMQ proxy as a worker
         # TODO: The endpoint we bind should be configurable
-        # TODO: Exceptions
         syslog.syslog("Connecting to the VMPoller Proxy server")
         self.worker = self.zcontext.socket(zmq.REP)
-        self.worker.bind("tcp://localhost:15556")
 
+        try:
+            self.worker.connect("tcp://localhost:15556")
+        except zmq.ZMQError as e:
+            raise VMPollerException, "Cannot connect worker to proxy: %s" % e
+
+        # A management socket, used to control the VMPoller daemon
+        self.mgmt = self.zcontext.socket(zmq.REP)
+
+        try:
+            self.mgmt.bind("tcp://localhost:15560")
+        except zmq.ZMQError as we:
+            raise VMPollerException, "Cannot bind management socket: %s" % e
+
+        # Create a poll set for our two sockets
+        self.zpoller = zmq.Poller()
+        self.zpoller.register(self.worker, zmq.POLLIN)
+        self.zpoller.register(self.mgmt, zmq.POLLIN)
+
+        # Process messages from both sockets
         while True:
-            msg = self.worker.recv_json()
+            socks = self.zpoller.poll()
 
-            print "Received: %s" % msg
-            result = self.process_request(msg)
+            # Process worker message
+            if socks.get(self.worker) == zmq.POLLIN:
+                msg = self.worker.recv_json()
+                result = self.process_worker_message(msg)
+                self.worker.send_json(result)
 
-            print "Sending: ", result
-            self.worker.send_json(result)
+            if socks.get(self.mgmt) == zmq.POLLIN:
+                msg = self.mgmt.recv_json()
+                result = self.process_mgmt_message(msg)
+                self.mgmt.send_json(result)
 
         # TODO: Proper shutdown and zmq context termination
+        #       This should be done in the shutdown/stop command
         self.shutdown_agents()
+        self.worker.close()
+        self.mgmt.close()
+        self.stop()
 
-    def load_configs(self, config_dir):
+    def get_configs(self, config_dir):
         """
-        Loads the configuration files for vCenters
+        Gets the configuration files for the vCenters
         
         The 'config_dir' argument should point to a directory containing all .conf files
         for the different vCenters we are connecting our VMPollerAgents to.
@@ -152,36 +181,43 @@ class VMPollerDaemon(Daemon):
         for eachAgent in self.agents:
             self.agents[eachAgent].disconnect()
 
-    def process_request(self, msg):
+    def process_worker_message(self, msg):
         """
         Processes a client request message
+
+        The message is passed to the VMPollerAgent object of the respective vCenter in
+        order to do the actual polling.
+
+        The messages that we support are polling for datastores and hosts.
 
         Args:
             msg (dict): A dictionary containing the client request message
 
+        Returns:
+            A dict object which contains the requested property
+            
         """
-        # Valid commands that the VMPoller Agent processes
-        commands = { "status": "no-command-here-yet", # TODO: Implement a status command
-                     "poll"  : self.process_poll_cmd
-                   }
+        
+        # We require to have 'type' and 'vcenter' keys in our message
+        if not all(k in msg for k in ("type", "vcenter")):
+            return { "status": -1, "reason": "Missing message properties (e.g. type and/or vcenter)" }
 
-        if not 'cmd' in msg:
-            return {'status': -1, 'reason': 'No command specified'}
-
-        if not msg['cmd'] in commands:
-            return {'status': -1, 'reason': 'Unknown command'}
-
-        return commands[msg['cmd']](msg)
-
-    def process_poll_cmd(self, msg):
-        # TODO: sanity check of the received message
-        if msg['type'] == 'datastores':
-            return self.agents[msg['vcenter']].get_datastore_property(msg['name'], msg['ds_url'], msg['property'])
-        elif msg['type'] == 'hosts':
-            return self.agents[msg['vcenter']].get_host_property(msg['name'], msg['property'])
+        vcenter = msg["vcenter"]
+        
+        if msg["type"] == "datastores":
+            return self.agents[vcenter].get_datastore_property(msg)
+        elif msg["type"] == "hosts":
+            return self.agents[vcenter].get_host_property(msg)
         else:
-            return {'status': -1, 'reason': 'Unknown poll command'}
-    
+            return {"status": -1, "reason": "Unknown object type to poll requested" }
+
+    def process_mgmt_message(self, msg):
+        """
+        Processes a message for the management interface
+
+        """
+        pass
+        
 class VMPollerAgent(VMConnector):
     """
     VMPollerAgent object.
@@ -192,43 +228,53 @@ class VMPollerAgent(VMConnector):
         VMConnector
 
     """
-    def get_host_property(self, name, prop):
+    def get_host_property(self, msg):
         """
         Get property of an object of type HostSystem and return it.
 
+        Example client message to get a host property could be:
+
+        msg = { "type":     "hosts",
+                "vcenter":  "sof-vc0-mnik",
+                "name":     "sof-dev-d7-mnik",
+                "property": "hardware.memorySize"
+              }
+        
         Args:
-            name    (str): Name of the host
-            prop    (str): Name of the property as defined by the vSphere SDK API
+            msg (dict): The client message
 
         Returns:
             The requested property value
 
         """
-        # Search is done by using the 'name' property
+        # Sanity check for required attributes in the message
+        if not all(k in msg for k in ("type", "vcenter", "name", "property")):
+            return { "status": -1, "reason": "Missing message properties (e.g. vcenter/host)" }
+        
+        # Search is done by using the 'name' property of the ESX Host
         # Properties we want to retrieve are 'name' and the requested property
         #
         # Check the vSphere Web Services SDK API for more information on the properties
         #
         #     https://www.vmware.com/support/developer/vc-sdk/
-        # 
-        property_names = ['name', prop]
+        #
+        property_names = ['name', msg['property']]
 
         # Check if we are connected first
         if not self.viserver.is_connected():
             self.reconnect()
         
-        syslog.syslog('[%s] Retrieving %s for host %s' % (self.vcenter, prop, name))
+        syslog.syslog('[%s] Retrieving %s for host %s' % (self.vcenter, msg['property'], msg['name']))
 
         # TODO: Custom zabbix properties and convertors
         # TODO: Exceptions, e.g. pysphere.resources.vi_exception.VIApiException:
-        # TODO: See if you can optimize this and directly find the host instead of searching for it
 
         # Find the host's Managed Object Reference (MOR)
-        mor = [x for x, host in self.viserver.get_hosts().items() if host == name]
+        mor = [x for x, host in self.viserver.get_hosts().items() if host == msg['name']]
 
         # Do we have a match?
         if not mor:
-            return -1
+            return { "status": -1, "reason": "Unable to find the host" }
         else:
             mor = mor.pop()
             
@@ -238,56 +284,66 @@ class VMPollerAgent(VMConnector):
                                                                obj_type=MORTypes.HostSystem).pop()
 
         # Get the property value
-        val = [x.Val for x in results.PropSet if x.Name == prop].pop()
+        val = [x.Val for x in results.PropSet if x.Name == msg['property']].pop()
 
-        return { "status": 0, "host": name, "property": prop, "value": val }
+        return { "status": 0, "host": msg['name'], "property": msg['property'], "value": val }
             
-    def get_datastore_property(self, name, url, prop):
+    def get_datastore_property(self, msg):
         """
         Get property of an object of type Datastore and return it.
 
-        Args:
-            name    (str): Name of the datatstore object
-            url     (str): Datastore URL
-            prop    (str): Name of the property as defined by the vSphere SDK API
+        Example client message to get a host property could be:
 
+        msg = { "type":     "datastores",
+                "vcenter":  "sof-vc0-mnik",
+                "name":     "datastore1",
+                "ds_url":   "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
+                "property": "summary.capacity"
+              }
+        
+        Args:
+            msg (dict): The client message
+        
         Returns:
             The requested property value
 
         """
+        # Sanity check for required attributes in the message
+        if not all(k in msg for k in ("type", "vcenter", "name", "ds_url", "property")):
+            return { "status": -1, "reason": "Missing message properties (e.g. vcenter/ds_url)" }
+        
         # Search is done by using the 'info.name' and 'info.url' properties
         #
         # Check the vSphere Web Services SDK API for more information on the properties
         #
         #     https://www.vmware.com/support/developer/vc-sdk/
         # 
-        property_names = ['info.name', 'info.url', prop]
+        property_names = ['info.name', 'info.url', msg['property']]
 
         # Check if we are connected first
         if not self.viserver.is_connected():
             self.reconnect()
         
-        syslog.syslog('[%s] Retrieving %s for datastore %s' % (self.vcenter, prop, name))
+        syslog.syslog('[%s] Retrieving %s for datastore %s' % (self.vcenter, msg['property'], msg['name']))
 
         # TODO: Custom zabbix properties and convertors
         # TODO: Exceptions, e.g. pysphere.resources.vi_exception.VIApiException:
-        # TODO: See if you can optimize this and directly find the host instead of searching for it
         
         results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                obj_type=MORTypes.Datastore)
         
-        # Iterate over the results and find our datastore with 'name' and 'url'
+        # Iterate over the results and find our datastore with 'info.name' and 'info.url' properties
         for item in results:
             props = [(p.Name, p.Val) for p in item.PropSet]
             d = dict(props)
 
-            # return the result back to Zabbix if we have a match
+            # break if we have a match
             if d['info.name'] == name and d['info.url'] == url:
                 break
         else:
-            return -1 # We didn't find the datastore we were looking for
+            return { "status": -1, "reason": "Unable to find the datastore" }
 
-        return { "status": 0, "datastore": name, "property": prop, "value": d[prop] } # Return the requested property
+        return { "status": 0, "datastore": msg["name"], "property": msg["property"], "value": d[msg["property"]] } 
     
 class VMPollerProxy(Daemon):
     """
