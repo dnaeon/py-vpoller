@@ -286,13 +286,13 @@ class VMPollerWorkerAgent(VMConnector):
         # Some of the properties we process need to be converted to a Zabbix-friendly value
         # before passing the value back to the Zabbix Agents
         zbx_helpers = {
-            'summary.quickStats.overallCpuUsage':            lambda p: return p * 1048576, # The value we return is in Hertz
-            'summary.quickStats.overallMemoryUsage':         lambda p: return p * 1048576, # The value we return is in Bytes
-            'summary.quickStats.distributedMemoryFairness':  lambda p: return p * 1048576, # The value we return is in Bytes
-            'runtime.inMaintenanceMode':                     lambda p: return int(p),      # The value we return is integer
-            'summary.config.vmotionEnabled':                 lambda p: return int(p),      # The value we return is integer
-            'summary.rebootRequired':                        lambda p: return int(p),      # The value we return is integer
-            'runtime.bootTime':                              lambda p: return time.strftime('%Y-%m-%d %H:%M:%S', p),
+            'summary.quickStats.overallCpuUsage':            lambda p: p * 1048576, # The value we return is in Hertz
+            'summary.quickStats.overallMemoryUsage':         lambda p: p * 1048576, # The value we return is in Bytes
+            'summary.quickStats.distributedMemoryFairness':  lambda p: p * 1048576, # The value we return is in Bytes
+            'runtime.inMaintenanceMode':                     lambda p: int(p),      # The value we return is integer
+            'summary.config.vmotionEnabled':                 lambda p: int(p),      # The value we return is integer
+            'summary.rebootRequired':                        lambda p: int(p),      # The value we return is integer
+            'runtime.bootTime':                              lambda p: time.strftime('%Y-%m-%d %H:%M:%S', p),
         }
             
         syslog.syslog('[%s] Retrieving %s for host %s' % (self.vcenter, msg['property'], msg['name']))
@@ -369,7 +369,7 @@ class VMPollerWorkerAgent(VMConnector):
         # Some of the properties we process need to be converted to a Zabbix-friendly value
         # before passing the value back to the Zabbix Agents
         zbx_helpers = {
-            'ds_used_space_percentage': lambda d: return round(100 - (float(d['summary.freeSpace']) / float(d['summary.capacity']) * 100), 2),
+            'ds_used_space_percentage': lambda d: round(100 - (float(d['summary.freeSpace']) / float(d['summary.capacity']) * 100), 2),
         }
 
         # Check if we have a custom property requested
