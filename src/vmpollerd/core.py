@@ -400,7 +400,7 @@ class VMPollerProxy(Daemon):
         try:
             self.backend.bind(self.backend_endpoint)
         except zmq.ZMQError as e:
-            raise VMPollerException, "Cannot bind backend socket: %s" e
+            raise VMPollerException, "Cannot bind backend socket: %s" % e
 
         # Start the proxy
         syslog.syslog("Starting the VMPoller Proxy")
@@ -438,13 +438,13 @@ class VMPollerClient(object):
     """
     def __init__(self, config_file="/etc/vm-poller/vm-pollerd-client.conf"):
         if not os.path.exists(config_file):
-            raise VMPollerException, "Config file %s does not exists" % config
+            raise VMPollerException, "Config file %s does not exists" % config_file
 
         config = ConfigParser.ConfigParser()
         config.read(config_file)
 
         self.timeout  = config.get('Default', 'timeout')
-        self.retries  = config.get('Default', 'retries')
+        self.retries  = int(config.get('Default', 'retries'))
         self.endpoint = config.get('Default', 'endpoint')
         
         self.zcontext = zmq.Context()
@@ -469,19 +469,21 @@ class VMPollerClient(object):
             socks = dict(self.zpoller.poll(self.timeout))
 
             # Do we have a reply?
-            if socks[self.zclient] == zmq.POLLIN:
+            if socks.get(self.zclient) == zmq.POLLIN:
                 result = self.zclient.recv_json()
                 break
             else:
                 # We didn't get a reply back from the server, let's retry
                 self.retries -= 1
-                syslog.syslog("Didn't get a reply from server, retrying...")
+                syslog.syslog("Did not receive reply from server, retrying...")
                 
                 # Socket is confused. Close and remove it.
                 self.zclient.close()
                 self.zpoller.unregister(self.zclient)
 
                 # Re-establish the connection
+                self.zclient = self.zcontext.socket(zmq.REQ)
+                self.zclient.setsockopt(zmq.LINGER, 0)
                 self.zclient.connect(self.endpoint)
                 self.zpoller.register(self.zclient, zmq.POLLIN)
 
@@ -492,7 +494,7 @@ class VMPollerClient(object):
 
         # Did we have any result reply at all?
         if not result:
-            return "Did not get a reply from the server"
+            return "Did not receive reply from the server, aborting..."
 
         # Was the request successful?
         if result["status"] != 0:
