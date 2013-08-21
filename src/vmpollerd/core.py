@@ -75,7 +75,7 @@ class VMPollerWorker(Daemon):
 
         """
         if not os.path.exists(config_file):
-            raise VMPoller, "Configuration file %s does not exists: %s" % (config_file, e)
+            raise VMPollerException, "Configuration file does not exists: %s" % config_file
 
         config = ConfigParser.ConfigParser()
         config.read(config_file)
@@ -93,7 +93,7 @@ class VMPollerWorker(Daemon):
 
         # Load the config for every Agent and vCenter
         for eachConf in confFiles:
-            agent = VMPollerAgent(eachConf, ignore_locks=True, lockdir="/var/run/vm-pollerd", keep_alive=True)
+            agent = VMPollerWorkerAgent(eachConf, ignore_locks=True, lockdir="/var/run/vm-pollerd", keep_alive=True)
             self.agents[agent.vcenter] = agent
 
         # Time to fire up our poller Agents

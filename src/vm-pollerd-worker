@@ -33,11 +33,11 @@ The requests are ZeroMQ messages.
 TODO: Better document this module
 """
 
-from vmpollerd.core import VMPollerDaemon
+from vmpollerd.core import VMPollerWorker
 
 def main():
-    pollerd = VMPollerDaemon("/etc/vm-poller")
-    pollerd.run()
+    worker = VMPollerWorker("/var/run/vm-pollerd-worker.pid")
+    worker.run("/etc/vm-poller/vm-pollerd-worker.conf")
 
 if __name__ == '__main__':
     main()
