@@ -30,29 +30,60 @@ vm-poller.py is an application used for polling objects' information from a VMwa
 It is intended to be integrated into a Zabbix template for polling of ESX hosts and Datastores properties.
 """
 
-import zmq
+import sys
+import getopt
+from vmpollerd.core import VMPollerClient
 
 def main():
-    context = zmq.Context()
-    socket = context.socket(zmq.REQ)
+
+    if len(sys.argv) != 12:
+        print 'usage: %s [-D|-H] -n <name> -p <property> -u <datastore-url> -c <poll|discover> -V <vcenter>' % sys.argv[0]
+        raise SystemExit
     
-    socket.connect("tcp://localhost:11555")
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "DHn:p:u:c:V:")
+    except getopt.GetoptError, e:
+        print 'usage: %s [-D|-H] -n <name> -p <property> -u <datastore-url> -c <poll|discover> -V <vcent1er>' % sys.argv[0]
+        raise SystemExit
 
-    msg = { "type": "datastores",
-	    "vcenter": "sof-vc0-mnik",
-            "name": "datastore1",
-            "ds_url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
-            "property": "summary.capacity",
-          }
+    for opt, arg in opts:
+        if opt == '-f':
+            myConfig = arg
+        elif opt == '-p':
+            myProperty = arg
+        elif opt == '-n':
+            name = arg
+        elif opt == '-u':
+            ds_url = arg
+        elif opt == '-D':
+            pollInfo = 'datastores'
+        elif opt == '-H':
+            pollInfo = 'hosts'
+        elif opt == '-c' and arg == 'poll':
+            cmd = 'poll'
+        elif opt == '-c' and arg == 'discover':
+            cmd = 'discover'
+        elif opt == '-V':
+            vcenter = arg
+    
+    client = VMPollerClient("/etc/vm-poller/vm-pollerd-client.conf")
 
-    socket.send_json(msg)
-    msg_in = socket.recv_json()
+    msg = { "type": pollInfo,
+            "vcenter": vcenter,
+            "name": name,
+            "ds_url": ds_url,
+            "cmd": cmd,
+            "property": myProperty,
+            }
 
-    if msg_in['status'] != 0:
-	print msg_in['reason']
+    result = client.run(msg)
+    
+    if result["status"] != 0:
+        print result["reason"]
     else:
-        print msg_in['value']
-    print msg_in
+        print result["value"]
+
+    
     
 if __name__ == '__main__':
     main()
