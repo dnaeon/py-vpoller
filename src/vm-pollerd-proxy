@@ -35,7 +35,7 @@ from vmpollerd.core import VMPollerProxy
 
 def main():
     proxy = VMPollerProxy("/var/run/vm-pollerd-proxy.pid")
-    proxy.start()
+    proxy.run()
     
 if __name__ == '__main__':
     main()

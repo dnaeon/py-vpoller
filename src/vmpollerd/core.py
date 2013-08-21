@@ -216,6 +216,9 @@ class VMPollerWorker(Daemon):
             return { "status": -1, "reason": "Missing message properties (e.g. type/cmd/vcenter)" }
 
         vcenter = msg["vcenter"]
+
+        if not self.agents.get(vcenter):
+            return { "status": -1, "reason": "Unknown vCenter agent requested" }
         
         if msg["type"] == "datastores" and msg["cmd"] == "poll":
             return self.agents[vcenter].get_datastore_property(msg)
@@ -373,8 +376,11 @@ class VMPollerWorkerAgent(VMConnector):
         }
 
         # Check if we have a custom property requested
+        # If we have a custom property we need to append the required properties
+        # and also remove the custom one, otherwise we will get an exception
         if msg["property"] in custom_zbx_properties:
             property_names.extend(custom_zbx_properties[msg["property"]])
+            property_names.remove(msg["property"])
 
         syslog.syslog('[%s] Retrieving %s for datastore %s' % (self.vcenter, msg['property'], msg['name']))
 
@@ -400,7 +406,7 @@ class VMPollerWorkerAgent(VMConnector):
             val = zbx_helpers[msg["property"]](d)
         else:
             # No need to convert anything
-            val = d["property"]
+            val = d[msg["property"]]
 
         return { "status": 0, "datastore": msg["name"], "property": msg["property"], "value": val } 
 
@@ -424,7 +430,7 @@ class VMPollerWorkerAgent(VMConnector):
         # Property <name>-<macros> mappings that Zabbix uses
         property_macros = { 'name': '{#ESX_NAME}', 'runtime.powerState': '{#ESX_POWERSTATE}' }
         
-        syslog.syslog('Discovering ESX hosts on vCenter %s' % self.vcenter)
+        syslog.syslog('[%s] Discovering ESX hosts' % self.vcenter)
 
         # Retrieve the data
         results = self.viserver._retrieve_properties_traversal(property_names=property_names,
@@ -468,7 +474,7 @@ class VMPollerWorkerAgent(VMConnector):
                            'summary.accessible': '{#DS_ACCESSIBLE}',
                            }
         
-        syslog.syslog('Discovering datastores on vCenter %s' % self.vcenter)
+        syslog.syslog('[%s] Discovering datastores' % self.vcenter)
         
         # Retrieve the data
         results = self.viserver._retrieve_properties_traversal(property_names=property_names,
@@ -506,7 +512,7 @@ class VMPollerProxy(Daemon):
     """
     def run(self, config_file="/etc/vm-poller/vm-pollerd-proxy.conf"):
         if not os.path.exists(config_file):
-            raise VMPollerException, "Cannot read configuration for proxy: %s" % e 
+            raise VMPollerException, "Cannot read configuration for proxy: %s" % config_file 
 
         config = ConfigParser.ConfigParser()
         config.read(config_file)
@@ -628,7 +634,5 @@ class VMPollerClient(object):
             return "Did not receive reply from the server, aborting..."
 
         # Was the request successful?
-        if result["status"] != 0:
-            return result["reason"]
-        else:
-            return result["value"]
+        return result
+
