@@ -29,6 +29,7 @@ Core module for the VMware vSphere Poller
 
 import os
 import glob
+import json
 import syslog
 import ConfigParser
 
@@ -44,12 +45,14 @@ class VMPollerException(Exception):
     """
     pass
 
-class VMPollerDaemon(Daemon):
+class VMPollerWorker(Daemon):
     """
-    VMPollerDaemon class
+    VMPollerWorker class
 
-    Prepares all VMPoller Agents to be ready for polling from the vCenters.
+    Prepares all VMPollerWorkerAgents to be ready for polling from the vCenters.
 
+    This is the main VMPoller worker, which contains all worker agents (vCenter pollers)
+    
     Creates two sockets, one connected to the ZeroMQ proxy to receive client requests,
     the second socket is bound to tcp://localhost:11560 and is used for management.
     
@@ -62,10 +65,10 @@ class VMPollerDaemon(Daemon):
     """
     def run(self, config_file):
         """
-        The main daemon loop.
+        The main worker loop.
 
         Args:
-            config_file (str): Configuration file for the VMPoller daemon
+            config_file (str): Configuration file for the VMPollerWorker
         
         Raises:
             VMPollerException
@@ -84,7 +87,7 @@ class VMPollerDaemon(Daemon):
         # Get the configuration files for our vCenters
         confFiles = self.get_vcenter_configs(self.vcenter_configs)
  
-        # Our Agents and ZeroMQ context
+        # Our Worker Agents and ZeroMQ context
         self.agents = dict()
         self.zcontext = zmq.Context()
 
@@ -166,7 +169,7 @@ class VMPollerDaemon(Daemon):
         confFiles = glob.glob(path)
 
         if not confFiles:
-            raise VMPollerException, "No config files found in %s" % config_dir
+            raise VMPollerException, "No vCenter config files found in %s" % config_dir
 
         return confFiles
 
@@ -193,7 +196,7 @@ class VMPollerDaemon(Daemon):
         """
         Processes a client request message
 
-        The message is passed to the VMPollerAgent object of the respective vCenter in
+        The message is passed to the VMPollerWorkerAgent object of the respective vCenter in
         order to do the actual polling.
 
         The messages that we support are polling for datastores and hosts.
@@ -206,18 +209,22 @@ class VMPollerDaemon(Daemon):
             
         """
         
-        # We require to have 'type' and 'vcenter' keys in our message
-        if not all(k in msg for k in ("type", "vcenter")):
-            return { "status": -1, "reason": "Missing message properties (e.g. type and/or vcenter)" }
+        # We require to have 'type', 'cmd' and 'vcenter' keys in our message
+        if not all(k in msg for k in ("type", "cmd", "vcenter")):
+            return { "status": -1, "reason": "Missing message properties (e.g. type/cmd/vcenter)" }
 
         vcenter = msg["vcenter"]
         
-        if msg["type"] == "datastores":
+        if msg["type"] == "datastores" and msg["cmd"] == "poll":
             return self.agents[vcenter].get_datastore_property(msg)
-        elif msg["type"] == "hosts":
+        elif msg["type"] == "datastores" and msg["cmd"] == "discover":
+            return self.agents[vcenter].discover_datastores()
+        elif msg["type"] == "hosts" and msg["cmd"] == "poll":
             return self.agents[vcenter].get_host_property(msg)
+        elif msg["type"] == "hosts" and msg["cmd"] == "discover":
+            return self.agents[vcenter].discover_hosts()
         else:
-            return {"status": -1, "reason": "Unknown object type to poll requested" }
+            return {"status": -1, "reason": "Unknown command" }
 
     def process_mgmt_message(self, msg):
         """
@@ -226,11 +233,13 @@ class VMPollerDaemon(Daemon):
         """
         pass
         
-class VMPollerAgent(VMConnector):
+class VMPollerWorkerAgent(VMConnector):
     """
-    VMPollerAgent object.
+    VMPollerWorkerAgent class
 
     Defines methods for retrieving vSphere objects' properties.
+
+    These are the worker agents that do the actual polling from the vCenters.
 
     Extends:
         VMConnector
@@ -358,7 +367,93 @@ class VMPollerAgent(VMConnector):
             return { "status": -1, "reason": "Unable to find the datastore" }
 
         return { "status": 0, "datastore": msg["name"], "property": msg["property"], "value": d[msg["property"]] } 
-    
+
+    def discover_hosts(self):
+        """
+        Discoveres all ESX hosts registered in the VMware vCenter server.
+
+        Returns:
+            The returned data is a JSON object, containing the discovered ESX hosts.
+
+        """
+        #
+        # Properties we want to retrieve are 'name' and 'runtime.powerState'
+        #
+        # Check the vSphere Web Services SDK API for more information on the properties
+        #
+        #     https://www.vmware.com/support/developer/vc-sdk/
+        #
+        property_names = ['name', 'runtime.powerState']
+
+        # Property <name>-<macros> mappings that Zabbix uses
+        property_macros = { 'name': '{#ESX_NAME}', 'runtime.powerState': '{#ESX_POWERSTATE}' }
+        
+        syslog.syslog('Discovering ESX hosts on vCenter %s' % self.vcenter)
+
+        # Retrieve the data
+        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                               obj_type=MORTypes.HostSystem)
+
+        # Iterate over the results and prepare the JSON object
+        json_data = []
+        for item in results:
+            props = [(property_macros[p.Name], p.Val) for p in item.PropSet]
+            d = dict(props)
+            
+            # remember on which vCenter this ESX host runs on
+            d['{#VCENTER_SERVER}'] = self.vcenter
+            json_data.append(d)
+
+        return json.dumps({ 'data': json_data}, indent=4)
+
+    def discover_datastores(self):
+        """
+        Discovers all datastores registered in a VMware vCenter server.
+
+        Returns:
+            The returned data is a JSON object, containing the discovered datastores.
+
+        """
+        #
+        # Properties we want to retrieve about the datastores
+        #
+        # Check the vSphere Web Services SDK API for more information on the properties
+        #
+        #     https://www.vmware.com/support/developer/vc-sdk/
+        #
+        property_names = ['info.name',
+                          'info.url',
+                          'summary.accessible',
+                          ]
+
+        # Property <name>-<macro> mappings that Zabbix uses
+        property_macros = {'info.name':          '{#DS_NAME}',
+                           'info.url':           '{#DS_URL}',
+                           'summary.accessible': '{#DS_ACCESSIBLE}',
+                           }
+        
+        syslog.syslog('Discovering datastores on vCenter %s' % self.vcenter)
+        
+        # Retrieve the data
+        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                obj_type=MORTypes.Datastore)
+
+        # Iterate over the results and prepare the JSON object
+        json_data = []
+        for item in results:
+            props = [(property_macros[p.Name], p.Val) for p in item.PropSet]
+            d = dict(props)
+
+            # Convert the 'summary.accessible' property to int as Zabbix does not understand True/False
+            d['{#DS_ACCESSIBLE}'] = int(d['{#DS_ACCESSIBLE}'])
+            
+            # Remember on which vCenter is this datastore
+            d['{#VCENTER_SERVER}'] = self.vcenter
+
+            json_data.append(d)
+
+        return json.dumps({ 'data': json_data}, indent=4)
+        
 class VMPollerProxy(Daemon):
     """
     VMPoller Proxy class
