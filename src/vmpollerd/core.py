@@ -60,22 +60,29 @@ class VMPollerDaemon(Daemon):
         run() method
 
     """
-    def run(self, config_dir="/etc/vm-poller"):
+    def run(self, config_file):
         """
         The main daemon loop.
 
-        The 'config_dir' argument should point to a directory containing all *.conf files
-        for the different vCenters we are connecting our VMPollerAgents to.
-        
         Args:
-            config_dir (str): A directory containing configuration files for the Agents
+            config_file (str): Configuration file for the VMPoller daemon
         
         Raises:
             VMPollerException
 
         """
+        if not os.path.exists(config_file):
+            raise VMPoller, "Configuration file %s does not exists: %s" % (config_file, e)
+
+        config = ConfigParser.ConfigParser()
+        config.read(config_file)
+
+        self.proxy_endpoint  = config.get('Default', 'proxy_endpoint')
+        self.mgmt_endpoint   = config.get('Default', 'mgmt_endpoint')
+        self.vcenter_configs = config.get('Default', 'vcenter_configs')
+        
         # Get the configuration files for our vCenters
-        confFiles = self.get_configs(config_dir)
+        confFiles = self.get_vcenter_configs(self.vcenter_configs)
  
         # Our Agents and ZeroMQ context
         self.agents = dict()
@@ -90,12 +97,11 @@ class VMPollerDaemon(Daemon):
         self.start_agents()
 
         # Connect to our ZeroMQ proxy as a worker
-        # TODO: The endpoint we bind should be configurable
         syslog.syslog("Connecting to the VMPoller Proxy server")
         self.worker = self.zcontext.socket(zmq.REP)
 
         try:
-            self.worker.connect("tcp://localhost:11556")
+            self.worker.connect(self.proxy_endpoint)
         except zmq.ZMQError as e:
             raise VMPollerException, "Cannot connect worker to proxy: %s" % e
 
@@ -103,7 +109,7 @@ class VMPollerDaemon(Daemon):
         self.mgmt = self.zcontext.socket(zmq.REP)
 
         try:
-            self.mgmt.bind("tcp://127.0.0.1:11560")
+            self.mgmt.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
             raise VMPollerException, "Cannot bind management socket: %s" % e
 
@@ -128,13 +134,14 @@ class VMPollerDaemon(Daemon):
                 self.mgmt.send_json(result)
 
         # TODO: Proper shutdown and zmq context termination
-        #       This should be done in the shutdown/stop command
+        #       This should be done in the shutdown/stop sequence, e.g. through the mgmt interface
         self.shutdown_agents()
         self.worker.close()
         self.mgmt.close()
+        self.zcontext.term()
         self.stop()
 
-    def get_configs(self, config_dir):
+    def get_vcenter_configs(self, config_dir):
         """
         Gets the configuration files for the vCenters
         
