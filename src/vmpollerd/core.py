@@ -30,6 +30,7 @@ Core module for the VMware vSphere Poller
 import os
 import glob
 import json
+import time
 import syslog
 import ConfigParser
 
@@ -131,6 +132,7 @@ class VMPollerWorker(Daemon):
                 result = self.process_worker_message(msg)
                 self.worker.send_json(result)
 
+            # Process management messages
             if socks.get(self.mgmt) == zmq.POLLIN:
                 msg = self.mgmt.recv_json()
                 result = self.process_mgmt_message(msg)
@@ -267,6 +269,10 @@ class VMPollerWorkerAgent(VMConnector):
         # Sanity check for required attributes in the message
         if not all(k in msg for k in ("type", "vcenter", "name", "property")):
             return { "status": -1, "reason": "Missing message properties (e.g. vcenter/host)" }
+
+        # Check if we are connected first
+        if not self.viserver.is_connected():
+            self.reconnect()
         
         # Search is done by using the 'name' property of the ESX Host
         # Properties we want to retrieve are 'name' and the requested property
@@ -277,14 +283,19 @@ class VMPollerWorkerAgent(VMConnector):
         #
         property_names = ['name', msg['property']]
 
-        # Check if we are connected first
-        if not self.viserver.is_connected():
-            self.reconnect()
-        
+        # Some of the properties we process need to be converted to a Zabbix-friendly value
+        # before passing the value back to the Zabbix Agents
+        zbx_helpers = {
+            'summary.quickStats.overallCpuUsage':            lambda p: return p * 1048576, # The value we return is in Hertz
+            'summary.quickStats.overallMemoryUsage':         lambda p: return p * 1048576, # The value we return is in Bytes
+            'summary.quickStats.distributedMemoryFairness':  lambda p: return p * 1048576, # The value we return is in Bytes
+            'runtime.inMaintenanceMode':                     lambda p: return int(p),      # The value we return is integer
+            'summary.config.vmotionEnabled':                 lambda p: return int(p),      # The value we return is integer
+            'summary.rebootRequired':                        lambda p: return int(p),      # The value we return is integer
+            'runtime.bootTime':                              lambda p: return time.strftime('%Y-%m-%d %H:%M:%S', p),
+        }
+            
         syslog.syslog('[%s] Retrieving %s for host %s' % (self.vcenter, msg['property'], msg['name']))
-
-        # TODO: Custom zabbix properties and convertors
-        # TODO: Exceptions, e.g. pysphere.resources.vi_exception.VIApiException:
 
         # Find the host's Managed Object Reference (MOR)
         mor = [x for x, host in self.viserver.get_hosts().items() if host == msg['name']]
@@ -305,6 +316,10 @@ class VMPollerWorkerAgent(VMConnector):
 
         # Get the property value
         val = [x.Val for x in results.PropSet if x.Name == msg['property']].pop()
+
+        # Do we need to convert this value to a Zabbix-friendly one?
+        if msg["property"] in zbx_helpers:
+            val = zbx_helpers[msg["property"]](val)
 
         return { "status": 0, "host": msg['name'], "property": msg['property'], "value": val }
             
@@ -331,6 +346,10 @@ class VMPollerWorkerAgent(VMConnector):
         # Sanity check for required attributes in the message
         if not all(k in msg for k in ("type", "vcenter", "name", "ds_url", "property")):
             return { "status": -1, "reason": "Missing message properties (e.g. vcenter/ds_url)" }
+
+        # Check if we are connected first
+        if not self.viserver.is_connected():
+            self.reconnect()
         
         # Search is done by using the 'info.name' and 'info.url' properties
         #
@@ -340,14 +359,24 @@ class VMPollerWorkerAgent(VMConnector):
         # 
         property_names = ['info.name', 'info.url', msg['property']]
 
-        # Check if we are connected first
-        if not self.viserver.is_connected():
-            self.reconnect()
-        
-        syslog.syslog('[%s] Retrieving %s for datastore %s' % (self.vcenter, msg['property'], msg['name']))
+        # Custom properties, which are not available in the vSphere Web SDK
+        # Keys are the property names and values are a list of the properties required to
+        # calculate the custom properties
+        custom_zbx_properties = {
+            'ds_used_space_percentage': ('summary.freeSpace', 'summary.capacity')
+        }
+                    
+        # Some of the properties we process need to be converted to a Zabbix-friendly value
+        # before passing the value back to the Zabbix Agents
+        zbx_helpers = {
+            'ds_used_space_percentage': lambda d: return round(100 - (float(d['summary.freeSpace']) / float(d['summary.capacity']) * 100), 2),
+        }
 
-        # TODO: Custom zabbix properties and convertors
-        # TODO: Exceptions, e.g. pysphere.resources.vi_exception.VIApiException:
+        # Check if we have a custom property requested
+        if msg["property"] in custom_zbx_properties:
+            property_names.extend(custom_zbx_properties[msg["property"]])
+
+        syslog.syslog('[%s] Retrieving %s for datastore %s' % (self.vcenter, msg['property'], msg['name']))
 
         try:
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
@@ -366,7 +395,14 @@ class VMPollerWorkerAgent(VMConnector):
         else:
             return { "status": -1, "reason": "Unable to find the datastore" }
 
-        return { "status": 0, "datastore": msg["name"], "property": msg["property"], "value": d[msg["property"]] } 
+        # Do we need to convert this value to a Zabbix-friendly one?
+        if msg["property"] in zbx_helpers:
+            val = zbx_helpers[msg["property"]](d)
+        else:
+            # No need to convert anything
+            val = d["property"]
+
+        return { "status": 0, "datastore": msg["name"], "property": msg["property"], "value": val } 
 
     def discover_hosts(self):
         """
