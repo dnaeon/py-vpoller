@@ -12,7 +12,8 @@ while [[ ${i} -lt ${TOTAL_REQUESTS} ]]; do
 
     # Fire up another request if needed
     if [[ ${running} -lt ${MAX_REQUESTS} ]]; then
-	echo "Firing up another request ..."
-	./vm-pollerd-client -D -n esx1-evn1_local0 -p summary.capacity -u ds:///vmfs/volumes/4c68dc48-0db9ca38-f0e0-78e7d1e5782e/ -c poll -V vc1-sof2 &
+	echo "I: Firing up request ${i} ..."
+	./vm-pollerd-client -D -n esx1-evn1_local0 -p summary.capacity -u ds:///vmfs/volumes/4c68dc48-0db9ca38-f0e0-78e7d1e5782e/ -c poll -V vc1-sof2 > /dev/null 2>&1 &
+	let i++
     fi
 done
