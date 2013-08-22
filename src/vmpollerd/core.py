@@ -317,6 +317,10 @@ class VMPollerWorkerAgent(VMConnector):
         except Exception as e:
             return { "status": -1, "reason": "Cannot get property: %s" % e }
 
+        # Do we have something to return?
+        if not results:
+            return { "status": -1, "reason": "Cannot get property: %s" % msg["property"] }
+        
         # Get the property value
         val = [x.Val for x in results.PropSet if x.Name == msg['property']].pop()
 
@@ -406,7 +410,7 @@ class VMPollerWorkerAgent(VMConnector):
             val = zbx_helpers[msg["property"]](d)
         else:
             # No need to convert anything
-            val = d[msg["property"]]
+            val = d[msg["property"]] if d.get(msg["property"]) else 0 # Make sure we've got the property
 
         return { "status": 0, "datastore": msg["name"], "property": msg["property"], "value": val } 
 
@@ -631,8 +635,7 @@ class VMPollerClient(object):
 
         # Did we have any result reply at all?
         if not result:
+            syslog.syslog("Did not receive a reply from the server, aborting...")
             return "Did not receive reply from the server, aborting..."
-
-        # Was the request successful?
+        
         return result
-

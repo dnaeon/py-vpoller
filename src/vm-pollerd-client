@@ -77,6 +77,10 @@ def main():
             }
 
     result = client.run(msg)
+
+    if cmd == "discover":
+        print result
+        return
     
     if result["status"] != 0:
         print result["reason"]
