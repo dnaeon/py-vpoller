@@ -636,6 +636,6 @@ class VMPollerClient(object):
         # Did we have any result reply at all?
         if not result:
             syslog.syslog("Did not receive a reply from the server, aborting...")
-            return "Did not receive reply from the server, aborting..."
+            return { "status": -1, "reason": "Did not receive reply from the server, aborting..." }
         
         return result
