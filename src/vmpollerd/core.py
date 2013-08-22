@@ -150,6 +150,9 @@ class VMPollerWorker(Daemon):
 
         # A flag to signal that our threads and daemon should be terminated
         self.time_to_die = False
+
+        # A list to hold our threads
+        self.threads = []
         
         # Get the configuration files for our vCenters
         confFiles = self.get_vcenter_configs(self.vcenter_configs)
@@ -189,6 +192,7 @@ class VMPollerWorker(Daemon):
         
         for i in xrange(cpu_count()):
             thread = threading.Thread(target=self.worker_thread, args=("inproc://workers", self.zcontext))
+            self.threads.append(thread)
             thread.daemon = True
             thread.start()
 
@@ -224,16 +228,19 @@ class VMPollerWorker(Daemon):
 
             # Management socket
             if socks.get(self.mgmt) == zmq.POLLIN:
-                msg = self.mgmt.recv()
-                result = process_mgmt_message(msg)
-                self.mgmt.send(msg)
- 
-        # TODO: Proper shutdown and zmq context termination
-        #       This should be done in the shutdown/stop sequence, e.g. through the mgmt interface
+                msg = self.mgmt.recv_json()
+                result = self.process_mgmt_message(msg)
+                self.mgmt.send_json(result)
+
+        # Shutdown time has arrived, let's clean up a bit
+        for eachThread in self.threads:
+            eachThread.join(1)
+
         self.shutdown_agents()
-        self.worker.close()
+        self.router.close()
+        self.dealer.close()
         self.mgmt.close()
-        self.zcontext.term()
+ #       self.zcontext.term()
         self.stop()
 
     def worker_thread(self, endpoint, context):
@@ -254,6 +261,9 @@ class VMPollerWorker(Daemon):
             result = self.process_worker_message(msg)
             socket.send_json(result)
 
+        # Let's clean up a bit here
+        socket.close()
+            
     def get_vcenter_configs(self, config_dir):
         """
         Gets the configuration files for the vCenters
@@ -344,7 +354,14 @@ class VMPollerWorker(Daemon):
         Processes a message for the management interface
 
         """
-        pass
+        # Check if we have a command to process
+        if not "cmd" in msg:
+            return { "status": -1, "reason": "Missing command" }
+
+        if msg["cmd"] == "shutdown":
+            self.time_to_die = True
+            syslog.syslog("VMPoller worker is shutting down")
+            return { "status": 0, "value": "Shutting down worker" }
         
 class VMPollerWorkerAgent(VMConnector):
     """
