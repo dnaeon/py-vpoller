@@ -25,14 +25,77 @@
 """
 Core module for the VMware vSphere Poller
 
-"""
+The principal work of the VMPoller can be seen in the diagram below.
+
+The diagram shows clients sending ZeroMQ messages to a ZeroMQ proxy,
+which load balances client requests between two threaded workers.
+
+   		    +--------+   +--------+   +--------+
+    		    | Client |   | Client |   | Client |
+                    +--------+   +--------+   +--------+
+                    |  REQ   |   |  REQ   |   |  REQ   |
+                    +--------+   +--------+   +--------+
+                        |             |            |
+                        +-------------+------------+
+                                      |
+                                      | -> TCP socket
+                                      |
+                                  +----------+
+                                  |  ROUTER  |
+                                  +----------+
+                                  |   Proxy  | -> Load Balancer (ZeroMQ Broker)
+                                  +----------+
+                                  |  DEALER  |
+                                  +----------+
+                                       |
+                                       |
+                                       |
+                   +---------------------------------------+     
+                   |                                       |
+              +--------+                              +--------+
+              | ROUTER |		     	      | ROUTER |
+              +--------+			      +--------+
+              | Worker |			      | Worker |
+              +--------+			      +--------+
+              | DEALER |			      | DEALER |
+              +--------+			      +--------+
+                   |				         |
+                   | -> INPROC socket	                 | -> INPROC socket
+                   |			                 |
+       +-----------+----------+		     +-----------+-----------+
+       |           |          |		     |           |           |
+  +--------+  +--------+  +--------+	+--------+  +--------+  +--------+
+  |   REP  |  |   REP  |  |   REP  |	|   REP  |  |   REP  |  |   REP  |
+  +--------+  +--------+  +--------+	+--------+  +--------+  +--------+ 
+  | Thread |  | Thread |  | Thread |	| Thread |  | Thread |  | Thread |
+  +--------+  +--------+  +--------+	+--------+  +--------+  +--------+
+      |           |           |             |           |           |
+      +-----------+-----------+-------------+-----------+-----------+
+                                       |
+                                       |
+                                       |
+                     +---------------- +----------------+
+                     |                 |                |
+              +-------------+   +-------------+   +-------------+
+              | vSphere API |   | vSphere API |   | vSphere API |
+              +-------------+   +-------------+   +-------------+
+              |   vCenter   |   |   vCenter   |   |   vCenter   |
+              +-------------+   +-------------+   +-------------+
+              |  ESX Hosts  |   |  ESX Hosts  |   |  ESX Hosts  |
+              +-------------+   +-------------+   +-------------+
+              |  Datastores |   |  Datastores |   |  Datastores |
+              +-------------+   +-------------+   +-------------+
+              
+"""   
 
 import os
 import glob
 import json
 import time
 import syslog
+import threading
 import ConfigParser
+from multiprocessing import cpu_count
 
 import zmq
 from vmconnector.core import VMConnector
@@ -56,7 +119,7 @@ class VMPollerWorker(Daemon):
     
     Creates two sockets, one connected to the ZeroMQ proxy to receive client requests,
     the second socket is bound to tcp://localhost:11560 and is used for management.
-    
+
     Extends:
         Daemon class
 
@@ -84,6 +147,9 @@ class VMPollerWorker(Daemon):
         self.proxy_endpoint  = config.get('Default', 'proxy_endpoint')
         self.mgmt_endpoint   = config.get('Default', 'mgmt_endpoint')
         self.vcenter_configs = config.get('Default', 'vcenter_configs')
+
+        # A flag to signal that our threads and daemon should be terminated
+        self.time_to_die = False
         
         # Get the configuration files for our vCenters
         confFiles = self.get_vcenter_configs(self.vcenter_configs)
@@ -97,17 +163,8 @@ class VMPollerWorker(Daemon):
             agent = VMPollerWorkerAgent(eachConf, ignore_locks=True, lockdir="/var/run/vm-pollerd", keep_alive=True)
             self.agents[agent.vcenter] = agent
 
-        # Time to fire up our poller Agents
+        # Time to fire up our vSphere poller Agents
         self.start_agents()
-
-        # Connect to our ZeroMQ proxy as a worker
-        syslog.syslog("Connecting to the VMPoller Proxy server")
-        self.worker = self.zcontext.socket(zmq.REP)
-
-        try:
-            self.worker.connect(self.proxy_endpoint)
-        except zmq.ZMQError as e:
-            raise VMPollerException, "Cannot connect worker to proxy: %s" % e
 
         # A management socket, used to control the VMPoller daemon
         self.mgmt = self.zcontext.socket(zmq.REP)
@@ -117,27 +174,60 @@ class VMPollerWorker(Daemon):
         except zmq.ZMQError as e:
             raise VMPollerException, "Cannot bind management socket: %s" % e
 
-        # Create a poll set for our two sockets
+        # Create a ROUTER socket for forwarding client requests to our worker threads
+        syslog.syslog("Connecting to the VMPoller Proxy server")
+        self.router = self.zcontext.socket(zmq.ROUTER)
+
+        try:
+            self.router.connect(self.proxy_endpoint)
+        except zmq.ZMQError as e:
+            raise VMPollerException, "Cannot connect worker to proxy: %s" % e
+
+        # Create a DEALER socket for passing messages from our worker threads back to the clients
+        self.dealer = self.zcontext.socket(zmq.DEALER)
+        self.dealer.bind("inproc://workers")
+        
+        for i in xrange(cpu_count()):
+            thread = threading.Thread(target=self.worker_thread, args=("inproc://workers", self.zcontext))
+            thread.daemon = True
+            thread.start()
+
+        #zmq.proxy(self.router, self.dealer)
+            
+        # Create a poll set for our sockets
         self.zpoller = zmq.Poller()
-        self.zpoller.register(self.worker, zmq.POLLIN)
+        self.zpoller.register(self.router, zmq.POLLIN)
+        self.zpoller.register(self.dealer, zmq.POLLIN)
         self.zpoller.register(self.mgmt, zmq.POLLIN)
 
-        # Process messages from both sockets
-        while True:
+        # Enter the daemon loop here
+        while not self.time_to_die:
             socks = dict(self.zpoller.poll())
 
-            # Process worker message
-            if socks.get(self.worker) == zmq.POLLIN:
-                msg = self.worker.recv_json()
-                result = self.process_worker_message(msg)
-                self.worker.send_json(result)
+            # ROUTER socket, forward messages to the backend
+            if socks.get(self.router) == zmq.POLLIN:
+                msg = self.router.recv()
+                more = self.router.getsockopt(zmq.RCVMORE)
+                if more:
+                    self.dealer.send(msg, zmq.SNDMORE)
+                else:
+                    self.dealer.send(msg)
 
-            # Process management messages
+            # DEALER socket, forward messages back to the clients
+            if socks.get(self.dealer) == zmq.POLLIN:
+                msg = self.dealer.recv()
+                more = self.dealer.getsockopt(zmq.RCVMORE)
+                if more:
+                    self.router.send(msg, zmq.SNDMORE)
+                else:
+                    self.router.send(msg)
+
+            # Management socket
             if socks.get(self.mgmt) == zmq.POLLIN:
-                msg = self.mgmt.recv_json()
-                result = self.process_mgmt_message(msg)
-                self.mgmt.send_json(result)
-
+                msg = self.mgmt.recv()
+                result = process_mgmt_message(msg)
+                self.mgmt.send(msg)
+ 
         # TODO: Proper shutdown and zmq context termination
         #       This should be done in the shutdown/stop sequence, e.g. through the mgmt interface
         self.shutdown_agents()
@@ -145,6 +235,24 @@ class VMPollerWorker(Daemon):
         self.mgmt.close()
         self.zcontext.term()
         self.stop()
+
+    def worker_thread(self, endpoint, context):
+        """
+        Worker thread routine
+
+        Passes messages to the vSphere Agents for polling.
+
+        Each thread creates a socket to the dealer and communicates
+        using inproc with the DEALER.
+
+        """
+        socket = context.socket(zmq.REP)
+        socket.connect(endpoint)
+        
+        while not self.time_to_die:
+            msg = socket.recv_json()
+            result = self.process_worker_message(msg)
+            socket.send_json(result)
 
     def get_vcenter_configs(self, config_dir):
         """
