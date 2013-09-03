@@ -25,17 +25,18 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vm-pollerd-proxy is a ZeroMQ proxy that load balances requests
-between clients and workers.
+vmpoller-worker.py is a daemon, which listens for new messages to poll
+information from a VMware vCenter server.
 
-TODO: Better document this module
+The requests are ZeroMQ messages.
 """
 
-from vmpollerd.core import VMPollerProxy
+from vmpoller.core import VMPollerWorker
 
 def main():
-    proxy = VMPollerProxy("/var/run/vm-pollerd-proxy.pid")
-    proxy.run()
-    
+    worker = VMPollerWorker("/var/run/vmpoller-worker.pid")
+    worker.run("/etc/vmpoller/vmpoller-worker.conf")
+
 if __name__ == '__main__':
     main()
+

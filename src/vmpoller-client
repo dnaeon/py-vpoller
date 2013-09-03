@@ -25,14 +25,14 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vm-poller.py is an application used for polling objects' information from a VMware vCenter server.
+vmpoller-client.py is an application used for polling objects' information from a VMware vCenter server.
 
 It is intended to be integrated into a Zabbix template for polling of ESX hosts and Datastores properties.
 """
 
 import sys
 import getopt
-from vmpollerd.core import VMPollerClient
+from vmpoller.core import VMPollerClient
 
 def main():
 
@@ -66,7 +66,7 @@ def main():
         elif opt == '-V':
             vcenter = arg
     
-    client = VMPollerClient("/etc/vm-poller/vm-pollerd-client.conf")
+    client = VMPollerClient("/etc/vmpoller/vmpoller-client.conf")
 
     msg = { "type": pollInfo,
             "vcenter": vcenter,

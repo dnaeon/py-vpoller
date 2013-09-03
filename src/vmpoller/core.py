@@ -98,7 +98,7 @@ import ConfigParser
 
 import zmq
 from vmconnector.core import VMConnector
-from vmpollerd.daemon import Daemon
+from vmpoller.daemon import Daemon
 from pysphere import MORTypes
 
 class VMPollerException(Exception):
@@ -651,7 +651,7 @@ class VMPollerProxy(Daemon):
         run() method
 
     """
-    def run(self, config_file="/etc/vm-poller/vm-pollerd-proxy.conf"):
+    def run(self, config_file):
         if not os.path.exists(config_file):
             raise VMPollerException, "Cannot read configuration for proxy: %s" % config_file 
 
@@ -702,7 +702,7 @@ class VMPollerClient(object):
         The result message back.
         
     """
-    def __init__(self, config_file="/etc/vm-poller/vm-pollerd-client.conf"):
+    def __init__(self, config_file):
         if not os.path.exists(config_file):
             raise VMPollerException, "Config file %s does not exists" % config_file
 
