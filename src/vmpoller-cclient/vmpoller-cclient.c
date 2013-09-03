@@ -216,7 +216,7 @@ main(int argc, char *argv[])
   if (result == NULL) {
     syslog(LOG_NOTICE, "Did not receive reply from server, aborting...\n");
   } else {
-    printf("%s", result);
+    printf("%s\n", result);
   }
 
   zmq_msg_close(&msg_in);
