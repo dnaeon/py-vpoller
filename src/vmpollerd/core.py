@@ -716,8 +716,8 @@ class VMPollerClient(object):
         self.zcontext = zmq.Context()
         
         self.zclient = self.zcontext.socket(zmq.REQ)
-        self.zclient.setsockopt(zmq.LINGER, 0)
         self.zclient.connect(self.endpoint)
+        self.zclient.setsockopt(zmq.LINGER, 0)
 
         self.zpoller = zmq.Poller()
         self.zpoller.register(self.zclient, zmq.POLLIN)
