@@ -126,12 +126,15 @@ class VMPollerWorker(Daemon):
         run() method
 
     """
-    def run(self, config_file):
+    def run(self, config_file, start_agents=False):
         """
         The main worker loop.
 
         Args:
-            config_file (str): Configuration file for the VMPollerWorker
+            config_file (str):  Configuration file for the VMPollerWorker
+            run_agents  (bool): If True then all vSphere Agents will be started up upfront
+            			any polling has occurred. Otherwise, a vSphere Agent will be
+                                started only if needed.
         
         Raises:
             VMPollerException
@@ -166,8 +169,8 @@ class VMPollerWorker(Daemon):
             agent = VMPollerWorkerAgent(eachConf, ignore_locks=True, lockdir="/var/run/vm-pollerd", keep_alive=True)
             self.agents[agent.vcenter] = agent
 
-        # Time to fire up our vSphere poller Agents
-        self.start_agents()
+        if start_agents:
+            self.start_agents()
 
         # A management socket, used to control the VMPoller daemon
         self.mgmt = self.zcontext.socket(zmq.REP)
