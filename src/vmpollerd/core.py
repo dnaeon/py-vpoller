@@ -263,7 +263,7 @@ class VMPollerWorker(Daemon):
         while not self.time_to_die:
             msg = socket.recv_json()
             result = self.process_worker_message(msg)
-            socket.send(result)
+            socket.send(str(result))
 
         # Let's clean up a bit here
         socket.close()
