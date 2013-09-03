@@ -149,7 +149,7 @@ class VMPollerWorker(Daemon):
         self.proxy_endpoint  = config.get('Default', 'broker')
         self.mgmt_endpoint   = config.get('Default', 'mgmt')
         self.vcenter_configs = config.get('Default', 'vcenters')
-        self.threads_num     = config.get('Default', 'threads')
+        self.threads_num     = int(config.get('Default', 'threads'))
 
         # A flag to signal that our threads and daemon should be terminated
         self.time_to_die = False
@@ -234,7 +234,7 @@ class VMPollerWorker(Daemon):
             if socks.get(self.mgmt) == zmq.POLLIN:
                 msg = self.mgmt.recv_json()
                 result = self.process_mgmt_message(msg)
-                self.mgmt.send_json(result)
+                self.mgmt.send(result)
 
         # Shutdown time has arrived, let's clean up a bit
         for eachThread in self.threads:
@@ -263,7 +263,7 @@ class VMPollerWorker(Daemon):
         while not self.time_to_die:
             msg = socket.recv_json()
             result = self.process_worker_message(msg)
-            socket.send_json(result)
+            socket.send(result)
 
         # Let's clean up a bit here
         socket.close()
@@ -304,7 +304,7 @@ class VMPollerWorker(Daemon):
         """
         for eachAgent in self.agents:
             try:
-                self.agents[eachAgent].connect(timeout=3)
+                self.agents[eachAgent].connect()
             except Exception as e:
                 print 'Cannot connect to %s: %s' % (eachAgent, e)
 
@@ -335,12 +335,12 @@ class VMPollerWorker(Daemon):
         
         # We require to have 'type', 'cmd' and 'vcenter' keys in our message
         if not all(k in msg for k in ("type", "cmd", "vcenter")):
-            return { "status": -1, "reply": "Missing message properties (e.g. type/cmd/vcenter)" }
+            return "Missing message properties (e.g. type/cmd/vcenter)"
 
         vcenter = msg["vcenter"]
 
         if not self.agents.get(vcenter):
-            return { "status": -1, "reply": "Unknown vCenter Agent requested" }
+            return "Unknown vCenter Agent requested"
         
         if msg["type"] == "datastores" and msg["cmd"] == "poll":
             return self.agents[vcenter].get_datastore_property(msg)
@@ -351,7 +351,7 @@ class VMPollerWorker(Daemon):
         elif msg["type"] == "hosts" and msg["cmd"] == "discover":
             return self.agents[vcenter].discover_hosts()
         else:
-            return {"status": -1, "reply": "Unknown command received" }
+            return "Unknown command received"
 
     def process_mgmt_message(self, msg):
         """
@@ -360,12 +360,12 @@ class VMPollerWorker(Daemon):
         """
         # Check if we have a command to process
         if not "cmd" in msg:
-            return { "status": -1, "reply": "Missing command name" }
+            return "Missing command name"
 
         if msg["cmd"] == "shutdown":
             self.time_to_die = True
             syslog.syslog("VMPoller Worker is shutting down")
-            return { "status": 0, "reply": "Shutting down VMPoller Worker" }
+            return "Shutting down VMPoller Worker"
         
 class VSphereAgent(VMConnector):
     """
@@ -400,7 +400,7 @@ class VSphereAgent(VMConnector):
         """
         # Sanity check for required attributes in the message
         if not all(k in msg for k in ("type", "vcenter", "name", "property")):
-            return { "status": -1, "reply": "Missing message properties (e.g. vcenter/host)" }
+            return "Missing message properties (e.g. vcenter/host)"
 
         # Check if we are connected first
         if not self.viserver.is_connected():
@@ -434,7 +434,7 @@ class VSphereAgent(VMConnector):
 
         # Do we have a match?
         if not mor:
-            return { "status": -1, "reply": "Unable to find the requested host" }
+            return "Unable to find the requested host"
         else:
             mor = mor.pop()
             
@@ -444,11 +444,11 @@ class VSphereAgent(VMConnector):
                                                                    from_node=mor,
                                                                    obj_type=MORTypes.HostSystem).pop()
         except Exception as e:
-            return { "status": -1, "reply": "Cannot get property for host %s: %s" % (msg["name"], e) }
+            return "Cannot get property for host %s: %s" % (msg["name"], e)
 
         # Do we have something to return?
         if not results:
-            return { "status": -1, "reply": "Did not find property %s for host %s" % (msg["property"], msg["name"]) }
+            return "Did not find property %s for host %s" % (msg["property"], msg["name"])
         
         # Get the property value
         val = [x.Val for x in results.PropSet if x.Name == msg['property']].pop()
@@ -457,7 +457,7 @@ class VSphereAgent(VMConnector):
         if msg["property"] in zbx_helpers:
             val = zbx_helpers[msg["property"]](val)
 
-        return { "status": 0, "host": msg['name'], "property": msg['property'], "reply": val }
+        return val
             
     def get_datastore_property(self, msg):
         """
@@ -481,7 +481,7 @@ class VSphereAgent(VMConnector):
         """
         # Sanity check for required attributes in the message
         if not all(k in msg for k in ("type", "vcenter", "name", "ds_url", "property")):
-            return { "status": -1, "reply": "Missing message properties (e.g. vcenter/ds_url)" }
+            return "Missing message properties (e.g. vcenter/ds_url)"
 
         # Check if we are connected first
         if not self.viserver.is_connected():
@@ -521,7 +521,7 @@ class VSphereAgent(VMConnector):
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.Datastore)
         except Exception as e:
-            return { "status": -1, "reply": "Cannot get property for datastore %s: %s" % (msg["name"], e) }
+            return "Cannot get property for datastore %s: %s" % (msg["name"], e)
             
         # Iterate over the results and find our datastore with 'info.name' and 'info.url' properties
         for item in results:
@@ -532,7 +532,7 @@ class VSphereAgent(VMConnector):
             if d['info.name'] == msg['name'] and d['info.url'] == msg['ds_url']:
                 break
         else:
-            return { "status": -1, "reply": "Unable to find datastore %s" % msg["name"] }
+            return "Unable to find datastore %s" % msg["name"]
 
         # Do we need to convert this value to a Zabbix-friendly one?
         if msg["property"] in zbx_helpers:
@@ -541,7 +541,7 @@ class VSphereAgent(VMConnector):
             # No need to convert anything
             val = d[msg["property"]] if d.get(msg["property"]) else 0 # Make sure we've got the property
 
-        return { "status": 0, "datastore": msg["name"], "property": msg["property"], "reply": val } 
+        return val
 
     def discover_hosts(self):
         """
@@ -551,6 +551,10 @@ class VSphereAgent(VMConnector):
             The returned data is a JSON object, containing the discovered ESX hosts.
 
         """
+        # Check if we are connected first
+        if not self.viserver.is_connected():
+            self.reconnect()
+        
         #
         # Properties we want to retrieve are 'name' and 'runtime.powerState'
         #
@@ -579,7 +583,7 @@ class VSphereAgent(VMConnector):
             d['{#VCENTER_SERVER}'] = self.vcenter
             json_data.append(d)
 
-        return json.dumps({ "status": 0, "value": { 'data': json_data} }, indent=4)
+        return json.dumps({ 'data': json_data}, indent=4)
 
     def discover_datastores(self):
         """
@@ -589,6 +593,10 @@ class VSphereAgent(VMConnector):
             The returned data is a JSON object, containing the discovered datastores.
 
         """
+        # Check if we are connected first
+        if not self.viserver.is_connected():
+            self.reconnect()
+        
         #
         # Properties we want to retrieve about the datastores
         #
@@ -627,7 +635,7 @@ class VSphereAgent(VMConnector):
 
             json_data.append(d)
 
-        return json.dumps({ "status": 0, "value": { 'data': json_data} }, indent=4)
+        return json.dumps({ 'data': json_data}, indent=4)
         
 class VMPollerProxy(Daemon):
     """
@@ -728,7 +736,7 @@ class VMPollerClient(object):
 
             # Do we have a reply?
             if socks.get(self.zclient) == zmq.POLLIN:
-                result = self.zclient.recv_json()
+                result = self.zclient.recv()
                 break
             else:
                 # We didn't get a reply back from the server, let's retry
@@ -753,6 +761,6 @@ class VMPollerClient(object):
         # Did we have any result reply at all?
         if not result:
             syslog.syslog("Did not receive a reply from the server, aborting...")
-            return { "status": -1, "reply": "Did not receive reply from the server, aborting..." }
+            return "Did not receive reply from the server, aborting..."
         
         return result
