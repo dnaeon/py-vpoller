@@ -451,8 +451,13 @@ class VSphereAgent(VMConnector):
             return "Did not find property %s for host %s" % (msg["property"], msg["name"])
         
         # Get the property value
-        val = [x.Val for x in results.PropSet if x.Name == msg['property']].pop()
+        val = [x.Val for x in results.PropSet if x.Name == msg['property']]
 
+        if not val:
+            return "Cannot find the requested property value"
+        else:
+            val = val.pop()
+        
         # Do we need to convert this value to a Zabbix-friendly one?
         if msg["property"] in zbx_helpers:
             val = zbx_helpers[msg["property"]](val)
