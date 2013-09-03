@@ -749,8 +749,8 @@ class VMPollerClient(object):
 
                 # Re-establish the connection
                 self.zclient = self.zcontext.socket(zmq.REQ)
-                self.zclient.setsockopt(zmq.LINGER, 0)
                 self.zclient.connect(self.endpoint)
+                self.zclient.setsockopt(zmq.LINGER, 0)
                 self.zpoller.register(self.zclient, zmq.POLLIN)
 
         # Close the socket and terminate the context
