@@ -95,7 +95,6 @@ import time
 import syslog
 import threading
 import ConfigParser
-from multiprocessing import cpu_count
 
 import zmq
 from vmconnector.core import VMConnector
@@ -144,9 +143,10 @@ class VMPollerWorker(Daemon):
         config = ConfigParser.ConfigParser()
         config.read(config_file)
 
-        self.proxy_endpoint  = config.get('Default', 'proxy_endpoint')
-        self.mgmt_endpoint   = config.get('Default', 'mgmt_endpoint')
-        self.vcenter_configs = config.get('Default', 'vcenter_configs')
+        self.proxy_endpoint  = config.get('Default', 'broker')
+        self.mgmt_endpoint   = config.get('Default', 'mgmt')
+        self.vcenter_configs = config.get('Default', 'vcenters')
+        self.threads_num     = config.get('Default', 'threads')
 
         # A flag to signal that our threads and daemon should be terminated
         self.time_to_die = False
@@ -190,7 +190,7 @@ class VMPollerWorker(Daemon):
         self.dealer = self.zcontext.socket(zmq.DEALER)
         self.dealer.bind("inproc://workers")
         
-        for i in xrange(cpu_count()):
+        for i in xrange(self.threads_num):
             thread = threading.Thread(target=self.worker_thread, args=("inproc://workers", self.zcontext))
             self.threads.append(thread)
             thread.daemon = True
