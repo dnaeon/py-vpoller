@@ -1,0 +1,228 @@
+/* 
+ * vmpoller-cclient is a C client intended to be used for polling/discovering
+ * information from a vSphere host (ESX or vCenter server).
+ * 
+ * It works by sending a ZeroMQ message to a ZeroMQ Broker/Proxy which in turn
+ * forwards the message to a pool of ZeroMQ workers, which do the actual polling.
+ * 
+ * The received reply is in turn printed to stdout, which allows Zabbix to catch it,
+ * therefore we don't use printf(3) here to output anything except for the reply.
+ */
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <sysexits.h>
+#include <unistd.h>
+#include <syslog.h>
+
+#include <zmq.h>
+
+#include "vmpoller-cclient.h"
+
+void
+usage(void)
+{
+  fprintf(stderr, "Usage: vmpoller-cclient [-D|-H] [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
+  fprintf(stderr, "                        -n <name> -p <property> -u <datastore-url>\n");
+  fprintf(stderr, "                        -c <poll|discover> -V <vcenter>\n\n");
+  fprintf(stderr, "       vmpoller-cclient -D -n <name> -p <property> -u <datastore-url> -c poll -V <vcenter>\n");
+  fprintf(stderr, "       vmpoller-cclient -D -c discover -V <vcenter>\n");
+  fprintf(stderr, "       vmpoller-cclient -H -n <name> -p <property> -c poll -V <vcenter>\n");
+  fprintf(stderr, "       vmpoller-cclient -H -c discover -V <vcenter>\n");
+}
+
+int
+main(int argc, char *argv[])
+{
+  void *zcontext = NULL; /* ZeroMQ Context */
+  void *zsocket  = NULL; /* ZeroMQ Socket */
+  zmq_msg_t msg_in;      /* Incoming ZeroMQ Message */
+
+  /* 
+   * Template message before formatting and sending out.
+   * The message we send is in JSON format
+   */
+  const char *msg_out_template = ""
+    "{"
+    "\"type\":      \"%s\", "
+    "\"vcenter\":   \"%s\", "
+    "\"name\":      \"%s\", "
+    "\"ds_url\":    \"%s\", "
+    "\"cmd\":       \"%s\", "
+    "\"property\":  \"%s\", "
+    "\"recv_json\": \"False\""
+    "}";
+
+  const char *objtype,	  /* The Object type we want to poll for, e.g. datastores/hosts */
+    *name,		  /* Name of the object, e.g. "datastore1", "esx1-host", .. */
+    *property,		  /* The property we want as defined in the vSphere Web Services SDK */
+    *url,		  /* Datastore URL, only applicable to datastores object type */
+    *cmd,		  /* The command to be processed, e.g. 'poll' or 'discover' */
+    *vcenter,		  /* The vCenter server we send the request message to */
+    *result;		  /* A pointer to hold the result from our request */
+  
+
+  /* The ZeroMQ Broker/Proxy endpoint we connect to */
+  const char *endpoint = DEFAULT_ENDPOINT;
+
+  int rc      = EX_OK;            /* Return code */
+  int timeout = DEFAULT_TIMEOUT;  /* Timeout in msec */
+  int retries = DEFAULT_RETRIES;  /* Number of retries */
+  int linger  = 0;                /* Set the ZeroMQ socket option ZMQ_LINGER to 0 */
+
+  char msg_buf[1024];		  /* Message buffer to hold the final message we send out */
+  char ch;
+
+  bool do_discovery       = false;  /* Flag to indicate that a discovery should be performed */
+  bool do_polling         = false;  /* Flag to indicate that a polling should be performed */
+  bool objtype_hosts      = false;  /* Flag to indicate that a 'Hosts' object has been requested */
+  bool objtype_datastores = false;  /* Flag to indicate that a 'Datastores' object has been requested */
+  
+  /* Initialize some of the message properties */
+  objtype = name = property = url = cmd = vcenter = result = NULL;
+  
+  /* Get the command-line options and arguments */
+  while ((ch = getopt(argc, argv, "DHe:r:t:n:p:u:c:V:")) != -1) {
+    switch (ch) {
+    case 'D':
+      objtype = "datastores";
+      objtype_datastores = true;
+      break;
+    case 'H':
+      objtype = "hosts";
+      objtype_hosts = true;
+      break;
+    case 'n':
+      name = optarg;
+      break;
+    case 'p':
+      property = optarg;
+      break;
+    case 'u':
+      url = optarg;
+      break;
+    case 'c': 
+      cmd = optarg;
+      break;
+    case 'V':
+      vcenter = optarg;
+      break;
+    case 'r':
+      retries = atol(optarg);
+      break;
+    case 't':
+      retries = atol(optarg);
+      break;
+    case 'e':
+      endpoint = optarg;
+      break;
+    default:
+      usage();
+      return (EX_USAGE);
+    }
+  }
+  argc -= optind;
+  argv += optind;
+  
+  /* Sanity check the provided options and arguments */
+  if (cmd == NULL || vcenter == NULL || objtype == NULL) {
+    usage();
+    return (EX_USAGE);
+  }
+  
+  if (strcmp(cmd, "poll") == 0)
+    do_polling = true;
+  else if (strcmp(cmd, "discover") == 0)
+    do_discovery = true;
+  else {
+    usage();
+    return (EX_USAGE);
+  }
+
+  /* Set the poll properties to "None" when doing a discovery */
+  if (do_discovery) {
+    name = property = url = "None";
+  } else if (do_polling) {
+    /* Sanity check the required arguments for doing a poll of hosts */
+    if (objtype_hosts && (name == NULL || property == NULL)) {
+      usage();
+      return (EX_USAGE);
+    } else if (objtype_datastores && (name == NULL || url == NULL || property == NULL)) {
+      usage();
+      return (EX_USAGE);
+    }
+  }
+  
+  /* Create the message to send out */
+  snprintf(msg_buf, 1023, msg_out_template, objtype, vcenter, name, url, cmd, property);
+    
+  /* Create a new ZeroMQ Context and Socket */
+  zcontext = zmq_ctx_new();
+  
+  if ((zsocket = zmq_socket(zcontext, ZMQ_REQ)) == NULL) {
+    fprintf(stderr, "Cannot create a ZeroMQ socket\n");
+    zmq_ctx_destroy(zcontext);
+    return (EX_PROTOCOL);
+  }
+
+  /* Connect to the ZeroMQ Broker/Proxy Endpoint */
+  zmq_connect(zsocket, endpoint);
+  zmq_setsockopt(zsocket, ZMQ_LINGER, &linger, sizeof(linger));
+
+  /* Init the ZeroMQ message we will be receiving */
+  zmq_msg_init(&msg_in);
+  
+  /* Open a connection to the syslog server */
+  openlog(argv[0], LOG_NOWAIT|LOG_PID, LOG_USER); 
+
+  /* Send our request message out, retry mechanism in place */
+  while (retries > 0) {
+    zmq_pollitem_t items[] = {
+       { zsocket, 0, ZMQ_POLLIN, 0 },	/* ZeroMQ Poller Items */
+     };
+
+     zmq_send(zsocket, msg_buf, strlen(msg_buf), 0);
+     zmq_poll(items, 1, timeout);
+
+     /* Do we have a reply? */
+     if (items[0].revents & ZMQ_POLLIN) {
+       if (zmq_msg_recv(&msg_in, zsocket, 0) != -1) {
+	 result = zmq_msg_data(&msg_in);
+	 break;
+       }
+     } else {
+       /* We didn't get a reply from the server, let's retry */
+       retries--;
+       
+       syslog(LOG_NOTICE, "Did not receive reply from server, retrying...\n");
+       
+       /* Socket is confused, close and remove it */
+       zmq_close(zsocket);
+
+       if ((zsocket = zmq_socket(zcontext, ZMQ_REQ)) == NULL) {
+	 fprintf(stderr, "Cannot create a ZeroMQ socket\n");
+	 zmq_msg_close(&msg_in);
+	 zmq_ctx_destroy(zcontext);
+	 return (EX_PROTOCOL);
+       }
+
+       zmq_connect(zsocket, endpoint);
+       zmq_setsockopt(zsocket, ZMQ_LINGER, &linger, sizeof(linger));
+     }
+  }
+  
+  /* Do we have any result? */
+  if (result == NULL) {
+    syslog(LOG_NOTICE, "Did not receive reply from server, aborting...\n");
+  } else {
+    printf("%s", result);
+  }
+
+  zmq_msg_close(&msg_in);
+  zmq_close(zsocket);
+  zmq_ctx_destroy(zcontext);
+
+  return (rc);
+}
+
