@@ -126,7 +126,7 @@ class VMPollerWorker(Daemon):
         run() method
 
     """
-    def run(self, config_file, start_agents=False):
+    def run(self, config_file, start_agents=True):
         """
         The main worker method.
 
