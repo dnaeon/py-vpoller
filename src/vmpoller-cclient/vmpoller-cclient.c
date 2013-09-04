@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
@@ -59,10 +60,10 @@ main(int argc, char *argv[])
     *property,		  /* The property we want as defined in the vSphere Web Services SDK */
     *url,		  /* Datastore URL, only applicable to datastores object type */
     *cmd,		  /* The command to be processed, e.g. 'poll' or 'discover' */
-    *vcenter,		  /* The vCenter server we send the request message to */
-    *result;		  /* A pointer to hold the result from our request */
+    *vcenter;		  /* The vCenter server we send the request message to */
   
-
+  char *result;	  	  /* A pointer to hold the result from our request */
+  
   /* The ZeroMQ Broker/Proxy endpoint we connect to */
   const char *endpoint = DEFAULT_ENDPOINT;
 
@@ -70,6 +71,7 @@ main(int argc, char *argv[])
   int timeout = DEFAULT_TIMEOUT;  /* Timeout in msec */
   int retries = DEFAULT_RETRIES;  /* Number of retries */
   int linger  = 0;                /* Set the ZeroMQ socket option ZMQ_LINGER to 0 */
+  int msg_len = 0;		  /* Length of the received message */
 
   char msg_buf[1024];		  /* Message buffer to hold the final message we send out */
   char ch;
@@ -187,8 +189,20 @@ main(int argc, char *argv[])
 
      /* Do we have a reply? */
      if (items[0].revents & ZMQ_POLLIN) {
-       if (zmq_msg_recv(&msg_in, zsocket, 0) != -1) {
+       if ((msg_len = zmq_msg_recv(&msg_in, zsocket, 0)) != -1) {
+	 /* 
+	  * Allocate a buffer to hold our resulting message
+	  * The resulting message needs to be NULL-terminated as well
+	  */
+	 if ((result = malloc(msg_len + 1)) == NULL) {
+	   fprintf(stderr, "Cannot allocate memory\n");
+	   zmq_msg_close(&msg_in);
+	   zmq_ctx_destroy(zcontext);
+	   return (EX_OSERR);
+	 }
+	 
 	 result = zmq_msg_data(&msg_in);
+	 result[msg_len] = '\0';
 	 break;
        }
      } else {
