@@ -527,7 +527,10 @@ class VSphereAgent(VMConnector):
                                                                    obj_type=MORTypes.Datastore)
         except Exception as e:
             return "Cannot get property for datastore %s: %s" % (msg["name"], e)
-            
+
+        if not results:
+            return "Did not find property %s for datastore %s" % (msg["property"], msg["name"])
+        
         # Iterate over the results and find our datastore with 'info.name' and 'info.url' properties
         for item in results:
             props = [(p.Name, p.Val) for p in item.PropSet]
