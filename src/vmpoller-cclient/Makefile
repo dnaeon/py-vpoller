@@ -9,7 +9,7 @@ all: vmpoller_cclient_clean vmpoller_cclient
 clean: vmpoller_cclient_clean
 
 vmpoller_cclient:
-	$(CC) $(CFLAGS) $(LIBS) vmpoller-cclient.c -o ../vmpoller-cclient
+	$(CC) $(CFLAGS) $(LIBS) vmpoller-cclient.c -o vmpoller-cclient
 
 vmpoller_cclient_clean:
 	@rm -rf vmpoller-cclient
