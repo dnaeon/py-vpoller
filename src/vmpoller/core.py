@@ -429,35 +429,31 @@ class VSphereAgent(VMConnector):
             
         syslog.syslog('[%s] Retrieving %s for host %s' % (self.vcenter, msg['property'], msg['name']))
 
-        # Find the host's Managed Object Reference (MOR)
-        mor = [x for x, host in self.viserver.get_hosts().items() if host == msg['name']]
-
-        # Do we have a match?
-        if not mor:
-            return "Unable to find the requested host"
-        else:
-            mor = mor.pop()
-            
-        # Get the properties
+        # Get the properties for all registered hosts
         try:
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                   from_node=mor,
-                                                                   obj_type=MORTypes.HostSystem).pop()
+                                                                   obj_type=MORTypes.HostSystem)
         except Exception as e:
             return "Cannot get property for host %s: %s" % (msg["name"], e)
 
         # Do we have something to return?
         if not results:
             return "Did not find property %s for host %s" % (msg["property"], msg["name"])
+
+        # Find the host we are looking for
+        for item in results:
+            props = [(p.Name, p.Val) for p in item.PropSet]
+            d = dict(props)
+
+            # Break if we have a match
+            if d["name"] == msg["name"]:
+                break
+        else:
+            return "Unable to find host %s" % msg["name"]
         
         # Get the property value
-        val = [x.Val for x in results.PropSet if x.Name == msg['property']]
+        val = d[msg["property"]] if d.get(msg["property"]) else 0
 
-        if not val:
-            return "Cannot find the requested property value"
-        else:
-            val = val.pop()
-        
         # Do we need to convert this value to a Zabbix-friendly one?
         if msg["property"] in zbx_helpers:
             val = zbx_helpers[msg["property"]](val)
