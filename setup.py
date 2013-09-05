@@ -10,6 +10,5 @@ setup(name='vmware-zabbix',
       package_dir={'': 'src'},
       scripts=['src/vmpoller-client',
                'src/vmpoller-proxy',
-               'src/vmpoller-worker',
-               'src/vmpoller-cclient/vmpoller-cclient'],
+               'src/vmpoller-worker'],
 )
