@@ -351,7 +351,7 @@ class VMPollerWorker(Daemon):
         elif msg["type"] == "hosts" and msg["cmd"] == "discover":
             return self.agents[vcenter].discover_hosts()
         else:
-            return "Unknown command received"
+            return "Unknown command '%s' received" % msg["cmd"]
 
     def process_mgmt_message(self, msg):
         """
@@ -366,6 +366,8 @@ class VMPollerWorker(Daemon):
             self.time_to_die = True
             syslog.syslog("VMPoller Worker is shutting down")
             return "Shutting down VMPoller Worker"
+        else:
+            return "Unknown command '%s' received" % msg["cmd"]
         
 class VSphereAgent(VMConnector):
     """
