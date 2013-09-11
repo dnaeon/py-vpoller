@@ -784,17 +784,23 @@ class VMPollerClient(object):
         The result message back.
         
     """
-    def __init__(self, config_file):
-        if not os.path.exists(config_file):
-            raise VMPollerException, "Config file %s does not exists" % config_file
+    def __init__(self, timeout=3000, retries=3, endpoint):
+        """
+        Initializes a VMPollerClient object
 
-        config = ConfigParser.ConfigParser()
-        config.read(config_file)
+        Args:
+            timeout  (int): Timeout after that amount of milliseconds
+            retries  (int): Number of retries
+            endpoint (str): Endpoint we connect the client to
 
-        self.timeout  = config.get('Default', 'timeout')
-        self.retries  = int(config.get('Default', 'retries'))
-        self.endpoint = config.get('Default', 'endpoint')
-        
+        """
+        self.timeout  = timeout
+        self.retries  = retries
+        self.endpoint = endpoint
+
+    def run(self, msg):
+        # Partially based on the Lazy Pirate Pattern
+        # http://zguide.zeromq.org/py:all#Client-Side-Reliability-Lazy-Pirate-Pattern
         self.zcontext = zmq.Context()
         
         self.zclient = self.zcontext.socket(zmq.REQ)
@@ -803,11 +809,7 @@ class VMPollerClient(object):
 
         self.zpoller = zmq.Poller()
         self.zpoller.register(self.zclient, zmq.POLLIN)
-
-    def run(self, msg):
-        # Partially based on the Lazy Pirate Pattern
-        # http://zguide.zeromq.org/py:all#Client-Side-Reliability-Lazy-Pirate-Pattern
-
+        
         result = None
         
         while self.retries > 0:
