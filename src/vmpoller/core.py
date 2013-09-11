@@ -95,6 +95,7 @@ import time
 import syslog
 import threading
 import ConfigParser
+from time import sleep
 
 import zmq
 from vmconnector.core import VMConnector
@@ -332,7 +333,6 @@ class VMPollerWorker(Daemon):
             A dict object which contains the requested property
             
         """
-        
         # We require to have 'type', 'cmd' and 'vcenter' keys in our message
         if not all(k in msg for k in ("type", "cmd", "vcenter")):
             return "Missing message properties (e.g. type/cmd/vcenter)"
@@ -434,6 +434,8 @@ class VSphereAgent(VMConnector):
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.HostSystem)
         except Exception as e:
+            sleep(1) # Settle down for a moment
+	    syslog.syslog("Cannot get property for host %s: %s" % (msg["name"], e))
             return "Cannot get property for host %s: %s" % (msg["name"], e)
 
         # Do we have something to return?
@@ -522,6 +524,8 @@ class VSphereAgent(VMConnector):
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.Datastore)
         except Exception as e:
+            sleep(1) # Settle down for a moment
+            syslog.syslog("Cannot get property for datastore %s: %s" % (msg["name"], e))
             return "Cannot get property for datastore %s: %s" % (msg["name"], e)
 
         if not results:
@@ -574,8 +578,13 @@ class VSphereAgent(VMConnector):
         syslog.syslog('[%s] Discovering ESX hosts' % self.vcenter)
 
         # Retrieve the data
-        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
-                                                               obj_type=MORTypes.HostSystem)
+	try:
+            results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                   obj_type=MORTypes.HostSystem)
+	except Exception as e:
+            sleep(1) # Settle down for a moment
+            syslog.syslog("Cannot discover hosts: %s" % e)
+            return "Cannot discover hosts: %s" % e
 
         # Iterate over the results and prepare the JSON object
         json_data = []
@@ -622,8 +631,13 @@ class VSphereAgent(VMConnector):
         syslog.syslog('[%s] Discovering datastores' % self.vcenter)
         
         # Retrieve the data
-        results = self.viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                obj_type=MORTypes.Datastore)
+	try:
+            results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                   obj_type=MORTypes.Datastore)
+	except Exception as e:
+            sleep(1) # Settle down for a moment
+            syslog.syslog("Cannot discover datastores: %s" % e)
+            return "Cannot discover datastores: %s" % e
 
         # Iterate over the results and prepare the JSON object
         json_data = []
