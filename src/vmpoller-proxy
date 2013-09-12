@@ -25,17 +25,89 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vmpoller-proxy is a ZeroMQ proxy that load balances requests
-between clients and workers.
+vmpoller-proxy is a ZeroMQ proxy/broker that load balances requests
+between a pool of ZeroMQ workers.
 
-TODO: Better document this module
 """
 
-from vmpoller.core import VMPollerProxy
+from vmpoller.core import VMPollerProxy, VMPollerClient
+from docopt import docopt
 
+def start(pidfile, config, daemon):
+    """
+    Start the VMPoller Proxy daemon
+
+    """
+    proxy = VMPollerProxy(pidfile)
+
+    if daemon:
+        # Run as daemon
+        proxy.start(config)
+    else:
+        # Run in the foreground
+        proxy.run(config)
+
+def stop(config, endpoint):
+    """
+    Stops the VMPoller Proxy daemon
+
+    """
+    # The message we send to initiate the shutdown sequence
+    msg = { "cmd": "shutdown" }
+
+    # Send out our message
+    client = VMPollerClient(endpoint=endpoint, timeout=1000, retries=3)
+    result = client.run(msg)
+
+    print result
+
+def status(config, endpoint):
+    """
+    Get status information from the VMPoller Proxy daemon
+
+    """
+    # The message we send to get status information
+    msg = { "cmd": "status" }
+
+    # Send out our message
+    client = VMPollerClient(endpoint=endpoint, timeout=1000, retries=3)
+    result = client.run(msg)
+
+    print result
+    
 def main():
-    proxy = VMPollerProxy("/var/run/vmpoller-proxy.pid")
-    proxy.run("/etc/vmpoller/vmpoller-proxy.conf")
+
+    usage="""
+Usage: vmpoller-proxy [-hvd] [-p <pidfile>] [-f <config-file>] start
+       vmpoller-proxy -e <endpoint> stop
+       vmpoller-proxy -e <endpoint> status
+
+Arguments:
+  start                                     Start the VMPoller Proxy
+  stop                                      Stop the VMPoller Proxy
+  status                                    Get status information
+
+Options:
+  -h, --help                                Display this usage info
+  -v, --version                             Display version and exit
+  -d, --daemon                              Start as a daemon, otherwise
+                                            run in the foreground
+  -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
+                                            [default: /var/run/vmpoller-proxy.pid]
+  -f <config-file>, --config <config-file>  Specify config file to use
+                                            [default: /etc/vmpoller/vmpoller-proxy.conf]
+  -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
+
+"""
+
+    args = docopt(usage, version="1.0.0")
+    
+    if args["start"]:
+        start(args["--pidfile"], args["--config"], args["--daemon"])
+    elif args["stop"]:
+        stop(args["--config"], args["--endpoint"])
+    elif args["status"]:
+        status(args["--config"], args["--endpoint"])
     
 if __name__ == '__main__':
     main()
