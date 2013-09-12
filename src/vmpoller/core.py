@@ -142,6 +142,7 @@ class VMPollerWorker(Daemon):
 
         """
         if not os.path.exists(config_file):
+            syslog.syslog("Configuration file does not exists: %s" % config_file)
             raise VMPollerException, "Configuration file does not exists: %s" % config_file
 
         config = ConfigParser.ConfigParser()
@@ -180,6 +181,7 @@ class VMPollerWorker(Daemon):
         try:
             self.mgmt.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
+            syslog.syslog("Cannot bind management socket: %s" % e)
             raise VMPollerException, "Cannot bind management socket: %s" % e
 
         # Create a ROUTER socket for forwarding client requests to our worker threads
@@ -189,6 +191,7 @@ class VMPollerWorker(Daemon):
         try:
             self.router.connect(self.proxy_endpoint)
         except zmq.ZMQError as e:
+            syslog.syslog("Cannot connect worker to proxy: %s" % e)
             raise VMPollerException, "Cannot connect worker to proxy: %s" % e
 
         # Create a DEALER socket for passing messages from our worker threads back to the clients
@@ -290,6 +293,7 @@ class VMPollerWorker(Daemon):
             
         """
         if not os.path.exists(config_dir) or not os.path.isdir(config_dir):
+            syslog.syslog("%s does not exists or is not a directory" % config_dir)
             raise VMPollerException, "%s does not exists or is not a directory" % config_dir
         
         # Get all *.conf files for the different vCenters
@@ -297,6 +301,7 @@ class VMPollerWorker(Daemon):
         confFiles = glob.glob(path)
 
         if not confFiles:
+            syslog.syslog("No vCenter config files found in %s" % config_dir)
             raise VMPollerException, "No vCenter config files found in %s" % config_dir
 
         return confFiles
@@ -689,6 +694,7 @@ class VMPollerProxy(Daemon):
     """
     def run(self, config_file):
         if not os.path.exists(config_file):
+            syslog.syslog("Cannot read configuration for proxy: %s" % config_file)
             raise VMPollerException, "Cannot read configuration for proxy: %s" % config_file 
 
         config = ConfigParser.ConfigParser()
@@ -710,6 +716,7 @@ class VMPollerProxy(Daemon):
         try:
             self.mgmt.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
+            syslog.syslog("Cannot bind management socket: %s" % e)
             raise VMPollerException, "Cannot bind management socket: %s" % e
         
         # Socket facing clients
@@ -718,6 +725,7 @@ class VMPollerProxy(Daemon):
         try:
             self.frontend.bind(self.frontend_endpoint)
         except zmq.ZMQError as e:
+            syslog.syslog("Cannot bind frontend socket: %s" % e)
             raise VMPollerException, "Cannot bind frontend socket: %s" % e
 
         # Socket facing workers
@@ -726,6 +734,7 @@ class VMPollerProxy(Daemon):
         try:
             self.backend.bind(self.backend_endpoint)
         except zmq.ZMQError as e:
+            syslog.syslog("Cannot bind backend socket: %s" % e)
             raise VMPollerException, "Cannot bind backend socket: %s" % e
 
         # Create a poll set for our sockets
