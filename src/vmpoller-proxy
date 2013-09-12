@@ -95,7 +95,7 @@ Options:
   -d, --daemon                              Start as a daemon, otherwise
                                             run in the foreground
   -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
-                                            [default: /var/run/vmpoller-proxy.pid]
+                                            [default: /var/run/vmpoller/vmpoller-proxy.pid]
   -f <config-file>, --config <config-file>  Specify config file to use
                                             [default: /etc/vmpoller/vmpoller-proxy.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to

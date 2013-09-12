@@ -97,7 +97,7 @@ Options:
   -d, --daemon                              Start as a daemon, otherwise
                                             run in the foreground
   -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
-                                            [default: /var/run/vmpoller-worker.pid]
+                                            [default: /var/run/vmpoller/vmpoller-worker.pid]
   -f <config-file>, --config <config-file>  Specify config file to use
                                             [default: /etc/vmpoller/vmpoller-worker.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
