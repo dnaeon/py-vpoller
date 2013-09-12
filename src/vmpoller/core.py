@@ -382,14 +382,14 @@ class VMPollerWorker(Daemon):
             header = "VMPoller Worker"
             msg  = header + "\n"
             msg += "-" * len(header) + "\n\n"
-            msg += "Status             : Running\n"
-            msg += "Hostname           : %s\n" % os.uname()[1]
-            msg += "Threads            : %d\n" % self.threads_num
-            msg += "Broker socket      : %s\n" % self.proxy_endpoint
-            msg += "Management socket  : %s\n" % self.mgmt_endpoint
-            msg += "vCenter configs    : %s\n" % self.vcenter_configs
-            msg += "vCenter Agents     : %s\n" % ", ".join(self.agents.keys())
-            msg += "System information : %s"   % " ".join(os.uname())
+            msg += "Status              : Running\n"
+            msg += "Hostname            : %s\n" % os.uname()[1]
+            msg += "Threads             : %d\n" % self.threads_num
+            msg += "Broker endpoint     : %s\n" % self.proxy_endpoint
+            msg += "Management endpoint : %s\n" % self.mgmt_endpoint
+            msg += "vCenter configs     : %s\n" % self.vcenter_configs
+            msg += "vCenter Agents      : %s\n" % ", ".join(self.agents.keys())
+            msg += "System information  : %s"   % " ".join(os.uname())
             return msg
         else:
             return "Unknown command '%s' received" % msg["cmd"]
@@ -808,12 +808,12 @@ class VMPollerProxy(Daemon):
             header = "VMPoller Proxy"
             msg  = header + "\n"
             msg += "-" * len(header) + "\n\n"
-            msg += "Status             : Running\n"
-            msg += "Hostname           : %s\n" % os.uname()[1]
-            msg += "Frontend socket    : %s\n" % self.frontend_endpoint
-            msg += "Backend socket     : %s\n" % self.backend_endpoint
-            msg += "Management socket  : %s\n" % self.mgmt_endpoint
-            msg += "System information : %s"   % " ".join(os.uname())
+            msg += "Status              : Running\n"
+            msg += "Hostname            : %s\n" % os.uname()[1]
+            msg += "Frontend endpoint   : %s\n" % self.frontend_endpoint
+            msg += "Backend endpoint    : %s\n" % self.backend_endpoint
+            msg += "Management endpoint : %s\n" % self.mgmt_endpoint
+            msg += "System information  : %s"   % " ".join(os.uname())
             return msg
         else:
             return "Unknown command '%s' received" % msg["cmd"]        
