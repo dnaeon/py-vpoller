@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# Author:           Marin Atanasov Nikolov <dnaeon@gmail.com>
+#
+### BEGIN INIT INFO
+# Provides:          vmpoller-proxy
+# Required-Start:    
+# Required-Stop:
+# X-Start-Before:    
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6 
+# Short-Description: VMPoller Proxy daemon
+### END INIT INFO
+ 
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+DESC="vmpoller-proxy daemon"
+NAME=vmpoller-proxy
+DAEMON=/usr/local/bin/vmpoller-proxy
+SCRIPTNAME=/etc/init.d/"$NAME"
+MGMT_INTERFACE="tcp://localhost:9999"
+
+set -e
+ 
+# /etc/init.d/vmpoller-proxy: start and stop the VMPoller Proxy daemon
+
+. /lib/lsb/init-functions
+ 
+do_start() {
+    ${DAEMON} -d start
+}
+
+do_stop() {
+    ${DAEMON} -e ${MGMT_INTERFACE} stop
+}
+ 
+do_status() {
+    ${DAEMON} -e ${MGMT_INTERFACE} status
+}
+ 
+case "${1}" in
+    start)
+        do_start
+        ;;
+    reset|stop)
+        do_stop
+        ;;
+    status)
+        do_status
+        ;;
+    reload|restart|force-reload)
+        do_stop
+        do_start
+        ;;
+    *)
+        log_success_msg "usage: ${0} {start|stop|status|reload|restart|force-reload|reset}" >&2
+        ;;
+esac
