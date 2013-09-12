@@ -148,10 +148,14 @@ class VMPollerWorker(Daemon):
         config = ConfigParser.ConfigParser()
         config.read(config_file)
 
-        self.proxy_endpoint  = config.get('Default', 'broker')
-        self.mgmt_endpoint   = config.get('Default', 'mgmt')
-        self.vcenter_configs = config.get('Default', 'vcenters')
-        self.threads_num     = int(config.get('Default', 'threads'))
+        try:
+            self.proxy_endpoint  = config.get('Default', 'broker')
+            self.mgmt_endpoint   = config.get('Default', 'mgmt')
+            self.vcenter_configs = config.get('Default', 'vcenters')
+            self.threads_num     = int(config.get('Default', 'threads'))
+        except ConfigParser.NoOptionError as e:
+            syslog.syslog("Configuration issues detected in %s: %s" % (config_file, e))
+            raise
 
         # A flag to signal that our threads and daemon should be terminated
         self.time_to_die = False
@@ -700,9 +704,13 @@ class VMPollerProxy(Daemon):
         config = ConfigParser.ConfigParser()
         config.read(config_file)
 
-        self.frontend_endpoint = config.get('Default', 'frontend')
-        self.backend_endpoint  = config.get('Default', 'backend')
-        self.mgmt_endpoint     = config.get('Default', 'mgmt')
+        try:
+            self.frontend_endpoint = config.get('Default', 'frontend')
+            self.backend_endpoint  = config.get('Default', 'backend')
+            self.mgmt_endpoint     = config.get('Default', 'mgmt')
+        except ConfigParser.NoOptionError as e:
+            syslog.syslog("Configuration issues detected in %s: %s" % (config_file, e))
+            raise
 
         # A flag to indicate that the VMPollerProxy daemon should be terminated
         self.time_to_die = False
