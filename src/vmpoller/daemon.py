@@ -159,6 +159,9 @@ class Daemon(object):
 
             return  # Not an error in a restart
 
+        # Just for sure, remove the pidfile while we are here
+	os.remove(self.pidfile)
+
         # Try killing the daemon process
         try:
             i = 0
