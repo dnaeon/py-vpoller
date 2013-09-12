@@ -784,7 +784,7 @@ class VMPollerClient(object):
         The result message back.
         
     """
-    def __init__(self, timeout=3000, retries=3, endpoint):
+    def __init__(self, endpoint, timeout=3000, retries=3):
         """
         Initializes a VMPollerClient object
 
