@@ -47,7 +47,7 @@ def start(pidfile, config, daemon):
         # Run in the foreground
         proxy.run(config)
 
-def stop(config, endpoint):
+def stop(endpoint):
     """
     Stops the VMPoller Proxy daemon
 
@@ -61,7 +61,7 @@ def stop(config, endpoint):
 
     print result
 
-def status(config, endpoint):
+def status(endpoint):
     """
     Get status information from the VMPoller Proxy daemon
 
@@ -105,9 +105,9 @@ Options:
     if args["start"]:
         start(args["--pidfile"], args["--config"], args["--daemon"])
     elif args["stop"]:
-        stop(args["--config"], args["--endpoint"])
+        stop(args["--endpoint"])
     elif args["status"]:
-        status(args["--config"], args["--endpoint"])
+        status(args["--endpoint"])
     
 if __name__ == '__main__':
     main()

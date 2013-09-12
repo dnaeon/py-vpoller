@@ -25,18 +25,92 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vmpoller-worker.py is a daemon, which listens for new messages to poll
-information from a VMware vCenter server.
+vmpoller-worker is a daemon, which receives new message requests from a
+ZeroMQ proxy/broker that need to be processed.
 
-The requests are ZeroMQ messages.
+The received messages are dispatched to the internal vSphere Agents for
+performing the actual polling from a vCenter server.
+
 """
 
-from vmpoller.core import VMPollerWorker
+from vmpoller.core import VMPollerWorker, VMPollerClient
+from docopt import docopt
+
+def start(pidfile, config, daemon):
+    """
+    Start the VMPoller Worker daemon
+
+    """
+    worker = VMPollerWorker(pidfile)
+
+    if daemon:
+        # Run as daemon
+        worker.start(config)
+    else:
+        # Run in the foreground
+        worker.run(config)
+
+def stop(endpoint):
+    """
+    Stops the VMPoller Worker daemon
+
+    """
+    # The message we send to initiate the shutdown sequence
+    msg = { "cmd": "shutdown" }
+
+    # Send out our message
+    client = VMPollerClient(endpoint=endpoint, timeout=1000, retries=3)
+    result = client.run(msg)
+
+    print result
+
+def status(endpoint):
+    """
+    Get status information from the VMPoller Worker daemon
+
+    """
+    # The message we send to get status information
+    msg = { "cmd": "status" }
+
+    # Send out our message
+    client = VMPollerClient(endpoint=endpoint, timeout=1000, retries=3)
+    result = client.run(msg)
+
+    print result
 
 def main():
-    worker = VMPollerWorker("/var/run/vmpoller-worker.pid")
-    worker.run("/etc/vmpoller/vmpoller-worker.conf")
+    usage="""
+Usage: vmpoller-worker [-hvd] [-p <pidfile>] [-f <config-file>] start
+       vmpoller-worker -e <endpoint> stop
+       vmpoller-worker -e <endpoint> status
 
+Arguments:
+  start                                     Start the VMPoller Worker
+  stop                                      Stop the VMPoller Worker
+  status                                    Get status information
+
+Options:
+  -h, --help                                Display this usage info
+  -v, --version                             Display version and exit
+  -d, --daemon                              Start as a daemon, otherwise
+                                            run in the foreground
+  -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
+                                            [default: /var/run/vmpoller-worker.pid]
+  -f <config-file>, --config <config-file>  Specify config file to use
+                                            [default: /etc/vmpoller/vmpoller-worker.conf]
+  -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
+
+"""
+
+    args = docopt(usage, version="1.0.0")
+    
+    if args["start"]:
+        start(args["--pidfile"], args["--config"], args["--daemon"])
+    elif args["stop"]:
+        stop(args["--endpoint"])
+    elif args["status"]:
+        status(args["--endpoint"])
+    
 if __name__ == '__main__':
     main()
 
