@@ -241,10 +241,13 @@ class VMPollerWorker(Daemon):
         for eachThread in self.threads:
             eachThread.join(1)
 
-        self.shutdown_agents()
+        self.zpoller.unregister(self.router)
+        self.zpoller.unregister(self.dealer)
+        self.zpoller.unregister(self.mgmt)
         self.router.close()
         self.dealer.close()
         self.mgmt.close()
+        self.shutdown_agents()
  #       self.zcontext.term()
         self.stop()
 
@@ -762,10 +765,13 @@ class VMPollerProxy(Daemon):
                 self.mgmt.send(result)
 
         # Shutdown time has arrived, let's clean up a bit
+        self.zpoller.unregister(self.frontend)
+        self.zpoller.unregister(self.backend)
+        self.zpoller.unregister(self.mgmt)
         self.frontend.close()
         self.backend.close()
         self.mgmt.close()
-        self.zcontext.term()
+#        self.zcontext.term()
         self.stop()
 
     def process_mgmt_message(self, msg):
