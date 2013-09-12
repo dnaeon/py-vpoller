@@ -78,9 +78,11 @@ def status(endpoint):
 def main():
 
     usage="""
-Usage: vmpoller-proxy [-hvd] [-p <pidfile>] [-f <config-file>] start
+Usage: vmpoller-proxy [-d] [-p <pidfile>] [-f <config-file>] start
        vmpoller-proxy -e <endpoint> stop
        vmpoller-proxy -e <endpoint> status
+       vmpoller-proxy --help
+       vmpoller-proxy --version
 
 Arguments:
   start                                     Start the VMPoller Proxy

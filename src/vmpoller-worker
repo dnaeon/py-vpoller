@@ -80,9 +80,11 @@ def status(endpoint):
 
 def main():
     usage="""
-Usage: vmpoller-worker [-hvd] [-p <pidfile>] [-f <config-file>] start
+Usage: vmpoller-worker [-d] [-p <pidfile>] [-f <config-file>] start
        vmpoller-worker -e <endpoint> stop
        vmpoller-worker -e <endpoint> status
+       vmpoller-worker --help
+       vmpoller-worker --version
 
 Arguments:
   start                                     Start the VMPoller Worker

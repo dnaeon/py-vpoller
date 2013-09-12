@@ -25,57 +25,52 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vmpoller-client.py is an application used for polling objects' information from a VMware vCenter server.
+vmpoller-client is an application used for polling objects' information from a VMware vCenter server.
 
 It is intended to be integrated into a Zabbix template for polling of ESX hosts and Datastores properties.
 """
 
-import sys
-import getopt
 from vmpoller.core import VMPollerClient
+from docopt import docopt
 
 def main():
 
-    if len(sys.argv) != 12:
-        print 'usage: %s [-D|-H] -n <name> -p <property> -u <datastore-url> -c <poll|discover> -V <vcenter>' % sys.argv[0]
-        raise SystemExit
-    
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "DHn:p:u:c:V:")
-    except getopt.GetoptError, e:
-        print 'usage: %s [-D|-H] -n <name> -p <property> -u <datastore-url> -c <poll|discover> -V <vcent1er>' % sys.argv[0]
-        raise SystemExit
+    usage="""
+Usage:
+  vmpoller-client [-r <retries>] [-t <timeout>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] -D -n <name> -p <property> -u <datastore-url> -c poll -V <vcenter> -e <endpoint>
+  vmpoller-client --help
+  vmpoller-client --version
 
-    for opt, arg in opts:
-        if opt == '-f':
-            myConfig = arg
-        elif opt == '-p':
-            myProperty = arg
-        elif opt == '-n':
-            name = arg
-        elif opt == '-u':
-            ds_url = arg
-        elif opt == '-D':
-            pollInfo = 'datastores'
-        elif opt == '-H':
-            pollInfo = 'hosts'
-        elif opt == '-c' and arg == 'poll':
-            cmd = 'poll'
-        elif opt == '-c' and arg == 'discover':
-            cmd = 'discover'
-        elif opt == '-V':
-            vcenter = arg
-    
-    client = VMPollerClient("/etc/vmpoller/vmpoller-client.conf")
+Options:
+  -h, --help                                Display this usage info
+  -v, --version                             Display version and exit
+  -D, --datastores                          Retrieve a datastore object property
+  -H, --hosts                               Retrieve a host object property
+  -V <vcenter>, --vcenter <vcenter>         The vCenter server to send the request to
+  -c <cmd>, --command <cmd>                 The command to perform, either "poll" or "discover"
+  -n <name>, --name <name>                  Name of the object, e.g. datastore/host name
+  -p <property>, --property <property>      Name of the property as defined by the vSphere Web SDK
+  -u <datastore-url>, --url <datastore-url> Datastore URL, only applicable to datastores object type
+  -r <retries>, --retries <retries>         Number of time to retry if a request times out [default: 3]
+  -t <timeout>, --timeout <timeout>         Timeout after that period of milliseconds [default: 3000]
+  -e <endpoint>, --endpoint <endpoint>      Endpoint of ZeroMQ Proxy/Broker the client connects to
 
-    msg = { "type": pollInfo,
-            "vcenter": vcenter,
-            "name": name,
-            "ds_url": ds_url,
-            "cmd": cmd,
-            "property": myProperty,
+"""
+
+    args = docopt(usage, version="1.0.0")
+
+    client = VMPollerClient(endpoint=args["--endpoint"], retries=args["--retries"], timeout=args["--timeout"])
+
+    msg = { "type":    "hosts" if args["--hosts"] else "datastores",
+            "vcenter":  args["--vcenter"],
+            "name":     args["--name"],
+            "ds_url":   args["--url"],
+            "cmd":      args["--command"],
+            "property": args["--property"],
             }
-
+    
     result = client.run(msg)
     print result
     
