@@ -142,7 +142,7 @@ main(int argc, char *argv[])
       retries = atol(optarg);
       break;
     case 't':
-      retries = atol(optarg);
+      timeout = atol(optarg);
       break;
     case 'e':
       endpoint = optarg;
