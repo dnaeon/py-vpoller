@@ -92,7 +92,7 @@ import os
 import glob
 import json
 import time
-import syslog
+import logging
 import threading
 import ConfigParser
 from time import sleep
@@ -142,7 +142,7 @@ class VMPollerWorker(Daemon):
 
         """
         if not os.path.exists(config_file):
-            syslog.syslog("Configuration file does not exists: %s" % config_file)
+            logging.error("Configuration file does not exists: %s", config_file)
             raise VMPollerException, "Configuration file does not exists: %s" % config_file
 
         config = ConfigParser.ConfigParser()
@@ -154,7 +154,7 @@ class VMPollerWorker(Daemon):
             self.vcenter_configs = config.get('Default', 'vcenters')
             self.threads_num     = int(config.get('Default', 'threads'))
         except ConfigParser.NoOptionError as e:
-            syslog.syslog("Configuration issues detected in %s: %s" % (config_file, e))
+            logging.error("Configuration issues detected in %s: %s" , config_file, e)
             raise
 
         # A flag to signal that our threads and daemon should be terminated
@@ -185,17 +185,17 @@ class VMPollerWorker(Daemon):
         try:
             self.mgmt.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
-            syslog.syslog("Cannot bind management socket: %s" % e)
+            logging.error("Cannot bind management socket: %s", e)
             raise VMPollerException, "Cannot bind management socket: %s" % e
 
         # Create a ROUTER socket for forwarding client requests to our worker threads
-        syslog.syslog("Connecting to the VMPoller Proxy server")
+        logging.info("Connecting to the VMPoller Proxy server")
         self.router = self.zcontext.socket(zmq.ROUTER)
 
         try:
             self.router.connect(self.proxy_endpoint)
         except zmq.ZMQError as e:
-            syslog.syslog("Cannot connect worker to proxy: %s" % e)
+            logging.error("Cannot connect worker to proxy: %s", e)
             raise VMPollerException, "Cannot connect worker to proxy: %s" % e
 
         # Create a DEALER socket for passing messages from our worker threads back to the clients
@@ -297,7 +297,7 @@ class VMPollerWorker(Daemon):
             
         """
         if not os.path.exists(config_dir) or not os.path.isdir(config_dir):
-            syslog.syslog("%s does not exists or is not a directory" % config_dir)
+            logging.error("%s does not exists or is not a directory", config_dir)
             raise VMPollerException, "%s does not exists or is not a directory" % config_dir
         
         # Get all *.conf files for the different vCenters
@@ -305,7 +305,7 @@ class VMPollerWorker(Daemon):
         confFiles = glob.glob(path)
 
         if not confFiles:
-            syslog.syslog("No vCenter config files found in %s" % config_dir)
+            logging.error("No vCenter config files found in %s", config_dir)
             raise VMPollerException, "No vCenter config files found in %s" % config_dir
 
         return confFiles
@@ -319,7 +319,7 @@ class VMPollerWorker(Daemon):
             try:
                 self.agents[eachAgent].connect()
             except Exception as e:
-                print 'Cannot connect to %s: %s' % (eachAgent, e)
+                logging.error('Cannot connect to %s: %s', eachAgent, e)
 
     def shutdown_agents(self):
         """
@@ -376,7 +376,7 @@ class VMPollerWorker(Daemon):
 
         if msg["cmd"] == "shutdown":
             self.time_to_die = True
-            syslog.syslog("VMPoller Worker is shutting down")
+            logging.info("VMPoller Worker is shutting down")
             return "Shutting down VMPoller Worker"
         elif msg["cmd"] == "status":
             header = "VMPoller Worker"
@@ -454,7 +454,7 @@ class VSphereAgent(VMConnector):
             'runtime.bootTime':                              lambda p: time.strftime('%Y-%m-%d %H:%M:%S', p),
         }
             
-        syslog.syslog('[%s] Retrieving %s for host %s' % (self.vcenter, msg['property'], msg['name']))
+        logging.info('[%s] Retrieving %s for host %s', self.vcenter, msg['property'], msg['name'])
 
         # Get the properties for all registered hosts
         try:
@@ -462,7 +462,7 @@ class VSphereAgent(VMConnector):
                                                                    obj_type=MORTypes.HostSystem)
         except Exception as e:
             sleep(1) # Settle down for a moment
-	    syslog.syslog("Cannot get property for host %s: %s" % (msg["name"], e))
+	    logging.warning("Cannot get property for host %s: %s", msg["name"], e)
             return "Cannot get property for host %s: %s" % (msg["name"], e)
 
         # Do we have something to return?
@@ -545,14 +545,14 @@ class VSphereAgent(VMConnector):
             property_names.extend(custom_zbx_properties[msg["property"]])
             property_names.remove(msg["property"])
 
-        syslog.syslog('[%s] Retrieving %s for datastore %s' % (self.vcenter, msg['property'], msg['name']))
+        logging.info('[%s] Retrieving %s for datastore %s', self.vcenter, msg['property'], msg['name'])
 
         try:
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.Datastore)
         except Exception as e:
             sleep(1) # Settle down for a moment
-            syslog.syslog("Cannot get property for datastore %s: %s" % (msg["name"], e))
+            logging.warning("Cannot get property for datastore %s: %s" % (msg["name"], e))
             return "Cannot get property for datastore %s: %s" % (msg["name"], e)
 
         if not results:
@@ -602,7 +602,7 @@ class VSphereAgent(VMConnector):
         # Property <name>-<macros> mappings that Zabbix uses
         property_macros = { 'name': '{#ESX_NAME}', 'runtime.powerState': '{#ESX_POWERSTATE}' }
         
-        syslog.syslog('[%s] Discovering ESX hosts' % self.vcenter)
+        logging.info('[%s] Discovering ESX hosts', self.vcenter)
 
         # Retrieve the data
 	try:
@@ -610,7 +610,7 @@ class VSphereAgent(VMConnector):
                                                                    obj_type=MORTypes.HostSystem)
 	except Exception as e:
             sleep(1) # Settle down for a moment
-            syslog.syslog("Cannot discover hosts: %s" % e)
+            logging.warning("Cannot discover hosts: %s", e)
             return "Cannot discover hosts: %s" % e
 
         # Iterate over the results and prepare the JSON object
@@ -655,7 +655,7 @@ class VSphereAgent(VMConnector):
                            'summary.accessible': '{#DS_ACCESSIBLE}',
                            }
         
-        syslog.syslog('[%s] Discovering datastores' % self.vcenter)
+        logging.info('[%s] Discovering datastores', self.vcenter)
         
         # Retrieve the data
 	try:
@@ -663,7 +663,7 @@ class VSphereAgent(VMConnector):
                                                                    obj_type=MORTypes.Datastore)
 	except Exception as e:
             sleep(1) # Settle down for a moment
-            syslog.syslog("Cannot discover datastores: %s" % e)
+            logging.warning("Cannot discover datastores: %s", e)
             return "Cannot discover datastores: %s" % e
 
         # Iterate over the results and prepare the JSON object
@@ -698,7 +698,7 @@ class VMPollerProxy(Daemon):
     """
     def run(self, config_file):
         if not os.path.exists(config_file):
-            syslog.syslog("Cannot read configuration for proxy: %s" % config_file)
+            logging.error("Cannot read configuration for proxy: %s", config_file)
             raise VMPollerException, "Cannot read configuration for proxy: %s" % config_file 
 
         config = ConfigParser.ConfigParser()
@@ -709,7 +709,7 @@ class VMPollerProxy(Daemon):
             self.backend_endpoint  = config.get('Default', 'backend')
             self.mgmt_endpoint     = config.get('Default', 'mgmt')
         except ConfigParser.NoOptionError as e:
-            syslog.syslog("Configuration issues detected in %s: %s" % (config_file, e))
+            logging.error("Configuration issues detected in %s: %s", config_file, e)
             raise
 
         # A flag to indicate that the VMPollerProxy daemon should be terminated
@@ -724,7 +724,7 @@ class VMPollerProxy(Daemon):
         try:
             self.mgmt.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
-            syslog.syslog("Cannot bind management socket: %s" % e)
+            logging.error("Cannot bind management socket: %s", e)
             raise VMPollerException, "Cannot bind management socket: %s" % e
         
         # Socket facing clients
@@ -733,7 +733,7 @@ class VMPollerProxy(Daemon):
         try:
             self.frontend.bind(self.frontend_endpoint)
         except zmq.ZMQError as e:
-            syslog.syslog("Cannot bind frontend socket: %s" % e)
+            logging.error("Cannot bind frontend socket: %s", e)
             raise VMPollerException, "Cannot bind frontend socket: %s" % e
 
         # Socket facing workers
@@ -742,7 +742,7 @@ class VMPollerProxy(Daemon):
         try:
             self.backend.bind(self.backend_endpoint)
         except zmq.ZMQError as e:
-            syslog.syslog("Cannot bind backend socket: %s" % e)
+            logging.error("Cannot bind backend socket: %s", e)
             raise VMPollerException, "Cannot bind backend socket: %s" % e
 
         # Create a poll set for our sockets
@@ -751,7 +751,7 @@ class VMPollerProxy(Daemon):
         self.zpoller.register(self.backend, zmq.POLLIN)
         self.zpoller.register(self.mgmt, zmq.POLLIN)
 
-        syslog.syslog("Starting the VMPoller Proxy")
+        logging.info("Starting the VMPoller Proxy")
         
         # Enter the daemon loop from here
         while not self.time_to_die:
@@ -802,7 +802,7 @@ class VMPollerProxy(Daemon):
 
         if msg["cmd"] == "shutdown":
             self.time_to_die = True
-            syslog.syslog("VMPoller Proxy is shutting down")
+            logging.info("VMPoller Proxy is shutting down")
             return "Shutting down VMPoller Proxy"
         elif msg["cmd"] == "status":
             header = "VMPoller Proxy"
@@ -872,7 +872,7 @@ class VMPollerClient(object):
             else:
                 # We didn't get a reply back from the server, let's retry
                 self.retries -= 1
-                syslog.syslog("Did not receive reply from server, retrying...")
+                logging.warning("Did not receive reply from server, retrying...")
                 
                 # Socket is confused. Close and remove it.
                 self.zclient.close()
@@ -891,7 +891,7 @@ class VMPollerClient(object):
 
         # Did we have any result reply at all?
         if not result:
-            syslog.syslog("Did not receive a reply from the server, aborting...")
+            logging.error("Did not receive a reply from the server, aborting...")
             return "Did not receive reply from the server, aborting..."
         
         return result

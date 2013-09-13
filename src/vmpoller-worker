@@ -33,6 +33,8 @@ performing the actual polling from a vCenter server.
 
 """
 
+import logging
+
 from vmpoller.core import VMPollerWorker, VMPollerClient
 from docopt import docopt
 
@@ -80,7 +82,7 @@ def status(endpoint):
 
 def main():
     usage="""
-Usage: vmpoller-worker [-d] [-p <pidfile>] [-f <config-file>] start
+Usage: vmpoller-worker [-d] [-p <pidfile>] [-f <config-file>] [-l <logfile>] start
        vmpoller-worker -e <endpoint> stop
        vmpoller-worker -e <endpoint> status
        vmpoller-worker --help
@@ -101,10 +103,16 @@ Options:
   -f <config-file>, --config <config-file>  Specify config file to use
                                             [default: /etc/vmpoller/vmpoller-worker.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
+  -l <logfile>, --logfile <logfile>         Specify the logfile to use
+                                            [default: /var/log/vmpoller/vmpoller-worker.log]
 
 """
 
     args = docopt(usage, version="1.0.0")
+
+    logging.basicConfig(filename=args["--logfile"],
+                        format='%(asctime)s - %(levelname)s - vmpoller-worker[%(process)s]: %(message)s',
+                        level=logging.DEBUG)
     
     if args["start"]:
         start(args["--pidfile"], args["--config"], args["--daemon"])

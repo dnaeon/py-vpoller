@@ -30,6 +30,8 @@ vmpoller-client is an application used for polling objects' information from a V
 It is intended to be integrated into a Zabbix template for polling of ESX hosts and Datastores properties.
 """
 
+import logging
+
 from vmpoller.core import VMPollerClient
 from docopt import docopt
 
@@ -37,9 +39,9 @@ def main():
 
     usage="""
 Usage:
-  vmpoller-client [-r <retries>] [-t <timeout>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
-  vmpoller-client [-r <retries>] [-t <timeout>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
-  vmpoller-client [-r <retries>] [-t <timeout>] -D -n <name> -p <property> -u <datastore-url> -c poll -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] -D -n <name> -p <property> -u <datastore-url> -c poll -V <vcenter> -e <endpoint>
   vmpoller-client --help
   vmpoller-client --version
 
@@ -56,11 +58,17 @@ Options:
   -r <retries>, --retries <retries>         Number of time to retry if a request times out [default: 3]
   -t <timeout>, --timeout <timeout>         Timeout after that period of milliseconds [default: 3000]
   -e <endpoint>, --endpoint <endpoint>      Endpoint of ZeroMQ Proxy/Broker the client connects to
+  -l <logfile>, --logfile <logfile>         Specify the log file to use when performing the poll
+                                            [default: /var/log/vmpoller/vmpoller-client.log]
 
 """
 
     args = docopt(usage, version="1.0.0")
 
+    logging.basicConfig(filename=args["--logfile"],
+                        format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
+                        level=logging.DEBUG)
+    
     client = VMPollerClient(endpoint=args["--endpoint"], retries=args["--retries"], timeout=args["--timeout"])
 
     msg = { "type":    "hosts" if args["--hosts"] else "datastores",

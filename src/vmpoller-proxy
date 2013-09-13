@@ -30,6 +30,8 @@ between a pool of ZeroMQ workers.
 
 """
 
+import logging
+
 from vmpoller.core import VMPollerProxy, VMPollerClient
 from docopt import docopt
 
@@ -78,7 +80,7 @@ def status(endpoint):
 def main():
 
     usage="""
-Usage: vmpoller-proxy [-d] [-p <pidfile>] [-f <config-file>] start
+Usage: vmpoller-proxy [-d] [-p <pidfile>] [-f <config-file>] [-l <logfile>] start
        vmpoller-proxy -e <endpoint> stop
        vmpoller-proxy -e <endpoint> status
        vmpoller-proxy --help
@@ -99,10 +101,16 @@ Options:
   -f <config-file>, --config <config-file>  Specify config file to use
                                             [default: /etc/vmpoller/vmpoller-proxy.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
+  -l <logfile>, --logfile <logfile>         Specify the logfile to use
+                                            [default: /var/log/vmpoller/vmpoller-proxy.log]
 
 """
 
     args = docopt(usage, version="1.0.0")
+
+    logging.basicConfig(filename=args["--logfile"],
+                        format='%(asctime)s - %(levelname)s - vmpoller-proxy[%(process)s]: %(message)s',
+                        level=logging.DEBUG)
     
     if args["start"]:
         start(args["--pidfile"], args["--config"], args["--daemon"])
