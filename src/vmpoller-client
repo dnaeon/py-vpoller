@@ -30,6 +30,7 @@ vmpoller-client is an application used for polling objects' information from a V
 It is intended to be integrated into a Zabbix template for polling of ESX hosts and Datastores properties.
 """
 
+import sys
 import logging
 
 from vmpoller.core import VMPollerClient
@@ -65,10 +66,15 @@ Options:
 
     args = docopt(usage, version="1.0.0")
 
-    logging.basicConfig(filename=args["--logfile"],
-                        format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
-                        level=logging.DEBUG)
-    
+    if args["--logfile"] == "-":
+        logging.basicConfig(stream=sys.stdout,
+                            format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
+                            level=logging.DEBUG)
+    else:
+        logging.basicConfig(filename=args["--logfile"],
+                            format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
+                            level=logging.DEBUG)
+        
     client = VMPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
 
     msg = { "type":    "hosts" if args["--hosts"] else "datastores",

@@ -33,6 +33,7 @@ performing the actual polling from a vCenter server.
 
 """
 
+import sys
 import logging
 
 from vmpoller.core import VMPollerWorker, VMPollerClient
@@ -110,9 +111,14 @@ Options:
 
     args = docopt(usage, version="1.0.0")
 
-    logging.basicConfig(filename=args["--logfile"],
-                        format='%(asctime)s - %(levelname)s - vmpoller-worker[%(process)s]: %(message)s',
-                        level=logging.DEBUG)
+    if args["--logfile"] == "-":
+        logging.basicConfig(stream=sys.stdout,
+                            format='%(asctime)s - %(levelname)s - vmpoller-worker[%(process)s]: %(message)s',
+                            level=logging.DEBUG)
+    else:
+        logging.basicConfig(filename=args["--logfile"],
+                            format='%(asctime)s - %(levelname)s - vmpoller-worker[%(process)s]: %(message)s',
+                            level=logging.DEBUG)
     
     if args["start"]:
         start(args["--pidfile"], args["--config"], args["--daemon"])
