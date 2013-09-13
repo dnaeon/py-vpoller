@@ -91,11 +91,10 @@ which load balances client requests between two threaded workers.
 import os
 import glob
 import json
-import time
 import logging
 import threading
 import ConfigParser
-from time import sleep
+from time import sleep, asctime
 
 import zmq
 from vmconnector.core import VMConnector
@@ -157,6 +156,9 @@ class VMPollerWorker(Daemon):
             logging.error("Configuration issues detected in %s: %s" , config_file, e)
             raise
 
+        # Note the time we start up
+        self.running_since = asctime()
+        
         # A flag to signal that our threads and daemon should be terminated
         self.time_to_die = False
 
@@ -389,6 +391,7 @@ class VMPollerWorker(Daemon):
             msg += "Management endpoint : %s\n" % self.mgmt_endpoint
             msg += "vCenter configs     : %s\n" % self.vcenter_configs
             msg += "vCenter Agents      : %s\n" % ", ".join(self.agents.keys())
+            msg += "Running since       : %s\n" % self.running_since
             msg += "System information  : %s"   % " ".join(os.uname())
             return msg
         else:
@@ -712,6 +715,9 @@ class VMPollerProxy(Daemon):
             logging.error("Configuration issues detected in %s: %s", config_file, e)
             raise
 
+        # Note the time we start up
+        self.running_since = asctime()
+
         # A flag to indicate that the VMPollerProxy daemon should be terminated
         self.time_to_die = False
         
@@ -813,6 +819,7 @@ class VMPollerProxy(Daemon):
             msg += "Frontend endpoint   : %s\n" % self.frontend_endpoint
             msg += "Backend endpoint    : %s\n" % self.backend_endpoint
             msg += "Management endpoint : %s\n" % self.mgmt_endpoint
+            msg += "Running since       : %s\n" % self.running_since
             msg += "System information  : %s"   % " ".join(os.uname())
             return msg
         else:
