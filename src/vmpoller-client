@@ -69,7 +69,7 @@ Options:
                         format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
                         level=logging.DEBUG)
     
-    client = VMPollerClient(endpoint=args["--endpoint"], retries=args["--retries"], timeout=args["--timeout"])
+    client = VMPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
 
     msg = { "type":    "hosts" if args["--hosts"] else "datastores",
             "vcenter":  args["--vcenter"],
