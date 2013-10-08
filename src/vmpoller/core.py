@@ -115,10 +115,13 @@ class VMPollerWorker(Daemon):
     Prepares all vSphere Agents to be ready for polling from the vCenters.
 
     This is the main VMPoller worker, which contains all worker agents (vSphere Agents/Pollers)
-    
-    Creates two sockets, one connected to the ZeroMQ proxy to receive client requests,
-    the second socket is used for management, e.g. querying status information, shutdown, etc.
 
+    Creates three sockets: 
+
+    * ROUTER socket connected to the VMPoller Proxy backend endpoint
+    * DEALER socket connected via inproc:// for communication between the threads
+    * REP socket used for management
+    
     Extends:
         Daemon class
 
@@ -132,7 +135,7 @@ class VMPollerWorker(Daemon):
 
         Args:
             config_file (str):  Configuration file for the VMPollerWorker
-            run_agents  (bool): If True then all vSphere Agents will be started up upfront
+            run_agents  (bool): If True then all vSphere Agents will be started upfront
             			any polling has occurred. Otherwise, a vSphere Agent will be
                                 started only if needed.
         
@@ -266,8 +269,8 @@ class VMPollerWorker(Daemon):
 
         Passes messages to the vSphere Agents for polling.
 
-        Each thread creates a socket to the dealer and communicates
-        using inproc with the DEALER.
+        Each thread is connected via a REP socket to the DEALER socket of the
+        worker. Communication happens using inproc:// sockets.
 
         """
         socket = context.socket(zmq.REP)
