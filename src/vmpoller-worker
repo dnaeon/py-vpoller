@@ -43,6 +43,11 @@ def start(pidfile, config, daemon):
     """
     Start the VMPoller Worker daemon
 
+    Args:
+        pidfile (string): Location to the daemon's pidfile
+        config  (string): Configuration file of the VMPoller Worker
+        daemon    (bool): If True daemonize the VMPoller Worker
+
     """
     worker = VMPollerWorker(pidfile)
 
@@ -56,6 +61,9 @@ def start(pidfile, config, daemon):
 def stop(endpoint):
     """
     Stops the VMPoller Worker daemon
+
+    Args:
+        endpoint (string): The endpoint we send the shutdown message to
 
     """
     # The message we send to initiate the shutdown sequence
@@ -71,6 +79,9 @@ def status(endpoint):
     """
     Get status information from the VMPoller Worker daemon
 
+    Args:
+        endpoint (string): The endpoint we send the status message to
+    
     """
     # The message we send to get status information
     msg = { "cmd": "status" }

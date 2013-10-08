@@ -40,6 +40,11 @@ def start(pidfile, config, daemon):
     """
     Start the VMPoller Proxy daemon
 
+    Args:
+        pidfile (string): Location to the daemon's pidfile
+        config  (string): Configuration file of the VMPoller Proxy
+        daemon    (bool): If True daemonize the VMPoller Proxy
+
     """
     proxy = VMPollerProxy(pidfile)
 
@@ -53,6 +58,9 @@ def start(pidfile, config, daemon):
 def stop(endpoint):
     """
     Stops the VMPoller Proxy daemon
+
+    Args:
+        endpoint (string): The endpoint we send the shutdown message to
 
     """
     # The message we send to initiate the shutdown sequence
@@ -68,6 +76,9 @@ def status(endpoint):
     """
     Get status information from the VMPoller Proxy daemon
 
+    Args:
+        endpoint (string): The endpoint we send the status message to
+    
     """
     # The message we send to get status information
     msg = { "cmd": "status" }
