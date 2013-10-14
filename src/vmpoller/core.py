@@ -151,7 +151,7 @@ class VMPollerWorker(Daemon):
         config.read(config_file)
 
         try:
-            self.proxy_endpoint  = config.get('Default', 'broker')
+            self.proxy_endpoint  = config.get('Default', 'proxy')
             self.mgmt_endpoint   = config.get('Default', 'mgmt')
             self.vcenter_configs = config.get('Default', 'vcenters')
             self.threads_num     = int(config.get('Default', 'threads'))
