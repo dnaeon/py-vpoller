@@ -206,12 +206,15 @@ class VMPollerWorker(Daemon):
         # Create a DEALER socket for passing messages from our worker threads back to the clients
         self.dealer = self.zcontext.socket(zmq.DEALER)
         self.dealer.bind("inproc://workers")
-        
+
+        # Create our threads 
         for i in xrange(self.threads_num):
-            thread = threading.Thread(target=self.worker_thread, args=("inproc://workers", self.zcontext))
+            thread = threading.Thread(target=self.worker_thread, args=("inproc://workers", self.zcontext), daemon=True)
             self.threads.append(thread)
-            thread.daemon = True
-            thread.start()
+
+        # Start our threads
+        for eachThread in self.threads:
+            eachThread.start()
 
         #zmq.proxy(self.router, self.dealer)
             
