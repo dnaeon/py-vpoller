@@ -40,9 +40,9 @@ def main():
 
     usage="""
 Usage:
-  vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
-  vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
-  vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] -D -u <datastore-url> -p <property> -c poll -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -D -u <datastore-url> -p <property> -c poll -V <vcenter> -e <endpoint>
   vmpoller-client --help
   vmpoller-client --version
 
@@ -60,19 +60,19 @@ Options:
   -t <timeout>, --timeout <timeout>         Timeout after that period of milliseconds [default: 3000]
   -e <endpoint>, --endpoint <endpoint>      Endpoint of ZeroMQ Proxy/Broker the client connects to
                                             [default: tcp://localhost:10123]
-  -l <logfile>, --logfile <logfile>         Specify the log file to use when performing the poll
+  -o <logfile>, --output <logfile>          Specify the log file to use when performing the poll
                                             [default: /var/log/vmpoller/vmpoller-client.log]
 
 """
 
     args = docopt(usage, version="1.0.0")
 
-    if args["--logfile"] == "-":
+    if args["--output"] == "-":
         logging.basicConfig(stream=sys.stdout,
                             format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
                             level=logging.DEBUG)
     else:
-        logging.basicConfig(filename=args["--logfile"],
+        logging.basicConfig(filename=args["--output"],
                             format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
                             level=logging.DEBUG)
         

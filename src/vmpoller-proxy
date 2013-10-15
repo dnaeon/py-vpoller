@@ -92,7 +92,7 @@ def status(endpoint):
 def main():
 
     usage="""
-Usage: vmpoller-proxy [-d] [-p <pidfile>] [-f <config-file>] [-l <logfile>] start
+Usage: vmpoller-proxy [-d] [-p <pidfile>] [-f <config-file>] [-o <logfile>] start
        vmpoller-proxy -e <endpoint> stop
        vmpoller-proxy -e <endpoint> status
        vmpoller-proxy --help
@@ -113,19 +113,19 @@ Options:
   -f <config-file>, --config <config-file>  Specify config file to use
                                             [default: /etc/vmpoller/vmpoller-proxy.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
-  -l <logfile>, --logfile <logfile>         Specify the logfile to use
+  -o <logfile>, --output <logfile>          Specify the logfile to use
                                             [default: /var/log/vmpoller/vmpoller-proxy.log]
 
 """
 
     args = docopt(usage, version="1.0.0")
 
-    if args["--logfile"] == "-":
+    if args["--output"] == "-":
         logging.basicConfig(stream=stdout,
                             format='%(asctime)s - %(levelname)s - vmpoller-proxy[%(process)s]: %(message)s',
                             level=logging.DEBUG)
     else:
-        logging.basicConfig(filename=args["--logfile"],
+        logging.basicConfig(filename=args["--output"],
                             format='%(asctime)s - %(levelname)s - vmpoller-proxy[%(process)s]: %(message)s',
                             level=logging.DEBUG)
     
