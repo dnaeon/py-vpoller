@@ -43,7 +43,6 @@
 #include <string.h>
 #include <sysexits.h>
 #include <unistd.h>
-#include <syslog.h>
 
 #include <zmq.h>
 
@@ -97,7 +96,7 @@ main(int argc, char *argv[])
     "\"name\":      \"%s\", "
     "\"info.url\":  \"%s\", "
     "\"cmd\":       \"%s\", "
-    "\"property\":  \"%s\", "
+    "\"property\":  \"%s\""
     "}";
 
   const char *objtype,	  /* The Object type we want to poll for, e.g. datastores/hosts */
@@ -219,9 +218,6 @@ main(int argc, char *argv[])
 
   /* Init the ZeroMQ message we will be receiving */
   zmq_msg_init(&msg_in);
-  
-  /* Open a connection to the syslog server */
-  openlog(argv[0], LOG_NOWAIT|LOG_PID, LOG_USER); 
 
   /* Send our request message out, retry mechanism in place */
   while (retries > 0) {
@@ -254,8 +250,6 @@ main(int argc, char *argv[])
        /* We didn't get a reply from the server, let's retry */
        retries--;
        
-       syslog(LOG_NOTICE, "Did not receive reply from server, retrying...\n");
-       
        /* Socket is confused, close and remove it */
        zmq_close(zsocket);
 
@@ -273,7 +267,7 @@ main(int argc, char *argv[])
   
   /* Do we have any result? */
   if (result == NULL) {
-    syslog(LOG_NOTICE, "Did not receive reply from server, aborting...\n");
+    printf("Did not receive reply from server, aborting...\n");
   } else {
     printf("%s\n", result);
   }
@@ -284,4 +278,3 @@ main(int argc, char *argv[])
 
   return (rc);
 }
-
