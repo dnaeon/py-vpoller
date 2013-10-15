@@ -52,13 +52,31 @@
 void
 usage(void)
 {
-  fprintf(stderr, "Usage: vmpoller-cclient [-D|-H] [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
-  fprintf(stderr, "                        -n <name> -p <property> -u <datastore-url>\n");
-  fprintf(stderr, "                        -c <poll|discover> -V <vcenter>\n\n");
-  fprintf(stderr, "       vmpoller-cclient -D -n <name> -p <property> -u <datastore-url> -c poll -V <vcenter>\n");
-  fprintf(stderr, "       vmpoller-cclient -D -c discover -V <vcenter>\n");
-  fprintf(stderr, "       vmpoller-cclient -H -n <name> -p <property> -c poll -V <vcenter>\n");
-  fprintf(stderr, "       vmpoller-cclient -H -c discover -V <vcenter>\n");
+  fprintf(stderr, "Usage:\n");
+  fprintf(stderr, "    vmpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] (-D|-H)\n");
+  fprintf(stderr, "                     -c discover -V <vcenter>\n");
+  fprintf(stderr, "    vmpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] -H\n");
+  fprintf(stderr, "                     -n <name> -p <property> -c poll -V <vcenter>\n");
+  fprintf(stderr, "    vmpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] -D\n");
+  fprintf(stderr, "                     -u <datastore-url> -p <property> -c poll -V <vcenter>\n");
+  fprintf(stderr, "    vmpoller-cclient -h\n\n");
+  fprintf(stderr, "Options:\n");
+  fprintf(stderr, "    -h                   Display this usage info\n");
+  fprintf(stderr, "    -D                   Retrieve a datastore object property\n");
+  fprintf(stderr, "    -H                   Retrieve a host object property\n");
+  fprintf(stderr, "    -V <vcenter>         The vCenter server to send the request to\n");
+  fprintf(stderr, "    -c <cmd>             The command to perform, either \"poll\" or \"discover\"\n");
+  fprintf(stderr, "    -n <name>            Name of the ESX host, only applicable to hosts object type\n");
+  fprintf(stderr, "    -p <property>        Name of the property as defined by the vSphere Web SDK\n");
+  fprintf(stderr, "    -u <datastore-url>   Datastore URL, only applicable to datastores object type\n");
+  fprintf(stderr, "    -r <retries>         Number of times to retry if a request times out [default: 3]\n");
+  fprintf(stderr, "    -t <timeout>         Timeout after that period of milliseconds [default: 3000]\n");
+  fprintf(stderr, "    -e <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to\n");
+  fprintf(stderr, "                         [default: tcp://localhost:10123]\n\n");
+  fprintf(stderr, "Example usage for discovering datastores on a vCenter:\n\n");
+  fprintf(stderr, "     $ vmpoller-cclient -D -c discover -V vc1.example.org\n\n");
+  fprintf(stderr, "Example usage for retrieving a property of an ESX host:\n\n");
+  fprintf(stderr, "     $ vmpoller-cclient -H -c poll -V sof-vc0-mnik -p runtime.bootTime -n esx1.example.org\n");
 }
 
 int
@@ -77,10 +95,9 @@ main(int argc, char *argv[])
     "\"type\":      \"%s\", "
     "\"vcenter\":   \"%s\", "
     "\"name\":      \"%s\", "
-    "\"ds_url\":    \"%s\", "
+    "\"info.url\":  \"%s\", "
     "\"cmd\":       \"%s\", "
     "\"property\":  \"%s\", "
-    "\"recv_json\": \"False\""
     "}";
 
   const char *objtype,	  /* The Object type we want to poll for, e.g. datastores/hosts */
