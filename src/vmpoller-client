@@ -59,6 +59,7 @@ Options:
   -r <retries>, --retries <retries>         Number of time to retry if a request times out [default: 3]
   -t <timeout>, --timeout <timeout>         Timeout after that period of milliseconds [default: 3000]
   -e <endpoint>, --endpoint <endpoint>      Endpoint of ZeroMQ Proxy/Broker the client connects to
+                                            [default: tcp://localhost:10123]
   -l <logfile>, --logfile <logfile>         Specify the log file to use when performing the poll
                                             [default: /var/log/vmpoller/vmpoller-client.log]
 
