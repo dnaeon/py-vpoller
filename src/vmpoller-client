@@ -42,7 +42,7 @@ def main():
 Usage:
   vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
   vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
-  vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] -D -n <name> -p <property> -u <datastore-url> -c poll -V <vcenter> -e <endpoint>
+  vmpoller-client [-r <retries>] [-t <timeout>] [-l <logfile>] -D -u <datastore-url> -p <property> -c poll -V <vcenter> -e <endpoint>
   vmpoller-client --help
   vmpoller-client --version
 
@@ -53,7 +53,7 @@ Options:
   -H, --hosts                               Retrieve a host object property
   -V <vcenter>, --vcenter <vcenter>         The vCenter server to send the request to
   -c <cmd>, --command <cmd>                 The command to perform, either "poll" or "discover"
-  -n <name>, --name <name>                  Name of the object, e.g. datastore/host name
+  -n <name>, --name <name>                  Name of the ESX host, only applicable to hosts object type
   -p <property>, --property <property>      Name of the property as defined by the vSphere Web SDK
   -u <datastore-url>, --url <datastore-url> Datastore URL, only applicable to datastores object type
   -r <retries>, --retries <retries>         Number of time to retry if a request times out [default: 3]
@@ -80,7 +80,7 @@ Options:
     msg = { "type":    "hosts" if args["--hosts"] else "datastores",
             "vcenter":  args["--vcenter"],
             "name":     args["--name"],
-            "ds_url":   args["--url"],
+            "info.url": args["--url"],
             "cmd":      args["--command"],
             "property": args["--property"],
             }

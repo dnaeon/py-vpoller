@@ -83,7 +83,7 @@ import glob
 import json
 import logging
 import ConfigParser
-from time import sleep, asctime
+from time import asctime, strftime
 
 import zmq
 from vmconnector.core import VMConnector
@@ -416,8 +416,8 @@ class VSphereAgent(VMConnector):
         if not self.viserver.is_connected():
             self.reconnect()
         
-        # Search is done by using the 'name' property of the ESX Host
-        # Properties we want to retrieve are 'name' and the requested property
+        # Search is done by using the 'name' property of the ESX Host as
+        # this uniquely identifies the host
         #
         # Check the vSphere Web Services SDK API for more information on the properties
         #
@@ -434,7 +434,7 @@ class VSphereAgent(VMConnector):
             'runtime.inMaintenanceMode':                     lambda p: int(p),      # The value we return is integer
             'summary.config.vmotionEnabled':                 lambda p: int(p),      # The value we return is integer
             'summary.rebootRequired':                        lambda p: int(p),      # The value we return is integer
-            'runtime.bootTime':                              lambda p: time.strftime('%Y-%m-%d %H:%M:%S', p),
+            'runtime.bootTime':                              lambda p: strftime('%Y-%m-%d %H:%M:%S', p),
         }
             
         logging.info('[%s] Retrieving %s for host %s', self.vcenter, msg['property'], msg['name'])
@@ -444,7 +444,6 @@ class VSphereAgent(VMConnector):
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.HostSystem)
         except Exception as e:
-            sleep(1) # Settle down for a moment
 	    logging.warning("Cannot get property for host %s: %s", msg["name"], e)
             return "Cannot get property for host %s: %s" % (msg["name"], e)
 
@@ -480,8 +479,7 @@ class VSphereAgent(VMConnector):
 
         msg = { "type":     "datastores",
                 "vcenter":  "sof-vc0-mnik",
-                "name":     "datastore1",
-                "ds_url":   "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
+                "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
                 "property": "summary.capacity"
               }
         
@@ -493,26 +491,27 @@ class VSphereAgent(VMConnector):
 
         """
         # Sanity check for required attributes in the message
-        if not all(k in msg for k in ("type", "vcenter", "name", "ds_url", "property")):
-            return "Missing message properties (e.g. vcenter/ds_url)"
+        if not all(k in msg for k in ("type", "vcenter", "info.url", "property")):
+            return "Missing message properties (e.g. vcenter/info.url)"
 
         # Check if we are connected first
         if not self.viserver.is_connected():
             self.reconnect()
         
-        # Search is done by using the 'info.name' and 'info.url' properties
+        # Search is done by using the 'info.url' property as
+        # this uniquely identifies the datastore
         #
         # Check the vSphere Web Services SDK API for more information on the properties
         #
         #     https://www.vmware.com/support/developer/vc-sdk/
         # 
-        property_names = ['info.name', 'info.url', msg['property']]
+        property_names = ['info.url', msg['property']]
 
         # Custom properties, which are not available in the vSphere Web SDK
         # Keys are the property names and values are a list/tuple of the properties required to
         # calculate the custom properties
         custom_zbx_properties = {
-            'ds_used_space_percentage': ('summary.freeSpace', 'summary.capacity')
+            'ds_used_space_percentage': ['summary.freeSpace', 'summary.capacity']
         }
                     
         # Some of the properties we process need to be converted to a Zabbix-friendly value
@@ -528,36 +527,35 @@ class VSphereAgent(VMConnector):
             property_names.extend(custom_zbx_properties[msg["property"]])
             property_names.remove(msg["property"])
 
-        logging.info('[%s] Retrieving %s for datastore %s', self.vcenter, msg['property'], msg['name'])
+        logging.info('[%s] Retrieving %s for datastore %s', self.vcenter, msg['property'], msg['info.url'])
 
         try:
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.Datastore)
         except Exception as e:
-            sleep(1) # Settle down for a moment
-            logging.warning("Cannot get property for datastore %s: %s" % (msg["name"], e))
-            return "Cannot get property for datastore %s: %s" % (msg["name"], e)
+            logging.warning("Cannot get property for datastore %s: %s" % (msg["info.url"], e))
+            return "Cannot get property for datastore %s: %s" % (msg["info.url"], e)
 
         if not results:
-            return "Did not find property %s for datastore %s" % (msg["property"], msg["name"])
+            return "Did not find property %s for datastore %s" % (msg["property"], msg["info.url"])
         
-        # Iterate over the results and find our datastore with 'info.name' and 'info.url' properties
+        # Iterate over the results and find our datastore
         for item in results:
             props = [(p.Name, p.Val) for p in item.PropSet]
             d = dict(props)
 
             # break if we have a match
-            if d['info.name'] == msg['name'] and d['info.url'] == msg['ds_url']:
+            if d['info.url'] == msg['info.url']:
                 break
         else:
-            return "Unable to find datastore %s" % msg["name"]
+            return "Unable to find datastore %s" % msg["info.url"]
 
         # Do we need to convert this value to a Zabbix-friendly one?
         if msg["property"] in zbx_helpers:
             val = zbx_helpers[msg["property"]](d)
         else:
             # No need to convert anything
-            val = d[msg["property"]] if d.get(msg["property"]) else 0 # Make sure we've got the property
+            val = d[msg["property"]] if d.get(msg["property"]) else 0
 
         return val
 
@@ -592,7 +590,6 @@ class VSphereAgent(VMConnector):
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.HostSystem)
 	except Exception as e:
-            sleep(1) # Settle down for a moment
             logging.warning("Cannot discover hosts: %s", e)
             return "Cannot discover hosts: %s" % e
 
@@ -645,7 +642,6 @@ class VSphereAgent(VMConnector):
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.Datastore)
 	except Exception as e:
-            sleep(1) # Settle down for a moment
             logging.warning("Cannot discover datastores: %s", e)
             return "Cannot discover datastores: %s" % e
 
