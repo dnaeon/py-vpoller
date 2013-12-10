@@ -121,7 +121,7 @@ Options:
     args = docopt(usage, version="1.0.0")
 
     if args["--output"] == "-":
-        logging.basicConfig(stream=stdout,
+        logging.basicConfig(stream=sys.stdout,
                             format='%(asctime)s - %(levelname)s - vmpoller-proxy[%(process)s]: %(message)s',
                             level=logging.DEBUG)
     else:
