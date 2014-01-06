@@ -25,39 +25,42 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vmpoller-proxy is a ZeroMQ proxy/broker that load balances requests
-between a pool of ZeroMQ workers.
+vpoller-worker is a daemon, which receives new message requests from a
+ZeroMQ proxy/broker that need to be processed.
+
+The received messages are dispatched to the internal vSphere Agents for
+performing the actual polling from a vCenter server.
 
 """
 
 import sys
 import logging
 
-from vmpoller.core import VMPollerProxy, VMPollerClient
+from vpoller.core import VPollerWorker, VPollerClient
 from docopt import docopt
 
 def start(pidfile, config, daemon):
     """
-    Start the VMPoller Proxy daemon
+    Start the VPoller Worker daemon
 
     Args:
         pidfile (string): Location to the daemon's pidfile
-        config  (string): Configuration file of the VMPoller Proxy
-        daemon    (bool): If True daemonize the VMPoller Proxy
+        config  (string): Configuration file of the VPoller Worker
+        daemon    (bool): If True daemonize the VPoller Worker
 
     """
-    proxy = VMPollerProxy(pidfile)
+    worker = VPollerWorker(pidfile)
 
     if daemon:
         # Run as daemon
-        proxy.start(config)
+        worker.start(config)
     else:
         # Run in the foreground
-        proxy.run(config)
+        worker.run(config)
 
 def stop(endpoint):
     """
-    Stops the VMPoller Proxy daemon
+    Stops the VPoller Worker daemon
 
     Args:
         endpoint (string): The endpoint we send the shutdown message to
@@ -67,14 +70,14 @@ def stop(endpoint):
     msg = { "cmd": "shutdown" }
 
     # Send out our message
-    client = VMPollerClient(endpoint=endpoint, timeout=1000, retries=3)
+    client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run(msg)
 
     print result
 
 def status(endpoint):
     """
-    Get status information from the VMPoller Proxy daemon
+    Get status information from the VPoller Worker daemon
 
     Args:
         endpoint (string): The endpoint we send the status message to
@@ -84,23 +87,22 @@ def status(endpoint):
     msg = { "cmd": "status" }
 
     # Send out our message
-    client = VMPollerClient(endpoint=endpoint, timeout=1000, retries=3)
+    client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run(msg)
 
     print result
-    
-def main():
 
+def main():
     usage="""
-Usage: vmpoller-proxy [-d] [-p <pidfile>] [-f <config-file>] [-o <logfile>] start
-       vmpoller-proxy -e <endpoint> stop
-       vmpoller-proxy -e <endpoint> status
-       vmpoller-proxy --help
-       vmpoller-proxy --version
+Usage: vpoller-worker [-d] [-p <pidfile>] [-f <config-file>] [-o <logfile>] start
+       vpoller-worker -e <endpoint> stop
+       vpoller-worker -e <endpoint> status
+       vpoller-worker --help
+       vpoller-worker --version
 
 Arguments:
-  start                                     Start the VMPoller Proxy
-  stop                                      Stop the VMPoller Proxy
+  start                                     Start the VPoller Worker
+  stop                                      Stop the VPoller Worker
   status                                    Get status information
 
 Options:
@@ -109,12 +111,12 @@ Options:
   -d, --daemon                              Start as a daemon, otherwise
                                             run in the foreground
   -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
-                                            [default: /var/run/vmpoller/vmpoller-proxy.pid]
+                                            [default: /var/run/vpoller/vpoller-worker.pid]
   -f <config-file>, --config <config-file>  Specify config file to use
-                                            [default: /etc/vmpoller/vmpoller-proxy.conf]
+                                            [default: /etc/vpoller/vpoller-worker.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
   -o <logfile>, --output <logfile>          Specify the logfile to use
-                                            [default: /var/log/vmpoller/vmpoller-proxy.log]
+                                            [default: /var/log/vpoller/vpoller-worker.log]
 
 """
 
@@ -122,11 +124,11 @@ Options:
 
     if args["--output"] == "-":
         logging.basicConfig(stream=sys.stdout,
-                            format='%(asctime)s - %(levelname)s - vmpoller-proxy[%(process)s]: %(message)s',
+                            format='%(asctime)s - %(levelname)s - vpoller-worker[%(process)s]: %(message)s',
                             level=logging.DEBUG)
     else:
         logging.basicConfig(filename=args["--output"],
-                            format='%(asctime)s - %(levelname)s - vmpoller-proxy[%(process)s]: %(message)s',
+                            format='%(asctime)s - %(levelname)s - vpoller-worker[%(process)s]: %(message)s',
                             level=logging.DEBUG)
     
     if args["start"]:
@@ -138,3 +140,4 @@ Options:
     
 if __name__ == '__main__':
     main()
+

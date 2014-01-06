@@ -25,7 +25,7 @@
 """
 Core module for the VMware vSphere Poller
 
-The principal work of the VMPoller can be seen in the diagram below.
+The principal work of the vPoller system can be seen in the diagram below.
 
 The diagram shows clients sending ZeroMQ messages to a ZeroMQ proxy,
 which load balances client requests between two workers.
@@ -87,23 +87,23 @@ from time import asctime, strftime
 
 import zmq
 from vmconnector.core import VMConnector
-from vmpoller.daemon import Daemon
+from vpoller.daemon import Daemon
 from pysphere import MORTypes
 
-class VMPollerException(Exception):
+class VPollerException(Exception):
     """
-    Generic VMPoller exception.
+    Generic VPoller exception.
 
     """
     pass
 
-class VMPollerWorker(Daemon):
+class VPollerWorker(Daemon):
     """
-    VMPollerWorker class
+    VPollerWorker class
 
     Prepares all vSphere Agents for polling from the vCenters.
 
-    This is the main VMPoller worker, which contains all worker agents (vSphere Agents/Pollers)
+    This is the main vPoller worker, which contains all worker agents (vSphere Agents/Pollers)
     
     Extends:
         Daemon class
@@ -117,7 +117,7 @@ class VMPollerWorker(Daemon):
         The main worker method.
 
         Args:
-            config_file (str):  Configuration file for the VMPollerWorker
+            config_file (str):  Configuration file for the VPollerWorker
 
         """
         # Note the time we start up
@@ -179,12 +179,12 @@ class VMPollerWorker(Daemon):
             config_file (str): Config file of the Worker
 
         Raises:
-            VMPollerException
+            VPollerException
 
         """
         if not os.path.exists(config_file):
             logging.error("Configuration file does not exists: %s", config_file)
-            raise VMPollerException, "Configuration file does not exists: %s" % config_file
+            raise VPollerException, "Configuration file does not exists: %s" % config_file
 
         config = ConfigParser.ConfigParser()
         config.read(config_file)
@@ -204,32 +204,32 @@ class VMPollerWorker(Daemon):
         Creates two sockets: 
 
         * REP socket (mgmt_socket) used for management
-        * DEALER socket (worker_socket) connected to the VMPoller Proxy
+        * DEALER socket (worker_socket) connected to the VPoller Proxy
 
         Raises:
-            VMPollerException
+            VPollerException
 
         """
         self.zcontext = zmq.Context()
         
-        # A management socket used to control the VMPollerWorker daemon
+        # A management socket used to control the VPollerWorker daemon
         self.mgmt_socket = self.zcontext.socket(zmq.REP)
 
         try:
             self.mgmt_socket.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
             logging.error("Cannot bind management socket: %s", e)
-            raise VMPollerException, "Cannot bind management socket: %s" % e
+            raise VPollerException, "Cannot bind management socket: %s" % e
 
         # Create a DEALER socket for processing client messages
-        logging.info("Connecting to the VMPoller Proxy server")
+        logging.info("Connecting to the VPoller Proxy server")
         self.worker_socket = self.zcontext.socket(zmq.DEALER)
 
         try:
             self.worker_socket.connect(self.proxy_endpoint)
         except zmq.ZMQError as e:
             logging.error("Cannot connect worker to proxy: %s", e)
-            raise VMPollerException, "Cannot connect worker to proxy: %s" % e
+            raise VPollerException, "Cannot connect worker to proxy: %s" % e
 
         # Create a poll set for our sockets
         self.zpoller = zmq.Poller()
@@ -259,12 +259,12 @@ class VMPollerWorker(Daemon):
 
         # Load the config for every vSphere Agent
         for eachConf in confFiles:
-            agent = VSphereAgent(eachConf, ignore_locks=True, lockdir="/var/run/vmpoller", keep_alive=True)
+            agent = VSphereAgent(eachConf, ignore_locks=True, lockdir="/var/run/vpoller", keep_alive=True)
             self.agents[agent.vcenter] = agent
 
     def start_vsphere_agents(self):
         """
-        Connects all VMPoller Agents to their vCenters
+        Connects all VPoller Agents to their vCenters
 
         """
         for eachAgent in self.agents:
@@ -275,7 +275,7 @@ class VMPollerWorker(Daemon):
 
     def shutdown_vsphere_agents(self):
         """
-        Disconnects all VMPoller Agents from their vCenters
+        Disconnects all VPoller Agents from their vCenters
         
         """
         for eachAgent in self.agents:
@@ -295,12 +295,12 @@ class VMPollerWorker(Daemon):
             A list of all configuration files found in the config directory
         
         Raises:
-            VMPollerException
+            VPollerException
             
         """
         if not os.path.exists(config_dir) or not os.path.isdir(config_dir):
             logging.error("%s does not exists or is not a directory", config_dir)
-            raise VMPollerException, "%s does not exists or is not a directory" % config_dir
+            raise VPollerException, "%s does not exists or is not a directory" % config_dir
         
         # Get all *.conf files for the different vCenters
         path = os.path.join(config_dir, "*.conf")
@@ -308,7 +308,7 @@ class VMPollerWorker(Daemon):
 
         if not confFiles:
             logging.error("No vCenter config files found in %s", config_dir)
-            raise VMPollerException, "No vCenter config files found in %s" % config_dir
+            raise VPollerException, "No vCenter config files found in %s" % config_dir
 
         return confFiles
 
@@ -359,10 +359,10 @@ class VMPollerWorker(Daemon):
 
         if msg["cmd"] == "shutdown":
             self.time_to_die = True
-            logging.info("VMPoller Worker is shutting down")
-            return "Shutting down VMPoller Worker"
+            logging.info("VPoller Worker is shutting down")
+            return "Shutting down VPoller Worker"
         elif msg["cmd"] == "status":
-            header = "VMPoller Worker"
+            header = "VPoller Worker"
             msg  = header + "\n"
             msg += "-" * len(header) + "\n\n"
             msg += "Status              : Running\n"
@@ -661,9 +661,9 @@ class VSphereAgent(VMConnector):
 
         return json.dumps({ 'data': json_data}, indent=4)
         
-class VMPollerProxy(Daemon):
+class VPollerProxy(Daemon):
     """
-    VMPoller Proxy class
+    VPoller Proxy class
 
     ZeroMQ proxy/broker which load-balances all client requests to a
     pool of connected ZeroMQ workers.
@@ -678,7 +678,7 @@ class VMPollerProxy(Daemon):
     def run(self, config_file):
         if not os.path.exists(config_file):
             logging.error("Cannot read configuration for proxy: %s", config_file)
-            raise VMPollerException, "Cannot read configuration for proxy: %s" % config_file 
+            raise VPollerException, "Cannot read configuration for proxy: %s" % config_file 
 
         config = ConfigParser.ConfigParser()
         config.read(config_file)
@@ -694,20 +694,20 @@ class VMPollerProxy(Daemon):
         # Note the time we start up
         self.running_since = asctime()
 
-        # A flag to indicate that the VMPollerProxy daemon should be terminated
+        # A flag to indicate that the VPollerProxy daemon should be terminated
         self.time_to_die = False
         
         # ZeroMQ context
         self.zcontext = zmq.Context()
 
-        # A management socket, used to control the VMPollerProxy daemon
+        # A management socket, used to control the VPollerProxy daemon
         self.mgmt = self.zcontext.socket(zmq.REP)
 
         try:
             self.mgmt.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
             logging.error("Cannot bind management socket: %s", e)
-            raise VMPollerException, "Cannot bind management socket: %s" % e
+            raise VPollerException, "Cannot bind management socket: %s" % e
         
         # Socket facing clients
         self.frontend = self.zcontext.socket(zmq.ROUTER)
@@ -716,7 +716,7 @@ class VMPollerProxy(Daemon):
             self.frontend.bind(self.frontend_endpoint)
         except zmq.ZMQError as e:
             logging.error("Cannot bind frontend socket: %s", e)
-            raise VMPollerException, "Cannot bind frontend socket: %s" % e
+            raise VPollerException, "Cannot bind frontend socket: %s" % e
 
         # Socket facing workers
         self.backend = self.zcontext.socket(zmq.DEALER)
@@ -725,7 +725,7 @@ class VMPollerProxy(Daemon):
             self.backend.bind(self.backend_endpoint)
         except zmq.ZMQError as e:
             logging.error("Cannot bind backend socket: %s", e)
-            raise VMPollerException, "Cannot bind backend socket: %s" % e
+            raise VPollerException, "Cannot bind backend socket: %s" % e
 
         # Create a poll set for our sockets
         self.zpoller = zmq.Poller()
@@ -733,7 +733,7 @@ class VMPollerProxy(Daemon):
         self.zpoller.register(self.backend, zmq.POLLIN)
         self.zpoller.register(self.mgmt, zmq.POLLIN)
 
-        logging.info("Starting the VMPoller Proxy")
+        logging.info("Starting the VPoller Proxy")
         
         # Enter the daemon loop from here
         while not self.time_to_die:
@@ -775,7 +775,7 @@ class VMPollerProxy(Daemon):
 
     def process_mgmt_message(self, msg):
         """
-        Processes a message for the management interface of the VMPoller Proxy
+        Processes a message for the management interface of the VPoller Proxy
 
         """
         # Check if we have a command to process
@@ -784,10 +784,10 @@ class VMPollerProxy(Daemon):
 
         if msg["cmd"] == "shutdown":
             self.time_to_die = True
-            logging.info("VMPoller Proxy is shutting down")
-            return "Shutting down VMPoller Proxy"
+            logging.info("VPoller Proxy is shutting down")
+            return "Shutting down VPoller Proxy"
         elif msg["cmd"] == "status":
-            header = "VMPoller Proxy"
+            header = "VPoller Proxy"
             msg  = header + "\n"
             msg += "-" * len(header) + "\n\n"
             msg += "Status              : Running\n"
@@ -801,13 +801,13 @@ class VMPollerProxy(Daemon):
         else:
             return "Unknown command '%s' received" % msg["cmd"]        
 
-class VMPollerClient(object):
+class VPollerClient(object):
     """
-    VMPoller Client class
+    VPoller Client class
 
     Defines methods for use by clients for sending out message requests.
 
-    Sends out messages to a VMPoller Proxy server requesting properties of
+    Sends out messages to a VPoller Proxy server requesting properties of
     different vSphere objects, e.g. datastores, hosts, etc.
 
     Returns:
@@ -816,7 +816,7 @@ class VMPollerClient(object):
     """
     def __init__(self, endpoint, timeout=3000, retries=3):
         """
-        Initializes a VMPollerClient object
+        Initializes a VPollerClient object
 
         Args:
             timeout  (int): Timeout after that amount of milliseconds

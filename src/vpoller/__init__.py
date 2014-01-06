@@ -1,2 +1,2 @@
-__name__ = 'vmpoller'
+__name__ = 'vpoller'
 __all__ = [ 'core', 'daemon' ] 

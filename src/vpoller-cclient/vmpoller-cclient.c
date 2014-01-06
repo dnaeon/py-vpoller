@@ -26,7 +26,7 @@
 
 
 /* 
- * vmpoller-cclient is a C client intended to be used for polling/discovering
+ * vpoller-cclient is a C client intended to be used for polling/discovering
  * information from a vSphere host (ESX or vCenter server).
  * 
  * It works by sending a ZeroMQ message to a ZeroMQ Broker/Proxy which in turn
@@ -46,19 +46,19 @@
 
 #include <zmq.h>
 
-#include "vmpoller-cclient.h"
+#include "vpoller-cclient.h"
 
 void
 usage(void)
 {
   fprintf(stderr, "Usage:\n");
-  fprintf(stderr, "    vmpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] (-D|-H)\n");
+  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] (-D|-H)\n");
   fprintf(stderr, "                     -c discover -V <vcenter>\n");
-  fprintf(stderr, "    vmpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] -H\n");
+  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] -H\n");
   fprintf(stderr, "                     -n <name> -p <property> -c poll -V <vcenter>\n");
-  fprintf(stderr, "    vmpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] -D\n");
+  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] -D\n");
   fprintf(stderr, "                     -u <datastore-url> -p <property> -c poll -V <vcenter>\n");
-  fprintf(stderr, "    vmpoller-cclient -h\n\n");
+  fprintf(stderr, "    vpoller-cclient -h\n\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "    -h                   Display this usage info\n");
   fprintf(stderr, "    -D                   Retrieve a datastore object property\n");
@@ -73,9 +73,9 @@ usage(void)
   fprintf(stderr, "    -e <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to\n");
   fprintf(stderr, "                         [default: tcp://localhost:10123]\n\n");
   fprintf(stderr, "Example usage for discovering datastores on a vCenter:\n\n");
-  fprintf(stderr, "     $ vmpoller-cclient -D -c discover -V vc1.example.org\n\n");
+  fprintf(stderr, "     $ vpoller-cclient -D -c discover -V vc1.example.org\n\n");
   fprintf(stderr, "Example usage for retrieving a property of an ESX host:\n\n");
-  fprintf(stderr, "     $ vmpoller-cclient -H -c poll -V sof-vc0-mnik -p runtime.bootTime -n esx1.example.org\n");
+  fprintf(stderr, "     $ vpoller-cclient -H -c poll -V sof-vc0-mnik -p runtime.bootTime -n esx1.example.org\n");
 }
 
 int

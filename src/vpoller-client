@@ -25,7 +25,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vmpoller-client is an application used for polling objects' information from a VMware vCenter server.
+vpoller-client is an application used for polling objects' information from a VMware vCenter server.
 
 It is intended to be integrated into a Zabbix template for polling of ESX hosts and Datastores properties.
 """
@@ -33,18 +33,18 @@ It is intended to be integrated into a Zabbix template for polling of ESX hosts 
 import sys
 import logging
 
-from vmpoller.core import VMPollerClient
+from vpoller.core import VPollerClient
 from docopt import docopt
 
 def main():
 
     usage="""
 Usage:
-  vmpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
-  vmpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
-  vmpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -D -u <datastore-url> -p <property> -c poll -V <vcenter> -e <endpoint>
-  vmpoller-client --help
-  vmpoller-client --version
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -D -u <datastore-url> -p <property> -c poll -V <vcenter> -e <endpoint>
+  vpoller-client --help
+  vpoller-client --version
 
 Options:
   -h, --help                                Display this usage info
@@ -61,7 +61,7 @@ Options:
   -e <endpoint>, --endpoint <endpoint>      Endpoint of ZeroMQ Proxy/Broker the client connects to
                                             [default: tcp://localhost:10123]
   -o <logfile>, --output <logfile>          Specify the log file to use when performing the poll
-                                            [default: /var/log/vmpoller/vmpoller-client.log]
+                                            [default: /var/log/vpoller/vpoller-client.log]
 
 """
 
@@ -69,14 +69,14 @@ Options:
 
     if args["--output"] == "-":
         logging.basicConfig(stream=sys.stdout,
-                            format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
+                            format='%(asctime)s - %(levelname)s - vpoller-client[%(process)s]: %(message)s',
                             level=logging.DEBUG)
     else:
         logging.basicConfig(filename=args["--output"],
-                            format='%(asctime)s - %(levelname)s - vmpoller-client[%(process)s]: %(message)s',
+                            format='%(asctime)s - %(levelname)s - vpoller-client[%(process)s]: %(message)s',
                             level=logging.DEBUG)
         
-    client = VMPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
+    client = VPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
 
     msg = { "type":    "hosts" if args["--hosts"] else "datastores",
             "vcenter":  args["--vcenter"],
