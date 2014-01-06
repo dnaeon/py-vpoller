@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(name='py-vpoller',
-      version='1.0.0',
+      version='0.1.0',
       description='VMware vSphere Distributed Pollers',
       author='Marin Atanasov Nikolov',
       author_email='dnaeon@gmail.com',

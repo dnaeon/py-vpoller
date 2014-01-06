@@ -86,7 +86,7 @@ import ConfigParser
 from time import asctime, strftime
 
 import zmq
-from vmconnector.core import VMConnector
+from vconnector.core import VConnector
 from vpoller.daemon import Daemon
 from pysphere import MORTypes
 
@@ -377,7 +377,7 @@ class VPollerWorker(Daemon):
         else:
             return "Unknown command '%s' received" % msg["cmd"]
         
-class VSphereAgent(VMConnector):
+class VSphereAgent(VConnector):
     """
     VSphereAgent class
 
@@ -386,7 +386,7 @@ class VSphereAgent(VMConnector):
     These are the worker agents that do the actual polling from the vCenters.
 
     Extends:
-        VMConnector
+        VConnector
 
     """
     def get_host_property(self, msg):
