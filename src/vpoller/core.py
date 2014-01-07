@@ -330,12 +330,12 @@ class VPollerWorker(Daemon):
         """
         # We require to have 'type', 'cmd' and 'hostname' keys in our message
         if not all(k in msg for k in ("type", "cmd", "hostname")):
-            return "Missing message properties (e.g. type/cmd/hostname)"
+            return "{ \"success\": -1, \"msg\": \"Missing message properties (e.g. type/cmd/hostname)\" }"
 
         vsphere_host = msg["hostname"]
 
         if not self.agents.get(vsphere_host):
-            return "Unknown vSphere Agent requested"
+            return "{ \"success\": -1, \"msg\": \"Unknown vSphere Agent requested\" }"
         
         if msg["type"] == "datastores" and msg["cmd"] == "poll":
             return self.agents[vsphere_host].get_datastore_property(msg)
@@ -346,7 +346,7 @@ class VPollerWorker(Daemon):
         elif msg["type"] == "hosts" and msg["cmd"] == "discover":
             return self.agents[vsphere_host].discover_hosts(msg)
         else:
-            return "Unknown command '%s' received" % msg["cmd"]
+            return "{ \"success\": -1\", \"msg\": \"Uknown command %s received\" }" % msg["cmd"]
 
     def process_mgmt_message(self, msg):
         """
@@ -355,27 +355,16 @@ class VPollerWorker(Daemon):
         """
         # Check if we have a command to process
         if not "cmd" in msg:
-            return "Missing command name"
+            return "{ \"success\": -1, \"msg\": \"Missing command name\" }"
 
         if msg["cmd"] == "shutdown":
             self.time_to_die = True
             logging.info("VPoller Worker is shutting down")
-            return "Shutting down VPoller Worker"
+            return "{ \"success\": 0, \"msg\": \"Shutting down VPoller Worker\" }"
         elif msg["cmd"] == "status":
-            header = "VPoller Worker"
-            msg  = header + "\n"
-            msg += "-" * len(header) + "\n\n"
-            msg += "Status              : Running\n"
-            msg += "Hostname            : %s\n" % os.uname()[1]
-            msg += "Broker endpoint     : %s\n" % self.proxy_endpoint
-            msg += "Management endpoint : %s\n" % self.mgmt_endpoint
-            msg += "vSphere configs     : %s\n" % self.vsphere_hosts_dir
-            msg += "vSphere Agents      : %s\n" % ", ".join(self.agents.keys())
-            msg += "Running since       : %s\n" % self.running_since
-            msg += "System information  : %s"   % " ".join(os.uname())
-            return msg
+            return "{ \"success\": 0, \"msg\": \"Okay, this is the status\" }"
         else:
-            return "Unknown command '%s' received" % msg["cmd"]
+            return "{ \"success\": -1, \"msg\": \"Unknown command %s received\" }" % msg["cmd"]
         
 class VSphereAgent(VConnector):
     """
@@ -410,7 +399,7 @@ class VSphereAgent(VConnector):
         """
         # Sanity check for required attributes in the message
         if not all(k in msg for k in ("type", "hostname", "name", "property")):
-            return "Missing message properties (e.g. type/hostname/name/property)"
+            return "{ \"success\": -1, \"msg\": \"Missing message properties (e.g. type/hostname/name/property)\" }"
 
         # Check if we are connected first
         if not self.viserver.is_connected():
@@ -445,11 +434,11 @@ class VSphereAgent(VConnector):
                                                                    obj_type=MORTypes.HostSystem)
         except Exception as e:
 	    logging.warning("Cannot get property for host %s: %s", msg["name"], e)
-            return "Cannot get property for host %s: %s" % (msg["name"], e)
+            return "{ \"success\": -1, \"msg\": \"Cannot get property for host %s: %s\" }" % (msg["name"], e)
 
         # Do we have something to return?
         if not results:
-            return "Did not find property %s for host %s" % (msg["property"], msg["name"])
+            return "{ \"success\": -1, \"msg\": \"Did not find property %s for host %s\" }" % (msg["property"], msg["name"])
 
         # Find the host we are looking for
         for item in results:
@@ -460,7 +449,7 @@ class VSphereAgent(VConnector):
             if d["name"] == msg["name"]:
                 break
         else:
-            return "Unable to find host %s" % msg["name"]
+            return "{ \"success\": -1, \"msg\": \"Unable to find ESXi host %s\" }" % msg["name"]
         
         # Get the property value
         val = d[msg["property"]] if d.get(msg["property"]) else 0
@@ -492,7 +481,7 @@ class VSphereAgent(VConnector):
         """
         # Sanity check for required attributes in the message
         if not all(k in msg for k in ("type", "hostname", "info.url", "property")):
-            return "Missing message properties (e.g. type/hostname/info.url/property)"
+            return "{ \"success\": -1, \"msg\": \"Missing message properties (e.g. type/hostname/info.url/property)\" }"
 
         # Check if we are connected first
         if not self.viserver.is_connected():
@@ -534,10 +523,10 @@ class VSphereAgent(VConnector):
                                                                    obj_type=MORTypes.Datastore)
         except Exception as e:
             logging.warning("Cannot get property for datastore %s: %s" % (msg["info.url"], e))
-            return "Cannot get property for datastore %s: %s" % (msg["info.url"], e)
+            return "{ \"success\": -1, \"msg\": \"Cannot get property for datastore %s: %s\" }" % (msg["info.url"], e)
 
         if not results:
-            return "Did not find property %s for datastore %s" % (msg["property"], msg["info.url"])
+            return "{ \"success\": -1, \"msg\": \"Did not find property %s for datastore %s\" }" % (msg["property"], msg["info.url"])
         
         # Iterate over the results and find our datastore
         for item in results:
@@ -548,13 +537,14 @@ class VSphereAgent(VConnector):
             if d['info.url'] == msg['info.url']:
                 break
         else:
-            return "Unable to find datastore %s" % msg["info.url"]
+            return "{ \"success\": -1, \"msg\": \"Unable to find datastore %s\" }" % msg["info.url"]
 
         # Do we need to convert this value to a Zabbix-friendly one?
         if msg["property"] in zbx_helpers:
             val = zbx_helpers[msg["property"]](d)
         else:
             # No need to convert anything
+            return json.dumps({ 'result': d }, indent=4)
             val = d[msg["property"]] if d.get(msg["property"]) else 0
 
         return val
@@ -602,7 +592,7 @@ class VSphereAgent(VConnector):
                                                                    obj_type=MORTypes.HostSystem)
 	except Exception as e:
             logging.warning("Cannot discover hosts: %s", e)
-            return "Cannot discover hosts: %s" % e
+            return "{ \"success\": -1, \"msg\": \"Cannot discover ESXi hosts: %s\" }" % e
 
         # Iterate over the results and prepare the JSON object
         json_data = []
@@ -671,7 +661,7 @@ class VSphereAgent(VConnector):
                                                                    obj_type=MORTypes.Datastore)
 	except Exception as e:
             logging.warning("Cannot discover datastores: %s", e)
-            return "Cannot discover datastores: %s" % e
+            return "{ \"success\": -1, \"msg\": \"Cannot discover datastores: %s\" }" % e
 
         # Iterate over the results and prepare the JSON object
         json_data = []
@@ -693,9 +683,9 @@ class VSphereAgent(VConnector):
             
         # Return result in Zabbix LLD format
         if msg.get('zabbix'):
-            return json.dumps({ 'data': json_data}, indent=4)
+            return "{ \"data\": %s }" % json.dumps(json_data)
 
-        return json.dumps({ 'result': json_data}, indent=4)
+        return "{ \"success\": 0, \"msg\": \"Successfully discovered datastores\", \"result\": %s }" % json.dumps(json_data)
             
 class VPollerProxy(Daemon):
     """
