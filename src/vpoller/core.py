@@ -344,7 +344,7 @@ class VPollerWorker(Daemon):
         elif msg["type"] == "hosts" and msg["cmd"] == "poll":
             return self.agents[vsphere_host].get_host_property(msg)
         elif msg["type"] == "hosts" and msg["cmd"] == "discover":
-            return self.agents[vsphere_host].discover_hosts()
+            return self.agents[vsphere_host].discover_hosts(msg)
         else:
             return "Unknown command '%s' received" % msg["cmd"]
 
@@ -559,10 +559,25 @@ class VSphereAgent(VConnector):
 
         return val
 
-    def discover_hosts(self):
+    def discover_hosts(self, msg):
         """
         Discovers all ESX hosts registered in the VMware vSphere server.
 
+        Example client message to discover all ESXi hosts could be:
+
+        msg = { "type"    : "hosts",
+        	"hostname": "sof-vc0-mnik",
+                "cmd"     : "discover",
+                "zabbix"  : False,
+              }
+
+        If "zabbix" is set to True then the result will be formatted in a way that the
+        Zabbix Low-Level Discovery protocol can understand and use.
+
+        For more information about Zabbix Low-Level Discovery, please check the link below:
+
+          - https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery
+              
         Returns:
             The returned data is a JSON object, containing the discovered ESX hosts.
 
@@ -577,11 +592,8 @@ class VSphereAgent(VConnector):
         #
         #     https://www.vmware.com/support/developer/vc-sdk/
         #
-        property_names = ['name', 'runtime.powerState']
+        property_names = ['name', 'runtime.powerState', 'summary.managementServerIp']
 
-        # Property <name>-<macros> mappings that Zabbix uses
-        property_macros = { 'name': '{#ESX_NAME}', 'runtime.powerState': '{#ESX_POWERSTATE}' }
-        
         logging.info('[%s] Discovering ESXi hosts', self.hostname)
 
         # Retrieve the data
@@ -595,14 +607,26 @@ class VSphereAgent(VConnector):
         # Iterate over the results and prepare the JSON object
         json_data = []
         for item in results:
-            props = [(property_macros[p.Name], p.Val) for p in item.PropSet]
+            # Do we want to return the data in Zabbix LLD format?
+            # The names of the properties we return is in Zabbix Macro-like format, e.g.
+            #
+            #   {#vSphere.<property-name>}: <value>
+            #
+            # We also keep the vSphere host so we can use it later in Zabbix items
+            if msg.get('zabbix'):
+                props = [('{#vSphere.' + p.Name + '}', p.Val) for p in item.PropSet]
+                props.append(('{#vSphere.Host}', self.hostname))
+            else:
+                props = [(p.Name, p.Val) for p in item.PropSet]
+
             d = dict(props)
-            
-            # remember on which vSphere host this ESX host is registered to
-            d['{#VCENTER_SERVER}'] = self.hostname
             json_data.append(d)
 
-        return json.dumps({ 'data': json_data}, indent=4)
+        # Return result in Zabbix LLD format
+        if msg.get('zabbix'):
+            return json.dumps({ 'data': json_data}, indent=4)
+
+        return json.dumps({ 'result': json_data}, indent=4)
 
     def discover_datastores(self):
         """
