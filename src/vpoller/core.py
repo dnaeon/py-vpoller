@@ -340,7 +340,7 @@ class VPollerWorker(Daemon):
         if msg["type"] == "datastores" and msg["cmd"] == "poll":
             return self.agents[vsphere_host].get_datastore_property(msg)
         elif msg["type"] == "datastores" and msg["cmd"] == "discover":
-            return self.agents[vsphere_host].discover_datastores()
+            return self.agents[vsphere_host].discover_datastores(msg)
         elif msg["type"] == "hosts" and msg["cmd"] == "poll":
             return self.agents[vsphere_host].get_host_property(msg)
         elif msg["type"] == "hosts" and msg["cmd"] == "discover":
@@ -628,10 +628,25 @@ class VSphereAgent(VConnector):
 
         return json.dumps({ 'result': json_data}, indent=4)
 
-    def discover_datastores(self):
+    def discover_datastores(self, msg):
         """
         Discovers all datastores registered in a VMware vSphere server.
 
+        Example client message to discover all datastores could be:
+        
+        msg = { "type"    : "datastores",
+        	"hostname": "sof-vc0-mnik",
+                "cmd"     : "discover",
+                "zabbix"  : False,
+              }
+
+        If "zabbix" is set to True then the result will be formatted in a way that the
+        Zabbix Low-Level Discovery protocol can understand and use.
+
+        For more information about Zabbix Low-Level Discovery, please check the link below:
+
+          - https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery
+              
         Returns:
             The returned data is a JSON object, containing the discovered datastores.
 
@@ -640,23 +655,13 @@ class VSphereAgent(VConnector):
         if not self.viserver.is_connected():
             self.reconnect()
         
-        #
         # Properties we want to retrieve about the datastores
         #
         # Check the vSphere Web Services SDK API for more information on the properties
         #
         #     https://www.vmware.com/support/developer/vc-sdk/
         #
-        property_names = ['info.name',
-                          'info.url',
-                          'summary.accessible',
-                          ]
-
-        # Property <name>-<macro> mappings that Zabbix uses
-        property_macros = {'info.name':          '{#DS_NAME}',
-                           'info.url':           '{#DS_URL}',
-                           'summary.accessible': '{#DS_ACCESSIBLE}',
-                           }
+        property_names = ['info.name', 'info.url', 'summary.accessible']
         
         logging.info('[%s] Discovering datastores', self.hostname)
         
@@ -671,19 +676,27 @@ class VSphereAgent(VConnector):
         # Iterate over the results and prepare the JSON object
         json_data = []
         for item in results:
-            props = [(property_macros[p.Name], p.Val) for p in item.PropSet]
+            # Do we want to return the data in Zabbix LLD format?
+            # The names of the properties we return is in Zabbix Macro-like format, e.g.
+            #
+            #   {#vSphere.<property-name>}: <value>
+            #
+            # We also keep the vSphere host so we can use it later in Zabbix items
+            if msg.get('zabbix'):
+                props = [('{#vSphere.' + p.Name + '}', p.Val) for p in item.PropSet]
+                props.append(('{#vSphere.Host}', self.hostname))
+            else:
+                props = [(p.Name, p.Val) for p in item.PropSet]
+
             d = dict(props)
-
-            # Convert the 'summary.accessible' property to int as Zabbix does not understand True/False
-            d['{#DS_ACCESSIBLE}'] = int(d['{#DS_ACCESSIBLE}'])
-            
-            # Remember on which vSphere host this datastore is registered
-            d['{#VCENTER_SERVER}'] = self.hostname
-
             json_data.append(d)
+            
+        # Return result in Zabbix LLD format
+        if msg.get('zabbix'):
+            return json.dumps({ 'data': json_data}, indent=4)
 
-        return json.dumps({ 'data': json_data}, indent=4)
-        
+        return json.dumps({ 'result': json_data}, indent=4)
+            
 class VPollerProxy(Daemon):
     """
     VPoller Proxy class
