@@ -33,7 +33,7 @@ It is intended to be integrated into a Zabbix template for polling of ESX hosts 
 import sys
 import logging
 
-from vpoller.core import VPollerClient
+from vpoller.client import VPollerClient
 from docopt import docopt
 
 def main():
@@ -90,7 +90,7 @@ Options:
     
     result = client.run(msg)
     print result
-    
+
 if __name__ == '__main__':
     main()
 
