@@ -36,7 +36,8 @@ performing the actual polling from a vCenter server.
 import sys
 import logging
 
-from vpoller.core import VPollerWorker, VPollerClient
+from vpoller.client import VPollerClient
+from vpoller.worker import VPollerWorker
 from docopt import docopt
 
 def start(pidfile, config, daemon):

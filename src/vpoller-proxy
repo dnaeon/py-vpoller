@@ -33,7 +33,8 @@ between a pool of ZeroMQ workers.
 import sys
 import logging
 
-from vpoller.core import VPollerProxy, VPollerClient
+from vpoller.client import VPollerClient
+from vpoller.proxy import VPollerProxy
 from docopt import docopt
 
 def start(pidfile, config, daemon):
