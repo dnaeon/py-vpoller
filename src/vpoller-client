@@ -40,9 +40,9 @@ def main():
 
     usage="""
 Usage:
-  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] (-D|-H) -c discover -V <vcenter> -e <endpoint>
-  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -H -n <name> -p <property> -c poll -V <vcenter> -e <endpoint>
-  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -D -u <datastore-url> -p <property> -c poll -V <vcenter> -e <endpoint>
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] (-D|-H) -c discover -V <host> -e <endpoint>
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -H -n <name> -p <property> -c poll -V <host> -e <endpoint>
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] -D -u <datastore-url> -p <property> -c poll -V <host> -e <endpoint>
   vpoller-client --help
   vpoller-client --version
 
@@ -51,7 +51,7 @@ Options:
   -v, --version                             Display version and exit
   -D, --datastores                          Retrieve a datastore object property
   -H, --hosts                               Retrieve a host object property
-  -V <vcenter>, --vcenter <vcenter>         The vCenter server to send the request to
+  -V <host>, --vsphere-host <host>          The vSphere host to send the request to
   -c <cmd>, --command <cmd>                 The command to perform, either "poll" or "discover"
   -n <name>, --name <name>                  Name of the ESX host, only applicable to hosts object type
   -p <property>, --property <property>      Name of the property as defined by the vSphere Web SDK
@@ -78,12 +78,12 @@ Options:
         
     client = VPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
 
-    msg = { "type":    "hosts" if args["--hosts"] else "datastores",
-            "vcenter":  args["--vcenter"],
-            "name":     args["--name"],
-            "info.url": args["--url"],
-            "cmd":      args["--command"],
-            "property": args["--property"],
+    msg = { "type":      "hosts" if args["--hosts"] else "datastores",
+            "hostname":  args["--vsphere-host"],
+            "name":      args["--name"],
+            "info.url":  args["--url"],
+            "cmd":       args["--command"],
+            "property":  args["--property"],
             }
     
     result = client.run(msg)

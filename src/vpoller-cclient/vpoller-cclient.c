@@ -92,7 +92,7 @@ main(int argc, char *argv[])
   const char *msg_out_template = ""
     "{"
     "\"type\":      \"%s\", "
-    "\"vcenter\":   \"%s\", "
+    "\"hostname\":   \"%s\", "
     "\"name\":      \"%s\", "
     "\"info.url\":  \"%s\", "
     "\"cmd\":       \"%s\", "
@@ -104,7 +104,7 @@ main(int argc, char *argv[])
     *property,		  /* The property we want as defined in the vSphere Web Services SDK */
     *url,		  /* Datastore URL, only applicable to datastores object type */
     *cmd,		  /* The command to be processed, e.g. 'poll' or 'discover' */
-    *vcenter;		  /* The vCenter server we send the request message to */
+    *vsphere_host;	  /* The vSphere host we send the request message to */
   
   char *result;	  	  /* A pointer to hold the result from our request */
   
@@ -126,7 +126,7 @@ main(int argc, char *argv[])
   bool objtype_datastores = false;  /* Flag to indicate that a 'Datastores' object has been requested */
   
   /* Initialize some of the message properties */
-  objtype = name = property = url = cmd = vcenter = result = NULL;
+  objtype = name = property = url = cmd = vsphere_host = result = NULL;
   
   /* Get the command-line options and arguments */
   while ((ch = getopt(argc, argv, "DHe:r:t:n:p:u:c:V:")) != -1) {
@@ -152,7 +152,7 @@ main(int argc, char *argv[])
       cmd = optarg;
       break;
     case 'V':
-      vcenter = optarg;
+      vsphere_host = optarg;
       break;
     case 'r':
       retries = atol(optarg);
@@ -172,7 +172,7 @@ main(int argc, char *argv[])
   argv += optind;
   
   /* Sanity check the provided options and arguments */
-  if (cmd == NULL || vcenter == NULL || objtype == NULL) {
+  if (cmd == NULL || vsphere_host == NULL || objtype == NULL) {
     usage();
     return (EX_USAGE);
   }
@@ -201,7 +201,7 @@ main(int argc, char *argv[])
   }
   
   /* Create the message to send out */
-  snprintf(msg_buf, 1023, msg_out_template, objtype, vcenter, name, url, cmd, property);
+  snprintf(msg_buf, 1023, msg_out_template, objtype, vsphere_host, name, url, cmd, property);
     
   /* Create a new ZeroMQ Context and Socket */
   zcontext = zmq_ctx_new();

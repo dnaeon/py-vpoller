@@ -571,7 +571,6 @@ class VSphereAgent(VConnector):
         if not self.viserver.is_connected():
             self.reconnect()
         
-        #
         # Properties we want to retrieve are 'name' and 'runtime.powerState'
         #
         # Check the vSphere Web Services SDK API for more information on the properties
