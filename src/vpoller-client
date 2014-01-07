@@ -65,7 +65,7 @@ Options:
 
 """
 
-    args = docopt(usage, version="1.0.0")
+    args = docopt(usage, version="0.1.0")
 
     if args["--output"] == "-":
         logging.basicConfig(stream=sys.stdout,
