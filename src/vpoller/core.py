@@ -69,7 +69,7 @@ which load balances client requests between two workers.
               +-------------+   +-------------+   +-------------+
               | vSphere API |   | vSphere API |   | vSphere API |
               +-------------+   +-------------+   +-------------+
-              |   vCenter   |   |   vCenter   |   |   vCenter   |
+              |   vSphere   |   |   vSphere   |   |   vSphere   |
               +-------------+   +-------------+   +-------------+
               |  ESX Hosts  |   |  ESX Hosts  |   |  ESX Hosts  |
               +-------------+   +-------------+   +-------------+
@@ -101,7 +101,7 @@ class VPollerWorker(Daemon):
     """
     VPollerWorker class
 
-    Prepares all vSphere Agents for polling from the vCenters.
+    Prepares all vSphere Agents for polling from the vSphere hosts.
 
     This is the main vPoller worker, which contains all worker agents (vSphere Agents/Pollers)
     
@@ -190,9 +190,9 @@ class VPollerWorker(Daemon):
         config.read(config_file)
 
         try:
-            self.proxy_endpoint  = config.get('Default', 'proxy')
-            self.mgmt_endpoint   = config.get('Default', 'mgmt')
-            self.vcenter_configs = config.get('Default', 'vcenters')
+            self.proxy_endpoint    = config.get('Default', 'proxy')
+            self.mgmt_endpoint     = config.get('Default', 'mgmt')
+            self.vsphere_hosts_dir = config.get('Default', 'vsphere_hosts_dir')
         except ConfigParser.NoOptionError as e:
             logging.error("Configuration issues detected in %s: %s" , config_file, e)
             raise
@@ -251,8 +251,8 @@ class VPollerWorker(Daemon):
         Creates the vSphere Agents used by the Worker and starts the worker threads
 
         """
-        # Get the configuration files for our vCenters
-        confFiles = self.get_vcenter_configs(self.vcenter_configs)
+        # Get the configuration files for our vSphere hosts
+        confFiles = self.get_vsphere_configs(self.vsphere_hosts_dir)
  
         # Our Worker's vSphere Agents
         self.agents = dict()
@@ -260,11 +260,11 @@ class VPollerWorker(Daemon):
         # Load the config for every vSphere Agent
         for eachConf in confFiles:
             agent = VSphereAgent(eachConf, ignore_locks=True, lockdir="/var/run/vpoller", keep_alive=True)
-            self.agents[agent.vcenter] = agent
+            self.agents[agent.hostname] = agent
 
     def start_vsphere_agents(self):
         """
-        Connects all VPoller Agents to their vCenters
+        Connects all VPoller Agents to their respective vSphere hosts
 
         """
         for eachAgent in self.agents:
@@ -275,18 +275,18 @@ class VPollerWorker(Daemon):
 
     def shutdown_vsphere_agents(self):
         """
-        Disconnects all VPoller Agents from their vCenters
+        Disconnects all VPoller Agents from their respective vSphere hosts
         
         """
         for eachAgent in self.agents:
             self.agents[eachAgent].disconnect()
         
-    def get_vcenter_configs(self, config_dir):
+    def get_vsphere_configs(self, config_dir):
         """
-        Gets the configuration files for the vCenters
+        Gets the configuration files for the vSphere hosts
         
         The 'config_dir' argument should point to a directory containing all .conf files
-        for the different vCenters we are connecting our VSphereAgents to.
+        for the different hosts we are connecting our VSphereAgents to.
         
         Args:
             config_dir (str): A directory containing configuration files for the vSphere Agents
@@ -302,13 +302,13 @@ class VPollerWorker(Daemon):
             logging.error("%s does not exists or is not a directory", config_dir)
             raise VPollerException, "%s does not exists or is not a directory" % config_dir
         
-        # Get all *.conf files for the different vCenters
+        # Get all *.conf files for the hosts
         path = os.path.join(config_dir, "*.conf")
         confFiles = glob.glob(path)
 
         if not confFiles:
-            logging.error("No vCenter config files found in %s", config_dir)
-            raise VPollerException, "No vCenter config files found in %s" % config_dir
+            logging.error("No vSphere config files found in %s", config_dir)
+            raise VPollerException, "No vSphere config files found in %s" % config_dir
 
         return confFiles
 
@@ -316,8 +316,8 @@ class VPollerWorker(Daemon):
         """
         Processes a client request message
 
-        The message is passed to the VSphereAgent object of the respective vCenter in
-        order to do the actual polling.
+        The message is passed to the VSphereAgent object of the respective vSphere host
+        in order to do the actual polling.
 
         The messages that we support are polling for datastores and hosts.
 
@@ -328,23 +328,23 @@ class VPollerWorker(Daemon):
             A dict object which contains the requested property
             
         """
-        # We require to have 'type', 'cmd' and 'vcenter' keys in our message
-        if not all(k in msg for k in ("type", "cmd", "vcenter")):
-            return "Missing message properties (e.g. type/cmd/vcenter)"
+        # We require to have 'type', 'cmd' and 'hostname' keys in our message
+        if not all(k in msg for k in ("type", "cmd", "hostname")):
+            return "Missing message properties (e.g. type/cmd/hostname)"
 
-        vcenter = msg["vcenter"]
+        vsphere_host = msg["hostname"]
 
-        if not self.agents.get(vcenter):
-            return "Unknown vCenter Agent requested"
+        if not self.agents.get(vsphere_host):
+            return "Unknown vSphere Agent requested"
         
         if msg["type"] == "datastores" and msg["cmd"] == "poll":
-            return self.agents[vcenter].get_datastore_property(msg)
+            return self.agents[vsphere_host].get_datastore_property(msg)
         elif msg["type"] == "datastores" and msg["cmd"] == "discover":
-            return self.agents[vcenter].discover_datastores()
+            return self.agents[vsphere_host].discover_datastores()
         elif msg["type"] == "hosts" and msg["cmd"] == "poll":
-            return self.agents[vcenter].get_host_property(msg)
+            return self.agents[vsphere_host].get_host_property(msg)
         elif msg["type"] == "hosts" and msg["cmd"] == "discover":
-            return self.agents[vcenter].discover_hosts()
+            return self.agents[vsphere_host].discover_hosts()
         else:
             return "Unknown command '%s' received" % msg["cmd"]
 
@@ -369,8 +369,8 @@ class VPollerWorker(Daemon):
             msg += "Hostname            : %s\n" % os.uname()[1]
             msg += "Broker endpoint     : %s\n" % self.proxy_endpoint
             msg += "Management endpoint : %s\n" % self.mgmt_endpoint
-            msg += "vCenter configs     : %s\n" % self.vcenter_configs
-            msg += "vCenter Agents      : %s\n" % ", ".join(self.agents.keys())
+            msg += "vSphere configs     : %s\n" % self.vsphere_hosts_dir
+            msg += "vSphere Agents      : %s\n" % ", ".join(self.agents.keys())
             msg += "Running since       : %s\n" % self.running_since
             msg += "System information  : %s"   % " ".join(os.uname())
             return msg
@@ -383,7 +383,7 @@ class VSphereAgent(VConnector):
 
     Defines methods for retrieving vSphere objects' properties.
 
-    These are the worker agents that do the actual polling from the vCenters.
+    These are the worker agents that do the actual polling from the vSphere host.
 
     Extends:
         VConnector
@@ -395,10 +395,10 @@ class VSphereAgent(VConnector):
 
         Example client message to get a host property could be:
 
-        msg = { "type":     "hosts",
-                "vcenter":  "sof-vc0-mnik",
-                "name":     "sof-dev-d7-mnik",
-                "property": "hardware.memorySize"
+        msg = { "type"     : "hosts",
+                "hostname" : "sof-vc0-mnik",
+                "name"     : "sof-dev-d7-mnik",
+                "property" : "hardware.memorySize"
               }
         
         Args:
@@ -409,8 +409,8 @@ class VSphereAgent(VConnector):
 
         """
         # Sanity check for required attributes in the message
-        if not all(k in msg for k in ("type", "vcenter", "name", "property")):
-            return "Missing message properties (e.g. vcenter/host)"
+        if not all(k in msg for k in ("type", "hostname", "name", "property")):
+            return "Missing message properties (e.g. type/hostname/name/property)"
 
         # Check if we are connected first
         if not self.viserver.is_connected():
@@ -437,7 +437,7 @@ class VSphereAgent(VConnector):
             'runtime.bootTime':                              lambda p: strftime('%Y-%m-%d %H:%M:%S', p),
         }
             
-        logging.info('[%s] Retrieving %s for host %s', self.vcenter, msg['property'], msg['name'])
+        logging.info('[%s] Retrieving %s for host %s', self.hostname, msg['property'], msg['name'])
 
         # Get the properties for all registered hosts
         try:
@@ -477,8 +477,8 @@ class VSphereAgent(VConnector):
 
         Example client message to get a host property could be:
 
-        msg = { "type":     "datastores",
-                "vcenter":  "sof-vc0-mnik",
+        msg = { "type"    : "datastores",
+                "hostname": "sof-vc0-mnik",
                 "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
                 "property": "summary.capacity"
               }
@@ -491,8 +491,8 @@ class VSphereAgent(VConnector):
 
         """
         # Sanity check for required attributes in the message
-        if not all(k in msg for k in ("type", "vcenter", "info.url", "property")):
-            return "Missing message properties (e.g. vcenter/info.url)"
+        if not all(k in msg for k in ("type", "hostname", "info.url", "property")):
+            return "Missing message properties (e.g. type/hostname/info.url/property)"
 
         # Check if we are connected first
         if not self.viserver.is_connected():
@@ -527,7 +527,7 @@ class VSphereAgent(VConnector):
             property_names.extend(custom_zbx_properties[msg["property"]])
             property_names.remove(msg["property"])
 
-        logging.info('[%s] Retrieving %s for datastore %s', self.vcenter, msg['property'], msg['info.url'])
+        logging.info('[%s] Retrieving %s for datastore %s', self.hostname, msg['property'], msg['info.url'])
 
         try:
             results = self.viserver._retrieve_properties_traversal(property_names=property_names,
@@ -561,7 +561,7 @@ class VSphereAgent(VConnector):
 
     def discover_hosts(self):
         """
-        Discoveres all ESX hosts registered in the VMware vCenter server.
+        Discovers all ESX hosts registered in the VMware vSphere server.
 
         Returns:
             The returned data is a JSON object, containing the discovered ESX hosts.
@@ -583,7 +583,7 @@ class VSphereAgent(VConnector):
         # Property <name>-<macros> mappings that Zabbix uses
         property_macros = { 'name': '{#ESX_NAME}', 'runtime.powerState': '{#ESX_POWERSTATE}' }
         
-        logging.info('[%s] Discovering ESX hosts', self.vcenter)
+        logging.info('[%s] Discovering ESXi hosts', self.hostname)
 
         # Retrieve the data
 	try:
@@ -599,15 +599,15 @@ class VSphereAgent(VConnector):
             props = [(property_macros[p.Name], p.Val) for p in item.PropSet]
             d = dict(props)
             
-            # remember on which vCenter this ESX host runs on
-            d['{#VCENTER_SERVER}'] = self.vcenter
+            # remember on which vSphere host this ESX host is registered to
+            d['{#VCENTER_SERVER}'] = self.hostname
             json_data.append(d)
 
         return json.dumps({ 'data': json_data}, indent=4)
 
     def discover_datastores(self):
         """
-        Discovers all datastores registered in a VMware vCenter server.
+        Discovers all datastores registered in a VMware vSphere server.
 
         Returns:
             The returned data is a JSON object, containing the discovered datastores.
@@ -635,7 +635,7 @@ class VSphereAgent(VConnector):
                            'summary.accessible': '{#DS_ACCESSIBLE}',
                            }
         
-        logging.info('[%s] Discovering datastores', self.vcenter)
+        logging.info('[%s] Discovering datastores', self.hostname)
         
         # Retrieve the data
 	try:
@@ -654,8 +654,8 @@ class VSphereAgent(VConnector):
             # Convert the 'summary.accessible' property to int as Zabbix does not understand True/False
             d['{#DS_ACCESSIBLE}'] = int(d['{#DS_ACCESSIBLE}'])
             
-            # Remember on which vCenter is this datastore
-            d['{#VCENTER_SERVER}'] = self.vcenter
+            # Remember on which vSphere host this datastore is registered
+            d['{#VCENTER_SERVER}'] = self.hostname
 
             json_data.append(d)
 
