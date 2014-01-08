@@ -31,6 +31,7 @@ between a pool of ZeroMQ workers.
 """
 
 import sys
+import json
 import logging
 
 from vpoller.client import VPollerClient
@@ -71,7 +72,7 @@ def stop(endpoint):
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run(msg)
 
-    print result
+    return result
 
 def status(endpoint):
     """
@@ -88,7 +89,7 @@ def status(endpoint):
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run(msg)
 
-    print result
+    return result
     
 def main():
 
@@ -129,13 +130,19 @@ Options:
         logging.basicConfig(filename=args["--output"],
                             format='%(asctime)s - %(levelname)s - vpoller-proxy[%(process)s]: %(message)s',
                             level=logging.DEBUG)
-    
+
+    result = None
+        
     if args["start"]:
         start(args["--pidfile"], args["--config"], args["--daemon"])
     elif args["stop"]:
-        stop(args["--endpoint"])
+        result = stop(args["--endpoint"])
     elif args["status"]:
-        status(args["--endpoint"])
-    
+        result = status(args["--endpoint"])
+
+    if result:
+        result = json.loads(result)
+        print json.dumps(result, indent=4)
+
 if __name__ == '__main__':
     main()
