@@ -41,7 +41,7 @@ class VPollerProxy(Daemon):
     VPoller Proxy class
 
     ZeroMQ proxy/broker which load-balances all client requests to a
-    pool of connected ZeroMQ workers.
+    pool of connected vPoller Workers workers.
 
     Extends:
         Daemon
@@ -196,16 +196,32 @@ class VPollerProxy(Daemon):
         """
         Processes a message for the management interface of the VPoller Proxy
 
+        An example message to get status information would be:
+
+            {
+                "method": "proxy.status"
+            }
+
+        An example message to shutdown the vPoller Proxy would be:
+
+            {
+                "method": "proxy.shutdown"
+            }
+        
+        Args:
+            msg (dict): The client message to process
+
         """
         # Check if we have a command to process
-        if not "cmd" in msg:
+        if not "method" in msg:
             return "{ \"success\": -1, \"msg\": \"Missing command name\" }"
 
-        if msg["cmd"] == "shutdown":
-            self.time_to_die = True
-            logging.info("VPoller Proxy is shutting down")
-            return "{ \"success\": 0, \"msg\": \"Shutting down VPoller Proxy\" }"
-        elif msg["cmd"] == "status":
-            return "{ \"success\": 0, \"msg\": \"Okay, this is the status\" }"
-        else:
-            return "{ \"success\": 0, \"msg\": \"Unknown command %s received\" }" % msg["cmd"]        
+        # Methods we support and process
+        methods = {
+            'proxy.status':   self.get_proxy_status(msg),
+            'proxy.shutdown': self.proxy_shutdown(msg),
+            }
+
+        result = methods[msg['method']] if methods.get(msg['method']) else "{ \"status\": -1, \"msg\": \"Uknown command received\" }"
+
+        return result
