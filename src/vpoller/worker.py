@@ -289,6 +289,18 @@ class VPollerWorker(Daemon):
         """
         Processes a message for the management interface
 
+        Example client message to shutdown the vPoller Worker would be:
+
+              {
+                "cmd": "shutdown"
+              }
+
+        Getting status information from the vPoller worker:
+
+              {
+                "cmd": "status"
+              }
+        
         """
         # Check if we have a command to process
         if not "cmd" in msg:
@@ -296,8 +308,8 @@ class VPollerWorker(Daemon):
 
         if msg["cmd"] == "shutdown":
             self.time_to_die = True
-            logging.info("VPoller Worker is shutting down")
-            return "{ \"success\": 0, \"msg\": \"Shutting down VPoller Worker\" }"
+            logging.info("vPoller Worker is shutting down")
+            return "{ \"success\": 0, \"msg\": \"vPoller Worker is shutting down\" }"
         elif msg["cmd"] == "status":
             return "{ \"success\": 0, \"msg\": \"Okay, this is the status\" }"
         else:
