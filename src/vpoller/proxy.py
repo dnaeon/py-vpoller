@@ -98,7 +98,7 @@ class VPollerProxy(Daemon):
             if socks.get(self.mgmt) == zmq.POLLIN:
                 msg = self.mgmt.recv_json()
                 result = self.process_mgmt_message(msg)
-                self.mgmt.send(result)
+                self.mgmt.send_json(result)
 
         # Shutdown time has arrived, let's clean up a bit
         self.close_proxy_sockets()
@@ -218,11 +218,11 @@ class VPollerProxy(Daemon):
 
         # Methods we support and process
         methods = {
-            'proxy.status':   self.get_proxy_status(msg),
-            'proxy.shutdown': self.proxy_shutdown(msg),
+            'proxy.status':   self.get_proxy_status,
+            'proxy.shutdown': self.proxy_shutdown,
             }
 
-        result = methods[msg['method']] if methods.get(msg['method']) else { "status": -1, "msg": "Uknown command received" }
+        result = methods[msg['method']](msg) if methods.get(msg['method']) else { "status": -1, "msg": "Uknown command received" }
 
         return result
 
