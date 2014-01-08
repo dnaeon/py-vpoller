@@ -222,7 +222,7 @@ class VPollerProxy(Daemon):
             'proxy.shutdown': self.proxy_shutdown,
             }
 
-        result = methods[msg['method']](msg) if methods.get(msg['method']) else { "status": -1, "msg": "Uknown command received" }
+        result = methods[msg['method']](msg) if methods.get(msg['method']) else { "success": -1, "msg": "Uknown command received" }
 
         return result
 
