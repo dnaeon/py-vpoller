@@ -37,11 +37,11 @@ class VPollerClient(object):
 
     Defines methods for use by clients for sending out message requests.
 
-    Sends out messages to a VPoller Proxy server requesting properties of
-    different vSphere objects, e.g. datastores, hosts, etc.
+    Sends out messages to a VPoller Proxy or vPoller Worker requesting
+    properties of different vSphere objects, e.g. datastores, hosts, etc.
 
     Returns:
-        The result message back.
+        The result message back to the client
         
     """
     def __init__(self, endpoint, timeout=3000, retries=3):
@@ -59,8 +59,17 @@ class VPollerClient(object):
         self.endpoint = endpoint
 
     def run(self, msg):
-        # Partially based on the Lazy Pirate Pattern
-        # http://zguide.zeromq.org/py:all#Client-Side-Reliability-Lazy-Pirate-Pattern
+        """
+        Main vPoller Client method
+
+        Partially based on the Lazy Pirate Pattern:
+
+            - http://zguide.zeromq.org/py:all#Client-Side-Reliability-Lazy-Pirate-Pattern
+
+        Args:
+            msg (dict): The client message to send
+            
+        """
         self.zcontext = zmq.Context()
         
         self.zclient = self.zcontext.socket(zmq.REQ)
