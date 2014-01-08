@@ -292,13 +292,13 @@ class VPollerWorker(Daemon):
 
         # The methods we support and process
         methods = {
-            'host.poll':          self.agents[vsphere_host].discover_hosts(msg),
-            'host.discover':      self.agents[vsphere_host].get_host_property(msg),
-            'datastore.poll':     self.agents[vsphere_host].get_datastore_property(msg),
-            'datastore.discover': self.agents[vsphere_host].discover_datastores(msg),
+            'host.poll':          self.agents[vsphere_host].get_host_property,
+            'host.discover':      self.agents[vsphere_host].discover_hosts,
+            'datastore.poll':     self.agents[vsphere_host].get_datastore_property,
+            'datastore.discover': self.agents[vsphere_host].discover_datastores,
             }
 
-        result = methods[msg['method']] if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Unknown command received\" }"
+        result = methods[msg['method']](msg) if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Unknown command received\" }"
 
         return result
         
@@ -327,11 +327,11 @@ class VPollerWorker(Daemon):
         
         # The management methods we support and process
         methods = {
-            'worker.status':   self.get_worker_status(msg),
-            'worker.shutdown': self.worker_shutdown(msg),
+            'worker.status':   self.get_worker_status,
+            'worker.shutdown': self.worker_shutdown,
             }
         
-        result = methods[msg['method']] if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Uknown command received\" }"
+        result = methods[msg['method']](msg) if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Uknown command received\" }"
 
         return result
  
