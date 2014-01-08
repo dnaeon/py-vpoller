@@ -114,6 +114,6 @@ class VPollerClient(object):
         # Did we have any result reply at all?
         if not result:
             logging.error("Did not receive a reply from the server, aborting...")
-            return "{ \"success\": -1, \"msg\": \"Did not receive reply from the server, aborting...\" }"
+            return { "success": -1, "msg": "Did not receive reply from the server, aborting..." }
         
         return result

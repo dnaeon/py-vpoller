@@ -214,7 +214,7 @@ class VPollerProxy(Daemon):
         """
         # Check if we have a command to process
         if not "method" in msg:
-            return "{ \"success\": -1, \"msg\": \"Missing command name\" }"
+            return { "success": -1, "msg": "Missing command name" }
 
         # Methods we support and process
         methods = {
@@ -222,7 +222,7 @@ class VPollerProxy(Daemon):
             'proxy.shutdown': self.proxy_shutdown(msg),
             }
 
-        result = methods[msg['method']] if methods.get(msg['method']) else "{ \"status\": -1, \"msg\": \"Uknown command received\" }"
+        result = methods[msg['method']] if methods.get(msg['method']) else { "status": -1, "msg": "Uknown command received" }
 
         return result
 
@@ -237,23 +237,20 @@ class VPollerProxy(Daemon):
             Status information about the vPoller Proxy
             
         """
-        result = '{ "success": 0, \
-                    "msg": "vPoller Proxy Status", \
-                    "result": {\
-                        "status": "running", \
-                        "hostname": "%s", \
-                        "frontend_endpoint": "%s", \
-                        "backend_endpoint": "%s", \
-                        "mgmt_endpoint": "%s", \
-                        "running_since": "%s", \
-                        "uname": "%s" \
-                      } \
-                  }' % (os.uname()[1],
-                        self.frontend_endpoint,
-                        self.backend_endpoint,
-                        self.mgmt_endpoint,
-                        self.running_since,
-                        " ".join(os.uname()))
+        result = {
+            'success': 0,
+            'msg': 'vPoller Proxy Status', 
+            'result': {
+                'status': 'running',
+                'hostname': os.uname()[1],
+                'frontend_endpoint': self.frontend_endpoint,
+                'backend_endpoint': self.backend_endpoint,
+                'mgmt_endpoint': self.mgmt_endpoint,
+                'running_since': self.running_since,
+                'uname': ' '.join(os.uname()),
+                }
+            }
+
         return result
 
     def proxy_shutdown(self, msg):
@@ -268,5 +265,5 @@ class VPollerProxy(Daemon):
 
         self.time_to_die = True
 
-        return "{ \"success\": 0, \"msg\": \"vPoller Proxy is shutting down\" }"
+        return { "success": 0, "msg": "vPoller Proxy is shutting down" }
 

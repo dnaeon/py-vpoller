@@ -30,7 +30,6 @@ establishing the connection to the vSphere hosts and do all the heavy lifting.
 
 """
 
-import json
 import logging
 
 import zmq
@@ -69,7 +68,7 @@ class VSphereAgent(VConnector):
         """
         # Sanity check for required attributes in the message
         if not all(k in msg for k in ("name", "property")):
-            return "{ \"success\": -1, \"msg\": \"Missing message properties (e.g. name/property)\" }"
+            return { "success": -1, "msg": "Missing message properties (e.g. name/property)" }
 
         # Check if we are connected first
         if not self.viserver.is_connected():
@@ -92,11 +91,15 @@ class VSphereAgent(VConnector):
                                                                    obj_type=MORTypes.HostSystem)
         except Exception as e:
 	    logging.warning("Cannot get property for host %s: %s", msg["name"], e)
-            return "{ \"success\": -1, \"msg\": \"Cannot get property for host %s: %s\" }" % (msg["name"], e)
+            return { "success": -1,
+                     "msg": "Cannot get property for host %s: %s" % (msg['name'], e)
+                     }
 
         # Do we have something to return?
         if not results:
-            return "{ \"success\": -1, \"msg\": \"Did not find property %s for host %s\" }" % (msg["property"], msg["name"])
+            return { "success": -1,
+                     "msg": "Did not find property %s for host %s" % (msg['property'], msg['name'])
+                     }
 
         # Find the host we are looking for
         for item in results:
@@ -107,9 +110,14 @@ class VSphereAgent(VConnector):
             if d["name"] == msg["name"]:
                 break
         else:
-            return "{ \"success\": -1, \"msg\": \"Unable to find ESXi host %s\" }" % msg["name"]
+            return { "success": -1,
+                     "msg": "Unable to find ESXi host %s" % msg['name']
+                     }
 
-        result = "{ \"success\": 0, \"msg\": \"Successfully retrieved property\", \"result\": %s }" % json.dumps(d)
+        result = { "success": 0,
+                   "msg": "Successfully retrieved property",
+                   "result": d,
+                   }
 
         return result
             
@@ -132,7 +140,7 @@ class VSphereAgent(VConnector):
         """
         # Sanity check for required attributes in the message
         if not all(k in msg for k in ("info.url", "property")):
-            return "{ \"success\": -1, \"msg\": \"Missing message properties (e.g. info.url/property)\" }"
+            return { "success": -1, "msg": "Missing message properties (e.g. info.url/property)" }
 
         # Check if we are connected first
         if not self.viserver.is_connected():
@@ -154,10 +162,14 @@ class VSphereAgent(VConnector):
                                                                    obj_type=MORTypes.Datastore)
         except Exception as e:
             logging.warning("Cannot get property for datastore %s: %s" % (msg["info.url"], e))
-            return "{ \"success\": -1, \"msg\": \"Cannot get property for datastore %s: %s\" }" % (msg["info.url"], e)
+            return { "success": -1,
+                     "msg": "Cannot get property for datastore %s: %s" % (msg['info.url'], e),
+                     }
 
         if not results:
-            return "{ \"success\": -1, \"msg\": \"Did not find property %s for datastore %s\" }" % (msg["property"], msg["info.url"])
+            return { "success": -1,
+                     "msg": "Did not find property %s for datastore %s" % (msg["property"], msg["info.url"]),
+                     }
         
         # Iterate over the results and find our datastore
         for item in results:
@@ -168,9 +180,14 @@ class VSphereAgent(VConnector):
             if d['info.url'] == msg['info.url']:
                 break
         else:
-            return "{ \"success\": -1, \"msg\": \"Unable to find datastore %s\" }" % msg["info.url"]
+            return { "success": -1,
+                     "msg": "Unable to find datastore %s" % msg['info.url'],
+                     }
 
-        result = "{ \"success\": 0, \"msg\": \"Successfully retrieved property\", \"result\": %s }" % json.dumps(d)
+        result = { "success": 0,
+                   "msg": "Successfully retrieved property",
+                   "result": d,
+                   }
 
         return result
         
@@ -209,7 +226,9 @@ class VSphereAgent(VConnector):
                                                                    obj_type=MORTypes.HostSystem)
 	except Exception as e:
             logging.warning("Cannot discover hosts: %s", e)
-            return "{ \"success\": -1, \"msg\": \"Cannot discover ESXi hosts: %s\" }" % e
+            return { "success": -1,
+                     "msg": "Cannot discover ESXi hosts: %s" % e,
+                     }
 
         # Iterate over the results and prepare the JSON object
         data = []
@@ -218,7 +237,10 @@ class VSphereAgent(VConnector):
             d = dict(props)
             data.append(d)
 
-        return "{ \"success\": 0, \"msg\": \"Successfully discovered ESXi hosts\", \"result\": %s }" % json.dumps(data)
+        return { "success": 0,
+                 "msg": "Successfully discovered ESXi hosts",
+                 "result": data
+                 }
 
     def discover_datastores(self, msg):
         """
@@ -255,7 +277,9 @@ class VSphereAgent(VConnector):
                                                                    obj_type=MORTypes.Datastore)
 	except Exception as e:
             logging.warning("Cannot discover datastores: %s", e)
-            return "{ \"success\": -1, \"msg\": \"Cannot discover datastores: %s\" }" % e
+            return { "success": -1,
+                     "msg": "Cannot discover datastores: %s" % e,
+                     }
 
         # Iterate over the results and prepare the JSON object
         data = []
@@ -264,5 +288,8 @@ class VSphereAgent(VConnector):
             d = dict(props)
             data.append(d)
 
-        return "{ \"success\": 0, \"msg\": \"Successfully discovered datastores\", \"result\": %s }" % json.dumps(data)
+        return { "success": 0,
+                 "msg": "Successfully discovered datastores",
+                 "result": data,
+                 }
     

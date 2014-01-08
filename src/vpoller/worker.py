@@ -98,13 +98,13 @@ class VPollerWorker(Daemon):
                 result = self.process_client_message(msg)
                 self.worker_socket.send(_id, zmq.SNDMORE)
                 self.worker_socket.send("", zmq.SNDMORE)
-                self.worker_socket.send_unicode(result)
+                self.worker_socket.send_json(result)
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
                 msg = self.mgmt_socket.recv_json()
                 result = self.process_mgmt_message(msg)
-                self.mgmt_socket.send_unicode(result)
+                self.mgmt_socket.send_json(result)
 
         # Shutdown time has arrived, let's clean up a bit
         self.close_worker_sockets()
@@ -283,12 +283,12 @@ class VPollerWorker(Daemon):
         """
         # We require to have at least the 'method' and vSphere 'hostname'
         if not all(k in msg for k in ("method", "hostname")):
-            return "{ \"success\": -1, \"msg\": \"Missing message properties (e.g. method/hostname)\" }"
+            return { "success": -1, "msg": "Missing message properties (e.g. method/hostname)" }
 
         vsphere_host = msg["hostname"]
 
         if not self.agents.get(vsphere_host):
-            return "{ \"success\": -1, \"msg\": \"Unknown vSphere Agent requested\" }"
+            return { "success": -1, "msg": "Unknown vSphere Agent requested" }
 
         # The methods we support and process
         methods = {
@@ -298,7 +298,7 @@ class VPollerWorker(Daemon):
             'datastore.discover': self.agents[vsphere_host].discover_datastores,
             }
 
-        result = methods[msg['method']](msg) if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Unknown command received\" }"
+        result = methods[msg['method']](msg) if methods.get(msg['method']) else { "success": -1, "msg": "Unknown command received" }
 
         return result
         
@@ -323,7 +323,7 @@ class VPollerWorker(Daemon):
               
         """
         if not "method" in msg:
-            return "{ \"success\": -1, \"msg\": \"Missing command name\" }"
+            return { "success": -1, "msg": "Missing method name" }
         
         # The management methods we support and process
         methods = {
@@ -331,7 +331,7 @@ class VPollerWorker(Daemon):
             'worker.shutdown': self.worker_shutdown,
             }
         
-        result = methods[msg['method']](msg) if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Uknown command received\" }"
+        result = methods[msg['method']](msg) if methods.get(msg['method']) else { "success": -1, "msg": "Uknown command received" }
 
         return result
  
@@ -347,25 +347,21 @@ class VPollerWorker(Daemon):
             
         """
 
-        result = '{ "success": 0, \
-                    "msg": "vPoller Worker Status", \
-                    "result": {\
-                        "status": "running", \
-                        "hostname": "%s", \
-                        "proxy_endpoint": "%s", \
-                        "mgmt_endpoint": "%s", \
-                        "vsphere_hosts_dir": "%s", \
-                        "vsphere_agents": "%s", \
-                        "running_since": "%s", \
-                        "uname": "%s" \
-                      } \
-                  }' % (os.uname()[1],
-                        self.proxy_endpoint,
-                        self.mgmt_endpoint,
-                        self.vsphere_hosts_dir,
-                        ", ".join(self.agents.keys()),
-                        self.running_since,
-                        " ".join(os.uname()))
+        result = {
+            'success': 0,
+            'msg': 'vPoller Worker Status',
+            'result': {
+                'status': 'running',
+                'hostname': os.uname()[1],
+                'proxy_endpoint': self.proxy_endpoint,
+                'mgmt_endpoint': self.mgmt_endpoint,
+                'vsphere_hosts_dir': self.vsphere_hosts_dir,
+                'vsphere_agents': self.agents.keys(),
+                'running_since': self.running_since,
+                'uname': ' '.join(os.uname()),
+                }
+            }
+
         return result
 
     def worker_shutdown(self, msg):
@@ -380,4 +376,4 @@ class VPollerWorker(Daemon):
 
         self.time_to_die = True
 
-        return "{ \"success\": 0, \"msg\": \"vPoller Worker is shutting down\" }"
+        return { "success": 0, "msg": "vPoller Worker is shutting down" }
