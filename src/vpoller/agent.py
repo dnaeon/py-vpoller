@@ -109,7 +109,7 @@ class VSphereAgent(VConnector):
         else:
             return "{ \"success\": -1, \"msg\": \"Unable to find ESXi host %s\" }" % msg["name"]
 
-        result = "{ \"status\": 0, \"msg\": \"Successfully retrieved property\", \"result\": \"%s\" }" % json.dumps(d)
+        result = "{ \"status\": 0, \"msg\": \"Successfully retrieved property\", \"result\": %s }" % json.dumps(d)
 
         return result
             
@@ -170,7 +170,7 @@ class VSphereAgent(VConnector):
         else:
             return "{ \"success\": -1, \"msg\": \"Unable to find datastore %s\" }" % msg["info.url"]
 
-        result = "{ \"status\": 0, \"msg\": \"Successfully retrieved property\", \"result\": \"%s\" }" % json.dumps(d)
+        result = "{ \"status\": 0, \"msg\": \"Successfully retrieved property\", \"result\": %s }" % json.dumps(d)
 
         return result
         
