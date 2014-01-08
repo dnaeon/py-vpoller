@@ -68,7 +68,7 @@ def stop(endpoint):
 
     """
     # The message we send to initiate the shutdown sequence
-    msg = { "cmd": "shutdown" }
+    msg = { "method": "worker.shutdown" }
 
     # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
@@ -81,11 +81,11 @@ def status(endpoint):
     Get status information from the VPoller Worker daemon
 
     Args:
-        endpoint (string): The endpoint we send the status message to
+        endpoint (string): The endpoint we send the status request to
     
     """
     # The message we send to get status information
-    msg = { "cmd": "status" }
+    msg = { "method": "worker.status" }
 
     # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
