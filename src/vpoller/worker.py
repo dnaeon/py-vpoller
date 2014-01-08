@@ -98,7 +98,7 @@ class VPollerWorker(Daemon):
                 result = self.process_client_message(msg)
                 self.worker_socket.send(_id, zmq.SNDMORE)
                 self.worker_socket.send("", zmq.SNDMORE)
-                self.worker_socket.send(str(result))
+                self.worker_socket.send(result)
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
