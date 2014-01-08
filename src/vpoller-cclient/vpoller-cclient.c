@@ -26,14 +26,12 @@
 
 
 /* 
- * vpoller-cclient is a C client intended to be used for polling/discovering
+ * vPoller C client is intended to be used for polling/discovering
  * information from a vSphere host (ESX or vCenter server).
  * 
- * It works by sending a ZeroMQ message to a ZeroMQ Broker/Proxy which in turn
- * forwards the message to a pool of ZeroMQ workers, which do the actual polling.
+ * It works by sending a ZeroMQ message to a vPoller Proxy which in turn will
+ * dispatch the message to a pool of ZeroMQ workers for performing any operations.
  * 
- * The received reply is in turn printed to stdout, which allows Zabbix to catch it,
- * therefore we don't use printf(3) here to output anything except for the reply.
  */
 
 
@@ -52,30 +50,28 @@ void
 usage(void)
 {
   fprintf(stderr, "Usage:\n");
-  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] (-D|-H)\n");
-  fprintf(stderr, "                     -c discover -V <vcenter>\n");
-  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] -H\n");
-  fprintf(stderr, "                     -n <name> -p <property> -c poll -V <vcenter>\n");
-  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>] -D\n");
-  fprintf(stderr, "                     -u <datastore-url> -p <property> -c poll -V <vcenter>\n");
+  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
+  fprintf(stderr, "                    -m <method> -V <host>\n");
+  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
+  fprintf(stderr, "                    -m <method> -n <name> -p <property> -V <host>\n");
+  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
+  fprintf(stderr, "                    -m <method> -u <datastore-url> -p <property> -V <host>\n");
   fprintf(stderr, "    vpoller-cclient -h\n\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "    -h                   Display this usage info\n");
-  fprintf(stderr, "    -D                   Retrieve a datastore object property\n");
-  fprintf(stderr, "    -H                   Retrieve a host object property\n");
-  fprintf(stderr, "    -V <vcenter>         The vCenter server to send the request to\n");
-  fprintf(stderr, "    -c <cmd>             The command to perform, either \"poll\" or \"discover\"\n");
-  fprintf(stderr, "    -n <name>            Name of the ESX host, only applicable to hosts object type\n");
+  fprintf(stderr, "    -V <host>            The vSphere host server to send the request to\n");
+  fprintf(stderr, "    -m <method>          The method to be processed during the client request\n");
+  fprintf(stderr, "    -n <name>            Name of the ESXi host, only applicable to hosts object type\n");
   fprintf(stderr, "    -p <property>        Name of the property as defined by the vSphere Web SDK\n");
   fprintf(stderr, "    -u <datastore-url>   Datastore URL, only applicable to datastores object type\n");
   fprintf(stderr, "    -r <retries>         Number of times to retry if a request times out [default: 3]\n");
   fprintf(stderr, "    -t <timeout>         Timeout after that period of milliseconds [default: 3000]\n");
   fprintf(stderr, "    -e <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to\n");
   fprintf(stderr, "                         [default: tcp://localhost:10123]\n\n");
-  fprintf(stderr, "Example usage for discovering datastores on a vCenter:\n\n");
-  fprintf(stderr, "     $ vpoller-cclient -D -c discover -V vc1.example.org\n\n");
-  fprintf(stderr, "Example usage for retrieving a property of an ESX host:\n\n");
-  fprintf(stderr, "     $ vpoller-cclient -H -c poll -V sof-vc0-mnik -p runtime.bootTime -n esx1.example.org\n");
+  fprintf(stderr, "Example usage for discovering datastores on a vSphere host:\n\n");
+  fprintf(stderr, "     $ vpoller-cclient -m datastore.discover -V vc1.example.org\n\n");
+  fprintf(stderr, "Example usage for retrieving a property of an ESXi host:\n\n");
+  fprintf(stderr, "     $ vpoller-cclient -m host.poll -V vc01-test.example.org -p runtime.bootTime -n esxi1.example.org\n");
 }
 
 int
@@ -91,19 +87,17 @@ main(int argc, char *argv[])
    */
   const char *msg_out_template = ""
     "{"
-    "\"type\":      \"%s\", "
-    "\"hostname\":   \"%s\", "
-    "\"name\":      \"%s\", "
-    "\"info.url\":  \"%s\", "
-    "\"cmd\":       \"%s\", "
-    "\"property\":  \"%s\""
+    "\"method\":      \"%s\", "
+    "\"hostname\":    \"%s\", "
+    "\"name\":        \"%s\", "
+    "\"info.url\":    \"%s\", "
+    "\"property\":    \"%s\""
     "}";
 
-  const char *objtype,	  /* The Object type we want to poll for, e.g. datastores/hosts */
+  const char *method,	  /* The method to be processed during client request */
     *name,		  /* Name of the object, e.g. "datastore1", "esx1-host", .. */
     *property,		  /* The property we want as defined in the vSphere Web Services SDK */
     *url,		  /* Datastore URL, only applicable to datastores object type */
-    *cmd,		  /* The command to be processed, e.g. 'poll' or 'discover' */
     *vsphere_host;	  /* The vSphere host we send the request message to */
   
   char *result;	  	  /* A pointer to hold the result from our request */
@@ -120,24 +114,15 @@ main(int argc, char *argv[])
   char msg_buf[1024];		  /* Message buffer to hold the final message we send out */
   char ch;
 
-  bool do_discovery       = false;  /* Flag to indicate that a discovery should be performed */
-  bool do_polling         = false;  /* Flag to indicate that a polling should be performed */
-  bool objtype_hosts      = false;  /* Flag to indicate that a 'Hosts' object has been requested */
-  bool objtype_datastores = false;  /* Flag to indicate that a 'Datastores' object has been requested */
-  
-  /* Initialize some of the message properties */
-  objtype = name = property = url = cmd = vsphere_host = result = NULL;
+  /* Initialize the message properties */
+  name = property = url = "None";
+  method = vsphere_host = result = NULL;
   
   /* Get the command-line options and arguments */
-  while ((ch = getopt(argc, argv, "DHe:r:t:n:p:u:c:V:")) != -1) {
+  while ((ch = getopt(argc, argv, "m:e:r:t:n:p:u:V:")) != -1) {
     switch (ch) {
-    case 'D':
-      objtype = "datastores";
-      objtype_datastores = true;
-      break;
-    case 'H':
-      objtype = "hosts";
-      objtype_hosts = true;
+    case 'm':
+      method = optarg;
       break;
     case 'n':
       name = optarg;
@@ -147,9 +132,6 @@ main(int argc, char *argv[])
       break;
     case 'u':
       url = optarg;
-      break;
-    case 'c': 
-      cmd = optarg;
       break;
     case 'V':
       vsphere_host = optarg;
@@ -172,36 +154,13 @@ main(int argc, char *argv[])
   argv += optind;
   
   /* Sanity check the provided options and arguments */
-  if (cmd == NULL || vsphere_host == NULL || objtype == NULL) {
+  if (method == NULL || vsphere_host == NULL) {
     usage();
     return (EX_USAGE);
-  }
-  
-  if (strcmp(cmd, "poll") == 0)
-    do_polling = true;
-  else if (strcmp(cmd, "discover") == 0)
-    do_discovery = true;
-  else {
-    usage();
-    return (EX_USAGE);
-  }
-
-  /* Set the poll properties to "None" when doing a discovery */
-  if (do_discovery) {
-    name = property = url = "None";
-  } else if (do_polling) {
-    /* Sanity check the required arguments for doing a poll of hosts */
-    if (objtype_hosts && (name == NULL || property == NULL)) {
-      usage();
-      return (EX_USAGE);
-    } else if (objtype_datastores && (name == NULL || url == NULL || property == NULL)) {
-      usage();
-      return (EX_USAGE);
-    }
   }
   
   /* Create the message to send out */
-  snprintf(msg_buf, 1023, msg_out_template, objtype, vsphere_host, name, url, cmd, property);
+  snprintf(msg_buf, 1023, msg_out_template, method, vsphere_host, name, url, property);
     
   /* Create a new ZeroMQ Context and Socket */
   zcontext = zmq_ctx_new();
@@ -212,7 +171,7 @@ main(int argc, char *argv[])
     return (EX_PROTOCOL);
   }
 
-  /* Connect to the ZeroMQ Broker/Proxy Endpoint */
+  /* Connect to the ZeroMQ Proxy */
   zmq_connect(zsocket, endpoint);
   zmq_setsockopt(zsocket, ZMQ_LINGER, &linger, sizeof(linger));
 
@@ -267,7 +226,7 @@ main(int argc, char *argv[])
   
   /* Do we have any result? */
   if (result == NULL) {
-    printf("Did not receive reply from server, aborting...\n");
+    printf("{ \"success\": -1, \"msg\": \"Did not receive reply from server, aborting...\"\n");
   } else {
     printf("%s\n", result);
   }
