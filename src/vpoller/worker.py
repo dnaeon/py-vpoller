@@ -340,7 +340,7 @@ class VPollerWorker(Daemon):
         Get status information about the vPoller Worker
 
         Args:
-            msg (dict): The client message for processing
+            msg (dict): The client message for processing (ignored)
 
         Returns:
             Status information about the vPoller Worker
@@ -369,5 +369,15 @@ class VPollerWorker(Daemon):
         return result
 
     def worker_shutdown(self, msg):
-        pass
+        """
+        Shutdown the vPoller Worker
 
+        Args:
+            msg (dict): The client message for processing (ignored)
+
+        """
+        logging.info("vPoller Worker is shutting down")
+
+        self.time_to_die = True
+
+        return "{ \"success\": 0, \"msg\": \"vPoller Worker is shutting down\" }"
