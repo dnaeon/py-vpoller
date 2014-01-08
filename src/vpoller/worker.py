@@ -298,7 +298,7 @@ class VPollerWorker(Daemon):
             'datastore.discover': self.agents[vsphere_host].discover_datastores(msg),
             }
 
-        result = methods[msg['method']](msg) if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Unknown command received\" }"
+        result = methods[msg['method']] if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Unknown command received\" }"
 
         return result
         
@@ -309,27 +309,65 @@ class VPollerWorker(Daemon):
         Example client message to shutdown the vPoller Worker would be:
 
               {
-                "cmd": "worker.shutdown"
+                "method": "worker.shutdown"
               }
 
         Getting status information from the vPoller worker:
 
               {
-                "cmd": "worker.status"
+                "method": "worker.status"
               }
-        
-        """
-        # Check if we have a command to process
-        if not "cmd" in msg:
-            return "{ \"success\": -1, \"msg\": \"Missing command name\" }"
 
+        Args:
+            msg (dict): The client message for processing
+              
+        """
+        if not "method" in msg:
+            return "{ \"success\": -1, \"msg\": \"Missing command name\" }"
+        
         # The management methods we support and process
         methods = {
-            'worker.status': self.get_worker_status(msg),
+            'worker.status':   self.get_worker_status(msg),
             'worker.shutdown': self.worker_shutdown(msg),
             }
-
-        result = methods[msg['method']](msg) if  methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Uknown command received\" }"
+        
+        result = methods[msg['method']] if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Uknown command received\" }"
 
         return result
  
+    def get_worker_status(self, msg):
+        """
+        Get status information about the vPoller Worker
+
+        Args:
+            msg (dict): The client message for processing
+
+        Returns:
+            Status information about the vPoller Worker
+            
+        """
+
+        result = '{ "success": 0, \
+                    "msg": "vPoller Worker Status", \
+                    "result": {\
+                        "status": "running", \
+                        "hostname": "%s", \
+                        "proxy_endpoint": "%s", \
+                        "mgmt_endpoint": "%s", \
+                        "vsphere_hosts_dir": "%s", \
+                        "vsphere_agents": "%s", \
+                        "running_since": "%s", \
+                        "uname": "%s" \
+                      } \
+                  }' % (os.uname()[1],
+                        self.proxy_endpoint,
+                        self.mgmt_endpoint,
+                        self.vsphere_hosts_dir,
+                        ", ".join(self.agents.keys()),
+                        self.running_since,
+                        " ".join(os.uname()))
+        return result
+
+    def worker_shutdown(self, msg):
+        pass
+
