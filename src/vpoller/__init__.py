@@ -1,2 +1,2 @@
 __name__ = 'vpoller'
-__all__ = [ 'daemon', 'worker', 'client', 'agent', 'proxy' ] 
+__all__ = [ 'core', 'daemon', 'worker', 'client', 'agent', 'proxy' ] 
