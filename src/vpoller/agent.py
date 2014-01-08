@@ -183,16 +183,8 @@ class VSphereAgent(VConnector):
             {
                 "method":   "host.discover",
                 "hostname": "vc01-test.example.org",
-                "zabbix"  : False,
             }
 
-        If "zabbix" attribute is set to True then the result will be formatted
-        in a way that the Zabbix Low-Level Discovery protocol can understand and use.
-
-        For more information about Zabbix Low-Level Discovery, please check the link below:
-
-          - https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery
-              
         Returns:
             The returned data is a JSON object, containing the discovered ESXi hosts.
 
@@ -222,24 +214,9 @@ class VSphereAgent(VConnector):
         # Iterate over the results and prepare the JSON object
         data = []
         for item in results:
-            # Do we want to return the data in Zabbix LLD format?
-            # The names of the properties we return is in Zabbix Macro-like format, e.g.
-            #
-            #   {#vSphere.<property-name>}: <value>
-            #
-            # We also keep the vSphere host so we can use it later in Zabbix items
-            if msg.get('zabbix'):
-                props = [('{#vSphere.' + p.Name + '}', p.Val) for p in item.PropSet]
-                props.append(('{#vSphere.Host}', self.hostname))
-            else:
-                props = [(p.Name, p.Val) for p in item.PropSet]
-
+            props = [(p.Name, p.Val) for p in item.PropSet]
             d = dict(props)
             data.append(d)
-
-        # Return result in Zabbix LLD format
-        if msg.get('zabbix'):
-            return "{ \"data\": %s }" % json.dumps(data)
 
         return "{ \"success\": 0, \"msg\": \"Successfully discovered ESXi hosts\", \"result\": %s }" % json.dumps(data)
 
@@ -252,15 +229,7 @@ class VSphereAgent(VConnector):
             {
                 "method":   "datastore.discover",
         	"hostname": "vc01-test.example.org",
-                "zabbix"  : False,
             }
-
-        If "zabbix" attribute is set to True then the result will be formatted
-        in a way that the Zabbix Low-Level Discovery protocol can understand and use.
-
-        For more information about Zabbix Low-Level Discovery, please check the link below:
-
-          - https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery
               
         Returns:
             The returned data is a JSON object, containing the discovered datastores.
@@ -291,23 +260,9 @@ class VSphereAgent(VConnector):
         # Iterate over the results and prepare the JSON object
         data = []
         for item in results:
-            # Do we want to return the data in Zabbix LLD format?
-            # The names of the properties we return is in Zabbix Macro-like format, e.g.
-            #
-            #   {#vSphere.<property-name>}: <value>
-            #
-            # We also keep the vSphere host so we can use it later in Zabbix items
-            if msg.get('zabbix'):
-                props = [('{#vSphere.' + p.Name + '}', p.Val) for p in item.PropSet]
-                props.append(('{#vSphere.Host}', self.hostname))
-            else:
-                props = [(p.Name, p.Val) for p in item.PropSet]
-
+            props = [(p.Name, p.Val) for p in item.PropSet]
             d = dict(props)
             data.append(d)
 
-        # Return result in Zabbix LLD format
-        if msg.get('zabbix'):
-            return "{ \"data\": %s }" % json.dumps(data)
-
         return "{ \"success\": 0, \"msg\": \"Successfully discovered datastores\", \"result\": %s }" % json.dumps(data)
+    
