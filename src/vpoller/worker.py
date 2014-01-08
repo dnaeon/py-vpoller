@@ -98,13 +98,13 @@ class VPollerWorker(Daemon):
                 result = self.process_client_message(msg)
                 self.worker_socket.send(_id, zmq.SNDMORE)
                 self.worker_socket.send("", zmq.SNDMORE)
-                self.worker_socket.send(result)
+                self.worker_socket.send_unicode(result)
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
                 msg = self.mgmt_socket.recv_json()
                 result = self.process_mgmt_message(msg)
-                self.mgmt_socket.send(result)
+                self.mgmt_socket.send_unicode(result)
 
         # Shutdown time has arrived, let's clean up a bit
         self.close_worker_sockets()
