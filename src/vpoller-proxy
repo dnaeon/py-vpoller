@@ -65,7 +65,7 @@ def stop(endpoint):
 
     """
     # The message we send to initiate the shutdown sequence
-    msg = { "cmd": "shutdown" }
+    msg = { "method": "proxy.shutdown" }
 
     # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
@@ -82,7 +82,7 @@ def status(endpoint):
     
     """
     # The message we send to get status information
-    msg = { "cmd": "status" }
+    msg = { "method": "proxy.status" }
 
     # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)

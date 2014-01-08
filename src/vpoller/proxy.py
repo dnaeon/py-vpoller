@@ -225,3 +225,48 @@ class VPollerProxy(Daemon):
         result = methods[msg['method']] if methods.get(msg['method']) else "{ \"status\": -1, \"msg\": \"Uknown command received\" }"
 
         return result
+
+    def get_proxy_status(self, msg):
+        """
+        Get status information about the vPoller Proxy
+
+        Args:
+            msg (dict): The client message for processing (ignored)
+
+        Returns:
+            Status information about the vPoller Proxy
+            
+        """
+        result = '{ "success": 0, \
+                    "msg": "vPoller Proxy Status", \
+                    "result": {\
+                        "status": "running", \
+                        "hostname": "%s", \
+                        "frontend_endpoint": "%s", \
+                        "backend_endpoint": "%s", \
+                        "mgmt_endpoint": "%s", \
+                        "running_since": "%s", \
+                        "uname": "%s" \
+                      } \
+                  }' % (os.uname()[1],
+                        self.frontend_endpoint,
+                        self.backend_endpoint,
+                        self.mgmt_endpoint
+                        self.running_since,
+                        " ".join(os.uname()))
+        return result
+
+    def proxy_shutdown(self, msg):
+        """
+        Shutdown the vPoller Worker
+
+        Args:
+            msg (dict): The client message for processing (ignored)
+
+        """
+        logging.info("vPoller Proxy is shutting down")
+
+        self.time_to_die = True
+
+        return "{ \"success\": 0, \"msg\": \"vPoller Proxy is shutting down\" }"
+
