@@ -51,6 +51,71 @@ class VPollerProxy(Daemon):
 
     """
     def run(self, config_file):
+        """
+        The main vPoller Proxy method
+
+        Args:
+            config_file (str): Location to the config file for vPoller Proxy
+
+        """
+        # Note the time we start up
+        self.running_since = asctime()
+
+        # A flag to indicate that the VPollerProxy daemon should be terminated
+        self.time_to_die = False
+
+        # Load the configuration file of the vPoller Proxy
+        self.load_proxy_config(config_file)
+
+        # Create vPoller Proxy sockets
+        self.create_proxy_sockets()
+        
+        logging.info("Starting the VPoller Proxy")
+        
+        # Enter the main daemon loop from here
+        while not self.time_to_die:
+            socks = dict(self.zpoller.poll())
+
+            # Frontend socket, forward messages to the backend
+            if socks.get(self.frontend) == zmq.POLLIN:
+                msg = self.frontend.recv()
+                more = self.frontend.getsockopt(zmq.RCVMORE)
+                if more:
+                    self.backend.send(msg, zmq.SNDMORE)
+                else:
+                    self.backend.send(msg)
+
+            # Backend socket, forward messages back to the clients
+            if socks.get(self.backend) == zmq.POLLIN:
+                msg = self.backend.recv()
+                more = self.backend.getsockopt(zmq.RCVMORE)
+                if more:
+                    self.frontend.send(msg, zmq.SNDMORE)
+                else:
+                    self.frontend.send(msg)
+
+            # Management socket
+            if socks.get(self.mgmt) == zmq.POLLIN:
+                msg = self.mgmt.recv_json()
+                result = self.process_mgmt_message(msg)
+                self.mgmt.send(result)
+
+        # Shutdown time has arrived, let's clean up a bit
+        self.close_proxy_sockets()
+#        self.zcontext.term()
+        self.stop()
+
+    def load_proxy_config(self, config_file):
+        """
+        Loads the vPoller Proxy configuration file
+        
+        Args:
+            config_file (str): Config file of the vPoller Proxy
+
+        Raises:
+            VPollerException
+            
+        """
         if not os.path.exists(config_file):
             logging.error("Configuration file does not exists: %s", config_file)
             raise VPollerException, "Configuration file does not exists: %s" % config_file 
@@ -66,13 +131,20 @@ class VPollerProxy(Daemon):
             logging.error("Configuration issues detected in %s: %s", config_file, e)
             raise
 
-        # Note the time we start up
-        self.running_since = asctime()
+    def create_proxy_sockets(self):
+        """
+        Creates the ZeroMQ sockets used by the vPoller Proxy
 
-        # A flag to indicate that the VPollerProxy daemon should be terminated
-        self.time_to_die = False
-        
-        # ZeroMQ context
+        Creates three sockets: 
+
+        * REP socket (mgmt) used for management
+        * ROUTER socket (frotend) facing clients
+        * DEALER socket (backend) for workers
+
+        Raises:
+            VPollerException
+            
+        """
         self.zcontext = zmq.Context()
 
         # A management socket, used to control the VPollerProxy daemon
@@ -108,46 +180,18 @@ class VPollerProxy(Daemon):
         self.zpoller.register(self.backend, zmq.POLLIN)
         self.zpoller.register(self.mgmt, zmq.POLLIN)
 
-        logging.info("Starting the VPoller Proxy")
-        
-        # Enter the daemon loop from here
-        while not self.time_to_die:
-            socks = dict(self.zpoller.poll())
+    def close_proxy_sockets(self):
+        """
+        Closes the ZeroMQ sockets used by the vPoller Proxy
 
-            # Frontend socket, forward messages to the backend
-            if socks.get(self.frontend) == zmq.POLLIN:
-                msg = self.frontend.recv()
-                more = self.frontend.getsockopt(zmq.RCVMORE)
-                if more:
-                    self.backend.send(msg, zmq.SNDMORE)
-                else:
-                    self.backend.send(msg)
-
-            # Backend socket, forward messages back to the frontend
-            if socks.get(self.backend) == zmq.POLLIN:
-                msg = self.backend.recv()
-                more = self.backend.getsockopt(zmq.RCVMORE)
-                if more:
-                    self.frontend.send(msg, zmq.SNDMORE)
-                else:
-                    self.frontend.send(msg)
-
-            # Management socket
-            if socks.get(self.mgmt) == zmq.POLLIN:
-                msg = self.mgmt.recv_json()
-                result = self.process_mgmt_message(msg)
-                self.mgmt.send(result)
-
-        # Shutdown time has arrived, let's clean up a bit
+        """
         self.zpoller.unregister(self.frontend)
         self.zpoller.unregister(self.backend)
         self.zpoller.unregister(self.mgmt)
         self.frontend.close()
         self.backend.close()
         self.mgmt.close()
-#        self.zcontext.term()
-        self.stop()
-
+        
     def process_mgmt_message(self, msg):
         """
         Processes a message for the management interface of the VPoller Proxy

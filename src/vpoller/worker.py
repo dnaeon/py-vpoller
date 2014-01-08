@@ -68,7 +68,7 @@ class VPollerWorker(Daemon):
         self.time_to_die = False
         
         # Load the configuration file of the vPoller Worker
-        self.parse_worker_config(config_file)
+        self.load_worker_config(config_file)
         
         # Create the worker sockets
         self.create_worker_sockets()
@@ -112,9 +112,9 @@ class VPollerWorker(Daemon):
  #       self.zcontext.term()
         self.stop()
 
-    def parse_worker_config(self, config_file):
+    def load_worker_config(self, config_file):
         """
-        Parses the Worker configuration file
+        Loads the vPoller Worker configuration file
 
         Args:
             config_file (str): Config file of the Worker
