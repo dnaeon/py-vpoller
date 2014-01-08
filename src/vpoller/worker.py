@@ -261,30 +261,47 @@ class VPollerWorker(Daemon):
 
         The messages that we support are polling for datastores and hosts.
 
+        An example message for discovering the hosts could be:
+
+            {
+              "method":   "host.discover",
+              "hostname": "vc01-test.example.org",
+            }
+
+        An example message for polling a datastore property could be:
+
+            {
+              "method":   "datastore.poll",
+              "hostname": "vc0-test.example.org",
+              "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
+              "property": "summary.capacity"
+              }
+
         Args:
             msg (dict): The client message for processing
 
         """
-        # We require to have 'type', 'cmd' and 'hostname' keys in our message
-        if not all(k in msg for k in ("type", "cmd", "hostname")):
-            return "{ \"success\": -1, \"msg\": \"Missing message properties (e.g. type/cmd/hostname)\" }"
+        # We require to have at least the 'method' and vSphere 'hostname'
+        if not all(k in msg for k in ("method", "hostname")):
+            return "{ \"success\": -1, \"msg\": \"Missing message properties (e.g. method/hostname)\" }"
 
         vsphere_host = msg["hostname"]
 
         if not self.agents.get(vsphere_host):
             return "{ \"success\": -1, \"msg\": \"Unknown vSphere Agent requested\" }"
-        
-        if msg["type"] == "datastores" and msg["cmd"] == "poll":
-            return self.agents[vsphere_host].get_datastore_property(msg)
-        elif msg["type"] == "datastores" and msg["cmd"] == "discover":
-            return self.agents[vsphere_host].discover_datastores(msg)
-        elif msg["type"] == "hosts" and msg["cmd"] == "poll":
-            return self.agents[vsphere_host].get_host_property(msg)
-        elif msg["type"] == "hosts" and msg["cmd"] == "discover":
-            return self.agents[vsphere_host].discover_hosts(msg)
-        else:
-            return "{ \"success\": -1\", \"msg\": \"Uknown command %s received\" }" % msg["cmd"]
 
+        # The methods we support and process
+        methods = {
+            'host.poll':          self.agents[vsphere_host].discover_hosts(msg),
+            'host.discover':      self.agents[vsphere_host].get_host_property(msg),
+            'datastore.poll':     self.agents[vsphere_host].get_datastore_property(msg),
+            'datastore.discover': self.agents[vsphere_host].discover_datastores(msg),
+            }
+
+        result = methods[msg['method']](msg) if methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Unknown command received\" }"
+
+        return result
+        
     def process_mgmt_message(self, msg):
         """
         Processes a message for the management interface
@@ -292,13 +309,13 @@ class VPollerWorker(Daemon):
         Example client message to shutdown the vPoller Worker would be:
 
               {
-                "cmd": "shutdown"
+                "cmd": "worker.shutdown"
               }
 
         Getting status information from the vPoller worker:
 
               {
-                "cmd": "status"
+                "cmd": "worker.status"
               }
         
         """
@@ -306,12 +323,13 @@ class VPollerWorker(Daemon):
         if not "cmd" in msg:
             return "{ \"success\": -1, \"msg\": \"Missing command name\" }"
 
-        if msg["cmd"] == "shutdown":
-            self.time_to_die = True
-            logging.info("vPoller Worker is shutting down")
-            return "{ \"success\": 0, \"msg\": \"vPoller Worker is shutting down\" }"
-        elif msg["cmd"] == "status":
-            return "{ \"success\": 0, \"msg\": \"Okay, this is the status\" }"
-        else:
-            return "{ \"success\": -1, \"msg\": \"Unknown command %s received\" }" % msg["cmd"]
+        # The management methods we support and process
+        methods = {
+            'worker.status': self.get_worker_status(msg),
+            'worker.shutdown': self.worker_shutdown(msg),
+            }
 
+        result = methods[msg['method']](msg) if  methods.get(msg['method']) else "{ \"success\": -1, \"msg\": \"Uknown command received\" }"
+
+        return result
+ 
