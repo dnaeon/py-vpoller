@@ -251,7 +251,7 @@ class VPollerProxy(Daemon):
                   }' % (os.uname()[1],
                         self.frontend_endpoint,
                         self.backend_endpoint,
-                        self.mgmt_endpoint
+                        self.mgmt_endpoint,
                         self.running_since,
                         " ".join(os.uname()))
         return result
