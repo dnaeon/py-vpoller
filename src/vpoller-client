@@ -33,17 +33,45 @@ It is intended to be integrated into a Zabbix template for polling of ESX hosts 
 import sys
 import json
 import logging
+import importlib
 
 from vpoller.client import VPollerClient
 from docopt import docopt
+
+def vpoller_helpers(helper, msg, data):
+    """
+    vPoller Helpers
+
+    Dynamically loads a vPoller helper for post-processing
+    any result messages. Useful when you need to return a
+    result in other formats to be used by other tools/systems.
+
+    An example of such a helper is the Zabbix helper, which
+    takes care of returning result in Zabbix-friendly format.
+
+    Args:
+        helper  (str): The helper module name
+        msg    (dict): The original request message
+        data    (str): The result message from the request
+
+    """
+    try:
+        helper_module = importlib.import_module(helper)
+    except ImportError as e:
+        return 'Cannot import helper module: %s' % e
+
+    agent = helper_module.HelperAgent(msg, data)
+    result = agent.run()
+
+    return result
 
 def main():
 
     usage="""
 Usage:
-  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] -m <method> -V <host> -e <endpoint>
-  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] -m <method> -n <name> -p <property> -V <host> -e <endpoint>
-  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] -m <method> -u <datastore-url> -p <property> -V <host> -e <endpoint>
+  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -V <host> -e <endpoint>
+  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -p <property> -V <host> -e <endpoint>
+  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -u <datastore-url> -p <property> -V <host> -e <endpoint>
   vpoller-client --help
   vpoller-client --version
 
@@ -62,6 +90,8 @@ Options:
                                             [default: tcp://localhost:10123]
   -o <logfile>, --output <logfile>          Specify the log file to use when performing the poll
                                             [default: /var/log/vpoller/vpoller-client.log]
+  -H <helper>, --helper <helper>            Specify a helper module to use for processing the
+                                            result message, e.g. 'zabbix'
 
 """
 
@@ -78,6 +108,10 @@ Options:
         
     client = VPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
 
+    # List of available helpers
+    helpers = ['vpoller.helpers.zabbix']
+
+    # Message we send out to workers
     msg = {
         'method':   args['--method'],
         'hostname': args['--vsphere-host'],
@@ -87,9 +121,16 @@ Options:
         'zabbix':   args['--zabbix'],
         }
 
-    result = client.run(msg)
-    result = json.loads(result)
-    print json.dumps(result, indent=4)
+    # Get the result
+    data = client.run(msg)
+
+    # Do we use a helper module?
+    if args['--helper'] and args['--helper'] in helpers:
+        result = vpoller_helpers(args['--helper'], msg, data)
+    else:
+        result = json.dumps(json.loads(data), indent=4)
+    
+    print result
 
 if __name__ == '__main__':
     main()

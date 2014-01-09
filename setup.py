@@ -6,7 +6,7 @@ setup(name='py-vpoller',
       author='Marin Atanasov Nikolov',
       author_email='dnaeon@gmail.com',
       license='BSD',
-      packages=['vpoller'],
+      packages=['vpoller', 'vpoller.helpers'],
       package_dir={'': 'src'},
       scripts=[
         'src/vpoller-client',
