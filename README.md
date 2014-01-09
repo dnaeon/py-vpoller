@@ -20,6 +20,8 @@ Possible scenarios where *vPoller* could be used is to integrate it into monitor
 
 vPoller can also be described as a vSphere API-Proxy, because it translates user requests to vSphere API requests thus allowing the user to use the API without having the need to know how the vSphere API works internally.
 
+vPoller has been tested with vSphere 5.x and with very limited testing on vSphere 4.x
+
 ## Requirements
 
 * Python 2.7.x
@@ -182,3 +184,6 @@ This is an example command we would execute in order to get the capacity of a da
 	
 For more information about the property names you could use please refer to the [vSphere API documentation](https://www.vmware.com/support/developer/vc-sdk/).
 
+## Bugs
+
+Probably. If you experience a bug issue, please report it to the [vPoller issue tracker on Github](https://github.com/dnaeon/py-vpoller/issues).
