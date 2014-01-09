@@ -150,25 +150,44 @@ In order to get help and usage information about the *vpoller-client*, execute t
 
 The documentation below provides examples how to use the vPoller Client in order to send requests to the vSphere Workers.
 
+## vPoller Helpers
+
+The *vPoller Helpers* were implemented in order to provide an easy way for connecting your applications to *vPoller*.
+
+The result messages returned by a vPoller Worker are always in JSON format. 
+
+This could be okay for most applications, which require to process a result message, but in some cases you might want to
+receive the result in different formats. 
+
+Using the *vPoller Helpers* you are able to convert the result message to a format that your application or system understands.
+
+An example of such a *vPoller Helper* is the [Zabbix vPoller Helper module](https://github.com/dnaeon/py-vpoller/tree/master/src/vpoller/helpers), which can
+translate a result message to [Zabbix LLD format](https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery) and return
+property values ready to be used in Zabbix items.
+
 ## Discovering ESXi hosts on a vCenter server
 
-This is how you could use vPoller in order to discover all ESXi hosts registered on a vCenter.
+This is how you could use vPoller in order to discover all ESXi hosts registered to a vCenter.
 
 The message we send by using vPoller Client is sent to the vPoller Proxy which in turn will perform load-balancing and dispatch the message to our vPoller Workers.
+
+Of course all this is transparent to the user as you only need to send your message to the vPoller Proxy.
 
 Considering that the vPoller Proxy endpoint is at *tcp://localhost:10123* in order to discover the ESXi hosts on vCenter *vc01-test.example.org* you would execute a similar command:
 
-	$ vpoller-client -H -c discover -V vc01-test.example.org -e tcp://localhost:10123
+	$ vpoller-client -m host.discover -V vc01-test.example.org -e tcp://localhost:10123
 
 ## Discovering Datastores on a vCenter server
 
-This is how you could use vPoller in order to discover all datastores registered on a vCenter.
+This is how you could use vPoller in order to discover all datastores registered to a vCenter.
 
 The message we send by using vPoller Client is sent to the vPoller Proxy which in turn will perform load-balancing and dispatch the message to our vPoller Workers.
 
+Again, all this is transparent to the user as you only need to send your message to the vPoller Proxy and it will be handled properly.
+
 Considering that the vPoller Proxy endpoint is at *tcp://localhost:10123* in order to discover the datastores on vCenter *vc01-test.example.org* you would execute a similar command:
 
-	$ vpoller-client -D -c discover -V vc01-test.example.org -e tcp://localhost:10123
+	$ vpoller-client -m datastore.discover -V vc01-test.example.org -e tcp://localhost:10123
 
 ## Polling vSphere Object Properties
 
@@ -176,11 +195,11 @@ In order to get a vSphere Object property we need to send the property name of t
 
 Let's say that we want to get the power state of the ESXi host *esxi01-test.example.org* which is registered to the vCenter *vc01-test.example.org*.
 
-	$ vpoller-client -H -n esxi01-test.example.org -p runtime.powerState -c poll -V vc01-test.example.org -e tcp://localhost:10123
+	$ vpoller-client -m host.poll -n esxi01-test.example.org -p runtime.powerState -V vc01-test.example.org -e tcp://localhost:10123
 	
 This is an example command we would execute in order to get the capacity of a datastore from our vCenter:
 
-	$ vpoller-client -D -u ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/ -p summary.capacity -c poll -V vc01-test.example.org -e tcp://localhost:10123
+	$ vpoller-client -m datastore.poll -u ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/ -p summary.capacity -V vc01-test.example.org -e tcp://localhost:10123
 	
 For more information about the property names you could use please refer to the [vSphere API documentation](https://www.vmware.com/support/developer/vc-sdk/).
 
