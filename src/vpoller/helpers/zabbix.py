@@ -83,7 +83,9 @@ class HelperAgent(object):
             The property value from the result message
 
         """
-        pass
+        property_name = self.msg['property']
+        
+        return self.data['result'][property_name]
 
     def zabbix_lld_data(self):
         """
@@ -95,6 +97,19 @@ class HelperAgent(object):
         For more information about Zabbix LLD, please refer to link below:
 
             - https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery
+
+        The result attribute names are in Zabbix Macro-like format, e.g.
+
+            {#vSphere.<attribute>}: <value>
             
         """
-        pass
+        result = self.data['result']
+
+        data = []
+        
+        for eachItem in result:
+            props = [('{#vSphere.' + k + '}', v) for k, v in eachItem.items()]
+            data.append(dict(props))
+
+        return json.dumps({ 'data': data }, indent=4)
+                
