@@ -1,6 +1,6 @@
 ## vPoller -- VMware vSphere Distributed Pollers written in Python
 
-*vPoller* is a distributed system written in Python for polling of vSphere Objects properties.
+*vPoller* is a distributed system written in Python for discoverying and polling of vSphere Objects properties.
 
 *vPoller* uses the [vSphere API](https://www.vmware.com/support/developer/vc-sdk/) in order to perform discovery and polling of *Objects* from a vSphere host (e.g. ESXi or vCenter server instance).
 
@@ -21,6 +21,8 @@ Possible scenarios where *vPoller* could be used is to integrate it into monitor
 vPoller can also be described as a vSphere API-Proxy, because it translates user requests to vSphere API requests thus allowing the user to use the API without having the need to know how the vSphere API works internally.
 
 vPoller has been tested with vSphere 5.x and with very limited testing on vSphere 4.x
+
+You might also want to check this [introduction post about vPoller](http://unix-heaven.org/node/103), which contains real-world usage examples of *vPoller*.
 
 ## Requirements
 
@@ -157,13 +159,25 @@ The *vPoller Helpers* were implemented in order to provide an easy way for conne
 The result messages returned by a vPoller Worker are always in JSON format. 
 
 This could be okay for most applications, which require to process a result message, but in some cases you might want to
-receive the result in different formats. 
+receive the result in different formats and feed the data into your application. 
 
 Using the *vPoller Helpers* you are able to convert the result message to a format that your application or system understands.
 
 An example of such a *vPoller Helper* is the [Zabbix vPoller Helper module](https://github.com/dnaeon/py-vpoller/tree/master/src/vpoller/helpers), which can
 translate a result message to [Zabbix LLD format](https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery) and return
 property values ready to be used in Zabbix items.
+
+Here is an example of using the *Zabbix vPoller Helper* for converting the results to *Zabbix LLD format*:
+
+	$ vpoller-client -H vpoller.helpers.zabbix -m datastore.discover -e tcp://localhost:10123 -V vc01.example.org
+	
+This is how you could use the `vpoller.helpers.zabbix` helper to retrieve a property of a vSphere Object.
+
+	$ vpoller-client -H vpoller.helpers.zabbix -m datastore.poll -e tcp://localhost:10123 -V vc01.example.org -u <datastore-url> -p summary.capacity
+	
+This would return just the value of the property requested, thus making it easy for integrating into a *Zabbix Item*.
+
+Possible other usage of the *vPoller Helpers* is an HTML helper, which would return the result in HTML format in order to present the information nicely in a web browser.
 
 ## Discovering ESXi hosts on a vCenter server
 
@@ -202,6 +216,30 @@ This is an example command we would execute in order to get the capacity of a da
 	$ vpoller-client -m datastore.poll -u ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/ -p summary.capacity -V vc01-test.example.org -e tcp://localhost:10123
 	
 For more information about the property names you could use please refer to the [vSphere API documentation](https://www.vmware.com/support/developer/vc-sdk/).
+
+## Using the management interface of vPoller
+
+At any time you can request status information from your vPoller Proxy or Worker by sending a request to the management socket of your `Proxy` or `Worker`.
+
+This is how you could get status information from your vPoller Proxy:
+
+	$ vpoller-proxy -e tcp://localhost:9999 status
+	
+And this is how you could get status information from your `vPoller Workers`:
+
+	$ vpoller-worker -e tcp://localhost:10000 status
+	
+The management interface of `vPoller Proxy` and `Worker` also accepts commands for shutting down the components.
+
+This is how you could shutdown your `vPoller Proxy` by sending a shutdown message to your node:
+
+	$ vpoller-proxy -e tcp://localhost:9999 stop
+	
+And this is how you could shutdown your `vPoller Worker` by sending a shutdown message to your nodes:
+
+	$ vpoller-worker -e tcp://localhost:10000 stop
+
+You can also perform these operations using the *init.d* scripts from the vPoller Github repository.
 
 ## Bugs
 
