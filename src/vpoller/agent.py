@@ -97,7 +97,7 @@ class VSphereAgent(VConnector):
         
         # Get the properties 
         try:
-            result = self.viserver._get_object_properties(mor=mor, property_names=propery_names)
+            result = self.viserver._get_object_properties(mor=mor, property_names=property_names)
         except Exception as e:
 	    logging.warning("Cannot get property for host %s: %s", msg["name"], e)
             return { "success": -1,
@@ -149,36 +149,37 @@ class VSphereAgent(VConnector):
 
         logging.info('[%s] Retrieving %s for datastore %s', self.hostname, msg['property'], msg['info.url'])
 
+        # Get a list of all datastores on our vSphere host in order to find the MOR first
         try:
-            results = self.viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                   obj_type=MORTypes.Datastore)
+            datastores = self.viserver._retrieve_properties_traversal(property_names=['info.url'],
+                                                                      obj_type=MORTypes.Datastore)
         except Exception as e:
-            logging.warning("Cannot get property for datastore %s: %s" % (msg["info.url"], e))
-            return { "success": -1,
-                     "msg": "Cannot get property for datastore %s: %s" % (msg['info.url'], e),
-                     }
-
-        if not results:
-            return { "success": -1,
-                     "msg": "Did not find property %s for datastore %s" % (msg["property"], msg["info.url"]),
-                     }
+            logging.warning("Cannot get datastores: %s" % e)
+            return { "success": -1, "msg": "Cannot get datastores: %s" % e }
         
-        # Iterate over the results and find our datastore
-        for item in results:
-            props = [(p.Name, p.Val) for p in item.PropSet]
-            d = dict(props)
+        # Find the Managed Object Reference (MOR) of the datastore we are looking for
 
-            # break if we have a match
-            if d['info.url'] == msg['info.url']:
-                break
-        else:
+        result = [item.Obj for item in datastores for p in item.PropSet if p.Val == msg['info.url']]
+        
+        if not result:
             return { "success": -1,
                      "msg": "Unable to find datastore %s" % msg['info.url'],
                      }
+        else:
+            mor = result.pop()
+
+        # Get the datastore properties using the MOR we already have
+        try:
+            result = self.viserver._get_object_properties(mor=mor, property_names=property_names)
+        except Exception as e:
+            logging.warning("Cannot get property for datastore %s: %s" % (msg['info.url'], e))
+            return { "success": -1, "msg": "Cannot get property for datastore %s: %s" % (msg['info.url'], e) }
+
+        ps = result.get_element_propSet()
 
         result = { "success": 0,
                    "msg": "Successfully retrieved property",
-                   "result": d,
+                   "result": dict([(p.Name, p.Val) for p in ps]),
                    }
 
         return result
