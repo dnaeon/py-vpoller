@@ -212,7 +212,7 @@ class VSphereAgent(VConnector):
         #
         property_names = ['name', 'runtime.powerState']
 
-        if msg['properties']:
+        if msg.has_key('properties'):
             property_names.extend(msg['properties'])
 
         logging.info('[%s] Discovering ESXi hosts', self.hostname)
@@ -270,7 +270,7 @@ class VSphereAgent(VConnector):
         #
         property_names = ['info.name', 'info.url', 'summary.accessible']
 
-        if msg['properties']:
+        if msg.has_key('properties'):
             property_names.extend(msg['properties'])
         
         logging.info('[%s] Discovering datastores', self.hostname)
