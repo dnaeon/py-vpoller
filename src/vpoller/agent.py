@@ -104,7 +104,7 @@ class VSphereAgent(VConnector):
                    "msg": "Successfully retrieved property",
                    "result": {p.Name:p.Val for p in ps},
                    }
-
+        
         return result
             
     def get_datastore_property(self, msg):
@@ -193,22 +193,14 @@ class VSphereAgent(VConnector):
 
         logging.info('[%s] Discovering ESXi hosts', self.hostname)
 
-        # Retrieve the data
 	try:
-            results = self.viserver._retrieve_properties_traversal(property_names=property_names,
-                                                                   obj_type=MORTypes.HostSystem)
+            result = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                obj_type=MORTypes.HostSystem)
 	except Exception as e:
-            logging.warning("Cannot discover hosts: %s", e)
-            return { "success": -1,
-                     "msg": "Cannot discover ESXi hosts: %s" % e,
-                     }
+            logging.warning("Cannot discover ESXi hosts: %s", e)
+            return { "success": -1, "msg": "Cannot discover ESXi hosts: %s" % e }
 
-        # Iterate over the results and prepare the JSON object
-        data = []
-        for item in results:
-            props = [(p.Name, p.Val) for p in item.PropSet]
-            d = dict(props)
-            data.append(d)
+        data = [{p.Name:p.Val for p in item.PropSet} for item in result]
 
         return { "success": 0,
                  "msg": "Successfully discovered ESXi hosts",
@@ -246,20 +238,13 @@ class VSphereAgent(VConnector):
         
         # Retrieve the data
 	try:
-            results = self.viserver._retrieve_properties_traversal(property_names=property_names,
+            result = self.viserver._retrieve_properties_traversal(property_names=property_names,
                                                                    obj_type=MORTypes.Datastore)
 	except Exception as e:
             logging.warning("Cannot discover datastores: %s", e)
-            return { "success": -1,
-                     "msg": "Cannot discover datastores: %s" % e,
-                     }
+            return { "success": -1, "msg": "Cannot discover datastores: %s" % e }
 
-        # Iterate over the results and prepare the JSON object
-        data = []
-        for item in results:
-            props = [(p.Name, p.Val) for p in item.PropSet]
-            d = dict(props)
-            data.append(d)
+        data = [{p.Name:p.Val for p in item.PropSet} for item in result]
 
         return { "success": 0,
                  "msg": "Successfully discovered datastores",
