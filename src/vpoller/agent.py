@@ -85,30 +85,24 @@ class VSphereAgent(VConnector):
 
         logging.info('[%s] Retrieving %s for host %s', self.hostname, msg['property'], msg['name'])
 
-        # Find the Managed Object Reference (MOR) of the host we are looking for
-        result = [_mor for _mor, _name in self.viserver.get_hosts().items() if _name == msg['name']]
+        self.update_host_mors()
+        mor = self.mors_cache['HostSystem']['objects'].get(msg['name'])
 
-        if not result:
-            return { "success": -1,
-                     "msg": "Unable to find ESXi host %s" % msg['name']
-                     }
-        else:
-            mor = result.pop()
-        
+        if not mor:
+            return { "success": -1, "msg": "Unable to find ESXi host %s" % msg['name'] }
+
         # Get the properties 
         try:
             result = self.viserver._get_object_properties(mor=mor, property_names=property_names)
         except Exception as e:
-	    logging.warning("Cannot get property for host %s: %s", msg["name"], e)
-            return { "success": -1,
-                     "msg": "Cannot get property for host %s: %s" % (msg['name'], e)
-                     }
+	    logging.warning("Cannot get property for host %s: %s", msg['name'], e)
+            return { "success": -1, "msg": "Cannot get property for host %s: %s" % (msg['name'], e) }
 
         ps = result.get_element_propSet()
         
         result = { "success": 0,
                    "msg": "Successfully retrieved property",
-                   "result": dict([(p.Name, p.Val) for p in ps]),
+                   "result": {p.Name:p.Val for p in ps},
                    }
 
         return result
@@ -149,26 +143,12 @@ class VSphereAgent(VConnector):
 
         logging.info('[%s] Retrieving %s for datastore %s', self.hostname, msg['property'], msg['info.url'])
 
-        # Get a list of all datastores on our vSphere host in order to find the MOR first
-        try:
-            datastores = self.viserver._retrieve_properties_traversal(property_names=['info.url'],
-                                                                      obj_type=MORTypes.Datastore)
-        except Exception as e:
-            logging.warning("Cannot get datastores: %s" % e)
-            return { "success": -1, "msg": "Cannot get datastores: %s" % e }
-        
-        # Find the Managed Object Reference (MOR) of the datastore we are looking for
+        self.update_datastore_mors()
+        mor = self.mors_cache['Datastore']['objects'].get(msg['info.url'])
 
-        result = [item.Obj for item in datastores for p in item.PropSet if p.Val == msg['info.url']]
-        
-        if not result:
-            return { "success": -1,
-                     "msg": "Unable to find datastore %s" % msg['info.url'],
-                     }
-        else:
-            mor = result.pop()
+        if not mor:
+            return { "success": -1, "msg": "Unable to find datastore %s" % msg['info.url'] }
 
-        # Get the datastore properties using the MOR we already have
         try:
             result = self.viserver._get_object_properties(mor=mor, property_names=property_names)
         except Exception as e:
@@ -179,7 +159,7 @@ class VSphereAgent(VConnector):
 
         result = { "success": 0,
                    "msg": "Successfully retrieved property",
-                   "result": dict([(p.Name, p.Val) for p in ps]),
+                   "result": {p.Name:p.Val for p in ps},
                    }
 
         return result
