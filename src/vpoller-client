@@ -69,29 +69,29 @@ def main():
 
     usage="""
 Usage:
-  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -V <host> -e <endpoint>
+  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] -m <method> -V <host> -e <endpoint> 
   vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -p <property> -V <host> -e <endpoint>
   vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -u <datastore-url> -p <property> -V <host> -e <endpoint>
   vpoller-client --help
   vpoller-client --version
 
 Options:
-  -h, --help                                Display this usage info
-  -v, --version                             Display version and exit
-  -z, --zabbix                              Receive result in Zabbix Low-Level Discovery format
-  -m <method>, --method <method>            The method to be processed during the client request
-  -V <host>, --vsphere-host <host>          The vSphere host to send the request to
-  -n <name>, --name <name>                  Name of the ESX host, only applicable to hosts object type
-  -p <property>, --property <property>      Name of the property as defined by the vSphere Web SDK
-  -u <datastore-url>, --url <datastore-url> Datastore URL, only applicable to datastores object type
-  -r <retries>, --retries <retries>         Number of time to retry if a request times out [default: 3]
-  -t <timeout>, --timeout <timeout>         Timeout after that period of milliseconds [default: 3000]
-  -e <endpoint>, --endpoint <endpoint>      Endpoint of ZeroMQ Proxy/Broker the client connects to
-                                            [default: tcp://localhost:10123]
-  -o <logfile>, --output <logfile>          Specify the log file to use when performing the poll
-                                            [default: /var/log/vpoller/vpoller-client.log]
-  -H <helper>, --helper <helper>            Specify a helper module to use for processing the
-                                            result message, e.g. 'zabbix'
+  -h, --help                                  Display this usage info
+  -v, --version                               Display version and exit
+  -z, --zabbix                                Receive result in Zabbix Low-Level Discovery format
+  -m <method>, --method <method>              The method to be processed during the client request
+  -V <host>, --vsphere-host <host>            The vSphere host to send the request to
+  -n <name>, --name <name>                    Name of the ESX host, only applicable to hosts object type
+  -p <properties>, --properties <properties>  Name of the property as defined by the vSphere Web SDK
+  -u <datastore-url>, --url <datastore-url>   Datastore URL, only applicable to datastores object type
+  -r <retries>, --retries <retries>           Number of time to retry if a request times out [default: 3]
+  -t <timeout>, --timeout <timeout>           Timeout after that period of milliseconds [default: 3000]
+  -e <endpoint>, --endpoint <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to
+                                              [default: tcp://localhost:10123]
+  -o <logfile>, --output <logfile>            Specify the log file to use when performing the poll
+                                              [default: /var/log/vpoller/vpoller-client.log]
+  -H <helper>, --helper <helper>              Specify a helper module to use for processing the
+                                              result message, e.g. 'zabbix'
 
 """
 
@@ -113,12 +113,12 @@ Options:
 
     # Message we send out to workers
     msg = {
-        'method':   args['--method'],
-        'hostname': args['--vsphere-host'],
-        'name':     args['--name'],
-        'info.url': args['--url'],
-        'property': args['--property'],
-        'zabbix':   args['--zabbix'],
+        'method':     args['--method'],
+        'hostname':   args['--vsphere-host'],
+        'name':       args['--name'],
+        'info.url':   args['--url'],
+        'properties': args['--properties'].split(',') if args['--properties'] else None,
+        'zabbix':     args['--zabbix'],
         }
 
     # Get the result

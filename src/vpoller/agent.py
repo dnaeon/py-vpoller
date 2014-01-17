@@ -56,10 +56,13 @@ class VSphereAgent(VConnector):
         Example client message to get a host property could be:
 
             {
-                "method":    "host.poll",
-                "hostname":  "vc01-test.example.org",
-                "name"     : "esxi01-test.example.org",
-                "property" : "hardware.memorySize"
+                "method":     "host.poll",
+                "hostname":   "vc01-test.example.org",
+                "name":       "esxi01-test.example.org",
+                "properties": [
+                    "hardware.memorySize",
+                    "runtime.bootTime"
+                ]
             }
         
         Args:
@@ -67,23 +70,25 @@ class VSphereAgent(VConnector):
 
         """
         # Sanity check for required attributes in the message
-        if not all(k in msg for k in ("name", "property")):
-            return { "success": -1, "msg": "Missing message properties (e.g. name/property)" }
+        if not all(k in msg for k in ("name", "properties")):
+            return { "success": -1, "msg": "Missing message properties (e.g. name/properties)" }
 
         # Check if we are connected first
         if not self.viserver.is_connected():
             self.reconnect()
-        
-        # Search is done by using the 'name' property of the ESXi Host as
-        # this uniquely identifies the host
+
+        #
+        # Property names we want to retrieve about the HostSystem object plus
+        # any other user-requested properties.
         #
         # Check the vSphere Web Services SDK API for more information on the properties
         #
         #     https://www.vmware.com/support/developer/vc-sdk/
         #
-        property_names = ['name', msg['property']]
+        property_names = ['name']
+        property_names.extend(msg['properties'])
 
-        logging.info('[%s] Retrieving %s for host %s', self.hostname, msg['property'], msg['name'])
+        logging.info('[%s] Retrieving %s for host %s', self.hostname, msg['properties'], msg['name'])
 
         self.update_host_mors()
         mor = self.mors_cache['HostSystem']['objects'].get(msg['name'])
@@ -114,10 +119,13 @@ class VSphereAgent(VConnector):
         Example client message to get a host property could be:
 
             {
-                "method":   "datastore.poll",
-                "hostname": "vc01-test.example.org",
-                "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
-                "property": "summary.capacity"
+                "method":     "datastore.poll",
+                "hostname":   "vc01-test.example.org",
+                "info.url":   "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
+                "properties": [
+                    "summary.capacity",
+                    "info.freeSpace",
+                ]
             }
         
         Args:
@@ -125,23 +133,25 @@ class VSphereAgent(VConnector):
         
         """
         # Sanity check for required attributes in the message
-        if not all(k in msg for k in ("info.url", "property")):
-            return { "success": -1, "msg": "Missing message properties (e.g. info.url/property)" }
+        if not all(k in msg for k in ("info.url", "properties")):
+            return { "success": -1, "msg": "Missing message properties (e.g. info.url/properties)" }
 
         # Check if we are connected first
         if not self.viserver.is_connected():
             self.reconnect()
-        
-        # Search is done by using the 'info.url' property as
-        # this uniquely identifies the datastore
+
+        #
+        # Property names we want to retrieve about the Datastore object plus any
+        # other user-requested properties.
         #
         # Check the vSphere Web Services SDK API for more information on the properties
         #
         #     https://www.vmware.com/support/developer/vc-sdk/
-        # 
-        property_names = ['info.url', msg['property']]
+        #
+        property_names = ['info.url']
+        property_names.extend(msg['properties'])
 
-        logging.info('[%s] Retrieving %s for datastore %s', self.hostname, msg['property'], msg['info.url'])
+        logging.info('[%s] Retrieving %s for datastore %s', self.hostname, msg['properties'], msg['info.url'])
 
         self.update_datastore_mors()
         mor = self.mors_cache['Datastore']['objects'].get(msg['info.url'])
@@ -175,6 +185,17 @@ class VSphereAgent(VConnector):
                 "hostname": "vc01-test.example.org",
             }
 
+        Example client message which requests also additional properties:
+
+            {
+                "method":     "host.discover",
+                "hostname":   "vc01-test.example.org",
+                "properties": [
+                    "hardware.memorySize",
+                    "runtime.bootTime",
+                ]
+            }
+              
         Returns:
             The returned data is a JSON object, containing the discovered ESXi hosts.
 
@@ -190,6 +211,9 @@ class VSphereAgent(VConnector):
         #     https://www.vmware.com/support/developer/vc-sdk/
         #
         property_names = ['name', 'runtime.powerState']
+
+        if msg['properties']:
+            property_names.extend(msg['properties'])
 
         logging.info('[%s] Discovering ESXi hosts', self.hostname)
 
@@ -217,6 +241,17 @@ class VSphereAgent(VConnector):
                 "method":   "datastore.discover",
         	"hostname": "vc01-test.example.org",
             }
+
+        Example client message which requests also additional properties:
+
+            {
+                "method":     "datastore.discover",
+                "hostname":   "vc01-test.example.org",
+                "properties": [
+                    "info.freeSpace"
+                    "summary.capacity",
+                ]
+            }
               
         Returns:
             The returned data is a JSON object, containing the discovered datastores.
@@ -226,13 +261,17 @@ class VSphereAgent(VConnector):
         if not self.viserver.is_connected():
             self.reconnect()
         
-        # Properties we want to retrieve about the datastores
+        # Properties we want to retrieve about the datastores plus any
+        # other user-requested properties
         #
         # Check the vSphere Web Services SDK API for more information on the properties
         #
         #     https://www.vmware.com/support/developer/vc-sdk/
         #
         property_names = ['info.name', 'info.url', 'summary.accessible']
+
+        if msg['properties']:
+            property_names.extend(msg['properties'])
         
         logging.info('[%s] Discovering datastores', self.hostname)
         
