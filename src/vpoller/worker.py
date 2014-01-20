@@ -292,15 +292,15 @@ class VPollerWorker(Daemon):
 
         # The methods we support and process
         methods = {
-            'host.poll':            self.agents[vsphere_host].get_host_property,
+            'host.get':             self.agents[vsphere_host].get_host_property,
             'host.discover':        self.agents[vsphere_host].discover_hosts,
-            'datastore.poll':       self.agents[vsphere_host].get_datastore_property,
+            'datastore.get':        self.agents[vsphere_host].get_datastore_property,
             'datastore.discover':   self.agents[vsphere_host].discover_datastores,
-            'vm.poll':              self.agents[vsphere_host].get_vm_property,
+            'vm.get':               self.agents[vsphere_host].get_vm_property,
             'vm.discover':          self.agents[vsphere_host].discover_virtual_machines,
-            'datacenter.poll':      self.agents[vsphere_host].get_datacenter_property,
+            'datacenter.get':       self.agents[vsphere_host].get_datacenter_property,
             'datacenter.discover':  self.agents[vsphere_host].discover_datacenters,
-            'cluster.poll':         self.agents[vsphere_host].get_cluster_property,
+            'cluster.get':          self.agents[vsphere_host].get_cluster_property,
             'cluster.discover':     self.agents[vsphere_host].discover_clusters,
             }
 

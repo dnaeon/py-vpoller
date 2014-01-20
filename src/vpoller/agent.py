@@ -95,7 +95,7 @@ class VSphereAgent(VConnector):
         Example client message to get a host property could be:
 
             {
-                "method":     "host.poll",
+                "method":     "host.get",
                 "hostname":   "vc01-test.example.org",
                 "name":       "esxi01-test.example.org",
                 "properties": [
@@ -158,7 +158,7 @@ class VSphereAgent(VConnector):
         Example client message to get a host property could be:
 
             {
-                "method":     "datastore.poll",
+                "method":     "datastore.get",
                 "hostname":   "vc01-test.example.org",
                 "info.url":   "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
                 "properties": [
@@ -220,7 +220,7 @@ class VSphereAgent(VConnector):
         Example client message to get a VM property could be:
 
             {
-                "method":     "vm.poll",
+                "method":     "vm.get",
                 "hostname":   "vc01-test.example.org",
                 "name":       "vm01.example.org",
                 "properties": [
@@ -282,7 +282,7 @@ class VSphereAgent(VConnector):
         Example client message to get a Datacenter property could be:
 
             {
-                "method":     "datacenter.poll",
+                "method":     "datacenter.get",
                 "hostname":   "vc01-test.example.org",
                 "name":       "Dc01",
                 "properties": [
@@ -317,7 +317,7 @@ class VSphereAgent(VConnector):
         Example client message to get a cluster property could be:
 
             {
-                "method":     "cluster.poll",
+                "method":     "cluster.get",
                 "hostname":   "vc01-test.example.org",
                 "name":       "Cluster01",
                 "properties": [
