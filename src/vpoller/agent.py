@@ -49,6 +49,29 @@ class VSphereAgent(VConnector):
         VConnector
 
     """
+    def msg_is_okay(self, msg, attr):
+        """
+        Sanity checks the message for required attributes.
+
+        Also checks whether the vSphere Agent is connected and
+        if not, it will re-connect the Agent to the vSphere host.
+
+        Args:
+            msg   (dict): The client message
+            attr (tuple): A tuple of the required message attributes
+        
+        Returns:
+            True if the message contains all required properties, False otherwise.
+
+        """
+        if not all (k in msg for k in attr):
+            return False
+
+        if not self.viserver.is_connected():
+            self.reconnect()
+
+        return True
+    
     def get_host_property(self, msg):
         """
         Get property of an object of type HostSystem and return it.
@@ -69,13 +92,8 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
-        # Sanity check for required attributes in the message
-        if not all(k in msg for k in ("name", "properties")):
+        if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
             return { "success": -1, "msg": "Missing message properties (e.g. name/properties)" }
-
-        # Check if we are connected first
-        if not self.viserver.is_connected():
-            self.reconnect()
 
         #
         # Property names we want to retrieve about the HostSystem object plus
@@ -132,13 +150,8 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
         
         """
-        # Sanity check for required attributes in the message
-        if not all(k in msg for k in ("info.url", "properties")):
+        if not self.msg_is_okay(msg, ('method', 'hostname', 'info.url', 'properties')):
             return { "success": -1, "msg": "Missing message properties (e.g. info.url/properties)" }
-
-        # Check if we are connected first
-        if not self.viserver.is_connected():
-            self.reconnect()
 
         #
         # Property names we want to retrieve about the Datastore object plus any
@@ -200,9 +213,8 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered ESXi hosts.
 
         """
-        # Check if we are connected first
-        if not self.viserver.is_connected():
-            self.reconnect()
+        if not self.msg_is_okay(msg, ('method', 'hostname')):
+            return { 'success': -1, 'msg': 'Missing message properties (e.g. method/hostname)' }
         
         # Properties we want to retrieve are 'name' and 'runtime.powerState'
         #
@@ -257,9 +269,8 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered datastores.
 
         """
-        # Check if we are connected first
-        if not self.viserver.is_connected():
-            self.reconnect()
+        if not self.msg_is_okay(msg, ('method', 'hostname')):
+            return { 'success': -1, 'msg': 'Missing message properties (e.g. method/hostname)' }
         
         # Properties we want to retrieve about the datastores plus any
         # other user-requested properties
