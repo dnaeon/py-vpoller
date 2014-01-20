@@ -515,3 +515,57 @@ class VSphereAgent(VConnector):
                  "result": data,
                  }
     
+    def discover_clusters(self, msg):
+        """
+        Discovers all ClusterComputeResource objects in a VMware vSphere server.
+
+        Example client message to discover all clusters could be:
+        
+            {
+                "method":   "cluster.discover",
+        	"hostname": "vc01-test.example.org",
+            }
+
+        Example client message which requests also additional properties:
+
+            {
+                "method":     "cluster.discover",
+                "hostname":   "vc01-test.example.org",
+                "properties": [
+                ]
+            }
+              
+        Returns:
+            The returned data is a JSON object, containing the discovered Clusters.
+
+        """
+        if not self.msg_is_okay(msg, ('method', 'hostname')):
+            return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
+        
+        # Properties we want to retrieve about the ClusterComputeResource plus any
+        # other user-requested properties
+        #
+        # Check the vSphere Web Services SDK API for more information on the properties
+        #
+        #     https://www.vmware.com/support/developer/vc-sdk/
+        #
+        property_names = ['name']
+
+        if msg.has_key('properties') and msg['properties']:
+            property_names.extend(msg['properties'])
+        
+        logging.info('[%s] Discovering Clusters', self.hostname)
+        
+	try:
+            result = self.viserver._retrieve_properties_traversal(property_names=property_names,
+                                                                  obj_type=MORTypes.ClusterComputeResource)
+	except Exception as e:
+            logging.warning("Cannot discover Clusters: %s", e)
+            return { "success": -1, "msg": "Cannot discover Clusters: %s" % e }
+
+        data = [{p.Name:p.Val for p in item.PropSet} for item in result]
+
+        return { "success": 0,
+                 "msg": "Successfully discovered Clusters",
+                 "result": data,
+                 }
