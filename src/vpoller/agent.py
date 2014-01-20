@@ -289,7 +289,63 @@ class VSphereAgent(VConnector):
         #
 
         return { 'success': -1, 'msg': 'Polling of Datacenter properties is not implemented yet' }
+
+    def get_cluster_property(self, msg):
+        """
+        Get property of an object of type ClusterComputeResource and return it.
+
+        Example client message to get a cluster property could be:
+
+            {
+                "method":     "cluster.poll",
+                "hostname":   "vc01-test.example.org",
+                "name":       "Cluster01",
+                "properties": [
+                    "configuration.drsConfig.enabled",
+                ]
+            }
         
+        Args:
+            msg (dict): The client message to process
+
+        """
+        if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
+            return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
+
+        #
+        # Property names we want to retrieve about the ClusterComputeResource object plus
+        # any other user-requested properties.
+        #
+        # Check the vSphere Web Services SDK API for more information on the properties
+        #
+        #     https://www.vmware.com/support/developer/vc-sdk/
+        #
+        property_names = ['name']
+        property_names.extend(msg['properties'])
+
+        logging.info('[%s] Retrieving %s for cluster %s', self.hostname, msg['properties'], msg['name'])
+
+        self.update_cluster_mors()
+        mor = self.mors_cache['ClusterComputeResource']['objects'].get(msg['name'])
+
+        if not mor:
+            return { "success": -1, "msg": "Unable to find cluster %s" % msg['name'] }
+
+        try:
+            result = self.viserver._get_object_properties(mor=mor, property_names=property_names)
+        except Exception as e:
+	    logging.warning("Cannot get property for cluster %s: %s", msg['name'], e)
+            return { "success": -1, "msg": "Cannot get property for cluster %s: %s" % (msg['name'], e) }
+
+        ps = result.get_element_propSet()
+        
+        result = { "success": 0,
+                   "msg": "Successfully retrieved properties",
+                   "result": {p.Name:p.Val for p in ps},
+                   }
+        
+        return result
+    
     def discover_hosts(self, msg):
         """
         Discovers all ESXi hosts registered in the VMware vSphere server.

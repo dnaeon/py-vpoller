@@ -300,6 +300,7 @@ class VPollerWorker(Daemon):
             'vm.discover':          self.agents[vsphere_host].discover_virtual_machines,
             'datacenter.poll':      self.agents[vsphere_host].get_datacenter_property,
             'datacenter.discover':  self.agents[vsphere_host].discover_datacenters,
+            'cluster.poll':         self.agents[vsphere_host].get_cluster_property,
             'cluster.discover':     self.agents[vsphere_host].discover_clusters,
             }
 
