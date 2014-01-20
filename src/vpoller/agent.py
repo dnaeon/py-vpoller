@@ -30,6 +30,7 @@ establishing the connection to the vSphere hosts and do all the heavy lifting.
 
 """
 
+import types
 import logging
 
 import zmq
@@ -53,6 +54,8 @@ class VSphereAgent(VConnector):
         """
         Sanity checks the message for required attributes.
 
+        Check for proper attribute type is also performed.
+        
         Also checks whether the vSphere Agent is connected and
         if not, it will re-connect the Agent to the vSphere host.
 
@@ -64,9 +67,22 @@ class VSphereAgent(VConnector):
             True if the message contains all required properties, False otherwise.
 
         """
+        # The message attributes types we accept
+        msg_types = {
+            'method':     (types.StringType, types.UnicodeType),
+            'hostname':   (types.StringType, types.UnicodeType),
+            'name':       (types.StringType, types.UnicodeType, types.NoneType),
+            'info.url':   (types.StringType, types.UnicodeType, types.NoneType),
+            'properties': (types.TupleType,  types.ListType, types.NoneType),
+            }
+        
         if not all (k in msg for k in attr):
             return False
 
+        for k in msg.keys():
+            if not isinstance(msg[k], msg_types[k]):
+                return False
+        
         if not self.viserver.is_connected():
             self.reconnect()
 
@@ -93,7 +109,7 @@ class VSphereAgent(VConnector):
 
         """
         if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
-            return { "success": -1, "msg": "Missing message properties (e.g. name/properties)" }
+            return { "success": -1, "msg": "Incorrect or missing message properties" }
 
         #
         # Property names we want to retrieve about the HostSystem object plus
@@ -151,7 +167,7 @@ class VSphereAgent(VConnector):
         
         """
         if not self.msg_is_okay(msg, ('method', 'hostname', 'info.url', 'properties')):
-            return { "success": -1, "msg": "Missing message properties (e.g. info.url/properties)" }
+            return { "success": -1, "msg": "Incorrect or missing message properties" }
 
         #
         # Property names we want to retrieve about the Datastore object plus any
@@ -214,7 +230,7 @@ class VSphereAgent(VConnector):
 
         """
         if not self.msg_is_okay(msg, ('method', 'hostname')):
-            return { 'success': -1, 'msg': 'Missing message properties (e.g. method/hostname)' }
+            return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
         
         # Properties we want to retrieve are 'name' and 'runtime.powerState'
         #
@@ -224,7 +240,7 @@ class VSphereAgent(VConnector):
         #
         property_names = ['name', 'runtime.powerState']
 
-        if msg.has_key('properties'):
+        if msg.has_key('properties') and msg['properties']:
             property_names.extend(msg['properties'])
 
         logging.info('[%s] Discovering ESXi hosts', self.hostname)
@@ -270,7 +286,7 @@ class VSphereAgent(VConnector):
 
         """
         if not self.msg_is_okay(msg, ('method', 'hostname')):
-            return { 'success': -1, 'msg': 'Missing message properties (e.g. method/hostname)' }
+            return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
         
         # Properties we want to retrieve about the datastores plus any
         # other user-requested properties
@@ -281,7 +297,7 @@ class VSphereAgent(VConnector):
         #
         property_names = ['info.name', 'info.url', 'summary.accessible']
 
-        if msg.has_key('properties'):
+        if msg.has_key('properties') and msg['properties']:
             property_names.extend(msg['properties'])
         
         logging.info('[%s] Discovering datastores', self.hostname)
@@ -300,4 +316,4 @@ class VSphereAgent(VConnector):
                  "msg": "Successfully discovered datastores",
                  "result": data,
                  }
-    
+
