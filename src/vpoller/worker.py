@@ -296,6 +296,7 @@ class VPollerWorker(Daemon):
             'host.discover':      self.agents[vsphere_host].discover_hosts,
             'datastore.poll':     self.agents[vsphere_host].get_datastore_property,
             'datastore.discover': self.agents[vsphere_host].discover_datastores,
+            'vm.poll':            self.agents[vsphere_host].get_vm_property,
             'vm.discover':        self.agents[vsphere_host].discover_virtual_machines,
             }
 

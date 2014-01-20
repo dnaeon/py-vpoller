@@ -140,7 +140,7 @@ class VSphereAgent(VConnector):
         ps = result.get_element_propSet()
         
         result = { "success": 0,
-                   "msg": "Successfully retrieved property",
+                   "msg": "Successfully retrieved properties",
                    "result": {p.Name:p.Val for p in ps},
                    }
         
@@ -197,10 +197,67 @@ class VSphereAgent(VConnector):
         ps = result.get_element_propSet()
 
         result = { "success": 0,
-                   "msg": "Successfully retrieved property",
+                   "msg": "Successfully retrieved properties",
                    "result": {p.Name:p.Val for p in ps},
                    }
 
+        return result
+
+    def get_vm_property(self, msg):
+        """
+        Get property of an object of type VirtualMachine and return it.
+
+        Example client message to get a VM property could be:
+
+            {
+                "method":     "vm.poll",
+                "hostname":   "vc01-test.example.org",
+                "name":       "vm01.example.org",
+                "properties": [
+                    "config.uuid",
+                    "config.guestFullName"
+                ]
+            }
+        
+        Args:
+            msg (dict): The client message to process
+
+        """
+        if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
+            return { "success": -1, "msg": "Incorrect or missing message properties" }
+
+        #
+        # Property names we want to retrieve about the VirtualMachine object plus
+        # any other user-requested properties.
+        #
+        # Check the vSphere Web Services SDK API for more information on the properties
+        #
+        #     https://www.vmware.com/support/developer/vc-sdk/
+        #
+        property_names = ['config.name']
+        property_names.extend(msg['properties'])
+
+        logging.info('[%s] Retrieving %s for Virtual Machine %s', self.hostname, msg['properties'], msg['name'])
+
+        self.update_vm_mors()
+        mor = self.mors_cache['VirtualMachine']['objects'].get(msg['name'])
+
+        if not mor:
+            return { 'success': -1, 'msg': 'Unable to find Virtual Machine %s' % msg['name'] }
+
+        try:
+            result = self.viserver._get_object_properties(mor=mor, property_names=property_names)
+        except Exception as e:
+	    logging.warning('Cannot get property for Virtual Machine %s: %s', msg['name'], e)
+            return { 'success': -1, 'msg': 'Cannot get property for Virtual Machine %s: %s' % (msg['name'], e) }
+
+        ps = result.get_element_propSet()
+        
+        result = { "success": 0,
+                   "msg": "Successfully retrieved properties",
+                   "result": {p.Name:p.Val for p in ps},
+                   }
+        
         return result
         
     def discover_hosts(self, msg):
