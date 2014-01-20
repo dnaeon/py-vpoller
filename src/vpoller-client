@@ -73,7 +73,6 @@ def main():
 Usage:
   vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] -m <method> -V <host> -e <endpoint> 
   vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -p <property> -V <host> -e <endpoint>
-  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -u <datastore-url> -p <property> -V <host> -e <endpoint>
   vpoller-client --help
   vpoller-client --version
 
@@ -82,9 +81,8 @@ Options:
   -v, --version                               Display version and exit
   -m <method>, --method <method>              The method to be processed during the client request
   -V <host>, --vsphere-host <host>            The vSphere host to send the request to
-  -n <name>, --name <name>                    Name of the ESX host, only applicable to hosts object type
+  -n <name>, --name <name>                    Name of the object, e.g. ESXi hostname, datastore URL, etc.
   -p <properties>, --properties <properties>  Name of the property as defined by the vSphere Web SDK
-  -u <datastore-url>, --url <datastore-url>   Datastore URL, only applicable to datastores object type
   -r <retries>, --retries <retries>           Number of time to retry if a request times out [default: 3]
   -t <timeout>, --timeout <timeout>           Timeout after that period of milliseconds [default: 3000]
   -e <endpoint>, --endpoint <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to
@@ -117,7 +115,6 @@ Options:
         'method':     args['--method'],
         'hostname':   args['--vsphere-host'],
         'name':       args['--name'],
-        'info.url':   args['--url'],
         'properties': args['--properties'].split(',') if args['--properties'] else None,
         }
 

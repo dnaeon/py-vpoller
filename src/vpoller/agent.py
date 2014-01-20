@@ -72,7 +72,6 @@ class VSphereAgent(VConnector):
             'method':     (types.StringType, types.UnicodeType),
             'hostname':   (types.StringType, types.UnicodeType),
             'name':       (types.StringType, types.UnicodeType, types.NoneType),
-            'info.url':   (types.StringType, types.UnicodeType, types.NoneType),
             'properties': (types.TupleType,  types.ListType, types.NoneType),
             }
         
@@ -160,7 +159,7 @@ class VSphereAgent(VConnector):
             {
                 "method":     "datastore.get",
                 "hostname":   "vc01-test.example.org",
-                "info.url":   "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
+                "name":       "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
                 "properties": [
                     "summary.capacity",
                     "info.freeSpace",
@@ -176,7 +175,7 @@ class VSphereAgent(VConnector):
         # TODO: Handle collection objects as part of the returned result
         # 
 
-        if not self.msg_is_okay(msg, ('method', 'hostname', 'info.url', 'properties')):
+        if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
             return { "success": -1, "msg": "Incorrect or missing message properties" }
 
         #
@@ -190,19 +189,19 @@ class VSphereAgent(VConnector):
         property_names = ['info.url']
         property_names.extend(msg['properties'])
 
-        logging.info('[%s] Retrieving %s for datastore %s', self.hostname, msg['properties'], msg['info.url'])
+        logging.info('[%s] Retrieving %s for datastore %s', self.hostname, msg['properties'], msg['name'])
 
         self.update_datastore_mors()
-        mor = self.mors_cache['Datastore']['objects'].get(msg['info.url'])
+        mor = self.mors_cache['Datastore']['objects'].get(msg['name'])
 
         if not mor:
-            return { "success": -1, "msg": "Unable to find datastore %s" % msg['info.url'] }
+            return { "success": -1, "msg": "Unable to find datastore %s" % msg['name'] }
 
         try:
             result = self.viserver._get_object_properties(mor=mor, property_names=property_names)
         except Exception as e:
-            logging.warning("Cannot get property for datastore %s: %s" % (msg['info.url'], e))
-            return { "success": -1, "msg": "Cannot get property for datastore %s: %s" % (msg['info.url'], e) }
+            logging.warning("Cannot get property for datastore %s: %s" % (msg['name'], e))
+            return { "success": -1, "msg": "Cannot get property for datastore %s: %s" % (msg['name'], e) }
 
         ps = result.get_element_propSet()
 
