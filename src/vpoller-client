@@ -108,7 +108,7 @@ Options:
     client = VPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
 
     # List of available helpers
-    helpers = ['vpoller.helpers.zabbix']
+    helpers = ['vpoller.helpers.zabbix', 'vpoller.helpers.csvhelper']
 
     # Message we send out to workers
     msg = {
