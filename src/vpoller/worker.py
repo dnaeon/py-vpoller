@@ -304,7 +304,7 @@ class VPollerWorker(Daemon):
             'cluster.discover':     self.agents[vsphere_host].discover_clusters,
             }
 
-        result = methods[msg['method']](msg) if methods.get(msg['method']) else { "success": -1, "msg": "Unknown command received" }
+        result = methods[msg['method']](msg) if methods.get(msg['method']) else { "success": -1, "msg": "Unknown method received" }
 
         return result
         
