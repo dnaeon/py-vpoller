@@ -259,6 +259,36 @@ class VSphereAgent(VConnector):
                    }
         
         return result
+    
+    def get_datacenter_property(self, msg):
+        """
+        Get property of an object of type Datacenter and return it.
+
+        Example client message to get a Datacenter property could be:
+
+            {
+                "method":     "datacenter.poll",
+                "hostname":   "vc01-test.example.org",
+                "name":       "Dc01",
+                "properties": [
+                    "name"
+                ]
+            }
+        
+        Args:
+            msg (dict): The client message to process
+
+        """
+        if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
+            return { "success": -1, "msg": "Incorrect or missing message properties" }
+
+        #
+        # Currently we don't support polling of Datacenter object properties as the
+        # properties are mostly collections and we need a way to nicely process
+        # collection objects before we enable this.
+        #
+
+        return { 'success': -1, 'msg': 'Polling of Datacenter properties is not implemented yet' }
         
     def discover_hosts(self, msg):
         """
