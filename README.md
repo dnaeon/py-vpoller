@@ -199,6 +199,13 @@ This would return just the value of the property requested, thus making it easy 
 
 Possible other usage of the *vPoller Helpers* is an HTML helper, which would return the result in HTML format in order to present the information nicely in a web browser.
 
+The table below summarizes the currently existing and supported `vPoller Helpers`:
+
+| Helper                    | Description                                          |
+|---------------------------|------------------------------------------------------|
+| vpoller.helpers.zabbix    | Helper which returns data in Zabbix-friendly format  |
+| vpoller.helpers.csvhelper | Helper which returns data in CSV format              |
+
 ## Discovering ESXi hosts
 
 The method we use for discovering the ESXi hosts is `host.discover`. Below is an example command for discovering all ESXi hosts:
