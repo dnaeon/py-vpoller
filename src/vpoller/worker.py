@@ -296,6 +296,7 @@ class VPollerWorker(Daemon):
             'host.discover':      self.agents[vsphere_host].discover_hosts,
             'datastore.poll':     self.agents[vsphere_host].get_datastore_property,
             'datastore.discover': self.agents[vsphere_host].discover_datastores,
+            'vm.discover':        self.agents[vsphere_host].discover_virtual_machines,
             }
 
         result = methods[msg['method']](msg) if methods.get(msg['method']) else { "success": -1, "msg": "Unknown command received" }
