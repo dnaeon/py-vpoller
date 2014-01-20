@@ -108,6 +108,11 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+        
         if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
             return { "success": -1, "msg": "Incorrect or missing message properties" }
 
@@ -166,6 +171,11 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
         
         """
+        
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+
         if not self.msg_is_okay(msg, ('method', 'hostname', 'info.url', 'properties')):
             return { "success": -1, "msg": "Incorrect or missing message properties" }
 
@@ -223,6 +233,11 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+
         if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
             return { "success": -1, "msg": "Incorrect or missing message properties" }
 
@@ -279,6 +294,11 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+        
         if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
             return { "success": -1, "msg": "Incorrect or missing message properties" }
 
@@ -309,6 +329,11 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+        
         if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
             return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
 
@@ -372,6 +397,11 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered ESXi hosts.
 
         """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+        
         if not self.msg_is_okay(msg, ('method', 'hostname')):
             return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
         
@@ -428,6 +458,11 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered datastores.
 
         """
+        
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+        
         if not self.msg_is_okay(msg, ('method', 'hostname')):
             return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
         
@@ -485,6 +520,11 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered Virtual Machines.
 
         """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+        
         if not self.msg_is_okay(msg, ('method', 'hostname')):
             return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
         
@@ -540,6 +580,11 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered Datacenters.
 
         """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+        
         if not self.msg_is_okay(msg, ('method', 'hostname')):
             return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
         
@@ -595,6 +640,11 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered Clusters.
 
         """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+        
         if not self.msg_is_okay(msg, ('method', 'hostname')):
             return { 'success': -1, 'msg': 'Incorrect or missing message properties' }
         
