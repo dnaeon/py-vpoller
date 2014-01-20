@@ -25,9 +25,11 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vpoller-client is an application used for polling objects' information from a VMware vCenter server.
+vpoller-client is the vPoller Client application.
 
-It is intended to be integrated into a Zabbix template for polling of ESX hosts and Datastores properties.
+It is used for sending client requests to vPoller Proxy/Workers for
+discovering and polling of vSphere Object properties.
+
 """
 
 import sys
@@ -69,16 +71,15 @@ def main():
 
     usage="""
 Usage:
-  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] -m <method> -V <host> -e <endpoint> 
-  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -p <property> -V <host> -e <endpoint>
-  vpoller-client [-z] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -u <datastore-url> -p <property> -V <host> -e <endpoint>
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] -m <method> -V <host> -e <endpoint> 
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -p <property> -V <host> -e <endpoint>
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -u <datastore-url> -p <property> -V <host> -e <endpoint>
   vpoller-client --help
   vpoller-client --version
 
 Options:
   -h, --help                                  Display this usage info
   -v, --version                               Display version and exit
-  -z, --zabbix                                Receive result in Zabbix Low-Level Discovery format
   -m <method>, --method <method>              The method to be processed during the client request
   -V <host>, --vsphere-host <host>            The vSphere host to send the request to
   -n <name>, --name <name>                    Name of the ESX host, only applicable to hosts object type
@@ -118,7 +119,6 @@ Options:
         'name':       args['--name'],
         'info.url':   args['--url'],
         'properties': args['--properties'].split(',') if args['--properties'] else None,
-        'zabbix':     args['--zabbix'],
         }
 
     # Get the result
