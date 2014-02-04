@@ -65,8 +65,8 @@ class HelperAgent(object):
         
         # Methods that the Helper knows about and how to process
         methods = {
-            'host.poll':          self.zabbix_item_value,
-            'datastore.poll':     self.zabbix_item_value,
+            'host.get':           self.zabbix_item_value,
+            'datastore.get':      self.zabbix_item_value,
             'host.discover':      self.zabbix_lld_data,
             'datastore.discover': self.zabbix_lld_data,
             }
