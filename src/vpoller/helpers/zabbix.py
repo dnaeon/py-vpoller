@@ -65,10 +65,16 @@ class HelperAgent(object):
         
         # Methods that the Helper knows about and how to process
         methods = {
-            'host.get':           self.zabbix_item_value,
-            'datastore.get':      self.zabbix_item_value,
-            'host.discover':      self.zabbix_lld_data,
-            'datastore.discover': self.zabbix_lld_data,
+            'host.get':            self.zabbix_item_value,
+            'datastore.get':       self.zabbix_item_value,
+            'vm.get':              self.zabbix_item_value,
+            'datacenter.get':      self.zabbix_item_value,
+            'cluster.get':         self.zabbix_item_value,
+            'host.discover':       self.zabbix_lld_data,
+            'datastore.discover':  self.zabbix_lld_data,
+            'vm.discover':         self.zabbix_lld_data,
+            'datacenter.discover': self.zabbix_lld_data,
+            'cluster.discover':    self.zabbix_lld_data,
             }
         
         result = methods[method]() if methods.get(method) else '[zbx-helper]: Do not know how to process method %s' % method
