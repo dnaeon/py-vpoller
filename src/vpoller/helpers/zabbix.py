@@ -85,11 +85,14 @@ class HelperAgent(object):
         """
         Processes a single property value
 
+        The value we return is of the first property only,
+        so that each item in Zabbix stores a single property value.
+
         Returns:
             The property value from the result message
 
         """
-        property_name = self.msg['property']
+        property_name = self.msg['properties'][0]
         
         return self.data['result'][property_name]
 
