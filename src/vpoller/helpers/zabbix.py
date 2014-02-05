@@ -109,7 +109,7 @@ class HelperAgent(object):
 
         The result attribute names are in Zabbix Macro-like format, e.g.
 
-            {#vSphere.<attribute>}: <value>
+            {#VSPHERE.<ATTRIBUTE>}: <value>
             
         """
         result = self.data['result']
@@ -117,7 +117,7 @@ class HelperAgent(object):
         data = []
         
         for eachItem in result:
-            props = [('{#vSphere.' + k + '}', v) for k, v in eachItem.items()]
+            props = [('{#VSPHERE.' + k.upper() + '}', v) for k, v in eachItem.items()]
             data.append(dict(props))
 
         return json.dumps({ 'data': data }, indent=4)
