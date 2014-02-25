@@ -58,6 +58,8 @@ class VPollerProxy(Daemon):
             config_file (str): Location to the config file for vPoller Proxy
 
         """
+        logging.debug('Preparing vPoller Proxy for starting up')
+        
         # Note the time we start up
         self.running_since = asctime()
 
@@ -73,11 +75,14 @@ class VPollerProxy(Daemon):
         logging.info("Starting the VPoller Proxy")
         
         # Enter the main daemon loop from here
+        logging.debug('Entering main daemon loop')
         while not self.time_to_die:
             socks = dict(self.zpoller.poll())
 
             # Frontend socket, forward messages to the backend
             if socks.get(self.frontend) == zmq.POLLIN:
+                logging.debug('Received message on frontend socket, passing to backend...')
+                
                 msg = self.frontend.recv()
                 more = self.frontend.getsockopt(zmq.RCVMORE)
                 if more:
@@ -87,6 +92,8 @@ class VPollerProxy(Daemon):
 
             # Backend socket, forward messages back to the clients
             if socks.get(self.backend) == zmq.POLLIN:
+                logging.debug('Received message on backend socket, passing to frontend...')
+
                 msg = self.backend.recv()
                 more = self.backend.getsockopt(zmq.RCVMORE)
                 if more:
@@ -96,11 +103,14 @@ class VPollerProxy(Daemon):
 
             # Management socket
             if socks.get(self.mgmt) == zmq.POLLIN:
+                logging.debug('Received new message on mgmt socket')
+
                 msg = self.mgmt.recv_json()
                 result = self.process_mgmt_message(msg)
                 self.mgmt.send_json(result)
 
         # Shutdown time has arrived, let's clean up a bit
+        logging.debug('vPoller Proxy is going down...')
         self.close_proxy_sockets()
 #        self.zcontext.term()
         self.stop()
@@ -116,6 +126,8 @@ class VPollerProxy(Daemon):
             VPollerException
             
         """
+        logging.debug('Loading vPoller Proxy configuration file %s', config_file)
+        
         if not os.path.exists(config_file):
             logging.error("Configuration file does not exists: %s", config_file)
             raise VPollerException, "Configuration file does not exists: %s" % config_file 
@@ -145,11 +157,15 @@ class VPollerProxy(Daemon):
             VPollerException
             
         """
+        logging.debug('Creating vPoller Proxy sockets')
+
         self.zcontext = zmq.Context()
 
         # A management socket, used to control the VPollerProxy daemon
         self.mgmt = self.zcontext.socket(zmq.REP)
 
+
+        logging.debug('Binding mgmt socket to: %s', self.mgmt_endpoint)
         try:
             self.mgmt.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
@@ -159,6 +175,7 @@ class VPollerProxy(Daemon):
         # Socket facing clients
         self.frontend = self.zcontext.socket(zmq.ROUTER)
 
+        logging.debug('Binding frontend socket to: %s', self.frontend_endpoint)
         try:
             self.frontend.bind(self.frontend_endpoint)
         except zmq.ZMQError as e:
@@ -168,6 +185,7 @@ class VPollerProxy(Daemon):
         # Socket facing workers
         self.backend = self.zcontext.socket(zmq.DEALER)
 
+        logging.debug('Binding backend socket to: %s', self.backend_endpoint)
         try:
             self.backend.bind(self.backend_endpoint)
         except zmq.ZMQError as e:
@@ -175,6 +193,7 @@ class VPollerProxy(Daemon):
             raise VPollerException, "Cannot bind backend socket: %s" % e
 
         # Create a poll set for our sockets
+        logging.debug('Creating a poll set for our sockets')
         self.zpoller = zmq.Poller()
         self.zpoller.register(self.frontend, zmq.POLLIN)
         self.zpoller.register(self.backend, zmq.POLLIN)
@@ -185,6 +204,7 @@ class VPollerProxy(Daemon):
         Closes the ZeroMQ sockets used by the vPoller Proxy
 
         """
+        logging.debug('Closing vPoller Proxy sockets')
         self.zpoller.unregister(self.frontend)
         self.zpoller.unregister(self.backend)
         self.zpoller.unregister(self.mgmt)
@@ -212,6 +232,8 @@ class VPollerProxy(Daemon):
             msg (dict): The client message to process
 
         """
+        logging.debug('Processing mgmt message: %s', msg)
+        
         # Check if we have a command to process
         if not "method" in msg:
             return { "success": -1, "msg": "Missing command name" }
@@ -237,6 +259,8 @@ class VPollerProxy(Daemon):
             Status information about the vPoller Proxy
             
         """
+        logging.debug('Getting vPoller Proxy status')
+
         result = {
             'success': 0,
             'msg': 'vPoller Proxy Status', 
@@ -251,6 +275,8 @@ class VPollerProxy(Daemon):
                 }
             }
 
+        logging.debug('Returning result to client: %s', result)
+        
         return result
 
     def proxy_shutdown(self, msg):
@@ -261,7 +287,7 @@ class VPollerProxy(Daemon):
             msg (dict): The client message for processing (ignored)
 
         """
-        logging.info("vPoller Proxy is shutting down")
+        logging.info('vPoller Proxy is shutting down')
 
         self.time_to_die = True
 

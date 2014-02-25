@@ -70,6 +70,12 @@ class VPollerClient(object):
             msg (dict): The client message to send
             
         """
+        logging.debug('Initiating message flow')
+        logging.debug('Endpoint: %s', self.endpoint)
+        logging.debug('Timeout: %s', self.timeout)
+        logging.debug('Retries: %d', self.retries)
+        logging.debug('Message: %s', msg)
+
         self.zcontext = zmq.Context()
         
         self.zclient = self.zcontext.socket(zmq.REQ)
@@ -82,6 +88,9 @@ class VPollerClient(object):
         result = None
         
         while self.retries > 0:
+            logging.debug('Sending client message')
+            logging.debug('Retries left: %d', self.retries)
+
             # Send our message out
             self.zclient.send_json(msg)
             
@@ -89,6 +98,7 @@ class VPollerClient(object):
 
             # Do we have a reply?
             if socks.get(self.zclient) == zmq.POLLIN:
+                logging.debug('Received reply on client socket')
                 result = self.zclient.recv()
                 break
             else:
@@ -97,16 +107,19 @@ class VPollerClient(object):
                 logging.warning("Did not receive reply from server, retrying...")
                 
                 # Socket is confused. Close and remove it.
+                logging.debug('Closing client socket and removing it')
                 self.zclient.close()
                 self.zpoller.unregister(self.zclient)
 
                 # Re-establish the connection
+                logging.debug('Re-establishing connect to endpoint %s', self.endpoint)
                 self.zclient = self.zcontext.socket(zmq.REQ)
                 self.zclient.connect(self.endpoint)
                 self.zclient.setsockopt(zmq.LINGER, 0)
                 self.zpoller.register(self.zclient, zmq.POLLIN)
 
         # Close the socket and terminate the context
+        logging.debug('Closing client sockets')
         self.zclient.close()
         self.zpoller.unregister(self.zclient)
         self.zcontext.term()
@@ -114,6 +127,8 @@ class VPollerClient(object):
         # Did we have any result reply at all?
         if not result:
             logging.error("Did not receive a reply from the server, aborting...")
-            return { "success": -1, "msg": "Did not receive reply from the server, aborting..." }
+            return '{ "success": -1, "msg": "Did not receive reply from the server, aborting..." }'
+
+        logging.debug('Received reply was: %s', result)
         
         return result

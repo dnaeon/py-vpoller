@@ -61,6 +61,8 @@ class VPollerWorker(Daemon):
             config_file (str):  Configuration file for the VPollerWorker
 
         """
+        logging.debug('Preparing vPoller Worker for starting up')
+
         # Note the time we start up
         self.running_since = asctime()
         
@@ -80,6 +82,7 @@ class VPollerWorker(Daemon):
         self.start_vsphere_agents()
 
         # Enter the main daemon loop from here
+        logging.debug('Entering main daemon loop')
         while not self.time_to_die:
             socks = dict(self.zpoller.poll())
 
@@ -90,23 +93,31 @@ class VPollerWorker(Daemon):
                 # Frame 1:  [ N ][...]  <- Identity of connection
                 # Frame 2:  [ 0 ][]     <- Empty delimiter frame
                 # Frame 3:  [ N ][...]  <- Data frame
+                logging.debug('Received new message on worker socket')
+                
                 _id    = self.worker_socket.recv()
                 _empty = self.worker_socket.recv()
                 msg    = self.worker_socket.recv_json()
 
                 # Process the client message and send the result
                 result = self.process_client_message(msg)
+
                 self.worker_socket.send(_id, zmq.SNDMORE)
                 self.worker_socket.send("", zmq.SNDMORE)
                 self.worker_socket.send_json(result)
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
+                logging.debug('Received new message on mgmt socket')
+                
                 msg = self.mgmt_socket.recv_json()
+
                 result = self.process_mgmt_message(msg)
+
                 self.mgmt_socket.send_json(result)
 
         # Shutdown time has arrived, let's clean up a bit
+        logging.debug('Shutdown time, vPoller Worker is going down...')
         self.close_worker_sockets()
         self.shutdown_vsphere_agents()
  #       self.zcontext.term()
@@ -123,6 +134,8 @@ class VPollerWorker(Daemon):
             VPollerException
 
         """
+        logging.debug('Loading vPoller Worker config file %s', config_file)
+
         if not os.path.exists(config_file):
             logging.error("Configuration file does not exists: %s", config_file)
             raise VPollerException, "Configuration file does not exists: %s" % config_file
@@ -151,11 +164,14 @@ class VPollerWorker(Daemon):
             VPollerException
 
         """
+        logging.debug('Creating vPoller Worker sockets')
+
         self.zcontext = zmq.Context()
         
         # A management socket used to control the vPoller Worker daemon
         self.mgmt_socket = self.zcontext.socket(zmq.REP)
 
+        logging.debug('Binding mgmt socket to: %s', self.mgmt_endpoint)
         try:
             self.mgmt_socket.bind(self.mgmt_endpoint)
         except zmq.ZMQError as e:
@@ -163,7 +179,8 @@ class VPollerWorker(Daemon):
             raise VPollerException, "Cannot bind management socket: %s" % e
 
         # Create a DEALER socket for processing client messages
-        logging.info("Connecting to the vPoller Proxy server")
+        logging.info('Connecting to the vPoller Proxy server')
+        logging.debug('Connecting to vPoller Proxy endpoint: %s', self.proxy_endpoint)
         self.worker_socket = self.zcontext.socket(zmq.DEALER)
 
         try:
@@ -173,6 +190,7 @@ class VPollerWorker(Daemon):
             raise VPollerException, "Cannot connect worker to vPoller Proxy: %s" % e
 
         # Create a poll set for our sockets
+        logging.debug('Creating poll set for our sockets')
         self.zpoller = zmq.Poller()
         self.zpoller.register(self.mgmt_socket, zmq.POLLIN)
         self.zpoller.register(self.worker_socket, zmq.POLLIN)
@@ -182,6 +200,7 @@ class VPollerWorker(Daemon):
         Closes the ZeroMQ sockets used by the Worker
 
         """
+        logging.debug('Closing vPoller Worker sockets')
         self.zpoller.unregister(self.mgmt_socket)
         self.zpoller.unregister(self.worker_socket)
         self.mgmt_socket.close()
@@ -192,6 +211,8 @@ class VPollerWorker(Daemon):
         Prepares the vSphere Agent objects used by the Worker
 
         """
+        logging.debug('Spawning vSphere Agents')
+
         # Get the configuration files for our vSphere hosts
         confFiles = self.get_vsphere_configs(self.vsphere_hosts_dir)
  
@@ -199,6 +220,7 @@ class VPollerWorker(Daemon):
 
         # Load the config for every vSphere Agent
         for eachConf in confFiles:
+            logging.debug('Spawning vSphere Agent from config file: %s', eachConf)
             agent = VSphereAgent(eachConf, ignore_locks=True, lockdir="/var/run/vpoller", keep_alive=True)
             self.agents[agent.hostname] = agent
 
@@ -207,6 +229,8 @@ class VPollerWorker(Daemon):
         Connects all VPoller Agents to their respective vSphere hosts
 
         """
+        logging.debug('Starting vSphere Agents')
+        
         for eachAgent in self.agents:
             try:
                 self.agents[eachAgent].connect()
@@ -218,7 +242,10 @@ class VPollerWorker(Daemon):
         Disconnects all VPoller Agents from their respective vSphere hosts
         
         """
+        logging.debug('Shutting down vSphere Agents')
+
         for eachAgent in self.agents:
+            logging.debug('Shutting down vSphere Agent: %s', eachAgent.hostname)
             self.agents[eachAgent].disconnect()
         
     def get_vsphere_configs(self, config_dir):
@@ -238,6 +265,8 @@ class VPollerWorker(Daemon):
             VPollerException
             
         """
+        logging.debug('Getting vSphere configuration files from: %s', config_dir)
+        
         if not os.path.exists(config_dir) or not os.path.isdir(config_dir):
             logging.error("%s does not exists or is not a directory", config_dir)
             raise VPollerException, "%s does not exists or is not a directory" % config_dir
@@ -249,6 +278,8 @@ class VPollerWorker(Daemon):
         if not confFiles:
             logging.error("No vSphere config files found in %s", config_dir)
             raise VPollerException, "No vSphere config files found in %s" % config_dir
+
+        logging.debug('Discovered vSphere configuration files: %s', confFiles)
 
         return confFiles
 
@@ -281,6 +312,8 @@ class VPollerWorker(Daemon):
             msg (dict): The client message for processing
 
         """
+        logging.debug('Processing client message: %s', msg)
+
         # We require to have at least the 'method' and vSphere 'hostname'
         if not all(k in msg for k in ("method", "hostname")):
             return { "success": -1, "msg": "Missing message properties (e.g. method/hostname)" }
@@ -332,6 +365,8 @@ class VPollerWorker(Daemon):
             msg (dict): The client message for processing
               
         """
+        logging.debug('Processing mgmt message: %s', msg)
+
         if not "method" in msg:
             return { "success": -1, "msg": "Missing method name" }
         
@@ -356,6 +391,7 @@ class VPollerWorker(Daemon):
             Status information about the vPoller Worker
             
         """
+        logging.debug('Getting vPoller Worker status')
 
         result = {
             'success': 0,
@@ -372,6 +408,8 @@ class VPollerWorker(Daemon):
                 }
             }
 
+        logging.debug('Returning result to client: %s', result)
+
         return result
 
     def worker_shutdown(self, msg):
@@ -382,7 +420,7 @@ class VPollerWorker(Daemon):
             msg (dict): The client message for processing (ignored)
 
         """
-        logging.info("vPoller Worker is shutting down")
+        logging.info('vPoller Worker is shutting down')
 
         self.time_to_die = True
 

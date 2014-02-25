@@ -67,6 +67,9 @@ class VSphereAgent(VConnector):
             True if the message contains all required properties, False otherwise.
 
         """
+        logging.debug('Sanity checking client message')
+        logging.debug('Required message attributes: %s', attr)
+
         # The message attributes types we accept
         msg_types = {
             'method':     (types.StringType, types.UnicodeType),
@@ -107,6 +110,7 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+        logging.debug('Getting properties for a HostSystem object', self.hostname)
 
         #
         # TODO: Handle collection objects as part of the returned result
@@ -143,10 +147,13 @@ class VSphereAgent(VConnector):
 
         ps = result.get_element_propSet()
         
-        result = { "success": 0,
-                   "msg": "Successfully retrieved properties",
-                   "result": {p.Name:p.Val for p in ps},
-                   }
+        result = {
+            "success": 0,
+            "msg": "Successfully retrieved properties",
+            "result": {p.Name:p.Val for p in ps},
+        }
+
+        logging.debug('Returning result to client: %s', result)
         
         return result
 
@@ -170,7 +177,8 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
-
+        logging.debug('Getting performance counters for HostSystem object')
+        
         #
         # TODO: Handle collection objects as part of the returned result
         # 
@@ -225,6 +233,8 @@ class VSphereAgent(VConnector):
             "msg": "Successfully retrieved counters",
             "result": data,
         }
+
+        logging.debug('Returning result to client: %s', result)
         
         return result
 
@@ -244,7 +254,8 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
-
+        logging.debug('Getting all performance counters for HostSystem object')
+        
         #
         # TODO: Handle collection objects as part of the returned result
         # 
@@ -274,6 +285,8 @@ class VSphereAgent(VConnector):
             "msg": "Successfully retrieved counters",
             "result": data,
         }
+
+        logging.debug('Returning result to client: %s', result)
         
         return result
     
@@ -297,7 +310,8 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
         
         """
-        
+        logging.debug('Getting properties for a Datastore object')
+
         #
         # TODO: Handle collection objects as part of the returned result
         # 
@@ -332,10 +346,13 @@ class VSphereAgent(VConnector):
 
         ps = result.get_element_propSet()
 
-        result = { "success": 0,
-                   "msg": "Successfully retrieved properties",
-                   "result": {p.Name:p.Val for p in ps},
-                   }
+        result = {
+            "success": 0,
+            "msg": "Successfully retrieved properties",
+            "result": {p.Name:p.Val for p in ps},
+        }
+
+        logging.debug('Returning result to client: %s', result)
 
         return result
 
@@ -359,6 +376,7 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+        logging.debug('Getting properties for a VirtualMachine object')
 
         #
         # TODO: Handle collection objects as part of the returned result
@@ -394,10 +412,13 @@ class VSphereAgent(VConnector):
 
         ps = result.get_element_propSet()
         
-        result = { "success": 0,
-                   "msg": "Successfully retrieved properties",
-                   "result": {p.Name:p.Val for p in ps},
-                   }
+        result = {
+            "success": 0,
+            "msg": "Successfully retrieved properties",
+            "result": {p.Name:p.Val for p in ps},
+        }
+
+        logging.debug('Returning result to client: %s', result)
         
         return result
 
@@ -435,6 +456,7 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+        logging.debug('Getting performance counters for a VirtualMachine object')
 
         #
         # TODO: Handle collection objects as part of the returned result
@@ -490,6 +512,8 @@ class VSphereAgent(VConnector):
             "msg": "Successfully retrieved counters",
             "result": data,
         }
+
+        logging.debug('Returning result to client: %s', result)
         
         return result
 
@@ -509,6 +533,7 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+        logging.debug('Getting all performance counters for a VirtualMachine object')
 
         #
         # TODO: Handle collection objects as part of the returned result
@@ -539,6 +564,8 @@ class VSphereAgent(VConnector):
             "msg": "Successfully retrieved counters",
             "result": data,
         }
+
+        logging.debug('Returning result to client: %s', result)
         
         return result
 
@@ -561,6 +588,7 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+        logging.debug('Getting properties for a Datacenter object')
 
         #
         # TODO: Handle collection objects as part of the returned result
@@ -574,6 +602,9 @@ class VSphereAgent(VConnector):
         # properties are mostly collections and we need a way to nicely process
         # collection objects before we enable this.
         #
+
+        result = None
+        logging.debug('Returning result to client: %s', result)
 
         return { 'success': -1, 'msg': 'Polling of Datacenter properties is not implemented yet' }
 
@@ -596,6 +627,7 @@ class VSphereAgent(VConnector):
             msg (dict): The client message to process
 
         """
+        logging.debug('Getting properties for a ClusterComputeResource object')
 
         #
         # TODO: Handle collection objects as part of the returned result
@@ -631,10 +663,13 @@ class VSphereAgent(VConnector):
 
         ps = result.get_element_propSet()
         
-        result = { "success": 0,
-                   "msg": "Successfully retrieved properties",
-                   "result": {p.Name:p.Val for p in ps},
-                   }
+        result = {
+            "success": 0,
+            "msg": "Successfully retrieved properties",
+            "result": {p.Name:p.Val for p in ps},
+        }
+
+        logging.debug('Returning result to the client: %s', result)
         
         return result
     
@@ -664,6 +699,7 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered ESXi hosts.
 
         """
+        logging.debug('Discovering all HostSystem objects')
 
         #
         # TODO: Handle collection objects as part of the returned result
@@ -694,11 +730,16 @@ class VSphereAgent(VConnector):
 
         data = [{p.Name:p.Val for p in item.PropSet} for item in result]
 
-        return { "success": 0,
-                 "msg": "Successfully discovered ESXi hosts",
-                 "result": data
-                 }
+        result = {
+            "success": 0,
+            "msg": "Successfully discovered ESXi hosts",
+            "result": data
+        }
 
+        logging.debug('Returning result to client: %s', result)
+
+        return result
+        
     def discover_datastores(self, msg):
         """
         Discovers all datastores registered in a VMware vSphere server.
@@ -725,6 +766,7 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered datastores.
 
         """
+        logging.debug('Discovering all Datastore objects')
         
         #
         # TODO: Handle collection objects as part of the returned result
@@ -756,10 +798,15 @@ class VSphereAgent(VConnector):
 
         data = [{p.Name:p.Val for p in item.PropSet} for item in result]
 
-        return { "success": 0,
-                 "msg": "Successfully discovered datastores",
-                 "result": data,
-                 }
+        result = {
+            "success": 0,
+            "msg": "Successfully discovered datastores",
+            "result": data,
+        }
+
+        logging.debug('Returning result to client: %s', result)
+
+        return result
 
     def discover_virtual_machines(self, msg):
         """
@@ -787,6 +834,8 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered Virtual Machines.
 
         """
+        logging.debug('Discovering all VirtualMachine objects')
+
         #
         # TODO: Handle collection objects as part of the returned result
         # 
@@ -817,10 +866,15 @@ class VSphereAgent(VConnector):
 
         data = [{p.Name:p.Val for p in item.PropSet} for item in result]
 
-        return { "success": 0,
-                 "msg": "Successfully discovered Virtual Machines",
-                 "result": data,
-                 }
+        result = {
+            "success": 0,
+            "msg": "Successfully discovered Virtual Machines",
+            "result": data,
+        }
+
+        logging.debug('Returning result to client: %s', result)
+
+        return result
     
     def discover_datacenters(self, msg):
         """
@@ -846,6 +900,7 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered Datacenters.
 
         """
+        logging.debug('Discovering all Datacenter objects')
 
         #
         # TODO: Handle collection objects as part of the returned result
@@ -877,10 +932,15 @@ class VSphereAgent(VConnector):
 
         data = [{p.Name:p.Val for p in item.PropSet} for item in result]
 
-        return { "success": 0,
-                 "msg": "Successfully discovered Datacenters",
-                 "result": data,
-                 }
+        result = {
+            "success": 0,
+            "msg": "Successfully discovered Datacenters",
+            "result": data,
+        }
+
+        logging.debug('Returning result to client: %s', result)
+
+        return result
     
     def discover_clusters(self, msg):
         """
@@ -906,7 +966,8 @@ class VSphereAgent(VConnector):
             The returned data is a JSON object, containing the discovered Clusters.
 
         """
-
+        logging.debug('Discovering all ClusterComputeResource objects')
+        
         #
         # TODO: Handle collection objects as part of the returned result
         # 
@@ -937,7 +998,12 @@ class VSphereAgent(VConnector):
 
         data = [{p.Name:p.Val for p in item.PropSet} for item in result]
 
-        return { "success": 0,
-                 "msg": "Successfully discovered Clusters",
-                 "result": data,
-                 }
+        result = {
+            "success": 0,
+            "msg": "Successfully discovered Clusters",
+            "result": data,
+        }
+
+        logging.debug('Returning result to client: %s', result)
+
+        return result
