@@ -149,7 +149,134 @@ class VSphereAgent(VConnector):
                    }
         
         return result
-            
+
+    def get_host_counter(self, msg):
+        """
+        Get performance counters of an object of type HostSystem and return it.
+
+        Example client message to get a VM performance counter could be:
+
+            {
+                "method":     "host.counter.get",
+                "hostname":   "vc01-test.example.org",
+                "name":       "esxi01.example.org",
+                "properties": [
+                    "cpu.usage",
+                    "mem.usage"
+                ]
+            }
+        
+        Args:
+            msg (dict): The client message to process
+
+        """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+
+        if not self.msg_is_okay(msg, ('method', 'hostname', 'name', 'properties')):
+            return { "success": -1, "msg": "Incorrect or missing message properties" }
+
+        #
+        # Performance Counter names we want to retrieve about the VirtualMachine object plus
+        # any other user-requested properties.
+        #
+        # Check the vSphere Web Services SDK API for more information on the properties
+        #
+        #     https://www.vmware.com/support/developer/vc-sdk/
+        #
+        counter_names = msg['properties']
+
+        logging.info('[%s] Retrieving %s for host %s', self.hostname, msg['properties'], msg['name'])
+
+        # Locate the HostSystem MOR for which we want to get the performance counters
+        self.update_host_mors()
+        mor = self.mors_cache['HostSystem']['objects'].get(msg['name'])
+
+        if not mor:
+            return { 'success': -1, 'msg': 'Unable to find host %s' % msg['name'] }
+
+        self._get_performance_manager()
+
+        try:
+            result = self.pm.get_entity_statistic(entity=mor, counters=counter_names)
+        except Exception as e:
+	    logging.warning('Cannot get counters for host %s: %s', msg['name'], e)
+            return { 'success': -1, 'msg': 'Cannot get counters for host %s: %s' % (msg['name'], e) }
+
+        data = []
+
+        for eachCounter in result:
+          data.append(
+            { 'name': eachCounter.group + '.' + eachCounter.counter,
+              'counter': eachCounter.counter,
+              'group': eachCounter.group,
+              'description': eachCounter.description,
+              'unit': eachCounter.unit,
+              'group_description': eachCounter.group_description,
+              'unit_description': eachCounter.unit_description,
+              'value': eachCounter.value
+            }
+          )
+
+        result = {
+            "success": 0,
+            "msg": "Successfully retrieved counters",
+            "result": data,
+        }
+        
+        return result
+
+    def get_host_counter_all(self, msg):
+        """
+        Get all performance counters of an object of type HostSystem and return them.
+
+        Example client message to get all HostSystem performance counters could be:
+
+            {
+                "method":     "host.counter.all",
+                "hostname":   "vc01-test.example.org",
+                "name":       "esxi01.example.org",
+            }
+        
+        Args:
+            msg (dict): The client message to process
+
+        """
+
+        #
+        # TODO: Handle collection objects as part of the returned result
+        # 
+
+        if not self.msg_is_okay(msg, ('method', 'hostname', 'name')):
+            return { "success": -1, "msg": "Incorrect or missing message properties" }
+
+        logging.info('[%s] Retrieving all performance counters for %s', self.hostname, msg['name'])
+
+        # Locate the HostSystem MOR for which we want to get the performance counters
+        self.update_host_mors()
+        mor = self.mors_cache['HostSystem']['objects'].get(msg['name'])
+
+        if not mor:
+            return { 'success': -1, 'msg': 'Unable to find host %s' % msg['name'] }
+
+        self._get_performance_manager()
+
+        try:
+            data = self.pm.get_entity_counters(entity=mor)
+        except Exception as e:
+	    logging.warning('Cannot get counters for host %s: %s', msg['name'], e)
+            return { 'success': -1, 'msg': 'Cannot get counters for host %s: %s' % (msg['name'], e) }
+
+        result = {
+            "success": 0,
+            "msg": "Successfully retrieved counters",
+            "result": data,
+        }
+        
+        return result
+    
     def get_datastore_property(self, msg):
         """
         Get property of an object of type Datastore and return it.
@@ -414,7 +541,7 @@ class VSphereAgent(VConnector):
         }
         
         return result
-    
+
     def get_datacenter_property(self, msg):
         """
         Get property of an object of type Datacenter and return it.

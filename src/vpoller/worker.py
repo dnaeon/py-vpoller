@@ -294,6 +294,8 @@ class VPollerWorker(Daemon):
         methods = {
             'host.get':             self.agents[vsphere_host].get_host_property,
             'host.discover':        self.agents[vsphere_host].discover_hosts,
+            'host.counter.get':     self.agents[vsphere_host].get_host_counter,
+            'host.counter.all':     self.agents[vsphere_host].get_host_counter_all,
             'datastore.get':        self.agents[vsphere_host].get_datastore_property,
             'datastore.discover':   self.agents[vsphere_host].discover_datastores,
             'vm.get':               self.agents[vsphere_host].get_vm_property,
