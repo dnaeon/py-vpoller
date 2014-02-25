@@ -110,7 +110,8 @@ class HelperAgent(object):
 
         """
 	for v in self.data['result']:
-            if not v['instance']: return v['value']
+            if not v['instance']:
+                return v['value']
             
     def zabbix_lld_data(self):
         """
