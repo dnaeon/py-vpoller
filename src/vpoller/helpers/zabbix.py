@@ -66,8 +66,10 @@ class HelperAgent(object):
         # Methods that the Helper knows about and how to process
         methods = {
             'host.get':            self.zabbix_item_value,
+            'host.counter.get':    self.zabbix_counter_value,
             'datastore.get':       self.zabbix_item_value,
             'vm.get':              self.zabbix_item_value,
+            'vm.counter.get':      self.zabbix_counter_value,
             'datacenter.get':      self.zabbix_item_value,
             'cluster.get':         self.zabbix_item_value,
             'host.discover':       self.zabbix_lld_data,
@@ -96,6 +98,20 @@ class HelperAgent(object):
         
         return self.data['result'][property_name]
 
+    def zabbix_counter_value(self):
+        """
+        Processes a single counter value
+
+        The value we return is not for an instance,
+        so that each item in Zabbix stores a single property value.
+
+        Returns:
+            The counter value from the result message
+
+        """
+	for v in self.data['result']:
+            if not v['instance']: return v['value']
+            
     def zabbix_lld_data(self):
         """
         Translates a discovery request to Zabbix LLD format
