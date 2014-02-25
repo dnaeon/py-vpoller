@@ -72,6 +72,7 @@ def main():
     usage="""
 Usage:
   vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] -m <method> -V <host> -e <endpoint> 
+  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -V <host> -e <endpoint>
   vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -p <properties> -V <host> -e <endpoint>
   vpoller-client --help
   vpoller-client --version
