@@ -298,6 +298,8 @@ class VPollerWorker(Daemon):
             'datastore.discover':   self.agents[vsphere_host].discover_datastores,
             'vm.get':               self.agents[vsphere_host].get_vm_property,
             'vm.discover':          self.agents[vsphere_host].discover_virtual_machines,
+            'vm.counter.get':       self.agents[vsphere_host].get_vm_counter,
+            'vm.counter.all':       self.agents[vsphere_host].get_vm_counter_all,
             'datacenter.get':       self.agents[vsphere_host].get_datacenter_property,
             'datacenter.discover':  self.agents[vsphere_host].discover_datacenters,
             'cluster.get':          self.agents[vsphere_host].get_cluster_property,
