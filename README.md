@@ -104,18 +104,22 @@ Generally you would be running one vPoller Worker per node in order to provide r
 
 The table below summarizes the methods `vPoller Worker` currently supports and processes:
 
-| Method               | Description                                        |
-|----------------------|----------------------------------------------------|
-| host.get             | Get properties of a HostSystem object (ESXi host)  |
-| datastore.get        | Get properties of a Datastore object               |
-| vm.get               | Get properties of a VirtualMachine object          |
-| datacenter.get       | Get properties a Datacenter object                 |
-| cluster.get          | Get property of a ClusterComputeResource object    |
-| host.discover        | Discovers all HostSystem objects (ESXi hosts)      |
-| datastore.discover   | Discovers all Datastores objects                   | 
-| vm.discover          | Discovers all VirtualMachine objects               |
-| datacenter.discover  | Discovers all Datacenter objects                   |
-| cluster.discover     | Discovers all ClusterComputeResources objects      |
+| Method               | Description                                              |
+|----------------------|----------------------------------------------------------|
+| host.get             | Get properties of a HostSystem object (ESXi host)        |
+| datastore.get        | Get properties of a Datastore object                     |
+| vm.get               | Get properties of a VirtualMachine object                |
+| datacenter.get       | Get properties a Datacenter object                       |
+| cluster.get          | Get property of a ClusterComputeResource object          |
+| host.discover        | Discovers all HostSystem objects (ESXi hosts)            |
+| datastore.discover   | Discovers all Datastores objects                         | 
+| vm.discover          | Discovers all VirtualMachine objects                     |
+| datacenter.discover  | Discovers all Datacenter objects                         |
+| cluster.discover     | Discovers all ClusterComputeResources objects            |
+| host.counter.get     | Get performance counters for a HostSystem object         |
+| host.counter.all     | Get all performance counters for a HostSystem object     |
+| vm.counter.get       | Get performance counters for a VirtualMachine object     |
+| vm.counter.all       | Get all performance counters for a VirtualMachine object |
 
 The default configuration file of the *vpoller-worker* resides in */etc/vpoller/vpoller-worker.conf*, although you can specify a different config file from the command-line as well.
 
@@ -257,6 +261,19 @@ You can also request multiple properties for an object by appending the properti
 The example command below would request multiple properties to be returned for an ESXi host: 
 
 	$ vpoller-client -m host.get -V vc01-test.example.org -e tcp://localhost:10123 -n esx01.example.org -p runtime.powerState,hardware.memorySize,summary.overallStatus
+
+## Getting performance counters
+
+In order to get performance counters for a vSphere object using vPoller you can use the `vm.counter.*` and `host.counter.*` methods.
+
+This is an example to get performance counters for a VirtualMachine object:
+
+	$ vpoller-client -m vm.counter.get -V vc01-test.example.org -e tcp://localhost:10123 -n vm01.example.org -p cpu.run,cpu.idle
+
+And here is an example how to get all performance counter for a HostSystem object:
+
+	$ vpoller-client -m host.counter.all -V vc01-test.example.org -e tcp://localhost:10123 -n esxi01.example.org
+
 
 ## Using the management interface of vPoller
 
