@@ -33,7 +33,6 @@ performing the actual polling from a vCenter server.
 
 """
 
-import sys
 import json
 import logging
 
@@ -96,9 +95,9 @@ def status(endpoint):
 
 def main():
     usage="""
-Usage: vpoller-worker [-d] [-p <pidfile>] [-f <config-file>] [-o <logfile>] start
-       vpoller-worker -e <endpoint> stop
-       vpoller-worker -e <endpoint> status
+Usage: vpoller-worker [-d] [-D] [-p <pidfile>] [-f <config-file>] [-o <logfile>] start
+       vpoller-worker [-D] -e <endpoint> stop
+       vpoller-worker [-D] -e <endpoint> status
        vpoller-worker --help
        vpoller-worker --version
 
@@ -112,6 +111,7 @@ Options:
   -v, --version                             Display version and exit
   -d, --daemon                              Start as a daemon, otherwise
                                             run in the foreground
+  -D, --debug                               Debug mode, be more verbose
   -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
                                             [default: /var/run/vpoller/vpoller-worker.pid]
   -f <config-file>, --config <config-file>  Specify config file to use
@@ -124,14 +124,13 @@ Options:
 
     args = docopt(usage, version="0.1.0")
 
-    if args["--output"] == "-":
-        logging.basicConfig(stream=sys.stdout,
-                            format='%(asctime)s - %(levelname)s - vpoller-worker[%(process)s]: %(message)s',
-                            level=logging.DEBUG)
-    else:
-        logging.basicConfig(filename=args["--output"],
-                            format='%(asctime)s - %(levelname)s - vpoller-worker[%(process)s]: %(message)s',
-                            level=logging.DEBUG)
+    level = logging.DEBUG if args['--debug'] else logging.INFO
+
+    logging.basicConfig(
+        filename=args['--output'],
+        format='%(asctime)s - %(levelname)s - vpoller-worker[%(process)s]: %(message)s',
+        level=level
+    )
 
     result = None
         

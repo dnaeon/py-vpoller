@@ -32,7 +32,6 @@ discovering and polling of vSphere Object properties.
 
 """
 
-import sys
 import json
 import logging
 import importlib
@@ -71,15 +70,16 @@ def main():
 
     usage="""
 Usage:
-  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] -m <method> -V <host> -e <endpoint> 
-  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -V <host> -e <endpoint>
-  vpoller-client [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -p <properties> -V <host> -e <endpoint>
+  vpoller-client [-d] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] -m <method> -V <host> -e <endpoint> 
+  vpoller-client [-d] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -V <host> -e <endpoint>
+  vpoller-client [-d]  [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] -m <method> -n <name> -p <properties> -V <host> -e <endpoint>
   vpoller-client --help
   vpoller-client --version
 
 Options:
   -h, --help                                  Display this usage info
   -v, --version                               Display version and exit
+  -D, --debug                                 Debug mode, be more verbose
   -m <method>, --method <method>              The method to be processed during the client request
   -V <host>, --vsphere-host <host>            The vSphere host to send the request to
   -n <name>, --name <name>                    Name of the object, e.g. ESXi hostname, datastore URL, etc.
@@ -97,14 +97,13 @@ Options:
 
     args = docopt(usage, version="0.1.0")
 
-    if args["--output"] == "-":
-        logging.basicConfig(stream=sys.stdout,
-                            format='%(asctime)s - %(levelname)s - vpoller-client[%(process)s]: %(message)s',
-                            level=logging.DEBUG)
-    else:
-        logging.basicConfig(filename=args["--output"],
-                            format='%(asctime)s - %(levelname)s - vpoller-client[%(process)s]: %(message)s',
-                            level=logging.DEBUG)
+    level = logging.DEBUG if args['--debug'] else logging.INFO
+
+    logging.basicConfig(
+        filename=args['--output'],
+        format='%(asctime)s - %(levelname)s - vpoller-client[%(process)s]: %(message)s',
+        level=level
+    )
         
     client = VPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
 
