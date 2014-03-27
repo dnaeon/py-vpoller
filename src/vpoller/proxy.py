@@ -40,8 +40,8 @@ class VPollerProxy(Daemon):
     """
     VPoller Proxy class
 
-    ZeroMQ proxy/broker which load-balances all client requests to a
-    pool of connected vPoller Workers workers.
+    ZeroMQ proxy which load-balances client requests to a
+    pool of connected vPoller Workers workers
 
     Extends:
         Daemon
@@ -50,29 +50,29 @@ class VPollerProxy(Daemon):
         run() method
 
     """
-    def run(self, config_file):
+    def run(self, config):
         """
         The main vPoller Proxy method
 
         Args:
-            config_file (str): Location to the config file for vPoller Proxy
+            config (str): Path to the config file for vPoller Proxy
 
         """
-        logging.debug('Preparing vPoller Proxy for starting up')
+        logging.debug('Preparing vPoller Proxy for start up')
         
         # Note the time we start up
         self.running_since = asctime()
 
-        # A flag to indicate that the VPollerProxy daemon should be terminated
+        # A flag to indicate that the vPoller Proxy daemon should be terminated
         self.time_to_die = False
 
         # Load the configuration file of the vPoller Proxy
-        self.load_proxy_config(config_file)
+        self.load_proxy_config(config)
 
         # Create vPoller Proxy sockets
         self.create_proxy_sockets()
         
-        logging.info("Starting the VPoller Proxy")
+        logging.info('Starting the VPoller Proxy')
         
         # Enter the main daemon loop from here
         logging.debug('Entering main daemon loop')
@@ -81,7 +81,7 @@ class VPollerProxy(Daemon):
 
             # Frontend socket, forward messages to the backend
             if socks.get(self.frontend) == zmq.POLLIN:
-                logging.debug('Received message on frontend socket, passing to backend...')
+                logging.debug('Received message on frontend socket, passing to backend')
                 
                 msg = self.frontend.recv()
                 more = self.frontend.getsockopt(zmq.RCVMORE)
@@ -92,7 +92,7 @@ class VPollerProxy(Daemon):
 
             # Backend socket, forward messages back to the clients
             if socks.get(self.backend) == zmq.POLLIN:
-                logging.debug('Received message on backend socket, passing to frontend...')
+                logging.debug('Received message on backend socket, passing to frontend')
 
                 msg = self.backend.recv()
                 more = self.backend.getsockopt(zmq.RCVMORE)
@@ -103,44 +103,44 @@ class VPollerProxy(Daemon):
 
             # Management socket
             if socks.get(self.mgmt) == zmq.POLLIN:
-                logging.debug('Received new message on mgmt socket')
+                logging.debug('Received message on management socket')
 
                 msg = self.mgmt.recv_json()
                 result = self.process_mgmt_message(msg)
                 self.mgmt.send_json(result)
 
         # Shutdown time has arrived, let's clean up a bit
-        logging.debug('vPoller Proxy is going down...')
+        logging.debug('vPoller Proxy is going down')
         self.close_proxy_sockets()
 #        self.zcontext.term()
         self.stop()
 
-    def load_proxy_config(self, config_file):
+    def load_proxy_config(self, config):
         """
         Loads the vPoller Proxy configuration file
         
         Args:
-            config_file (str): Config file of the vPoller Proxy
+            config (str): Config file of the vPoller Proxy
 
         Raises:
             VPollerException
             
         """
-        logging.debug('Loading vPoller Proxy configuration file %s', config_file)
+        logging.debug('Loading vPoller Proxy configuration file %s', config)
         
-        if not os.path.exists(config_file):
-            logging.error("Configuration file does not exists: %s", config_file)
-            raise VPollerException, "Configuration file does not exists: %s" % config_file 
+        if not os.path.exists(config):
+            logging.error("Configuration file does not exists: %s", config)
+            raise VPollerException, "Configuration file does not exists: %s" % config 
 
-        config = ConfigParser.ConfigParser()
-        config.read(config_file)
+        parser = ConfigParser.ConfigParser()
+        parser.read(config)
 
         try:
-            self.frontend_endpoint = config.get('Default', 'frontend')
-            self.backend_endpoint  = config.get('Default', 'backend')
-            self.mgmt_endpoint     = config.get('Default', 'mgmt')
+            self.frontend_endpoint = parser.get('proxy', 'frontend')
+            self.backend_endpoint  = parser.get('proxy', 'backend')
+            self.mgmt_endpoint     = parser.get('proxy', 'mgmt')
         except ConfigParser.NoOptionError as e:
-            logging.error("Configuration issues detected in %s: %s", config_file, e)
+            logging.error("Configuration issues detected in %s: %s", config, e)
             raise
 
     def create_proxy_sockets(self):
@@ -161,60 +161,46 @@ class VPollerProxy(Daemon):
 
         self.zcontext = zmq.Context()
 
-        # A management socket, used to control the VPollerProxy daemon
-        self.mgmt = self.zcontext.socket(zmq.REP)
+        # vPoller Proxy sockets
+        self.mgmt     = self.zcontext.socket(zmq.REP)
+        self.frontend = self.zcontext.socket(zmq.ROUTER)
+        self.backend  = self.zcontext.socket(zmq.DEALER)
 
+        logging.debug('Binding vPoller Proxy sockets')
 
-        logging.debug('Binding mgmt socket to: %s', self.mgmt_endpoint)
         try:
             self.mgmt.bind(self.mgmt_endpoint)
-        except zmq.ZMQError as e:
-            logging.error("Cannot bind management socket: %s", e)
-            raise VPollerException, "Cannot bind management socket: %s" % e
-        
-        # Socket facing clients
-        self.frontend = self.zcontext.socket(zmq.ROUTER)
-
-        logging.debug('Binding frontend socket to: %s', self.frontend_endpoint)
-        try:
             self.frontend.bind(self.frontend_endpoint)
-        except zmq.ZMQError as e:
-            logging.error("Cannot bind frontend socket: %s", e)
-            raise VPollerException, "Cannot bind frontend socket: %s" % e
-
-        # Socket facing workers
-        self.backend = self.zcontext.socket(zmq.DEALER)
-
-        logging.debug('Binding backend socket to: %s', self.backend_endpoint)
-        try:
             self.backend.bind(self.backend_endpoint)
         except zmq.ZMQError as e:
-            logging.error("Cannot bind backend socket: %s", e)
-            raise VPollerException, "Cannot bind backend socket: %s" % e
+            logging.error('Cannot bind vPoller Proxy sockets: %s', e)
+            raise VPollerException, 'Cannot vPoller Proxy sockets: %s' % e
 
         # Create a poll set for our sockets
-        logging.debug('Creating a poll set for our sockets')
+        logging.debug('Creating a poll set for vPoller Proxy sockets')
         self.zpoller = zmq.Poller()
+        self.zpoller.register(self.mgmt, zmq.POLLIN)
         self.zpoller.register(self.frontend, zmq.POLLIN)
         self.zpoller.register(self.backend, zmq.POLLIN)
-        self.zpoller.register(self.mgmt, zmq.POLLIN)
 
     def close_proxy_sockets(self):
         """
-        Closes the ZeroMQ sockets used by the vPoller Proxy
+        Closes the ZeroMQ sockets used by vPoller Proxy
 
         """
         logging.debug('Closing vPoller Proxy sockets')
+
+        self.zpoller.unregister(self.mgmt)
         self.zpoller.unregister(self.frontend)
         self.zpoller.unregister(self.backend)
-        self.zpoller.unregister(self.mgmt)
+        
+        self.mgmt.close()
         self.frontend.close()
         self.backend.close()
-        self.mgmt.close()
         
     def process_mgmt_message(self, msg):
         """
-        Processes a message for the management interface of the VPoller Proxy
+        Processes a message for the management interface of VPoller Proxy
 
         An example message to get status information would be:
 
@@ -232,21 +218,23 @@ class VPollerProxy(Daemon):
             msg (dict): The client message to process
 
         """
-        logging.debug('Processing mgmt message: %s', msg)
+        logging.debug('Processing management message: %s', msg)
         
         # Check if we have a command to process
         if not "method" in msg:
             return { "success": -1, "msg": "Missing command name" }
 
-        # Methods we support and process
+        # Methods the vPoller Proxy supports and processes
         methods = {
             'proxy.status':   self.get_proxy_status,
             'proxy.shutdown': self.proxy_shutdown,
-            }
+        }
 
-        result = methods[msg['method']](msg) if methods.get(msg['method']) else { "success": -1, "msg": "Uknown command received" }
+        if msg['method'] not in methods:
+            return { 'success': -1, 'msg': 'Unknown method received' }
 
-        return result
+        # Process the requested method 
+        return methods[msg['method']](msg)
 
     def get_proxy_status(self, msg):
         """
@@ -272,8 +260,8 @@ class VPollerProxy(Daemon):
                 'mgmt_endpoint': self.mgmt_endpoint,
                 'running_since': self.running_since,
                 'uname': ' '.join(os.uname()),
-                }
             }
+        }
 
         logging.debug('Returning result to client: %s', result)
         
@@ -291,5 +279,5 @@ class VPollerProxy(Daemon):
 
         self.time_to_die = True
 
-        return { "success": 0, "msg": "vPoller Proxy is shutting down" }
+        return { 'success': 0, 'msg': 'vPoller Proxy is shutting down' }
 
