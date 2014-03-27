@@ -23,8 +23,10 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-The vconnector module provides classes and methods for establishing a 
-connection to VMware vSphere hosts and retrieving objects.
+vPoller Connector Module
+
+This module provides classes and methods for managing 
+connections to VMware vSphere hosts and retrieve objects
 
 """
 
@@ -34,17 +36,17 @@ from pyVim.connect import SmartConnect, Disconnect
 
 class VConnectorException(Exception):
     """
-    Generic VConnector exception.
+    Generic VConnector exception
 
     """
     pass
 
 class VConnector(object):
     """
-    VConnector class.
+    VConnector class
 
     The VConnector class defines methods for connecting, disconnecting and
-    retrieving objects from a VMware vSphere server instance.
+    retrieving objects from a VMware vSphere host
 
     Returns:
         VConnector object
@@ -55,16 +57,16 @@ class VConnector(object):
     """
     def __init__(self, user, pwd, host):
         """
-        Initializes a new VConnector object.
+        Initializes a new VConnector object
 
         Args:
-            user     (str): vSphere host
-            pwd      (str): Username 
-            host     (str): Password 
+            user     (str): Username to use when connecting
+            pwd      (str): Password to use when connecting 
+            host     (str): VMware vSphere host to connect to
 
         """
         self.user = user
-        self.pwd = pwd
+        self.pwd  = pwd
         self.host = host
 
     def connect(self):
@@ -75,7 +77,7 @@ class VConnector(object):
              VPollerException
         
         """
-        logging.info('Connecting to vSphere host %s', self.host)
+        logging.info('Connecting to %s', self.host)
         
         try:
             self.si = SmartConnect(
@@ -91,7 +93,7 @@ class VConnector(object):
         Disconnect from the VMware vSphere host
 
         """
-        logging.info('Disconnecting from vSphere host %s', self.host)
+        logging.info('Disconnecting from %s', self.host)
         Disxconnect(self.si)
 
     def reconnect(self):
