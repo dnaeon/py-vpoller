@@ -139,6 +139,48 @@ class VConnector(object):
         """
         return self.capability
 
+    def get_all_datacenters(self):
+        """
+        Get a list of all pyVmomi.vim.Datacenter managed objects
+
+        """
+        return self._get_all_objects(obj_type=[pyVmomi.vim.Datacenter])
+
+    def get_all_clusters(self):
+        """
+        Get a list of all pyVmomi.vim.ClusterComputeResource managed objects
+
+        """
+        return self._get_all_objects(obj_type=[pyVmomi.vim.ClusterComputeResource])
+
+    def get_all_hosts(self):
+        """
+        Get a list of a ll pyVmomi.vim.HostSystem managed objects
+
+        """
+        return self._get_all_objects(obj_type=[pyVmomi.vim.HostSystem])
+
+    def get_all_vms(self):
+        """
+        Get a list of all pyVmomi.vim.VirtualMachine managed objects
+
+        """
+        return self._get_all_objects(obj_type=[pyVmomi.vim.VirtualMachine])
+
+    def get_all_datastores(self):
+        """
+        Get a list of all pyVmomi.vim.Datastore managed objects
+
+        """
+        return self._get_all_objects(obj_type=[pyVmomi.vim.Datastore])
+
+    def get_all_resource_pools(self):
+        """
+        Get a list of all pyVmomi.vim.ResourcePool managed objects
+
+        """
+        return self._get_all_objects(obj_type=[pyVmomi.vim.ResourcePool])
+
     def _get_all_objects(self, obj_type):
         """
         Get all managed objects of type 'obj_type'
