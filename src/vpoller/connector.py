@@ -87,7 +87,7 @@ class VConnector(object):
             )
         except Exception as e:
             raise VConnectorException, 'Cannot connect to %s: %s' % (self.host, e)
-        
+
     def disconnect(self):
         """
         Disconnect from the VMware vSphere host
@@ -138,3 +138,26 @@ class VConnector(object):
 
         """
         return self.capability
+
+    def _get_all_objects(self, obj_type):
+        """
+        Get all managed objects of type 'obj_type'
+
+        Args:
+            obj_type (list): A list of managed object types
+
+        Returns:
+            A list of managed objects
+        
+        """
+        view_ref = self.si.content.viewManager.CreateContainerView(
+            container=self.si.content.rootFolder,
+            type=obj_type,
+            recursive=True
+        )
+
+        result = view_ref.view
+        view_ref.DestroyView()
+
+        return result
+
