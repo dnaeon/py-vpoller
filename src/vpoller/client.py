@@ -104,7 +104,7 @@ class VPollerClient(object):
             else:
                 # We didn't get a reply back from the server, let's retry
                 self.retries -= 1
-                logging.warning("Did not receive reply from server, retrying...")
+                logging.warning('Did not receive reply from server, retrying...')
                 
                 # Socket is confused. Close and remove it.
                 logging.debug('Closing client socket and removing it')
@@ -126,8 +126,8 @@ class VPollerClient(object):
 
         # Did we have any result reply at all?
         if not result:
-            logging.error("Did not receive a reply from the server, aborting...")
-            return '{ "success": -1, "msg": "Did not receive reply from the server, aborting..." }'
+            logging.error('Did not receive a reply from the server, aborting...')
+            return { 'success': -1, 'msg': 'Did not receive reply from the server, aborting...' }
 
         logging.debug('Received reply was: %s', result)
         
