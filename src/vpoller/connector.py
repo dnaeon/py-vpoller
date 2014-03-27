@@ -109,42 +109,54 @@ class VConnector(object):
         Get a list of all pyVmomi.vim.Datacenter managed objects
 
         """
-        return self._get_all_objects(obj_type=[pyVmomi.vim.Datacenter])
+        obj_type = pyVmomi.vim.Datacenter
+        logging.debug('Getting all %s managed objects', obj_type.__name__)
+        return self._get_all_objects(obj_type=[obj_type])
 
     def get_all_clusters(self):
         """
         Get a list of all pyVmomi.vim.ClusterComputeResource managed objects
 
         """
-        return self._get_all_objects(obj_type=[pyVmomi.vim.ClusterComputeResource])
+        obj_type = pyVmomi.vim.ClusterComputeResource
+        logging.debug('Getting all %s managed objects', obj_type.__name__)
+        return self._get_all_objects(obj_type=[obj_type])
 
     def get_all_hosts(self):
         """
         Get a list of a ll pyVmomi.vim.HostSystem managed objects
 
         """
-        return self._get_all_objects(obj_type=[pyVmomi.vim.HostSystem])
+        obj_type = pyVmomi.vim.HostSystem
+        logging.debug('Getting all %s managed objects', obj_type.__name__)
+        return self._get_all_objects(obj_type=[obj_type])
 
     def get_all_vms(self):
         """
         Get a list of all pyVmomi.vim.VirtualMachine managed objects
 
         """
-        return self._get_all_objects(obj_type=[pyVmomi.vim.VirtualMachine])
+        obj_type = pyVmomi.vim.VirtualMachine
+        logging.debug('Getting all %s managed objects', obj_type.__name__)
+        return self._get_all_objects(obj_type=[obj_type])
 
     def get_all_datastores(self):
         """
         Get a list of all pyVmomi.vim.Datastore managed objects
 
         """
-        return self._get_all_objects(obj_type=[pyVmomi.vim.Datastore])
+        obj_type = pyVmomi.vim.Datastore
+        logging.debug('Getting all %s managed objects', obj_type.__name__)
+        return self._get_all_objects(obj_type=[obj_type])
 
     def get_all_resource_pools(self):
         """
         Get a list of all pyVmomi.vim.ResourcePool managed objects
 
         """
-        return self._get_all_objects(obj_type=[pyVmomi.vim.ResourcePool])
+        obj_type = pyVmomi.vim.ResourcePool
+        logging.debug('Getting all %s managed objects', obj_type.__name__)
+        return self._get_all_objects(obj_type=[obj_type])
 
     def _get_all_objects(self, obj_type):
         """
