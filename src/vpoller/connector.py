@@ -105,79 +105,66 @@ class VConnector(object):
         self.disconnect()
         self.connect()
 
-    def get_all_datacenters(self):
+    def get_datacenters_view(self):
         """
-        Get a list of all pyVmomi.vim.Datacenter managed objects
+        Get a view ref to all pyVmomi.vim.Datacenter managed objects
 
         """
-        obj_type = pyVmomi.vim.Datacenter
-        logging.debug('Getting all %s managed objects', obj_type.__name__)
-        return self._get_all_objects(obj_type=[obj_type])
+        return self._get_objects_view(obj_type=[pyVmomi.vim.Datacenter])
 
-    def get_all_clusters(self):
+    def get_clusters_view(self):
         """
-        Get a list of all pyVmomi.vim.ClusterComputeResource managed objects
+        Get a view ref to all pyVmomi.vim.ClusterComputeResource managed objects
 
         """
-        obj_type = pyVmomi.vim.ClusterComputeResource
-        logging.debug('Getting all %s managed objects', obj_type.__name__)
-        return self._get_all_objects(obj_type=[obj_type])
+        return self._get_objects_view(obj_type=[pyVmomi.vim.ClusterComputeResource])
 
-    def get_all_hosts(self):
+    def get_hosts_view(self):
         """
-        Get a list of a ll pyVmomi.vim.HostSystem managed objects
+        Get a view ref to all pyVmomi.vim.HostSystem managed objects
 
         """
-        obj_type = pyVmomi.vim.HostSystem
-        logging.debug('Getting all %s managed objects', obj_type.__name__)
-        return self._get_all_objects(obj_type=[obj_type])
+        return self._get_objects_view(obj_type=[pyVmomi.vim.HostSystem])
 
-    def get_all_vms(self):
+    def get_vms_view(self):
         """
-        Get a list of all pyVmomi.vim.VirtualMachine managed objects
+        Get a view ref to all pyVmomi.vim.VirtualMachine managed objects
 
         """
-        obj_type = pyVmomi.vim.VirtualMachine
-        logging.debug('Getting all %s managed objects', obj_type.__name__)
-        return self._get_all_objects(obj_type=[obj_type])
+        return self._get_objects_view(obj_type=[pyVmomi.vim.VirtualMachine])
 
-    def get_all_datastores(self):
+    def get_datastores_view(self):
         """
-        Get a list of all pyVmomi.vim.Datastore managed objects
+        Get a view ref to all pyVmomi.vim.Datastore managed objects
 
         """
-        obj_type = pyVmomi.vim.Datastore
-        logging.debug('Getting all %s managed objects', obj_type.__name__)
-        return self._get_all_objects(obj_type=[obj_type])
+        return self._get_objects_view(obj_type=[pyVmomi.vim.Datastore])
 
-    def get_all_resource_pools(self):
+    def get_resource_pools_view(self):
         """
-        Get a list of all pyVmomi.vim.ResourcePool managed objects
+        Get a view ref to all pyVmomi.vim.ResourcePool managed objects
 
         """
-        obj_type = pyVmomi.vim.ResourcePool
-        logging.debug('Getting all %s managed objects', obj_type.__name__)
-        return self._get_all_objects(obj_type=[obj_type])
+        return self._get_objects_view(obj_type=[pyVmomi.vim.ResourcePool])
 
-    def _get_all_objects(self, obj_type):
+    def _get_objects_view(self, obj_type):
         """
-        Get all managed objects of type 'obj_type'
+        Get a vSphere View reference to all objects of type 'obj_type'
 
         Args:
             obj_type (list): A list of managed object types
 
         Returns:
-            A list of managed objects
+            A view refence to the discovered managed objects
         
         """
+        logging.debug('Getting view ref to %s managed objects', [t.__name__ for t in obj_type])
+
         view_ref = self.si.content.viewManager.CreateContainerView(
             container=self.si.content.rootFolder,
             type=obj_type,
             recursive=True
         )
 
-        result = view_ref.view
-        view_ref.DestroyView()
-
-        return result
+        return view_ref
 
