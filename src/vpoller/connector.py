@@ -32,7 +32,8 @@ connections to VMware vSphere hosts and retrieve objects
 
 import logging
 
-from pyVim.connect import SmartConnect, Disconnect
+import pyVmomi
+import pyVim.connect
 
 class VConnectorException(Exception):
     """
@@ -80,7 +81,7 @@ class VConnector(object):
         logging.info('Connecting to %s', self.host)
         
         try:
-            self.si = SmartConnect(
+            self.si = pyVim.connect.SmartConnect(
                 host=self.host,
                 user=self.user,
                 pwd=self.pwd
@@ -94,7 +95,7 @@ class VConnector(object):
 
         """
         logging.info('Disconnecting from %s', self.host)
-        Disxconnect(self.si)
+        pyVim.connect.Disconnect(self.si)
 
     def reconnect(self):
         """
