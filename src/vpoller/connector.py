@@ -104,41 +104,6 @@ class VConnector(object):
         self.disconnect()
         self.connect()
 
-    def get_content(self):
-        """
-        Returns the vSphere host contents
-
-        """
-        return self.si.RetrieveContent()
-
-    def get_root_folder(self):
-        """
-        Returns the vSphere host rootFolder 
-
-        """
-        return self.si.content.rootFolder
-
-    def get_service_content(self):
-        """
-        Returns the vSphere host service content
-
-        """
-        return self.si.RetrieveServiceContent()
-
-    def get_current_time(self):
-        """
-        Returns the current time of the vSphere host
-
-        """
-        return si.CurrentTime()
-
-    def get_capability(self):
-        """
-        Returns the vSphere host capabilities
-
-        """
-        return self.capability
-
     def get_all_datacenters(self):
         """
         Get a list of all pyVmomi.vim.Datacenter managed objects
