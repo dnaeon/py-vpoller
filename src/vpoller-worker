@@ -39,6 +39,7 @@ import logging
 from vpoller.client import VPollerClient
 from vpoller.worker import VPollerWorker
 from docopt import docopt
+from tabulate import tabulate
 
 def start(pidfile, config, daemon):
     """
@@ -151,10 +152,11 @@ def list_agents(config):
     worker.load_worker_config(config)
 
     agents = worker.worker_db_get_agents()
-
-    from tabulate import tabulate
-
-    print tabulate(agents, headers=['Hostname', 'Username', 'Password', 'Enabled'], tablefmt="grid")
+    print tabulate(
+        agents,
+        headers=['Hostname', 'Username', 'Password', 'Enabled'],
+        tablefmt='grid'
+    )
 
 def main():
     usage="""
