@@ -92,7 +92,7 @@ class VPollerProxy(Daemon):
                 self.process_mgmt_msg()
 
         # Shutdown time has arrived, let's clean up a bit
-        logging.debug('vPoller Proxy is going down')
+        logging.debug('Shutdown time has arrived, vPoller Proxy is going down')
         self.close_proxy_sockets()
         self.stop()
 

@@ -88,36 +88,16 @@ class VPollerWorker(Daemon):
 
             # Worker socket, receives client messages for processing
             if socks.get(self.worker_socket) == zmq.POLLIN:
-                # The routing envelope looks like this:
-                #
-                # Frame 1:  [ N ][...]  <- Identity of connection
-                # Frame 2:  [ 0 ][]     <- Empty delimiter frame
-                # Frame 3:  [ N ][...]  <- Data frame
-                logging.debug('Received message on the worker socket')
-                
-                _id    = self.worker_socket.recv()
-                _empty = self.worker_socket.recv()
-                msg    = self.worker_socket.recv_json()
-
-                # Process the client message and send the result
-                result = self.process_client_message(msg)
-
-                self.worker_socket.send(_id, zmq.SNDMORE)
-                self.worker_socket.send("", zmq.SNDMORE)
-                self.worker_socket.send_json(result)
+                self.process_client_msg()
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
-                logging.debug('Received message on the management socket')
-                msg = self.mgmt_socket.recv_json()
-                result = self.process_mgmt_message(msg)
-                self.mgmt_socket.send_json(result)
+                self.process_mgmt_msg()
 
         # Shutdown time has arrived, let's clean up a bit
-        logging.debug('Shutdown time, vPoller Worker is going down')
+        logging.debug('Shutdown time has arrived, vPoller Worker is going down')
         self.close_worker_sockets()
         self.shutdown_vsphere_agents()
- #       self.zcontext.term()
         self.stop()
 
     def load_worker_config(self, config):
@@ -141,9 +121,9 @@ class VPollerWorker(Daemon):
         parser.read(config_file)
 
         try:
-            self.proxy_endpoint    = config.get('worker', 'proxy')
-            self.mgmt_endpoint     = config.get('worker', 'mgmt')
-            self.vsphere_hosts_dir = config.get('worker', 'vsphere_hosts_dir')
+            self.proxy_endpoint    = parser.get('worker', 'proxy')
+            self.mgmt_endpoint     = parser.get('worker', 'mgmt')
+            self.vsphere_hosts_dir = parser.get('worker', 'vsphere_hosts_dir')
         except ConfigParser.NoOptionError as e:
             logging.error('Configuration issues detected in %s: %s' , config, e)
             raise
@@ -190,6 +170,7 @@ class VPollerWorker(Daemon):
         
         self.mgmt_socket.close()
         self.worker_socket.close()
+        self.zcontext.term()
 
     def spawn_vsphere_agents(self):
         """
@@ -221,13 +202,12 @@ class VPollerWorker(Daemon):
 
     def shutdown_vsphere_agents(self):
         """
-        Disconnects all VPoller Agents from their respective VMware vSphere hosts
+        Disconnects all vPoller Agents from their respective VMware vSphere hosts
         
         """
         logging.debug('Shutting down vSphere Agents')
 
         for agent in self.agents:
-            logging.debug('Shutting down vSphere Agent: %s', agent.host)
             self.agents[agent].disconnect()
         
     def get_vsphere_configs(self, config_dir):
@@ -265,70 +245,83 @@ class VPollerWorker(Daemon):
 
         return conf_files
 
-    def process_client_message(self, msg):
-        """
-        Processes a client request message
+   def process_client_msg(self):
+       """
+       Processes a client message received on the vPoller Worker socket
+    
+       The message is passed to the VSphereAgent object of the respective vSphere host
+       in order to do the actual polling.
 
-        The message is passed to the VSphereAgent object of the respective vSphere host
-        in order to do the actual polling.
+       The routing envelope of the message looks like this:
+       
+           Frame 1: [ N ][...]  <- Identity of connection
+           Frame 2: [ 0 ][]     <- Empty delimiter frame
+           Frame 3: [ N ][...]  <- Data frame
 
-        The messages that we support are polling for datastores and hosts.
+       An example message for discovering the hosts could be:
 
-        An example message for discovering the hosts could be:
+           {
+               "method":   "host.discover",
+               "hostname": "vc01.example.org",
+           }
+       
+       An example message for polling a datastore property could be:
 
-            {
-              "method":   "host.discover",
-              "hostname": "vc01-test.example.org",
-            }
+           {
+               "method":   "datastore.poll",
+               "hostname": "vc01.example.org",
+               "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
+               "property": "summary.capacity"
+           }
 
-        An example message for polling a datastore property could be:
+       """
+       logging.debug('Received message on the worker socket')
+       
+       _id    = self.worker_socket.recv()
+       _empty = self.worker_socket.recv()
+       msg    = self.worker_socket.recv_json()
+       
+       logging.debug('Processing client message: %s', msg)
 
-            {
-              "method":   "datastore.poll",
-              "hostname": "vc0-test.example.org",
-              "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
-              "property": "summary.capacity"
-              }
+       # We require to have at least the 'method' and vSphere 'hostname' in the message
+       if not all(k in msg for k in ('method', 'hostname')):
+           return { 'success': -1, 'msg': 'Missing message properties (e.g. method/hostname)' }
 
-        Args:
-            msg (dict): The client message for processing
-
-        """
-        logging.debug('Processing client message: %s', msg)
-
-        # We require to have at least the 'method' and vSphere 'hostname'
-        if not all(k in msg for k in ('method', 'hostname')):
-            return { 'success': -1, 'msg': 'Missing message properties (e.g. method/hostname)' }
-
-        vsphere_host = msg['hostname']
-
-        if not self.agents.get(vsphere_host):
-            return { 'success': -1, 'msg': 'Unknown vSphere Agent requested' }
-
-        # The vPoller Worker methods we support and process
-        methods = {
-            'host.get':             self.agents[vsphere_host].get_host_property,
-            'host.discover':        self.agents[vsphere_host].discover_hosts,
-            'host.counter.get':     self.agents[vsphere_host].get_host_counter,
-            'host.counter.all':     self.agents[vsphere_host].get_host_counter_all,
-            'datastore.get':        self.agents[vsphere_host].get_datastore_property,
-            'datastore.discover':   self.agents[vsphere_host].discover_datastores,
-            'vm.get':               self.agents[vsphere_host].get_vm_property,
-            'vm.discover':          self.agents[vsphere_host].discover_virtual_machines,
-            'vm.counter.get':       self.agents[vsphere_host].get_vm_counter,
-            'vm.counter.all':       self.agents[vsphere_host].get_vm_counter_all,
-            'datacenter.get':       self.agents[vsphere_host].get_datacenter_property,
-            'datacenter.discover':  self.agents[vsphere_host].discover_datacenters,
-            'cluster.get':          self.agents[vsphere_host].get_cluster_property,
-            'cluster.discover':     self.agents[vsphere_host].discover_clusters,
-            }
-
-        if msg['method'] not in methods:
-            return { 'success': -1, 'msg': 'Uknown method received' }
-
-        return methods[msg['method']](msg)
+       vsphere_host = msg['hostname']
         
-    def process_mgmt_message(self, msg):
+       if not self.agents.get(vsphere_host):
+           return { 'success': -1, 'msg': 'Unknown vSphere Agent requested' }
+
+       # The methods that the vSphere Agents support and process
+       methods = {
+           'host.get':             self.agents[vsphere_host].get_host_property,
+           'host.discover':        self.agents[vsphere_host].discover_hosts,
+           'host.counter.get':     self.agents[vsphere_host].get_host_counter,
+           'host.counter.all':     self.agents[vsphere_host].get_host_counter_all,
+           'datastore.get':        self.agents[vsphere_host].get_datastore_property,
+           'datastore.discover':   self.agents[vsphere_host].discover_datastores,
+           'vm.get':               self.agents[vsphere_host].get_vm_property,
+           'vm.discover':          self.agents[vsphere_host].discover_virtual_machines,
+           'vm.counter.get':       self.agents[vsphere_host].get_vm_counter,
+           'vm.counter.all':       self.agents[vsphere_host].get_vm_counter_all,
+           'datacenter.get':       self.agents[vsphere_host].get_datacenter_property,
+           'datacenter.discover':  self.agents[vsphere_host].discover_datacenters,
+           'cluster.get':          self.agents[vsphere_host].get_cluster_property,
+           'cluster.discover':     self.agents[vsphere_host].discover_clusters,
+       }
+
+       if msg['method'] not in methods:
+           return { 'success': -1, 'msg': 'Uknown method received' }
+
+       # Process client request
+       result = methods[msg['method']](msg)
+
+       # Return result back to client
+       self.worker_socket.send(_id, zmq.SNDMORE)
+       self.worker_socket.send("", zmq.SNDMORE)
+       self.worker_socket.send_json(result)
+
+    def process_mgmt_msg(self):
         """
         Processes a message for the management interface
 
@@ -348,6 +341,8 @@ class VPollerWorker(Daemon):
             msg (dict): The client message for processing
               
         """
+        logging.debug('Received message on the management socket')
+        msg = self.mgmt_socket.recv_json()
         logging.debug('Processing management message: %s', msg)
 
         if 'method' not in msg:
@@ -357,12 +352,14 @@ class VPollerWorker(Daemon):
         methods = {
             'worker.status':   self.get_worker_status,
             'worker.shutdown': self.worker_shutdown,
-            }
-
+        }
+        
         if msg['method'] not in methods:
             return { 'success': -1, 'msg': 'Unknown method received' }
 
-        return methods[msg['method']](msg)
+        # Process management request and return result to client
+        result = methods[msg['method']](msg)
+        self.mgmt_socket.send_json(result)
  
     def get_worker_status(self, msg):
         """
