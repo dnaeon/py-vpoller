@@ -87,12 +87,27 @@ class VPollerWorker(Daemon):
             socks = dict(self.zpoller.poll())
 
             # Worker socket, receives client messages for processing
+            #
+            # The routing envelope of the message looks like this:
+            #
+            # Frame 1: [ N ][...]  <- Identity of connection
+            # Frame 2: [ 0 ][]     <- Empty delimiter frame
+            # Frame 3: [ N ][...]  <- Data frame
             if socks.get(self.worker_socket) == zmq.POLLIN:
-                self.process_client_msg()
+                _id    = self.worker_socket.recv()
+                _empty = self.worker_socket.recv()
+                msg    = self.worker_socket.recv_json()
+                result = self.process_client_msg(msg)
+                # Return result back to client
+                self.worker_socket.send(_id, zmq.SNDMORE)
+                self.worker_socket.send("", zmq.SNDMORE)
+                self.worker_socket.send_json(result)
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
-                self.process_mgmt_msg()
+                msg = self.mgmt_socket.recv_json()
+                result = self.process_mgmt_msg(msg)
+                self.mgmt_socket.send_json(result)
 
         # Shutdown time has arrived, let's clean up a bit
         logging.debug('Shutdown time has arrived, vPoller Worker is going down')
@@ -245,18 +260,12 @@ class VPollerWorker(Daemon):
 
         return conf_files
 
-   def process_client_msg(self):
+   def process_client_msg(self, msg):
        """
        Processes a client message received on the vPoller Worker socket
     
        The message is passed to the VSphereAgent object of the respective vSphere host
        in order to do the actual polling.
-
-       The routing envelope of the message looks like this:
-       
-           Frame 1: [ N ][...]  <- Identity of connection
-           Frame 2: [ 0 ][]     <- Empty delimiter frame
-           Frame 3: [ N ][...]  <- Data frame
 
        An example message for discovering the hosts could be:
 
@@ -274,54 +283,59 @@ class VPollerWorker(Daemon):
                "property": "summary.capacity"
            }
 
+       Args:
+           msg (dict): Client message for processing
+
        """
-       logging.debug('Received message on the worker socket')
-       
-       _id    = self.worker_socket.recv()
-       _empty = self.worker_socket.recv()
-       msg    = self.worker_socket.recv_json()
-       
        logging.debug('Processing client message: %s', msg)
 
-       # We require to have at least the 'method' and vSphere 'hostname' in the message
-       if not all(k in msg for k in ('method', 'hostname')):
-           return { 'success': -1, 'msg': 'Missing message properties (e.g. method/hostname)' }
-
-       vsphere_host = msg['hostname']
+       vsphere_host = msg.get('hostname')
         
        if not self.agents.get(vsphere_host):
            return { 'success': -1, 'msg': 'Unknown vSphere Agent requested' }
 
        # The methods that the vSphere Agents support and process
+       # In the below dict the key is the method name requested by the client,
+       # where 'method' is the actual method invoked and the 'msg_attr' key is a
+       # tuple/list of required attributes the message must have in order for this
+       # request to be passed to and processed by the vSphere Agent
        methods = {
-           'host.get':             self.agents[vsphere_host].get_host_property,
-           'host.discover':        self.agents[vsphere_host].discover_hosts,
-           'host.counter.get':     self.agents[vsphere_host].get_host_counter,
-           'host.counter.all':     self.agents[vsphere_host].get_host_counter_all,
-           'datastore.get':        self.agents[vsphere_host].get_datastore_property,
-           'datastore.discover':   self.agents[vsphere_host].discover_datastores,
-           'vm.get':               self.agents[vsphere_host].get_vm_property,
-           'vm.discover':          self.agents[vsphere_host].discover_virtual_machines,
-           'vm.counter.get':       self.agents[vsphere_host].get_vm_counter,
-           'vm.counter.all':       self.agents[vsphere_host].get_vm_counter_all,
-           'datacenter.get':       self.agents[vsphere_host].get_datacenter_property,
-           'datacenter.discover':  self.agents[vsphere_host].discover_datacenters,
-           'cluster.get':          self.agents[vsphere_host].get_cluster_property,
-           'cluster.discover':     self.agents[vsphere_host].discover_clusters,
+           'datacenter.discover':  {
+               'method':    self.agents[vsphere_host].datacenter_discover,
+               'msg_attr':  ('method', 'hostname'),
+           },
        }
 
        if msg['method'] not in methods:
-           return { 'success': -1, 'msg': 'Uknown method received' }
+           return { 'success': -1, 'msg': 'Unknown method received' }
+
+       agent_method  = methods[msg['method']]
+
+       logging.debug('Checking client message, required to have: %s', agent_method['msg_attr'])
+
+       # The message attributes type we expect to receive
+       msg_attr_types = {
+           'method':     (types.StringType, types.UnicodeType),
+           'hostname':   (types.StringType, types.UnicodeType),
+           'name':       (types.StringType, types.UnicodeType, types.NoneType),
+           'properties': (types.TupleType,  types.ListType, types.NoneType),
+       }
+
+       # Check if we have the required message attributes
+       if not all (k in msg for k in agent_method['msg_attr']):
+           return { 'success': -1, 'msg': 'Missing message attributes' }
+
+       # Check if we have correct types of the message attributes
+       for k in msg.keys():
+           if not isinstance(msg[k], msg_types[k]):
+               return { 'success': -1, 'msg': 'Incorrect message attribute type received' }
 
        # Process client request
-       result = methods[msg['method']](msg)
+       result = agent_method['method'](msg)
 
-       # Return result back to client
-       self.worker_socket.send(_id, zmq.SNDMORE)
-       self.worker_socket.send("", zmq.SNDMORE)
-       self.worker_socket.send_json(result)
+       return result
 
-    def process_mgmt_msg(self):
+   def process_mgmt_msg(self, msg):
         """
         Processes a message for the management interface
 
@@ -341,8 +355,6 @@ class VPollerWorker(Daemon):
             msg (dict): The client message for processing
               
         """
-        logging.debug('Received message on the management socket')
-        msg = self.mgmt_socket.recv_json()
         logging.debug('Processing management message: %s', msg)
 
         if 'method' not in msg:
@@ -359,7 +371,8 @@ class VPollerWorker(Daemon):
 
         # Process management request and return result to client
         result = methods[msg['method']](msg)
-        self.mgmt_socket.send_json(result)
+
+        return result
  
     def get_worker_status(self, msg):
         """
