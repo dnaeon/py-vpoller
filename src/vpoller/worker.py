@@ -260,96 +260,96 @@ class VPollerWorker(Daemon):
 
         return conf_files
 
-   def process_client_msg(self, msg):
-       """
-       Processes a client message received on the vPoller Worker socket
+    def process_client_msg(self, msg):
+        """
+        Processes a client message received on the vPoller Worker socket
     
-       The message is passed to the VSphereAgent object of the respective vSphere host
-       in order to do the actual polling.
+        The message is passed to the VSphereAgent object of the respective vSphere host
+        in order to do the actual polling.
 
-       An example message for discovering the hosts could be:
+        An example message for discovering the hosts could be:
 
-           {
-               "method":   "host.discover",
-               "hostname": "vc01.example.org",
-           }
+            {
+                "method":   "host.discover",
+                "hostname": "vc01.example.org",
+            }
        
-       An example message for polling a datastore property could be:
+        An example message for polling a datastore property could be:
 
-           {
-               "method":   "datastore.poll",
-               "hostname": "vc01.example.org",
-               "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
-               "property": "summary.capacity"
-           }
+            {
+                "method":   "datastore.poll",
+                "hostname": "vc01.example.org",
+                "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
+                "property": "summary.capacity"
+            }
 
-       Args:
-           msg (dict): Client message for processing
-
-       """
-       logging.debug('Processing client message: %s', msg)
-
-       vsphere_host = msg.get('hostname')
+        Args:
+        msg (dict): Client message for processing
         
-       if not self.agents.get(vsphere_host):
-           return { 'success': -1, 'msg': 'Unknown vSphere Agent requested' }
+        """
+        logging.debug('Processing client message: %s', msg)
 
-       # The methods that the vSphere Agents support and process
-       # In the below dict the key is the method name requested by the client,
-       # where 'method' is the actual method invoked and the 'msg_attr' key is a
-       # tuple/list of required attributes the message must have in order for this
-       # request to be passed to and processed by the vSphere Agent
-       methods = {
-           'datacenter.discover':  {
-               'method':    self.agents[vsphere_host].datacenter_discover,
-               'msg_attr':  ('method', 'hostname'),
-           },
-       }
+        vsphere_host = msg.get('hostname')
+        
+        if not self.agents.get(vsphere_host):
+            return { 'success': -1, 'msg': 'Unknown vSphere Agent requested' }
 
-       if msg['method'] not in methods:
-           return { 'success': -1, 'msg': 'Unknown method received' }
+        # The methods that the vSphere Agents support and process
+        # In the below dict the key is the method name requested by the client,
+        # where 'method' is the actual method invoked and the 'msg_attr' key is a
+        # tuple/list of required attributes the message must have in order for this
+        # request to be passed to and processed by the vSphere Agent
+        methods = {
+            'datacenter.discover':  {
+                'method':    self.agents[vsphere_host].datacenter_discover,
+                'msg_attr':  ('method', 'hostname'),
+            },
+        }
 
-       agent_method  = methods[msg['method']]
+        if msg['method'] not in methods:
+            return { 'success': -1, 'msg': 'Unknown method received' }
 
-       logging.debug('Checking client message, required to have: %s', agent_method['msg_attr'])
+        agent_method  = methods[msg['method']]
 
-       # The message attributes type we expect to receive
-       msg_attr_types = {
-           'method':     (types.StringType, types.UnicodeType),
-           'hostname':   (types.StringType, types.UnicodeType),
-           'name':       (types.StringType, types.UnicodeType, types.NoneType),
-           'properties': (types.TupleType,  types.ListType, types.NoneType),
-       }
+        logging.debug('Checking client message, required to have: %s', agent_method['msg_attr'])
 
-       # Check if we have the required message attributes
-       if not all (k in msg for k in agent_method['msg_attr']):
-           return { 'success': -1, 'msg': 'Missing message attributes' }
+        # The message attributes type we expect to receive
+        msg_attr_types = {
+            'method':     (types.StringType, types.UnicodeType),
+            'hostname':   (types.StringType, types.UnicodeType),
+            'name':       (types.StringType, types.UnicodeType, types.NoneType),
+            'properties': (types.TupleType,  types.ListType, types.NoneType),
+        }
 
-       # Check if we have correct types of the message attributes
-       for k in msg.keys():
-           if not isinstance(msg[k], msg_types[k]):
-               return { 'success': -1, 'msg': 'Incorrect message attribute type received' }
+        # Check if we have the required message attributes
+        if not all (k in msg for k in agent_method['msg_attr']):
+            return { 'success': -1, 'msg': 'Missing message attributes' }
 
-       # Process client request
-       result = agent_method['method'](msg)
+        # Check if we have correct types of the message attributes
+        for k in msg.keys():
+            if not isinstance(msg[k], msg_types[k]):
+                return { 'success': -1, 'msg': 'Incorrect message attribute type received' }
+            
+        # Process client request
+        result = agent_method['method'](msg)
 
-       return result
+        return result
 
-   def process_mgmt_msg(self, msg):
+    def process_mgmt_msg(self, msg):
         """
         Processes a message for the management interface
-
+        
         Example client message to shutdown the vPoller Worker would be:
-
-              {
+        
+            {
                 "method": "worker.shutdown"
-              }
+            }
 
         Getting status information from the vPoller worker:
 
-              {
+            {
                 "method": "worker.status"
-              }
+            }
 
         Args:
             msg (dict): The client message for processing
