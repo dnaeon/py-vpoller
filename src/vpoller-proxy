@@ -113,7 +113,7 @@ Options:
   -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
                                             [default: /var/run/vpoller/vpoller-proxy.pid]
   -f <config-file>, --config <config-file>  Specify config file to use
-                                            [default: /etc/vpoller/vpoller-proxy.conf]
+                                            [default: /etc/vpoller/vpoller.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
   -o <logfile>, --output <logfile>          Specify the logfile to use
                                             [default: /var/log/vpoller/vpoller-proxy.log]
