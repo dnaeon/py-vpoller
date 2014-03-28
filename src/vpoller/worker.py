@@ -28,9 +28,9 @@ vPoller Worker module for the VMware vSphere Poller
 """   
 
 import os
-import glob
-import logging
 import types
+import logging
+import sqlite3
 import ConfigParser
 from time import asctime
 
@@ -137,9 +137,9 @@ class VPollerWorker(Daemon):
         parser.read(config_file)
 
         try:
-            self.proxy_endpoint    = parser.get('worker', 'proxy')
-            self.mgmt_endpoint     = parser.get('worker', 'mgmt')
-            self.vsphere_hosts_dir = parser.get('worker', 'vsphere_hosts_dir')
+            self.worker_db      = parser.get('worker', 'db')
+            self.proxy_endpoint = parser.get('worker', 'proxy')
+            self.mgmt_endpoint  = parser.get('worker', 'mgmt')
         except ConfigParser.NoOptionError as e:
             logging.error('Configuration issues detected in %s: %s' , config, e)
             raise
@@ -195,15 +195,14 @@ class VPollerWorker(Daemon):
         """
         logging.debug('Spawning vSphere Agents')
 
-        # Get the configuration files for our vSphere hosts
-        conf_files = self.get_vsphere_configs(self.vsphere_hosts_dir)
- 
         self.agents = dict()
 
-        # Load the config file for every vSphere Agent
-        for conf in conf_files:
-            logging.debug('Spawning vSphere Agent from config file: %s', conf)
-            agent = VSphereAgent(conf)
+        for each_agent in self.worker_db_get_agents(only_enabled=True):
+            agent = VSphereAgent(
+                user=each_agent['user'],
+                pwd=each_agent['pwd'],
+                host=each_agent['host']
+            )
             self.agents[agent.host] = agent
 
     def start_vsphere_agents(self):
@@ -421,3 +420,86 @@ class VPollerWorker(Daemon):
 
         return { 'success': 0, 'msg': 'vPoller Worker is shutting down' }
 
+    def worker_db_init(self):
+        """
+        Initializes the vPoller Worker database
+
+        The vPoller Worker database is used for storing
+        configuration about our vSphere Agents, such as
+        hostnames, usernames, passwords, etc.
+
+        """
+        if os.path.exists(self.worker_db):
+            raise VPollerException, 'vPoller Worker database already exists at %s' % self.worker_db
+
+        conn = sqlite3.connet(self.worker_db)
+        cursor = conn.cursor()
+
+        sql = """
+        CREATE TABLE hosts (
+            host TEXT UNIQUE,
+            user TEXT,
+            pwd  TEXT,
+            enabled INTEGER
+        )
+        """
+
+        cursor.execute(sql)
+        cursor.close()
+
+    def worker_db_add_agent(self, host, user, pwd, enabled):
+        """
+        Add/Update a vSphere Agent in the vPoller Worker database
+
+        Args:
+            host    (str): Hostname of the vSphere host
+            user    (str): Username to use when connecting
+            pwd     (str): Password to use when connecting
+            enabled (int): Enable or disable the vSphere Agent
+
+        """
+        conn = sqlite3.connect(self.worker_db)
+        cursor = conn.cursor()
+
+        cursor.execute('INSERT OR REPLACE INTO hosts VALUES (?,?,?,?)', (host, user, pwd, enabled))
+        cursor.commit()
+        cursor.close()
+
+    def worker_db_remove_agent(self, host):
+        """
+        Remove a vSphere Agent from the vPoller Worker database
+
+        Args:
+            host (str): Hostname of the vSphere Agent to remove
+        
+        """
+        conn = sqlite3.connect(self.worker_db)
+        cursor = conn.cursor()
+
+        cursor.execute('DELETE FROM hosts WHERE host = ?', host)
+        cursor.commit()
+        cursor.close()
+
+    def worker_db_get_agents(self, only_enabled=False):
+        """
+        Get the vSphere Agents from the vPoller Worker database
+
+        Args:
+            only_enabled (bool): If True return only the Agents which are enabled
+
+        """
+        conn = sqlite3.connect(self.worker_db)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        if only_enabled:
+            sql = 'SELECT * FROM hosts WHERE enabled = 1'
+        else:
+            sql = 'SELECT * FROM hosts'
+
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        cursor.close()
+
+        return result
+        
