@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='py-vpoller',
       version='0.1.1',
@@ -14,9 +14,8 @@ setup(name='py-vpoller',
         'src/vpoller-worker'
       ],
       install_requires=[
-        'pysphere >= 0.1.8',
-        'vconnector >= 0.1.0',
         'pyzmq >= 13.1.0',
         'docopt >= 0.6.1',
+        'pyvmomi >= 5.5.0',
       ]
 )
