@@ -26,7 +26,7 @@
 vPoller Connector Module
 
 This module provides classes and methods for managing 
-connections to VMware vSphere hosts and retrieve objects
+connections to VMware vSphere hosts and retrieving of object properties
 
 """
 
@@ -61,9 +61,9 @@ class VConnector(object):
         Initializes a new VConnector object
 
         Args:
-            user     (str): Username to use when connecting
-            pwd      (str): Password to use when connecting 
-            host     (str): VMware vSphere host to connect to
+            user (str): Username to use when connecting
+            pwd  (str): Password to use when connecting 
+            host (str): VMware vSphere host to connect to
 
         """
         self.user = user
@@ -105,51 +105,51 @@ class VConnector(object):
         self.disconnect()
         self.connect()
 
-    def get_datacenters_view(self):
+    def get_datacenter_view(self):
         """
         Get a view ref to all pyVmomi.vim.Datacenter managed objects
 
         """
-        return self._get_objects_view(obj_type=[pyVmomi.vim.Datacenter])
+        return self._get_object_view(obj_type=[pyVmomi.vim.Datacenter])
 
-    def get_clusters_view(self):
+    def get_cluster_view(self):
         """
         Get a view ref to all pyVmomi.vim.ClusterComputeResource managed objects
 
         """
-        return self._get_objects_view(obj_type=[pyVmomi.vim.ClusterComputeResource])
+        return self._get_object_view(obj_type=[pyVmomi.vim.ClusterComputeResource])
 
-    def get_hosts_view(self):
+    def get_host_view(self):
         """
         Get a view ref to all pyVmomi.vim.HostSystem managed objects
 
         """
-        return self._get_objects_view(obj_type=[pyVmomi.vim.HostSystem])
+        return self._get_object_view(obj_type=[pyVmomi.vim.HostSystem])
 
-    def get_vms_view(self):
+    def get_vm_view(self):
         """
         Get a view ref to all pyVmomi.vim.VirtualMachine managed objects
 
         """
-        return self._get_objects_view(obj_type=[pyVmomi.vim.VirtualMachine])
+        return self._get_object_view(obj_type=[pyVmomi.vim.VirtualMachine])
 
-    def get_datastores_view(self):
+    def get_datastore_view(self):
         """
         Get a view ref to all pyVmomi.vim.Datastore managed objects
 
         """
-        return self._get_objects_view(obj_type=[pyVmomi.vim.Datastore])
+        return self._get_object_view(obj_type=[pyVmomi.vim.Datastore])
 
-    def get_resource_pools_view(self):
+    def get_resource_pool_view(self):
         """
         Get a view ref to all pyVmomi.vim.ResourcePool managed objects
 
         """
-        return self._get_objects_view(obj_type=[pyVmomi.vim.ResourcePool])
+        return self._get_object_view(obj_type=[pyVmomi.vim.ResourcePool])
 
-    def collect_properties_from_view(self, view_ref, obj_type, path_set):
+    def collect_properties(self, view_ref, obj_type, path_set=[]):
         """
-        Collect properties for managed objects
+        Collect properties for managed objects from a view ref
 
         Check the vSphere API documentation for example on retrieving object properties:
     
@@ -157,14 +157,14 @@ class VConnector(object):
 
         Args:
             view_ref (pyVmomi.vim.view.ContainerView): Starting point of inventory navigation
-            obj_type                  (pyVmomi.vim.*): Managed object type
+            obj_type                  (pyVmomi.vim.*): Type of managed object
             path_set                           (list): List of properties to retrieve
 
         Returns:
             A list of properties for the managed objects
 
         """
-        logging.debug('Collecting properties for %s managed objects', obj_type.__name__)
+        logging.debug('[%s] Collecting properties for %s managed objects', self.host, obj_type.__name__)
 
         collector = self.si.content.propertyCollector
         
@@ -186,7 +186,7 @@ class VConnector(object):
         property_spec.type = obj_type
                 
         if not path_set:
-            logging.warning('No path_set provided, this might take a while...')
+            logging.warning('[%s] Retrieving all properties for objects, this might take a while...'. self.host)
             property_spec.all = True
             
         property_spec.pathSet = path_set
@@ -203,7 +203,7 @@ class VConnector(object):
 
         return data
 
-    def _get_objects_view(self, obj_type):
+    def _get_object_view(self, obj_type, container=None):
         """
         Get a vSphere View reference to all objects of type 'obj_type'
 
@@ -214,10 +214,13 @@ class VConnector(object):
             A view refence to the discovered managed objects
         
         """
-        logging.debug('Getting view ref to %s managed objects', [t.__name__ for t in obj_type])
+        if not container:
+            container = self.si.content.rootFolder
+
+        logging.debug('[%s] Getting view ref to %s managed objects', self.host, [t.__name__ for t in obj_type])
 
         view_ref = self.si.content.viewManager.CreateContainerView(
-            container=self.si.content.rootFolder,
+            container=container,
             type=obj_type,
             recursive=True
         )
