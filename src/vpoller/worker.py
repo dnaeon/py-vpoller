@@ -429,6 +429,8 @@ class VPollerWorker(Daemon):
         hostnames, usernames, passwords, etc.
 
         """
+        logging.info('Initializing vPoller Worker database at %s', self.worker_db)
+
         if os.path.exists(self.worker_db):
             raise VPollerException, 'vPoller Worker database already exists at %s' % self.worker_db
 
@@ -447,9 +449,9 @@ class VPollerWorker(Daemon):
         cursor.execute(sql)
         cursor.close()
 
-    def worker_db_add_agent(self, host, user, pwd, enabled):
+    def worker_db_add_update_agent(self, host, user, pwd, enabled):
         """
-        Add/Update a vSphere Agent in the vPoller Worker database
+        Add/update a vSphere Agent in the vPoller Worker database
 
         Args:
             host    (str): Hostname of the vSphere host
@@ -458,6 +460,8 @@ class VPollerWorker(Daemon):
             enabled (int): Enable or disable the vSphere Agent
 
         """
+        logging.info('Adding/updating vSphere Agent %s in database', host)
+
         conn = sqlite3.connect(self.worker_db)
         cursor = conn.cursor()
 
@@ -473,6 +477,8 @@ class VPollerWorker(Daemon):
             host (str): Hostname of the vSphere Agent to remove
         
         """
+        logging.info('Removing vSphere Agent %s from database', host)
+
         conn = sqlite3.connect(self.worker_db)
         cursor = conn.cursor()
 
@@ -488,6 +494,8 @@ class VPollerWorker(Daemon):
             only_enabled (bool): If True return only the Agents which are enabled
 
         """
+        logging.debug('Getting vSphere Agents from database')
+
         conn = sqlite3.connect(self.worker_db)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
