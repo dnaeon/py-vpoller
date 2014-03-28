@@ -35,7 +35,7 @@ class VPollerClient(object):
     """
     VPoller Client class
 
-    Defines methods for use by clients for sending out message requests.
+    Defines methods for use by clients for sending out message requests
 
     Sends out messages to a VPoller Proxy or vPoller Worker requesting
     properties of different vSphere objects, e.g. datastores, hosts, etc.
@@ -112,7 +112,7 @@ class VPollerClient(object):
                 self.zpoller.unregister(self.zclient)
 
                 # Re-establish the connection
-                logging.debug('Re-establishing connect to endpoint %s', self.endpoint)
+                logging.debug('Re-establishing connection to endpoint %s', self.endpoint)
                 self.zclient = self.zcontext.socket(zmq.REQ)
                 self.zclient.connect(self.endpoint)
                 self.zclient.setsockopt(zmq.LINGER, 0)
