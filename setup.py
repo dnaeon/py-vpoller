@@ -17,5 +17,6 @@ setup(name='py-vpoller',
         'pyzmq >= 13.1.0',
         'docopt >= 0.6.1',
         'pyvmomi >= 5.5.0',
+        'tabulate >= 0.7.2',  
       ]
 )
