@@ -30,6 +30,7 @@ vPoller Worker module for the VMware vSphere Poller
 import os
 import glob
 import logging
+import types
 import ConfigParser
 from time import asctime
 
