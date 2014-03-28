@@ -93,11 +93,78 @@ def status(endpoint):
 
     return result
 
+def initdb(config):
+    """
+    Initialize the vPoller Worker database
+    
+    Args:
+        config (str): Path to the vPoller Worker config file
+
+    """
+    worker = VPollerWorker(pidfile=None)
+    worker.load_worker_config(config)
+    worker.worker_db_init()
+
+def add_update_agent(config, user, pwd, host, enabled):
+    """
+    Add/update a vSphere Agent in the database
+
+    Args:
+        config    (str): Path to the vPoller Worker config file
+        user      (str): Username to use for this vSphere Agent
+        pwd       (str): Password to use for this vSphere Agent
+        host      (str): Hostname of the vSphere server
+        enabled  (bool): If True mark this vSphere Agent as enabled
+
+    """
+    worker = VPollerWorker(pidfile=None)
+    worker.load_worker_config(config)
+    worker.worker_db_add_update_agent(
+        user=user,
+        pwd=pwd,
+        host=host,
+        enabled=enabled
+    )
+
+def remove_agent(config, host):
+    """
+    Remove a vSphere Agent from the database
+
+    Args:
+        config    (str): Path to the vPoller Worker config file
+        host      (str): Hostname of the vSphere server
+
+    """
+    worker = VPollerWorker(pidfile=None)
+    worker.load_worker_config(config)
+    worker.worker_db_remove_agent(host=host)
+
+def list_agents(config):
+    """
+    List the registered vSphere Agents
+
+    Args:
+        config    (str): Path to the vPoller Worker config file
+
+    """
+    worker = VPollerWorker(pidfile=None)
+    worker.load_worker_config(config)
+
+    agents = worker.worker_db_get_agents()
+
+    from tabulate import tabulate
+
+    print tabulate(agents, headers=['Hostname', 'Username', 'Password', 'Enabled'], tablefmt="grid")
+
 def main():
     usage="""
-Usage: vpoller-worker [-d] [-D] [-p <pidfile>] [-f <config-file>] [-o <logfile>] start
+Usage: vpoller-worker [-d] [-D] [-p <pidfile>] [-f <config>] [-o <logfile>] start
        vpoller-worker [-D] -e <endpoint> stop
        vpoller-worker [-D] -e <endpoint> status
+       vpoller-worker [-D] [-f <config>] initdb
+       vpoller-worker [-D] [-f <config>] [-E <enabled>] -H <host> -U <user> -P <pwd> (agent-add|agent-update)
+       vpoller-worker [-D] [-f <config>] -H <host> agent-remove
+       vpoller-worker [-D] agent-list
        vpoller-worker --help
        vpoller-worker --version
 
@@ -105,6 +172,10 @@ Arguments:
   start                                     Start the VPoller Worker
   stop                                      Stop the VPoller Worker
   status                                    Get status information
+  agent-add                                 Add a vSphere Agent to the database
+  agent-update                              Update a vSphere Agent in the database
+  agent-remove                              Remove a vSphere Agent from the database
+  agent-list                                List registered vSphere Agents 
 
 Options:
   -h, --help                                Display this usage info
@@ -114,11 +185,16 @@ Options:
   -D, --debug                               Debug mode, be more verbose
   -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
                                             [default: /var/run/vpoller/vpoller-worker.pid]
-  -f <config-file>, --config <config-file>  Specify config file to use
-                                            [default: /etc/vpoller/vpoller-worker.conf]
+  -f <config>, --file <config>              Specify config file to use
+                                            [default: /etc/vpoller/vpoller.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
   -o <logfile>, --output <logfile>          Specify the logfile to use
                                             [default: /var/log/vpoller/vpoller-worker.log]
+  -E <enabled>, --enabled <enabled>         Mark the vSphere Agent as enabled
+                                            [default: 1]
+  -H <host>, --host <host>                  Specify the hostname of the vSphere Agent
+  -U <user>, --user <user>                  Username to use when connecting to the vSphere Agent
+  -P <pwd>, --pwd <pwd>                     Password to use when connecting to the vSphere Agent
 
 """
 
@@ -134,12 +210,33 @@ Options:
 
     result = None
         
-    if args["start"]:
-        start(args["--pidfile"], args["--config"], args["--daemon"])
-    elif args["stop"]:
-        result = stop(args["--endpoint"])
-    elif args["status"]:
-        result = status(args["--endpoint"])
+    if args['start']:
+        start(
+            args['--pidfile'],
+            args['--file'],
+            args['--daemon']
+        )
+    elif args['stop']:
+        result = stop(args['--endpoint'])
+    elif args['status']:
+        result = status(args['--endpoint'])
+    elif args['initdb']:
+        initdb(args['--file'])
+    elif args['agent-add'] or args['agent-update']:
+        add_update_agent(
+            config=args['--file'],
+            user=args['--user'],
+            pwd=args['--pwd'],
+            host=args['--host'],
+            enabled=int(args['--enabled'])
+        )
+    elif args['agent-remove']:
+        remove_agent(
+            config=args['--file'],
+            host=args['--host']
+        )
+    elif args['agent-list']:
+        list_agents(config=args['--file'])
 
     if result:
         result = json.loads(result)

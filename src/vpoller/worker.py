@@ -134,7 +134,7 @@ class VPollerWorker(Daemon):
             raise VPollerException, 'Configuration file does not exists: %s' % config
 
         parser = ConfigParser.ConfigParser()
-        parser.read(config_file)
+        parser.read(config)
 
         try:
             self.worker_db      = parser.get('worker', 'db')
@@ -197,7 +197,13 @@ class VPollerWorker(Daemon):
 
         self.agents = dict()
 
-        for each_agent in self.worker_db_get_agents(only_enabled=True):
+        registered_agents = self.worker_db_get_agents(only_enabled=True)
+
+        if not registered_agents:
+            logging.warning('There are no vSphere Agents in the database')
+            raise VPollerException, 'There are no vSphere Agents in the database'
+
+        for each_agent in registered_agents:
             agent = VSphereAgent(
                 user=each_agent['user'],
                 pwd=each_agent['pwd'],
@@ -434,7 +440,7 @@ class VPollerWorker(Daemon):
         if os.path.exists(self.worker_db):
             raise VPollerException, 'vPoller Worker database already exists at %s' % self.worker_db
 
-        conn = sqlite3.connet(self.worker_db)
+        conn = sqlite3.connect(self.worker_db)
         cursor = conn.cursor()
 
         sql = """
@@ -466,7 +472,7 @@ class VPollerWorker(Daemon):
         cursor = conn.cursor()
 
         cursor.execute('INSERT OR REPLACE INTO hosts VALUES (?,?,?,?)', (host, user, pwd, enabled))
-        cursor.commit()
+        conn.commit()
         cursor.close()
 
     def worker_db_remove_agent(self, host):
@@ -482,8 +488,8 @@ class VPollerWorker(Daemon):
         conn = sqlite3.connect(self.worker_db)
         cursor = conn.cursor()
 
-        cursor.execute('DELETE FROM hosts WHERE host = ?', host)
-        cursor.commit()
+        cursor.execute('DELETE FROM hosts WHERE host = ?', (host,))
+        conn.commit()
         cursor.close()
 
     def worker_db_get_agents(self, only_enabled=False):
