@@ -333,7 +333,7 @@ class VPollerWorker(Daemon):
 
         # Check if we have correct types of the message attributes
         for k in msg.keys():
-            if not isinstance(msg[k], msg_types[k]):
+            if not isinstance(msg[k], msg_attr_types[k]):
                 return { 'success': -1, 'msg': 'Incorrect message attribute type received' }
             
         # Process client request
