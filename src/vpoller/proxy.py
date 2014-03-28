@@ -41,7 +41,7 @@ class VPollerProxy(Daemon):
     VPoller Proxy class
 
     ZeroMQ proxy which load-balances client requests to a
-    pool of connected vPoller Workers workers
+    pool of connected vPoller Workers
 
     Extends:
         Daemon
@@ -81,38 +81,19 @@ class VPollerProxy(Daemon):
 
             # Frontend socket, forward messages to the backend
             if socks.get(self.frontend) == zmq.POLLIN:
-                logging.debug('Received message on frontend socket, passing to backend')
+                self.process_frontend_msg()
                 
-                msg = self.frontend.recv()
-                more = self.frontend.getsockopt(zmq.RCVMORE)
-                if more:
-                    self.backend.send(msg, zmq.SNDMORE)
-                else:
-                    self.backend.send(msg)
-
             # Backend socket, forward messages back to the clients
             if socks.get(self.backend) == zmq.POLLIN:
-                logging.debug('Received message on backend socket, passing to frontend')
-
-                msg = self.backend.recv()
-                more = self.backend.getsockopt(zmq.RCVMORE)
-                if more:
-                    self.frontend.send(msg, zmq.SNDMORE)
-                else:
-                    self.frontend.send(msg)
+                self.process_backend_msg()
 
             # Management socket
             if socks.get(self.mgmt) == zmq.POLLIN:
-                logging.debug('Received message on management socket')
-
-                msg = self.mgmt.recv_json()
-                result = self.process_mgmt_message(msg)
-                self.mgmt.send_json(result)
+                self.process_mgmt_msg()
 
         # Shutdown time has arrived, let's clean up a bit
         logging.debug('vPoller Proxy is going down')
         self.close_proxy_sockets()
-#        self.zcontext.term()
         self.stop()
 
     def load_proxy_config(self, config):
@@ -120,7 +101,7 @@ class VPollerProxy(Daemon):
         Loads the vPoller Proxy configuration file
         
         Args:
-            config (str): Config file of the vPoller Proxy
+            config (str): Path to the config file of vPoller Proxy
 
         Raises:
             VPollerException
@@ -129,8 +110,8 @@ class VPollerProxy(Daemon):
         logging.debug('Loading vPoller Proxy configuration file %s', config)
         
         if not os.path.exists(config):
-            logging.error("Configuration file does not exists: %s", config)
-            raise VPollerException, "Configuration file does not exists: %s" % config 
+            logging.error('Configuration file does not exists: %s', config)
+            raise VPollerException, 'Configuration file does not exists: %s' % config 
 
         parser = ConfigParser.ConfigParser()
         parser.read(config)
@@ -140,7 +121,7 @@ class VPollerProxy(Daemon):
             self.backend_endpoint  = parser.get('proxy', 'backend')
             self.mgmt_endpoint     = parser.get('proxy', 'mgmt')
         except ConfigParser.NoOptionError as e:
-            logging.error("Configuration issues detected in %s: %s", config, e)
+            logging.error('Configuration issues detected in %s: %s', config, e)
             raise
 
     def create_proxy_sockets(self):
@@ -197,8 +178,44 @@ class VPollerProxy(Daemon):
         self.mgmt.close()
         self.frontend.close()
         self.backend.close()
+
+        self.zcontext.term()
+
+    def process_frontend_msg(self):
+        """
+        Processes a message on the frontend socket
+
+        The received message is passed to backend socket
+        for further processing by workers
+
+        """
+        logging.debug('Received message on frontend socket, passing to backend')
         
-    def process_mgmt_message(self, msg):
+        msg = self.frontend.recv()
+        more = self.frontend.getsockopt(zmq.RCVMORE)
+        if more:
+            self.backend.send(msg, zmq.SNDMORE)
+        else:
+            self.backend.send(msg)
+
+    def process_backend_msg(self):
+        """
+        Processes a message on the backend socket
+
+        The received message is passed to frontend socket
+        which contains results for clients
+        
+        """
+        logging.debug('Received message on backend socket, passing to frontend')
+
+        msg = self.backend.recv()
+        more = self.backend.getsockopt(zmq.RCVMORE)
+        if more:
+            self.frontend.send(msg, zmq.SNDMORE)
+        else:
+            self.frontend.send(msg)
+        
+    def process_mgmt_msg(self):
         """
         Processes a message for the management interface of VPoller Proxy
 
@@ -218,11 +235,13 @@ class VPollerProxy(Daemon):
             msg (dict): The client message to process
 
         """
-        logging.debug('Processing management message: %s', msg)
+        logging.debug('Received message on management socket')
+
+        msg = self.mgmt.recv_json()
         
         # Check if we have a command to process
-        if not "method" in msg:
-            return { "success": -1, "msg": "Missing command name" }
+        if 'method' not in msg:
+            return { 'success': -1, 'msg': 'Missing method name' }
 
         # Methods the vPoller Proxy supports and processes
         methods = {
@@ -233,8 +252,12 @@ class VPollerProxy(Daemon):
         if msg['method'] not in methods:
             return { 'success': -1, 'msg': 'Unknown method received' }
 
-        # Process the requested method 
-        return methods[msg['method']](msg)
+        # Process the requested method
+        result = methods[msg['method']](msg)
+
+        logging.debug('Sending result to client: %s', result)
+
+        self.mgmt.send_json(result)
 
     def get_proxy_status(self, msg):
         """
@@ -263,7 +286,7 @@ class VPollerProxy(Daemon):
             }
         }
 
-        logging.debug('Returning result to client: %s', result)
+        logging.debug('Sending result to client: %s', result)
         
         return result
 
