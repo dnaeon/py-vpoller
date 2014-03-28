@@ -83,17 +83,19 @@ class VSphereAgent(VConnector):
         logging.info('[%s] Discovering pyVmomi.vim.Datacenter managed objects', self.host)
 
         # Property names to be collected
-        propeties = ['name']
+        properties = ['name']
         if msg.has_key('properties') and msg['properties']:
             properties.extend(msg['properties'])
 
-        # TODO: Handle exceptions
         view_ref = self.get_datacenter_view()
-        data = self.collect_properties(
-            view_ref=view_ref,
-            obj_type=pyVmomi.vim.Datacenter,
-            path_set=properties
-        )
+        try: 
+            data = self.collect_properties(
+                view_ref=view_ref,
+                obj_type=pyVmomi.vim.Datacenter,
+                path_set=properties
+            )
+        except Exception as e:
+            return { 'success': -1, 'msg': 'Cannot discover objects: %s' % e}
 
         result = {
             'success': 0,
