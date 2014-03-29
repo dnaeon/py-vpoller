@@ -277,7 +277,11 @@ class VPollerWorker(Daemon):
             },
             'cluster.discover': {
                 'method':    self.agents[vsphere_host].cluster_discover,
-                'msg_attr':  ('method', 'name'),
+                'msg_attr':  ('method', 'hostname'),
+            },
+            'resource.pool.discover': {
+                'method':    self.agents[vsphere_host].resource_pool_discover,
+                'msg_attr':  ('method', 'hostname'),
             },
             'host.discover': {
                 'method':    self.agents[vsphere_host].host_discover,
