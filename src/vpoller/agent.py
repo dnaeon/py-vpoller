@@ -120,6 +120,39 @@ class VSphereAgent(VConnector):
             properties.extend(msg['properties'])
 
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.Datacenter)
+
+    def cluster_discover(self, msg):
+        """
+        Discover all pyVmomi.vim.ClusterComputeResource managed objects
+
+        Example client message would be:
+        
+            {
+                "method":   "cluster.discover",
+        	"hostname": "vc01.example.org",
+            }
+
+        Example client message which also requests additional properties:
+
+            {
+                "method":     "cluster.discover",
+                "hostname":   "vc01.example.org",
+                "properties": [
+                    "name",
+                    "overallStatus"
+                ]
+            }
+              
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        # Property names to be collected
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+            
+        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.ClusterComputeResource)
     
     def host_discover(self, msg):
         """
@@ -153,3 +186,4 @@ class VSphereAgent(VConnector):
             properties.extend(msg['properties'])
 
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.HostSystem)
+
