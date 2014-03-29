@@ -65,7 +65,7 @@ class VSphereAgent(VConnector):
         	"hostname": "vc01.example.org",
             }
 
-        Example client message which requests also additional properties:
+        Example client message which also requests additional properties:
 
             {
                 "method":     "datacenter.discover",
@@ -99,7 +99,60 @@ class VSphereAgent(VConnector):
 
         result = {
             'success': 0,
-            'msg': 'Successfully discovered datacenters',
+            'msg': 'Successfully discovered objects',
+            'result': data,
+        }
+
+        logging.debug('Returning result to client: %s', result)
+
+        return result
+    
+    def host_discover(self, msg):
+        """
+        Discover all pyVmomi.vim.HostSystem managed objects
+
+        Example client message would be:
+        
+            {
+                "method":   "host.discover",
+        	"hostname": "vc01.example.org",
+            }
+
+        Example client message which also requests additional properties:
+
+            {
+                "method":     "host.discover",
+                "hostname":   "vc01.example.org",
+                "properties": [
+                    "name",
+                    "runtime.powerState"
+                ]
+            }
+              
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        logging.info('[%s] Discovering pyVmomi.vim.HostSystem managed objects', self.host)
+
+        # Property names to be collected
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        view_ref = self.get_host_view()
+        try: 
+            data = self.collect_properties(
+                view_ref=view_ref,
+                obj_type=pyVmomi.vim.HostSystem,
+                path_set=properties
+            )
+        except Exception as e:
+            return { 'success': -1, 'msg': 'Cannot discover objects: %s' % e}
+
+        result = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
             'result': data,
         }
 
