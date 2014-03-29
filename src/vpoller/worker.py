@@ -287,6 +287,10 @@ class VPollerWorker(Daemon):
                 'method':    self.agents[vsphere_host].host_discover,
                 'msg_attr':  ('method', 'hostname'),
             },
+            'vm.discover': {
+                'method':    self.agents[vsphere_host].vm_discover,
+                'msg_attr':  ('method', 'hostname'),
+            },
         }
 
         if msg['method'] not in methods:
