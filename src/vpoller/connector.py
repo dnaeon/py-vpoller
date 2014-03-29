@@ -31,6 +31,7 @@ connections to VMware vSphere hosts and retrieving of object properties
 """
 
 import logging
+import sqlite3
 
 import pyVmomi
 import pyVim.connect
@@ -226,4 +227,108 @@ class VConnector(object):
         )
 
         return view_ref
+
+class VConnectorDatabase(object):
+    """
+    VConnectorDatabase class
+
+    Provides an SQLite database backend for storing information
+    about vSphere Agents, such as hostname, username, password, etc.
+    
+    Returns:
+        VConnectorDatabase object
+    
+    Raises:
+        VConnectorException
+
+    """
+    def __init__(self, db):
+        """
+        Initializes a new VConnectorDatabase object
+
+        Args:
+            db (str): Path to the SQLite database file
+
+        """
+        self.db = db
+        self.conn = sqlite3.connect(self.db)
+        self.cursor = self.conn.cursor()
+
+    def db_init(self):
+        """
+        Initializes the vConnector Database backend
+
+        """
+        logging.info('Initializing vConnector database at %s', self.db)
+
+        sql = """
+        CREATE TABLE hosts (
+            host TEXT UNIQUE,
+            user TEXT,
+            pwd  TEXT,
+            enabled INTEGER
+        )
+        """
+
+        try:
+            self.cursor.execute(sql)
+        except sqlite3.OperationalError as e:
+            raise VConnectorException, 'Cannot initialize database: %s' % e
+
+        self.conn.commit()
+        self.cursor.close()
+
+    def add_update_agent(self, host, user, pwd, enabled):
+        """
+        Add/update a vSphere Agent in the vConnector database
+
+        Args:
+            host    (str): Hostname of the vSphere host
+            user    (str): Username to use when connecting
+            pwd     (str): Password to use when connecting
+            enabled (int): Enable or disable the vSphere Agent
+
+        """
+        logging.info('Adding/updating vSphere Agent %s in database', host)
+
+        self.cursor.execute('INSERT OR REPLACE INTO hosts VALUES (?,?,?,?)', (host, user, pwd, enabled))
+        self.conn.commit()
+        self.cursor.close()
+
+    def remove_agent(self, host):
+        """
+        Remove a vSphere Agent from the vConnector database
+
+        Args:
+            host (str): Hostname of the vSphere Agent to remove
+        
+        """
+        logging.info('Removing vSphere Agent %s from database', host)
+
+        self.cursor.execute('DELETE FROM hosts WHERE host = ?', (host,))
+        self.conn.commit()
+        self.cursor.close()
+
+    def get_agents(self, only_enabled=False):
+        """
+        Get the vSphere Agents from the vConnector database
+
+        Args:
+            only_enabled (bool): If True return only the Agents which are enabled
+
+        """
+        logging.debug('Getting vSphere Agents from database')
+
+        self.conn.row_factory = sqlite3.Row
+
+        if only_enabled:
+            sql = 'SELECT * FROM hosts WHERE enabled = 1'
+        else:
+            sql = 'SELECT * FROM hosts'
+
+        self.cursor.execute(sql)
+        result = cursor.fetchall()
+        self.cursor.close()
+
+        return result
 
