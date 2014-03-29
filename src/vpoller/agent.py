@@ -252,3 +252,36 @@ class VSphereAgent(VConnector):
             properties.extend(msg['properties'])
 
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.VirtualMachine)
+
+    def datastore_discover(self, msg):
+        """
+        Discover all pyVmomi.vim.Datastore managed objects
+
+        Example client message would be:
+        
+            {
+                "method":   "datastore.discover",
+        	"hostname": "vc01.example.org",
+            }
+
+        Example client message which also requests additional properties:
+
+            {
+                "method":     "datastore.discover",
+                "hostname":   "vc01.example.org",
+                "properties": [
+                    "name",
+                    "summary.url"
+                ]
+            }
+              
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        # Property names to be collected
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.Datastore)
