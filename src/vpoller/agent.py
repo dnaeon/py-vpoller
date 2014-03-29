@@ -68,7 +68,7 @@ class VSphereAgent(VConnector):
         """
         logging.info('[%s] Discovering %s managed objects', obj_type.__name__)
 
-        view_ref = self._get_object_view(obj_type=obj_type)
+        view_ref = self._get_object_view(obj_type=[obj_type])
         try:
             data = self.collect_properties(
                 view_ref=view_ref,
