@@ -54,6 +54,40 @@ class VSphereAgent(VConnector):
         VConnector
 
     """
+    def _discover_objects(self, properties, obj_type):
+        """
+        Helper method to simplify discovery of vSphere managed objects
+
+        Args:
+            properties          (list): List of properties to be collected
+            obj_type   (pyVmomi.vim.*): Type of vSphere managed object
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        logging.info('[%s] Discovering %s managed objects', obj_type.__name__)
+
+        view_ref = self._get_object_view(obj_type=obj_type)
+        try:
+            data = self.collect_properties(
+                view_ref=view_ref,
+                obj_type=obj_type,
+                path_set=properties
+            )
+        except Exception as e:
+            return { 'success': -1, 'msg': 'Cannot discover objects: %s' % e }
+
+        result = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': data,
+        }
+
+        logging.debug('Returning result from discovery: %s', result)
+
+        return result
+
     def datacenter_discover(self, msg):
         """
         Discover all pyVmomi.vim.Datacenter managed objects
@@ -75,37 +109,17 @@ class VSphereAgent(VConnector):
                     "overallStatus"
                 ]
             }
-              
+        
         Returns:
             The discovered objects in JSON format
 
         """
-        logging.info('[%s] Discovering pyVmomi.vim.Datacenter managed objects', self.host)
-
         # Property names to be collected
         properties = ['name']
         if msg.has_key('properties') and msg['properties']:
             properties.extend(msg['properties'])
 
-        view_ref = self.get_datacenter_view()
-        try: 
-            data = self.collect_properties(
-                view_ref=view_ref,
-                obj_type=pyVmomi.vim.Datacenter,
-                path_set=properties
-            )
-        except Exception as e:
-            return { 'success': -1, 'msg': 'Cannot discover objects: %s' % e}
-
-        result = {
-            'success': 0,
-            'msg': 'Successfully discovered objects',
-            'result': data,
-        }
-
-        logging.debug('Returning result to client: %s', result)
-
-        return result
+        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.Datacenter)
     
     def host_discover(self, msg):
         """
@@ -133,29 +147,9 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.info('[%s] Discovering pyVmomi.vim.HostSystem managed objects', self.host)
-
         # Property names to be collected
         properties = ['name']
         if msg.has_key('properties') and msg['properties']:
             properties.extend(msg['properties'])
 
-        view_ref = self.get_host_view()
-        try: 
-            data = self.collect_properties(
-                view_ref=view_ref,
-                obj_type=pyVmomi.vim.HostSystem,
-                path_set=properties
-            )
-        except Exception as e:
-            return { 'success': -1, 'msg': 'Cannot discover objects: %s' % e}
-
-        result = {
-            'success': 0,
-            'msg': 'Successfully discovered objects',
-            'result': data,
-        }
-
-        logging.debug('Returning result to client: %s', result)
-
-        return result
+        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.HostSystem)
