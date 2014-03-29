@@ -254,7 +254,7 @@ class VConnectorDatabase(object):
         self.conn = sqlite3.connect(self.db)
         self.cursor = self.conn.cursor()
 
-    def db_init(self):
+    def init_db(self):
         """
         Initializes the vConnector Database backend
 
@@ -332,3 +332,30 @@ class VConnectorDatabase(object):
 
         return result
 
+    def enable_agent(self, host):
+        """
+        Mark a vSphere Agent as enabled
+
+        Args:
+            host (str): Hostname of the vSphere Agent to enable
+
+        """
+        logging.info('Enabling vSphere Agent %s', host)
+
+        self.cursor.execute('UPDATE hosts SET enabled = 1 WHERE host = ?', (host,))
+        self.conn.commit()
+        self.cursor.close()
+        
+    def disable_agent(self, host):
+        """
+        Mark a vSphere Agent as disabled
+
+        Args:
+            host (str): Hostname of the vSphere Agent to disable
+
+        """
+        logging.info('Disabling vSphere Agent %s', host)
+
+        self.cursor.execute('UPDATE hosts SET enabled = 0 WHERE host = ?', (host,))
+        self.conn.commit()
+        self.cursor.close()
