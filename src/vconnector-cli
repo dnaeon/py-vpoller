@@ -47,7 +47,7 @@ def init_db(db):
     db = VConnectorDatabase(db)
     db.init_db()
 
-def add_update_agent(db, user, pwd, host, enabled):
+def add_update_agent(db, user, pwd, host):
     """
     Add/update a vSphere Agent in the database
 
@@ -56,7 +56,6 @@ def add_update_agent(db, user, pwd, host, enabled):
         user    (str): Username to use for this vSphere Agent
         pwd     (str): Password to use for this vSphere Agent
         host    (str): Hostname of the vSphere server
-        enabled (bool): If True mark this vSphere Agent as enabled
 
     """
     db = VConnectorDatabase(db)
@@ -64,7 +63,6 @@ def add_update_agent(db, user, pwd, host, enabled):
         user=user,
         pwd=pwd,
         host=host,
-        enabled=enabled
     )
 
 def remove_agent(db, host):
@@ -123,11 +121,11 @@ def disable_agent(db, host):
 def main():
     usage="""
 Usage: vconnector-cli [-D] [-o <logfile>] [-d <db>] init
-       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> -U <user> -P <pwd> (add|update)
-       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> remove
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] get
        vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> enable
        vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> disable
-       vconnector-cli [-D] [-o <logfile>] [-d <db>] get
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> remove
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> -U <user> -P <pwd> (add|update)
        vpoller-worker --help
        vpoller-worker --version
 
@@ -171,7 +169,6 @@ Options:
             user=args['--user'],
             pwd=args['--pwd'],
             host=args['--host'],
-            enabled=int(args['--enabled'])
         )
     elif args['remove']:
         remove_agent(
