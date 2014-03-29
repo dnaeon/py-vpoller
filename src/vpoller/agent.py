@@ -66,7 +66,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.info('[%s] Discovering %s managed objects', obj_type.__name__)
+        logging.info('[%s] Discovering %s managed objects', self.host, obj_type.__name__)
 
         view_ref = self._get_object_view(obj_type=[obj_type])
         try:
