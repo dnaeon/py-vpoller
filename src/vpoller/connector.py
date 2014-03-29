@@ -79,7 +79,7 @@ class VConnector(object):
              VPollerException
         
         """
-        logging.info('Connecting to %s', self.host)
+        logging.info('Connecting vSphere Agent to %s', self.host)
         
         try:
             self.si = pyVim.connect.SmartConnect(
@@ -95,7 +95,7 @@ class VConnector(object):
         Disconnect from the VMware vSphere host
 
         """
-        logging.info('Disconnecting from %s', self.host)
+        logging.info('Disconnecting vSphere Agent from %s', self.host)
         pyVim.connect.Disconnect(self.si)
 
     def reconnect(self):
