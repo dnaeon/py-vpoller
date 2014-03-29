@@ -231,41 +231,6 @@ class VPollerWorker(Daemon):
         for agent in self.agents:
             self.agents[agent].disconnect()
         
-    def get_vsphere_configs(self, config_dir):
-        """
-        Gets the configuration files for the vSphere hosts
-        
-        The 'config_dir' argument should point to a directory containing all .conf files
-        for the different hosts we are connecting our VSphereAgents to.
-        
-        Args:
-            config_dir (str): A directory containing configuration files for the vSphere Agents
-
-        Returns:
-            A list of all configuration files found in the config directory
-        
-        Raises:
-            VPollerException
-            
-        """
-        logging.debug('Getting vSphere configuration files from: %s', config_dir)
-        
-        if not os.path.exists(config_dir) or not os.path.isdir(config_dir):
-            logging.error('%s does not exists or is not a directory', config_dir)
-            raise VPollerException, '%s does not exists or is not a directory' % config_dir
-        
-        # Get all *.conf files for the hosts
-        path = os.path.join(config_dir, '*.conf')
-        conf_files = glob.glob(path)
-
-        if not conf_files:
-            logging.error('No vSphere config files found in %s', config_dir)
-            raise VPollerException, 'No vSphere config files found in %s' % config_dir
-
-        logging.debug('Discovered vSphere configuration files: %s', conf_files)
-
-        return conf_files
-
     def process_client_msg(self, msg):
         """
         Processes a client message received on the vPoller Worker socket
