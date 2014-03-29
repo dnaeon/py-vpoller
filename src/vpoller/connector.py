@@ -278,7 +278,7 @@ class VConnectorDatabase(object):
         self.conn.commit()
         self.cursor.close()
 
-    def add_update_agent(self, host, user, pwd, enabled):
+    def add_update_agent(self, host, user, pwd, enabled=0):
         """
         Add/update a vSphere Agent in the vConnector database
 
@@ -286,7 +286,7 @@ class VConnectorDatabase(object):
             host    (str): Hostname of the vSphere host
             user    (str): Username to use when connecting
             pwd     (str): Password to use when connecting
-            enabled (int): Enable or disable the vSphere Agent
+            enabled (int): If True mark this vSphere Agent as enabled
 
         """
         logging.info('Adding/updating vSphere Agent %s in database', host)
@@ -327,7 +327,7 @@ class VConnectorDatabase(object):
             sql = 'SELECT * FROM hosts'
 
         self.cursor.execute(sql)
-        result = cursor.fetchall()
+        result = self.cursor.fetchall()
         self.cursor.close()
 
         return result
