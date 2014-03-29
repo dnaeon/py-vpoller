@@ -30,7 +30,6 @@ vPoller Worker module for the VMware vSphere Poller
 import os
 import types
 import logging
-import sqlite3
 import ConfigParser
 from time import asctime
 
@@ -38,6 +37,7 @@ import zmq
 from vpoller.core import VPollerException
 from vpoller.agent import VSphereAgent
 from vpoller.daemon import Daemon
+from vpoller.connector import VConnectorDatabase
 
 class VPollerWorker(Daemon):
     """
@@ -137,7 +137,7 @@ class VPollerWorker(Daemon):
         parser.read(config)
 
         try:
-            self.worker_db      = parser.get('worker', 'db')
+            self.connector_db   = parser.get('worker', 'db')
             self.proxy_endpoint = parser.get('worker', 'proxy')
             self.mgmt_endpoint  = parser.get('worker', 'mgmt')
         except ConfigParser.NoOptionError as e:
@@ -197,13 +197,14 @@ class VPollerWorker(Daemon):
 
         self.agents = dict()
 
-        registered_agents = self.worker_db_get_agents(only_enabled=True)
+        db = VConnectorDatabase(self.connector_db)
+        db_agents = db.get_agents(only_enabled=True)
 
-        if not registered_agents:
-            logging.warning('There are no vSphere Agents in the database')
-            raise VPollerException, 'There are no vSphere Agents in the database'
+        if not db_agents:
+            logging.warning('There are no vSphere Agents registered')
+            raise VPollerException, 'There are no vSphere Agents registered'
 
-        for each_agent in registered_agents:
+        for each_agent in db_agents:
             agent = VSphereAgent(
                 user=each_agent['user'],
                 pwd=each_agent['pwd'],
