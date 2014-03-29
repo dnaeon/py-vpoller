@@ -1,0 +1,190 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2013-2014 Marin Atanasov Nikolov <dnaeon@gmail.com>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer
+#    in this position and unchanged.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+"""
+vconnector-cli is an application used for managing the vSphere Agents
+connection details using an SQLite database backend.
+
+"""
+
+import logging
+
+from docopt import docopt
+from tabulate import tabulate
+from vpoller.connector import VConnectorDatabase
+
+def init_db(db):
+    """
+    Initialize the vConnector database
+    
+    Args:
+        db (str): Path to the SQLite database file
+
+    """
+    db = VConnectorDatabase(db)
+    db.init_db()
+
+def add_update_agent(db, user, pwd, host, enabled):
+    """
+    Add/update a vSphere Agent in the database
+
+    Args:
+        db      (str): Path to the vConnector database file
+        user    (str): Username to use for this vSphere Agent
+        pwd     (str): Password to use for this vSphere Agent
+        host    (str): Hostname of the vSphere server
+        enabled (bool): If True mark this vSphere Agent as enabled
+
+    """
+    db = VConnectorDatabase(db)
+    db.add_update_agent(
+        user=user,
+        pwd=pwd,
+        host=host,
+        enabled=enabled
+    )
+
+def remove_agent(db, host):
+    """
+    Remove a vSphere Agent from the database
+
+    Args:
+        db   (str): Path to the vConnector database file
+        host (str): Hostname of the vSphere server
+
+    """
+    db = VConnectorDatabase(db)
+    db.remove_agent(host=host)
+
+def get_agents(db):
+    """
+    Get the registered vSphere Agents
+
+    Args:
+        db (str): Path to the vConnector database file
+
+    """
+    db = VConnectorDatabase(db)
+    agents = db.get_agents()
+
+    print tabulate(
+        agents,
+        headers=['Hostname', 'Username', 'Password', 'Enabled'],
+        tablefmt='grid'
+    )
+
+def enable_agent(db, host):
+    """
+    Mark a vSphere Agent as enabled
+
+    Args:
+        db   (str): Path to the vConnector database file
+        host (str): Hostname of the vSphere Agent to enable
+
+    """
+    db = VConnectorDatabase(db)
+    db.enable_agent(host=host)
+
+def disable_agent(db, host):
+    """
+    Mark a vSphere Agent as disabled
+
+    Args:
+        db   (str): Path to the vConnector database file
+        host (str): Hostname of the vSphere Agent to disable
+
+    """
+    db = VConnectorDatabase(db)
+    db.disable_agent(host=host)
+
+def main():
+    usage="""
+Usage: vconnector-cli [-D] [-o <logfile>] [-d <db>] init
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> -U <user> -P <pwd> (add|update)
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> remove
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> enable
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> disable
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] get
+       vpoller-worker --help
+       vpoller-worker --version
+
+Arguments:
+  add                               Add a vSphere Agent to the database
+  update                            Update a vSphere Agent in the database
+  remove                            Remove a vSphere Agent from the database
+  get                               Get all registered vSphere Agents
+  enable                            Mark this vSphere Agent as enabled
+  disable                           Mark this vSphere Agent as disabled
+
+Options:
+  -h, --help                        Display this usage info
+  -v, --version                     Display version and exit
+  -D, --debug                       Debug mode, be more verbose
+  -o <logfile>, --output <logfile>  Specify the logfile to use
+                                    [default: /var/log/vpoller/vconnector.log]
+  -d <db>, --database <db>          Path to the SQLite database file
+                                    [default: /var/lib/vconnector.db]
+  -H <host>, --host <host>          Specify the hostname of the vSphere Agent
+  -U <user>, --user <user>          Username to use when connecting to the vSphere Agent
+  -P <pwd>, --pwd <pwd>             Password to use when connecting to the vSphere Agent
+
+"""
+
+    args = docopt(usage, version="0.1.0")
+
+    level = logging.DEBUG if args['--debug'] else logging.INFO
+
+    logging.basicConfig(
+        filename=args['--output'],
+        format='%(asctime)s - %(levelname)s - vconnector-cli[%(process)s]: %(message)s',
+        level=level
+    )
+
+    if args['init']:
+        init_db(args['--database'])
+    elif args['add'] or args['update']:
+        add_update_agent(
+            db=args['--database'],
+            user=args['--user'],
+            pwd=args['--pwd'],
+            host=args['--host'],
+            enabled=int(args['--enabled']
+        )
+    elif args['remove']:
+        remove_agent(
+            db=args['--database'],
+            host=args['--host']
+        )
+    elif args['get']:
+        get_agents(db=args['--database'])
+    elif args['enable']:
+        enable_agent(db=args['--database'], host=args['--host'])
+    elif args['disable']:
+        disable_agent(db=args['--database'], host=args['--host'])
+        
+if __name__ == '__main__':
+    main()
+

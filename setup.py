@@ -11,7 +11,8 @@ setup(name='py-vpoller',
       scripts=[
         'src/vpoller-client',
         'src/vpoller-proxy',
-        'src/vpoller-worker'
+        'src/vpoller-worker',
+        'src/vconnector-cli',
       ],
       install_requires=[
         'pyzmq >= 13.1.0',
