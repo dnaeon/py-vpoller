@@ -146,7 +146,7 @@ Options:
   -o <logfile>, --output <logfile>  Specify the logfile to use
                                     [default: /var/log/vpoller/vconnector.log]
   -d <db>, --database <db>          Path to the SQLite database file
-                                    [default: /var/lib/vconnector.db]
+                                    [default: /var/lib/vconnector/vconnector.db]
   -H <host>, --host <host>          Specify the hostname of the vSphere Agent
   -U <user>, --user <user>          Username to use when connecting to the vSphere Agent
   -P <pwd>, --pwd <pwd>             Password to use when connecting to the vSphere Agent
