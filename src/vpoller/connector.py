@@ -252,7 +252,6 @@ class VConnectorDatabase(object):
         """
         self.db = db
         self.conn = sqlite3.connect(self.db)
-        self.cursor = self.conn.cursor()
 
     def init_db(self):
         """
@@ -260,6 +259,8 @@ class VConnectorDatabase(object):
 
         """
         logging.info('Initializing vConnector database at %s', self.db)
+
+        self.cursor = self.conn.cursor()
 
         sql = """
         CREATE TABLE hosts (
@@ -291,6 +292,7 @@ class VConnectorDatabase(object):
         """
         logging.info('Adding/updating vSphere Agent %s in database', host)
 
+        self.cursor = self.conn.cursor()
         self.cursor.execute('INSERT OR REPLACE INTO hosts VALUES (?,?,?,?)', (host, user, pwd, enabled))
         self.conn.commit()
         self.cursor.close()
@@ -305,6 +307,7 @@ class VConnectorDatabase(object):
         """
         logging.info('Removing vSphere Agent %s from database', host)
 
+        self.cursor = self.conn.cursor()
         self.cursor.execute('DELETE FROM hosts WHERE host = ?', (host,))
         self.conn.commit()
         self.cursor.close()
@@ -320,6 +323,7 @@ class VConnectorDatabase(object):
         logging.debug('Getting vSphere Agents from database')
 
         self.conn.row_factory = sqlite3.Row
+        self.cursor = self.conn.cursor()
 
         if only_enabled:
             sql = 'SELECT * FROM hosts WHERE enabled = 1'
@@ -342,6 +346,7 @@ class VConnectorDatabase(object):
         """
         logging.info('Enabling vSphere Agent %s', host)
 
+        self.cursor = self.conn.cursor()
         self.cursor.execute('UPDATE hosts SET enabled = 1 WHERE host = ?', (host,))
         self.conn.commit()
         self.cursor.close()
@@ -356,6 +361,7 @@ class VConnectorDatabase(object):
         """
         logging.info('Disabling vSphere Agent %s', host)
 
+        self.cursor = self.conn.cursor()
         self.cursor.execute('UPDATE hosts SET enabled = 0 WHERE host = ?', (host,))
         self.conn.commit()
         self.cursor.close()
