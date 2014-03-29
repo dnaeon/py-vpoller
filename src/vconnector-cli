@@ -122,13 +122,9 @@ def main():
     usage="""
 Usage: vconnector-cli [-D] [-o <logfile>] [-d <db>] init
        vconnector-cli [-D] [-o <logfile>] [-d <db>] get
-       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> enable
-       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> disable
-       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> remove
+       vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> (enable|disable|remove)
        vconnector-cli [-D] [-o <logfile>] [-d <db>] -H <host> -U <user> -P <pwd> (add|update)
-       vpoller-worker --help
-       vpoller-worker --version
-
+       vconnector-cli (-h|-v)
 Arguments:
   add                               Add a vSphere Agent to the database
   update                            Update a vSphere Agent in the database
