@@ -148,7 +148,7 @@ class VConnector(object):
         """
         return self.get_container_view(obj_type=[pyVmomi.vim.ResourcePool])
 
-    def collect_properties(self, view_ref, obj_type, path_set=[]):
+    def collect_properties(self, view_ref, obj_type, path_set=[], include_mors=False):
         """
         Collect properties for managed objects from a view ref
 
@@ -157,9 +157,10 @@ class VConnector(object):
             - http://pubs.vmware.com/vsphere-50/index.jsp#com.vmware.wssdk.pg.doc_50/PG_Ch5_PropertyCollector.7.2.html
 
         Args:
-            view_ref (pyVmomi.vim.view.ContainerView): Starting point of inventory navigation
-            obj_type                  (pyVmomi.vim.*): Type of managed object
-            path_set                           (list): List of properties to retrieve
+            view_ref (pyVmomi.vim.view.*): Starting point of inventory navigation
+            obj_type      (pyVmomi.vim.*): Type of managed object
+            path_set               (list): List of properties to retrieve
+            include_mors           (bool): If True include the managed objects refs in the result
 
         Returns:
             A list of properties for the managed objects
@@ -200,7 +201,16 @@ class VConnector(object):
         # Retrieve properties
         props = collector.RetrieveContents([filter_spec])
 
-        data = [{p.name:p.val for p in obj.propSet} for obj in props]
+        data = []
+        for obj in props:
+            properties = {}
+            for prop in obj.propSet:
+                properties[prop.name] = prop.val
+
+            if include_mors:
+                properties['obj'] = obj.obj
+
+            data.append(properties)
 
         return data
 
@@ -244,6 +254,32 @@ class VConnector(object):
         view_ref = self.si.content.viewManager.CreateListView(obj=obj)
 
         return view_ref
+
+    def get_object_by_property(self, property_name, property_value, obj_type):
+        """
+        Find a Managed Object by a propery
+    
+        Args:
+            property_name            (str): Name of the property to look for
+            property_value           (str): Value of the property to match 
+            obj_type       (pyVmomi.vim.*): Type of the Managed Object
+
+        Returns:
+            The first matching object
+    
+        """
+        view_ref = self.get_container_view(obj_type=[obj_type])
+
+        props = self.collect_properties(
+            view_ref=view_ref,
+            obj_type=obj_type,
+            path_set=[property_name],
+            include_mors=True
+        )
+
+        for each_obj in props:
+            if each_obj[property_name] == property_value:
+                return each_obj['obj']
 
 class VConnectorDatabase(object):
     """
