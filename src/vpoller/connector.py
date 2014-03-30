@@ -212,7 +212,7 @@ class VConnector(object):
             obj_type (list): A list of managed object types
 
         Returns:
-            A container view refence to the discovered managed objects
+            A container view ref to the discovered managed objects
         
         """
         if not container:
@@ -225,6 +225,23 @@ class VConnector(object):
             type=obj_type,
             recursive=True
         )
+
+        return view_ref
+
+    def get_list_view(self, obj):
+        """
+        Get a vSphere List View reference 
+
+        Args:
+            obj (list): A list of managed object to include in the List View
+
+        Returns:
+            A list view ref to the managed objects
+        
+        """
+        logging.debug('[%s] Getting list view ref for %s objects', self.host, [o.name for o in obj])
+
+        view_ref = self.si.content.viewManager.CreateListView(obj=obj)
 
         return view_ref
 
