@@ -126,7 +126,7 @@ class VSphereAgent(VConnector):
                 obj_type=obj_type
             )
         except Exception as e:
-            return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e) }
+            return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e }
 
         if not obj:
             return { 'success': -1, 'msg': 'Cannot find object %s' % obj_property_value }
