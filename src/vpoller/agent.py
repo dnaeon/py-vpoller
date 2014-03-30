@@ -58,6 +58,10 @@ class VSphereAgent(VConnector):
         """
         Helper method to simplify discovery of vSphere managed objects
 
+        This method is used by the '*.discover' vPoller Worker methods and is 
+        meant for collecting properties for multiple objects at once, e.g.
+        during object discovery operation.
+
         Args:
             properties          (list): List of properties to be collected
             obj_type   (pyVmomi.vim.*): Type of vSphere managed object
@@ -76,7 +80,7 @@ class VSphereAgent(VConnector):
                 path_set=properties
             )
         except Exception as e:
-            return { 'success': -1, 'msg': 'Cannot discover objects: %s' % e }
+            return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e }
 
         result = {
             'success': 0,
@@ -86,6 +90,65 @@ class VSphereAgent(VConnector):
 
         logging.debug('Returning result from discovery: %s', result)
 
+        return result
+
+    def _get_object_properties(self, properties, obj_type, obj_property_name, obj_property_value):
+        """
+        Helper method to simplify retrieving of properties for a single managed object
+
+        This method is used by the '*.get' vPoller Worker methods and is 
+        meant for collecting properties for a single managed object.
+
+        We first search for the object with property name and value, then create a
+        list view for this object and finally collect it's properties.
+
+        Args:
+            properties                  (list): List of properties to be collected
+            obj_type           (pyVmomi.vim.*): Type of vSphere managed object
+            obj_property_name            (str): Property name used while searching for the object
+            obj_property_value           (str): Property value uniquely identifying the object in question
+
+        Returns:
+            The collected properties for this managed object in JSON format
+
+        """
+        logging.info('[%s] Retrieving properties for %s managed object of type %s',
+                     self.host,
+                     obj_property_value,
+                     obj_type.__name__
+        )
+
+        # Find the Managed Object reference for the requested object
+        try:
+            obj = self.get_object_by_property(
+                property_name=obj_property_name,
+                property_value=obj_property_value,
+                obj_type=obj_type
+            )
+        except Exception as e:
+            return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e) }
+
+        if not obj:
+            return { 'success': -1, 'msg': 'Cannot find object %s' % obj_property_value }
+
+        # Create a list view for this object and collect properties
+        view_ref = self.get_list_view(obj=[obj])
+
+        try:
+            data = self.collect_properties(
+                view_ref=view_ref,
+                obj_type=obj_type,
+                path_set=properties
+            )
+        except Exception as e:
+            return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e }
+
+        result = {
+            'success': 0,
+            'msg': 'Successfully retrieved object properties',
+            'result': data,
+        }
+        
         return result
 
     def datacenter_discover(self, msg):
@@ -252,6 +315,38 @@ class VSphereAgent(VConnector):
             properties.extend(msg['properties'])
 
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.VirtualMachine)
+
+    def vm_get(self, msg):
+        """
+        Get properties from a pyVmomi.vim.VirtualMachine managed object
+
+        Example client message would be:
+
+            {
+                "method":     "vm.get",
+                "hostname":   "vc01.example.org",
+                "name":       "vm01.example.org",
+                "properties": [
+                    "name",
+                    "runtime.powerState"
+                ]
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        # Property names to be collected
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        return self._get_object_properties(
+            properties=properties,
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
 
     def datastore_discover(self, msg):
         """
