@@ -334,6 +334,10 @@ class VPollerWorker(Daemon):
                 'method':    self.agents[vsphere_host].datastore_discover,
                 'msg_attr':  ('method', 'hostname'),
             },
+            'datastore.get': {
+                'method':    self.agents[vsphere_host].datastore_get,
+                'msg_attr':  ('method', 'hostname', 'name', 'properties'),
+            },
         }
 
         if msg['method'] not in methods:

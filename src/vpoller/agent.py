@@ -510,3 +510,36 @@ class VSphereAgent(VConnector):
             properties.extend(msg['properties'])
 
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.Datastore)
+
+    def datastore_get(self, msg):
+        """
+        Get properties of a single pyVmomi.vim.Datastore managed object
+
+        Example client message would be:
+
+            {
+                "method":     "datastore.get",
+                "hostname":   "vc01.example.org",
+                "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
+                "properties": [
+                    "name",
+                    "summary.accessible",
+                    "summary.capacity"
+                ]
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        # Property names to be collected
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        return self._get_object_properties(
+            properties=properties,
+            obj_type=pyVmomi.vim.Datastore,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
