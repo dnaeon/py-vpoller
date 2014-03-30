@@ -302,6 +302,10 @@ class VPollerWorker(Daemon):
                 'method':    self.agents[vsphere_host].cluster_discover,
                 'msg_attr':  ('method', 'hostname'),
             },
+            'cluster.get': {
+                'method':    self.agents[vsphere_host].cluster_get,
+                'msg_attr':  ('method', 'hostname', 'name', 'properties'),
+            },
             'resource.pool.discover': {
                 'method':    self.agents[vsphere_host].resource_pool_discover,
                 'msg_attr':  ('method', 'hostname'),

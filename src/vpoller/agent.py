@@ -249,6 +249,38 @@ class VSphereAgent(VConnector):
             
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.ClusterComputeResource)
 
+    def cluster_get(self, msg):
+        """
+        Get properties of a single pyVmomi.vim.ClusterComputeResource managed object
+
+        Example client message would be:
+
+            {
+                "method":     "datacenter.get",
+                "hostname":   "vc01.example.org",
+                "name":       "MyCluster",
+                "properties": [
+                    "name",
+                    "overallStatus"
+                ]
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        # Property names to be collected
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        return self._get_object_properties(
+            properties=properties,
+            obj_type=pyVmomi.vim.ClusterComputeResource,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
     def resource_pool_discover(self, msg):
         """
         Discover all pyVmomi.vim.ResourcePool managed objects
