@@ -111,42 +111,42 @@ class VConnector(object):
         Get a view ref to all pyVmomi.vim.Datacenter managed objects
 
         """
-        return self._get_object_view(obj_type=[pyVmomi.vim.Datacenter])
+        return self.get_container_view(obj_type=[pyVmomi.vim.Datacenter])
 
     def get_cluster_view(self):
         """
         Get a view ref to all pyVmomi.vim.ClusterComputeResource managed objects
 
         """
-        return self._get_object_view(obj_type=[pyVmomi.vim.ClusterComputeResource])
+        return self.get_container_view(obj_type=[pyVmomi.vim.ClusterComputeResource])
 
     def get_host_view(self):
         """
         Get a view ref to all pyVmomi.vim.HostSystem managed objects
 
         """
-        return self._get_object_view(obj_type=[pyVmomi.vim.HostSystem])
+        return self.get_container_view(obj_type=[pyVmomi.vim.HostSystem])
 
     def get_vm_view(self):
         """
         Get a view ref to all pyVmomi.vim.VirtualMachine managed objects
 
         """
-        return self._get_object_view(obj_type=[pyVmomi.vim.VirtualMachine])
+        return self.get_container_view(obj_type=[pyVmomi.vim.VirtualMachine])
 
     def get_datastore_view(self):
         """
         Get a view ref to all pyVmomi.vim.Datastore managed objects
 
         """
-        return self._get_object_view(obj_type=[pyVmomi.vim.Datastore])
+        return self.get_container_view(obj_type=[pyVmomi.vim.Datastore])
 
     def get_resource_pool_view(self):
         """
         Get a view ref to all pyVmomi.vim.ResourcePool managed objects
 
         """
-        return self._get_object_view(obj_type=[pyVmomi.vim.ResourcePool])
+        return self.get_container_view(obj_type=[pyVmomi.vim.ResourcePool])
 
     def collect_properties(self, view_ref, obj_type, path_set=[]):
         """
@@ -179,7 +179,7 @@ class VConnector(object):
         traversal_spec.name = 'traverseEntities'
         traversal_spec.path = 'view'
         traversal_spec.skip = False
-        traversal_spec.type = pyVmomi.vim.view.ContainerView
+        traversal_spec.type = view_ref.__class__
         obj_spec.selectSet = [traversal_spec]
 
         # Identify the properties to the retrieved
@@ -204,21 +204,21 @@ class VConnector(object):
 
         return data
 
-    def _get_object_view(self, obj_type, container=None):
+    def get_container_view(self, obj_type, container=None):
         """
-        Get a vSphere View reference to all objects of type 'obj_type'
+        Get a vSphere Container View reference to all objects of type 'obj_type'
 
         Args:
             obj_type (list): A list of managed object types
 
         Returns:
-            A view refence to the discovered managed objects
+            A container view refence to the discovered managed objects
         
         """
         if not container:
             container = self.si.content.rootFolder
 
-        logging.debug('[%s] Getting view ref to %s managed objects', self.host, [t.__name__ for t in obj_type])
+        logging.debug('[%s] Getting container view ref to %s managed objects', self.host, [t.__name__ for t in obj_type])
 
         view_ref = self.si.content.viewManager.CreateContainerView(
             container=container,
