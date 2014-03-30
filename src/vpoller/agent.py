@@ -283,6 +283,38 @@ class VSphereAgent(VConnector):
 
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.HostSystem)
 
+    def host_get(self, msg):
+        """
+        Get properties of a single pyVmomi.vim.HostSystem managed object
+
+        Example client message would be:
+
+            {
+                "method":     "host.get",
+                "hostname":   "vc01.example.org",
+                "name":       "esxi01.example.org",
+                "properties": [
+                    "name",
+                    "runtime.powerState"
+                ]
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        # Property names to be collected
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        return self._get_object_properties(
+            properties=properties,
+            obj_type=pyVmomi.vim.HostSystem,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
     def vm_discover(self, msg):
         """
         Discover all pyVmomi.vim.VirtualMachine managed objects
@@ -318,7 +350,7 @@ class VSphereAgent(VConnector):
 
     def vm_get(self, msg):
         """
-        Get properties from a pyVmomi.vim.VirtualMachine managed object
+        Get properties of a single pyVmomi.vim.VirtualMachine managed object
 
         Example client message would be:
 
