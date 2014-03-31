@@ -182,7 +182,7 @@ class VSphereAgent(VConnector):
         props = data['result'][0]
         obj_name, obj_datastores = props['name'], props['datastore']
 
-        # Get a list view of the datastores available/used by this objet and collect properties
+        # Get a list view of the datastores available/used by this object and collect properties
         view_ref = self.get_list_view(obj=obj_datastores)
         result = {}
         result['name'] = obj_name
@@ -219,6 +219,47 @@ class VSphereAgent(VConnector):
             'msg': 'Successfully retrieved event',
             'success': 0,
             'result': self.si.content.eventManager.latestEvent.fullFormattedMessage,
+        }
+
+        return result
+
+    def about(self, msg):
+        """
+        Get the 'about' information for the vSphere host this agent is connected to
+
+        Example client message would be:
+        
+            {
+                "method":   "about",
+        	"hostname": "vc01.example.org"
+            }
+
+        Example client message requesting additional properties:
+        
+            {
+                "method":   "about",
+        	"hostname": "vc01.example.org"
+                "properties": [
+                    "apiType",
+                    "apiVersion",
+                    "version"
+                ]
+            }
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        # If no properties are specified just return the 'fullName' property
+        if not msg.has_key('properties') or not msg['properties']:
+            properties = ['fullName']
+        else:
+            properties = msg['properties']
+
+        result = {
+            'msg': 'Successfully retrieved properties',
+            'success': 0,
+            'result': {prop:getattr(self.si.content.about, prop, None) for prop in properties}
         }
 
         return result

@@ -290,6 +290,10 @@ class VPollerWorker(Daemon):
         # tuple/list of required attributes the message must have in order for this
         # request to be passed to and processed by the vSphere Agent
         methods = {
+            'about': {
+                'method':   self.agents[vsphere_host].about,
+                'msg_attr': ('method', 'hostname'),
+            },
             'event.latest': {
                 'method':    self.agents[vsphere_host].event_latest,
                 'msg_attr':  ('method', 'hostname'),
