@@ -102,10 +102,15 @@ class VPollerWorker(Daemon):
                 _empty = self.worker_socket.recv()
                 msg    = self.worker_socket.recv_json()
                 result = self.process_client_msg(msg)
+                
                 # Return result back to client
                 self.worker_socket.send(_id, zmq.SNDMORE)
                 self.worker_socket.send("", zmq.SNDMORE)
-                self.worker_socket.send_json(result)
+                try:
+                    self.worker_socket.send_json(result)
+                except TypeError as e:
+                    logging.warning('Cannot serialize result: %s', e)
+                    self.worker_socket.send_json({ 'success': -1, 'msg': 'Cannot serialize result: %s' % e})
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
@@ -279,10 +284,13 @@ class VPollerWorker(Daemon):
         """
         logging.debug('Processing client message: %s', msg)
 
+        if not isinstance(msg, dict):
+            return { 'success': -1, 'msg': 'Expected a JSON message, received %s' % msg.__class__ }
+
         vsphere_host = msg.get('hostname')
         
         if not self.agents.get(vsphere_host):
-            return { 'success': -1, 'msg': 'Unknown vSphere Agent requested' }
+            return { 'success': -1, 'msg': 'Unknown or missing vSphere Agent requested' }
 
         # The methods that the vSphere Agents support and process
         # In the below dict the key is the method name requested by the client,
