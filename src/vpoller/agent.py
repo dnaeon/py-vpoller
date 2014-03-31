@@ -767,7 +767,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting host where %s VirtualMachine %is running on', self.host, msg['name']) 
+        logging.debug('[%s] Getting HostSystem where %s VirtualMachine is running on', self.host, msg['name']) 
             
         data = self._get_object_properties(
             properties=['name', 'runtime.host'],
