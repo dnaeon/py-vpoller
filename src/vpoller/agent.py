@@ -151,6 +151,29 @@ class VSphereAgent(VConnector):
         
         return result
 
+    def event_latest(self, msg):
+        """
+        Get the latest event registered
+
+        Example client message would be:
+        
+            {
+                "method":   "event.latest",
+        	"hostname": "vc01.example.org",
+            }
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        result = {
+            'msg': 'Successfully retrieved event',
+            'success': 0,
+            'result': self.si.content.eventManager.latestEvent.fullFormattedMessage,
+        }
+
+        return result
+
     def datacenter_discover(self, msg):
         """
         Discover all pyVmomi.vim.Datacenter managed objects
