@@ -151,6 +151,55 @@ class VSphereAgent(VConnector):
         
         return result
 
+    def _object_datastore_get(self, obj_type, name):
+        """
+        Helper method used for getting the datastores available to an object
+
+        This method searches for the managed object with 'name' and retrieves
+        the 'datastore' property which contains all datastores available/used
+        by the managed object, e.g. VirtualMachine, HostSystem.
+
+        Args:
+            obj_type (pyVmomi.vim.*): Managed object type
+            name               (str): Name of the managed object, e.g. host, virtual machine
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        # Find the object by it's 'name' property and get the datastores available/used by it
+        data = self._get_object_properties(
+            properties=['name', 'datastore'],
+            obj_type=obj_type,
+            obj_property_name='name',
+            obj_property_value=name
+        )
+
+        if data['success'] != 0:
+            return data
+
+        # Get the name and datastore properties from the result
+        props = data['result'][0]
+        obj_name, obj_datastores = props['name'], props['datastore']
+
+        # Get a list view of the datastores available/used by this objet and collect properties
+        view_ref = self.get_list_view(obj=obj_datastores)
+        result = {}
+        result['name'] = obj_name
+        result['datastore'] = self.collect_properties(
+            view_ref=view_ref,
+            obj_type=pyVmomi.vim.Datastore,
+            path_set=['name', 'info.url']
+        )
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        return r
+
     def event_latest(self, msg):
         """
         Get the latest event registered
@@ -436,6 +485,27 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    def host_datastore_get(self, msg):
+        """
+        Get all Datastores available for a pyVmomi.vim.HostSystem managed object
+
+        Example client message would be:
+        
+            {
+                "method":   "host.datastore.get",
+        	"hostname": "vc01.example.org",
+                "name":     "esxi01.example.org",
+            }
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        return self._object_datastore_get(
+            obj_type=pyVmomi.vim.HostSystem,
+            name=msg['name']
+        )
+
     def vm_discover(self, msg):
         """
         Discover all pyVmomi.vim.VirtualMachine managed objects
@@ -615,7 +685,7 @@ class VSphereAgent(VConnector):
         Example client message would be:
         
             {
-                "method":   "vm.datastore.discover",
+                "method":   "vm.datastore.get",
         	"hostname": "vc01.example.org",
                 "name":     "vm01.example.org",
             }
@@ -624,38 +694,10 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        # Find the VM and get the datastores used by it
-        data = self._get_object_properties(
-            properties=['name', 'datastore'],
+        return self._object_datastore_get(
             obj_type=pyVmomi.vim.VirtualMachine,
-            obj_property_name='name',
-            obj_property_value=msg['name']
+            name=msg['name']
         )
-
-        if data['success'] != 0:
-            return data
-
-        # Get the VM name and datastore properties from the result
-        props = data['result'][0]
-        vm_name, vm_datastores = props['name'], props['datastore']
-
-        # Get a list view of the datastores used by this VM and collect properties
-        view_ref = self.get_list_view(obj=vm_datastores)
-        result = {}
-        result['name'] = vm_name
-        result['datastore'] = self.collect_properties(
-            view_ref=view_ref,
-            obj_type=pyVmomi.vim.Datastore,
-            path_set=['name', 'info.url']
-        )
-
-        r = {
-            'success': 0,
-            'msg': 'Successfully discovered objects',
-            'result': result,
-        }
-
-        return r
 
     def vm_disk_get(self, msg):
         """
