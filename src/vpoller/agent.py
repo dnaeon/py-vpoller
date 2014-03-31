@@ -446,9 +446,9 @@ class VSphereAgent(VConnector):
 
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.VirtualMachine)
 
-    def vm_guest_disk_discover(self, msg):
+    def vm_disk_discover(self, msg):
         """
-        Discover all disks used by each pyVmomi.vim.VirtualMachine managed object
+        Discover all disks used by a pyVmomi.vim.VirtualMachine managed object
 
         Note, that this request requires you to have VMware Tools installed in order
         get information about the guest disks.
@@ -456,8 +456,9 @@ class VSphereAgent(VConnector):
         Example client message would be:
         
             {
-                "method":   "vm.guest.disk.discover",
+                "method":   "vm.disk.discover",
         	"hostname": "vc01.example.org",
+                "name":     "vm01.example.org"
             }
         
         Example client message requesting additional properties to be collected:
@@ -465,6 +466,7 @@ class VSphereAgent(VConnector):
             {
                 "method":   "vm.guest.disk.discover",
         	"hostname": "vc01.example.org",
+                "name":     "vm01.example.org",
                 "properties": [
                     "capacity",
                     "diskPath",
@@ -476,29 +478,30 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        # Properties to be collected for the guest disks
-        disk_properties = ['diskPath']
-        if msg.has_key('properties') and msg['properties']:
-            disk_properties.extend(msg['properties'])
-
-        # Discover all VMs and collect their disk properties
-        data = self._discover_objects(
+        # Find the VM and get the guest disks
+        data = self._get_object_properties(
             properties=['name', 'guest.disk'],
-            obj_type=pyVmomi.vim.VirtualMachine
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name']
         )
 
-        # Get the VM objects and collect disk information for each VM
-        result = []
-        for each_obj in data['result']:
-            vm_name, vm_disks = each_obj['name'], each_obj['guest.disk']
+        if data['success'] != 0:
+            return data
 
-            properties = {}
-            properties['name'] = vm_name
-            properties['disk'] = []
+        # Get the VM name and guest disk properties from the result
+        props = data['result'][0]
+        vm_name, vm_disks = props['name'], props['guest.disk']
 
-            d = [{prop:getattr(disk, prop, None) for prop in disk_properties} for disk in vm_disks]
-            properties['disk'].append(d)
-            result.append(properties)
+        # Properties to be collected for the guest disks
+        properties = ['diskPath']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        # Get the requested disk properties
+        result = {}
+        result['name'] = vm_name
+        result['disk'] = [{prop:getattr(disk, prop, None) for prop in properties} for disk in vm_disks]
 
         r = {
             'success': 0,
@@ -572,8 +575,8 @@ class VSphereAgent(VConnector):
         vm_name, vm_datastores = props['name'], props['datastore']
 
         # Get a list view of the datastores used by this VM and collect properties
-        result = {}
         view_ref = self.get_list_view(obj=vm_datastores)
+        result = {}
         result['name'] = vm_name
         result['datastore'] = self.collect_properties(
             view_ref=view_ref,
