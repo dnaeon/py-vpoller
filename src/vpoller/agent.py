@@ -543,6 +543,48 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    def vm_running_on_host(self, msg):
+        """
+        Get the vSphere host where a Virtual Machine is running on
+
+        Example client message would be:
+
+            {
+                "method":     "vm.running.on.host",
+                "hostname":   "vc01.example.org",
+                "name":       "vm01.example.org",
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        data = self._get_object_properties(
+            properties=['name', 'runtime.host'],
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        props = data['result'][0]
+        vm_name, vm_host = props['name'], props['runtime.host']
+
+        result = {
+            'name': vm_name,
+            'host': vm_host.name,
+        }
+
+        r = {
+            'success': data['success'],
+            'msg': data['msg'],
+            'result': result,
+        }
+
+        return r
+
     def vm_datastore_get(self, msg):
         """
         Get all Datastores used by a pyVmomi.vim.VirtualMachine managed object
