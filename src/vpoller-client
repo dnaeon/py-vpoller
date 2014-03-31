@@ -71,8 +71,8 @@ def main():
     usage="""
 Usage:
   vpoller-client [-D] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] [-e <endpoint>] -m <method> -V <host> 
-  vpoller-client [-D] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-e <endpoint>] -m <method> -n <name> -V <host> 
-  vpoller-client [-D] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-e <endpoint>] -m <method> -n <name> -p <properties> -V <host>
+  vpoller-client [-D] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-e <endpoint>] [-k <key>] -m <method> -n <name> -V <host> 
+  vpoller-client [-D] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-e <endpoint>] [-k <key>] -m <method> -n <name> -p <properties> -V <host>
   vpoller-client --help
   vpoller-client --version
 
@@ -88,6 +88,7 @@ Options:
   -t <timeout>, --timeout <timeout>           Timeout after that period of milliseconds [default: 3000]
   -e <endpoint>, --endpoint <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to
                                               [default: tcp://localhost:10123]
+  -k <key>, --key <key>                       Provide additional key for data filtering 
   -o <logfile>, --output <logfile>            Specify the log file to use when performing the poll
                                               [default: /var/log/vpoller/vpoller-client.log]
   -H <helper>, --helper <helper>              Specify a helper module to use for processing the
@@ -115,6 +116,7 @@ Options:
         'method':     args['--method'],
         'hostname':   args['--vsphere-host'],
         'name':       args['--name'],
+        'key':        args['--key'],
         'properties': args['--properties'].split(',') if args['--properties'] else None,
         }
 

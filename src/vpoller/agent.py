@@ -592,6 +592,73 @@ class VSphereAgent(VConnector):
 
         return r
 
+    def vm_disk_get(self, msg):
+        """
+        Get properties for a single disk of a pyVmomi.vim.VirtualMachine managed object
+
+        Note, that this request requires you to have VMware Tools installed in order
+        get information about the guest disks.
+
+        Example client message would be:
+        
+            {
+                "method":   "vm.disk.get",
+        	"hostname": "vc01.example.org",
+                "name":     "vm01.example.org"
+                "key":      "/var"
+            }
+        
+        Example client message requesting additional properties to be collected:
+
+            {
+                "method":   "vm.disk.get",
+        	"hostname": "vc01.example.org",
+                "name":     "vm01.example.org",
+                "key":      "/var",
+                "properties": [
+                    "capacity",
+                    "diskPath",
+                    "freeSpace"
+                ]
+            }
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        # Discover the VM disks
+        data = self.vm_disk_discover(msg)
+
+        if data['success'] != 0:
+            return data
+
+        # If we have no key for the disk, just return the result from discovery
+        if msg.has_key('key') and msg['key']:
+            disk_path = msg['key']
+        else:
+            return data
+
+        props = data['result']
+        disks = props['disk']
+
+        for disk in disks:
+            if disk['diskPath'] == disk_path:
+                break
+        else:
+            return { 'success': -1, 'msg': 'Unable to find guest disk %s' % disk_path }
+
+        result = {}
+        result['name'] = msg['name']
+        result['disk'] = disk
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        return r
+
     def datastore_discover(self, msg):
         """
         Discover all pyVmomi.vim.Datastore managed objects

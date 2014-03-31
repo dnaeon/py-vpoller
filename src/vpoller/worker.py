@@ -338,6 +338,10 @@ class VPollerWorker(Daemon):
                 'method':    self.agents[vsphere_host].vm_datastore_get,
                 'msg_attr':  ('method', 'hostname', 'name'),
             },
+            'vm.disk.get': {
+                'method':    self.agents[vsphere_host].vm_disk_get,
+                'msg_attr':  ('method', 'hostname', 'name', 'key'),
+            },
             'datastore.discover': {
                 'method':    self.agents[vsphere_host].datastore_discover,
                 'msg_attr':  ('method', 'hostname'),
@@ -360,6 +364,7 @@ class VPollerWorker(Daemon):
             'method':     (types.StringType, types.UnicodeType),
             'hostname':   (types.StringType, types.UnicodeType),
             'name':       (types.StringType, types.UnicodeType, types.NoneType),
+            'key':        (types.StringType, types.UnicodeType, types.NoneType),
             'properties': (types.TupleType,  types.ListType, types.NoneType),
         }
 
