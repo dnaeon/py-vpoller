@@ -467,9 +467,6 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.VirtualMachine
         )
 
-        if data['success'] != 0:
-            return result
-
         # Get the VM objects and extract datastore information for each
         result = []
         for each_obj in data['result']:
@@ -529,6 +526,55 @@ class VSphereAgent(VConnector):
             obj_property_name='name',
             obj_property_value=msg['name']
         )
+
+    def vm_datastore_get(self, msg):
+        """
+        Get all Datastores used by a pyVmomi.vim.VirtualMachine managed object
+
+        Example client message would be:
+        
+            {
+                "method":   "vm.datastore.discover",
+        	"hostname": "vc01.example.org",
+                "name":     "vm01.example.org",
+            }
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        # Find the VM and get the datastores used by it
+        data = self._get_object_properties(
+            properties=['name', 'datastore'],
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        # Get the VM name and datastore properties from the result
+        props = data['result'][0]
+        vm_name, vm_datastores = props['name'], props['datastore']
+
+        # Get a list view of the datastores used by this VM and collect properties
+        result = {}
+        view_ref = self.get_list_view(obj=vm_datastores)
+        result['name'] = vm_name
+        result['datastore'] = self.collect_properties(
+            view_ref=view_ref,
+            obj_type=pyVmomi.vim.Datastore,
+            path_set=['name', 'info.url']
+        )
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        return r
 
     def datastore_discover(self, msg):
         """
