@@ -446,55 +446,6 @@ class VSphereAgent(VConnector):
 
         return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.VirtualMachine)
 
-    def vm_datastore_discover(self, msg):
-        """
-        Discover all Datastores used by each pyVmomi.vim.VirtualMachine managed object
-
-        Example client message would be:
-        
-            {
-                "method":   "vm.datastore.discover",
-        	"hostname": "vc01.example.org",
-            }
-
-        Returns:
-            The discovered objects in JSON format
-
-        """
-        # Discover all VMs and collect their datastore properties
-        data = self._discover_objects(
-            properties=['name', 'datastore'],
-            obj_type=pyVmomi.vim.VirtualMachine
-        )
-
-        # Get the VM objects and collect datastore information for each VM
-        result = []
-        for each_obj in data['result']:
-            properties = {}
-
-            vm_name, vm_datastores = each_obj['name'], each_obj['datastore']
-            properties['name'] = vm_name
-
-            # Get a list view of the datastores used by the VM
-            view_ref = self.get_list_view(obj=vm_datastores)
-
-            # Collect the name and url properties for each datastore
-            properties['datastore'] = self.collect_properties(
-                view_ref=view_ref,
-                obj_type=pyVmomi.vim.Datastore,
-                path_set=['name', 'info.url']
-            )
-            
-            result.append(properties)
-
-        r = {
-            'success': 0,
-            'msg': 'Successfully discovered objects',
-            'result': result,
-        }
-
-        return r
-
     def vm_guest_disk_discover(self, msg):
         """
         Discover all disks used by each pyVmomi.vim.VirtualMachine managed object
