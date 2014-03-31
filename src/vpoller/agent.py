@@ -88,7 +88,7 @@ class VSphereAgent(VConnector):
             'result': data,
         }
 
-        logging.debug('Returning result from discovery: %s', result)
+        logging.debug('[%s] Returning result from operation: %s', self.host, result)
 
         return result
 
@@ -148,6 +148,8 @@ class VSphereAgent(VConnector):
             'msg': 'Successfully retrieved object properties',
             'result': data,
         }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, result)
         
         return result
 
@@ -167,6 +169,12 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
+        logging.debug('[%s] Getting datastores for %s managed object of type %s',
+                      self.host,
+                      name,
+                      obj_type.__name__
+        )
+
         # Find the object by it's 'name' property and get the datastores available/used by it
         data = self._get_object_properties(
             properties=['name', 'datastore'],
@@ -198,6 +206,8 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
         return r
 
     def event_latest(self, msg):
@@ -215,11 +225,15 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
+        logging.info('[%s] Retrieving latest registered event', self.host)
+
         result = {
             'msg': 'Successfully retrieved event',
             'success': 0,
             'result': self.si.content.eventManager.latestEvent.fullFormattedMessage,
         }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, result)
 
         return result
 
@@ -250,6 +264,8 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
+        logging.info("[%s] Retrieving 'about' information", self.host)
+
         # If no properties are specified just return the 'fullName' property
         if not msg.has_key('properties') or not msg['properties']:
             properties = ['fullName']
@@ -261,6 +277,8 @@ class VSphereAgent(VConnector):
             'success': 0,
             'result': {prop:getattr(self.si.content.about, prop, None) for prop in properties}
         }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, result)
 
         return result
 
@@ -542,6 +560,8 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
+        logging.debug('[%s] Getting VirtualMachine list running on %s host', self.host, msg['name'])
+        
         # Find the HostSystem managed object and get the 'vm' property
         data = self._get_object_properties(
             properties=['name', 'vm'],
@@ -571,6 +591,8 @@ class VSphereAgent(VConnector):
             'msg': 'Successfully discovered objects',
             'result': result,
         }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
 
         return r
 
@@ -660,6 +682,8 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
+        logging.debug('[%s] Discovering guest disks for VirtualMachine %s', self.host, msg['name'])
+
         # Find the VM and get the guest disks
         data = self._get_object_properties(
             properties=['name', 'guest.disk'],
@@ -690,6 +714,8 @@ class VSphereAgent(VConnector):
             'msg': 'Successfully discovered objects',
             'result': result,
         }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
 
         return r
 
@@ -741,6 +767,8 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
+        logging.debug('[%s] Getting host where %s VirtualMachine %is running on', self.host, msg['name']) 
+            
         data = self._get_object_properties(
             properties=['name', 'runtime.host'],
             obj_type=pyVmomi.vim.VirtualMachine,
@@ -764,6 +792,8 @@ class VSphereAgent(VConnector):
             'msg': data['msg'],
             'result': result,
         }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
 
         return r
 
@@ -822,6 +852,13 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
+        logging.debug(
+            '[%s] Getting guest disk info for %s on VirtualMachine %s',
+            self.host,
+            key,
+            msg['name']
+        )
+        
         # Discover the VM disks
         data = self.vm_disk_discover(msg)
 
@@ -853,6 +890,8 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        
         return r
 
     def datastore_discover(self, msg):
