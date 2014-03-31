@@ -99,7 +99,7 @@ class VPollerClient(object):
             # Do we have a reply?
             if socks.get(self.zclient) == zmq.POLLIN:
                 logging.debug('Received reply on client socket')
-                result = self.zclient.recv()
+                result = self.zclient.recv_json()
                 break
             else:
                 # We didn't get a reply back from the server, let's retry

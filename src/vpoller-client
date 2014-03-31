@@ -125,7 +125,7 @@ Options:
     if args['--helper'] and args['--helper'] in helpers:
         result = vpoller_helpers(args['--helper'], msg, data)
     else:
-        result = json.dumps(json.loads(data), indent=4)
+        result = json.dumps(data, indent=4)
     
     print result
 
