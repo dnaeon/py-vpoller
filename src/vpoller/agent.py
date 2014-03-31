@@ -855,7 +855,7 @@ class VSphereAgent(VConnector):
         logging.debug(
             '[%s] Getting guest disk info for %s on VirtualMachine %s',
             self.host,
-            key,
+            msg['key'],
             msg['name']
         )
         
@@ -886,7 +886,7 @@ class VSphereAgent(VConnector):
 
         r = {
             'success': 0,
-            'msg': 'Successfully discovered objects',
+            'msg': 'Successfully retrieved properties',
             'result': result,
         }
 
