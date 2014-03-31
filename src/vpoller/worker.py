@@ -204,8 +204,8 @@ class VPollerWorker(Daemon):
         db_agents = db.get_agents(only_enabled=True)
 
         if not db_agents:
-            logging.warning('There are no vSphere Agents registered')
-            raise VPollerException, 'There are no vSphere Agents registered'
+            logging.warning('No registered or enabled vSphere Agents found')
+            raise VPollerException, 'No registered or enabled vSphere Agents found'
 
         for each_agent in db_agents:
             agent = VSphereAgent(
