@@ -467,7 +467,7 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.VirtualMachine
         )
 
-        # Get the VM objects and extract datastore information for each
+        # Get the VM objects and collect datastore information for each VM
         result = []
         for each_obj in data['result']:
             properties = {}
@@ -485,6 +485,68 @@ class VSphereAgent(VConnector):
                 path_set=['name', 'info.url']
             )
             
+            result.append(properties)
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        return r
+
+    def vm_guest_disk_discover(self, msg):
+        """
+        Discover all disks used by each pyVmomi.vim.VirtualMachine managed object
+
+        Note, that this request requires you to have VMware Tools installed in order
+        get information about the guest disks.
+
+        Example client message would be:
+        
+            {
+                "method":   "vm.guest.disk.discover",
+        	"hostname": "vc01.example.org",
+            }
+        
+        Example client message requesting additional properties to be collected:
+
+            {
+                "method":   "vm.guest.disk.discover",
+        	"hostname": "vc01.example.org",
+                "properties": [
+                    "capacity",
+                    "diskPath",
+                    "freeSpace"
+                ]
+            }
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        # Properties to be collected for the guest disks
+        disk_properties = ['diskPath']
+        if msg.has_key('properties') and msg['properties']:
+            disk_properties.extend(msg['properties'])
+
+        # Discover all VMs and collect their disk properties
+        data = self._discover_objects(
+            properties=['name', 'guest.disk'],
+            obj_type=pyVmomi.vim.VirtualMachine
+        )
+
+        # Get the VM objects and collect disk information for each VM
+        result = []
+        for each_obj in data['result']:
+            vm_name, vm_disks = each_obj['name'], each_obj['guest.disk']
+
+            properties = {}
+            properties['name'] = vm_name
+            properties['disk'] = []
+
+            d = [{prop:getattr(disk, prop, None) for prop in disk_properties} for disk in vm_disks]
+            properties['disk'].append(d)
             result.append(properties)
 
         r = {
