@@ -330,6 +330,10 @@ class VPollerWorker(Daemon):
                 'method':    self.agents[vsphere_host].host_get,
                 'msg_attr':  ('method', 'hostname', 'name', 'properties'),
             },
+            'host.vm.get': {
+                'method':    self.agents[vsphere_host].host_vm_get,
+                'msg_attr':  ('method', 'hostname', 'name'),
+            },
             'host.datastore.get': {
                 'method':    self.agents[vsphere_host].host_datastore_get,
                 'msg_attr':  ('method', 'hostname'),

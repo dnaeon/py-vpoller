@@ -526,6 +526,54 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    def host_vm_get(self, msg):
+        """
+        Get all Virtual Machines running on this HostSystem 
+
+        Example client message would be:
+
+            {
+                "method":     "host.vm.get",
+                "hostname":   "vc01.example.org",
+                "name":       "esxi01.example.org",
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        # Find the HostSystem managed object and get the 'vm' property
+        data = self._get_object_properties(
+            properties=['name', 'vm'],
+            obj_type=pyVmomi.vim.HostSystem,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        props = data['result'][0]
+        host_name, host_vms = props['name'], props['vm']
+
+        # Create a list view for the VirtualMachine managed objects
+        view_ref = self.get_list_view(obj=host_vms)
+        result = {}
+        result['name'] = host_name
+        result['vm'] = self.collect_properties(
+            view_ref=view_ref,
+            obj_type=pyVmomi.vim.VirtualMachine,
+            path_set=['name']
+        )
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        return r
+
     def host_datastore_get(self, msg):
         """
         Get all Datastores available for a pyVmomi.vim.HostSystem managed object
