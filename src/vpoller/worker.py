@@ -358,7 +358,7 @@ class VPollerWorker(Daemon):
                 'method':    self.agents[vsphere_host].vm_disk_get,
                 'msg_attr':  ('method', 'hostname', 'name', 'key'),
             },
-            'vm.running.on.host': {
+            'vm.host.get': {
                 'method':    self.agents[vsphere_host].vm_running_on_host,
                 'msg_attr':  ('method', 'hostname', 'name'),
             },

@@ -725,7 +725,7 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
-    def vm_running_on_host(self, msg):
+    def vm_host_get(self, msg):
         """
         Get the vSphere host where a Virtual Machine is running on
 
