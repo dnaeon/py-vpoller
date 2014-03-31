@@ -821,13 +821,13 @@ class VSphereAgent(VConnector):
 
         """
         # Property names to be collected
-        properties = ['name']
+        properties = ['name', 'info.url']
         if msg.has_key('properties') and msg['properties']:
             properties.extend(msg['properties'])
 
         return self._get_object_properties(
             properties=properties,
             obj_type=pyVmomi.vim.Datastore,
-            obj_property_name='name',
+            obj_property_name='info.url',
             obj_property_value=msg['name']
         )
