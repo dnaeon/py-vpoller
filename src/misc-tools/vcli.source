@@ -1,0 +1,60 @@
+# The functions below are using 'jq' for JSON processing
+#
+# Make sure you have 'jq' installed and in your ${PATH} before running
+# these commands, otherwise... they will fail :)
+#
+# You can grab 'jq' from here:
+#     - http://stedolan.github.io/jq/
+#
+
+_vcli_about() { vpoller-client -m about "$@" | jq '.' ;}
+_vcli_event() { vpoller-client -m event.latest "$@" | jq '.' ;}
+
+_vcli_datacenter_discover() { vpoller-client -m datacenter.discover "$@" | jq '.' ;}
+_vcli_datacenter_get() { vpoller-client -m datacenter.get "$@" | jq '.' ;}
+
+_vcli_cluster_discover() { vpoller-client -m cluster.discover "$@" | jq '.' ;}
+_vcli_cluster_get() { vpoller-client -m cluster.get "$@" | jq '.' ;}
+
+_vcli_resource_pool_discover() { vpoller-client -m resource.pool.discover "$@" | jq '.' ;}
+_vcli_resource_pool_get() { vpoller-client -m resource.pool.get "$@" | jq '.' ;}
+
+_vcli_host_discover() { vpoller-client -m host.discover "$@" | jq '.' ;}
+_vcli_host_get() { vpoller-client -m host.get "$@" | jq '.' ;}
+_vcli_host_vm_get() { vpoller-client -m host.vm.get "$@" | jq '.' ;}
+_vcli_host_datastore_get() { vpoller-client -m host.datastore.get "$@" | jq '.' ;}
+
+_vcli_vm_discover() { vpoller-client -m vm.discover "$@" | jq '.' ;}
+_vcli_vm_disk_discover() { vpoller-client -m vm.disk.discover "$@" | jq '.' ;}
+_vcli_vm_net_discover() { vpoller-client -m vm.net.discover "$@" | jq '.' ;}
+
+_vcli_vm_get() { vpoller-client -m vm.get "$@" | jq '.' ;}
+_vcli_vm_disk_get() { vpoller-client -m vm.disk.get "$@" | jq '.' ;}
+_vcli_vm_datastore_get() { vpoller-client -m vm.datastore.get "$@" | jq '.' ;}
+_vcli_vm_host_get() { vpoller-client -m vm.host.get "$@" | jq '.' ;}
+
+_vcli_datastore_discover() { vpoller-client -m datastore.discover "$@" | jq '.' ;}
+_vcli_datastore_get() { vpoller-client -m datastore.get "$@" | jq '.' ;}
+
+alias 'vcli-about=_vcli_about'
+alias 'vcli-event=_vcli_event'
+alias 'vcli-datacenter-discover=_vcli_datacenter_discover'
+alias 'vcli-datacenter-get=_vcli_datacenter_get'
+alias 'vcli-cluster-discover=_vcli_cluster_discover'
+alias 'vcli-cluster-get=_vcli_cluster_get'
+alias 'vcli-resource-pool-discover=_vcli_resource_pool_discover'
+alias 'vcli-resource-pool-get=_vcli_resource_pool_get'
+alias 'vcli-host-discover=_vcli_host_discover'
+alias 'vcli-host-get=_vcli_host_get'
+alias 'vcli-host-vm-get=_vcli_host_vm_get'
+alias 'vcli-host-datastore-get=_vcli_host_datastore_get'
+alias 'vcli-vm-discover=_vcli_vm_discover'
+alias 'vcli-vm-disk-discover=_vcli_vm_disk_discover'
+alias 'vcli-vm-net-discover=_vcli_vm_net_discover'
+alias 'vcli-vm-get=_vcli_vm_get'
+alias 'vcli-vm-disk-get=_vcli_vm_disk_get'
+alias 'vcli-vm-datastore-get=_vcli_vm_datastore_get'
+alias 'vcli-vm-host-get=_vcli_vm_host_get'
+alias 'vcli-datastore-discover=_vcli_datastore_discover'
+alias 'vcli-datastore-get=_vcli_datastore_get'
+
