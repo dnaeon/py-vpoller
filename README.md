@@ -1,34 +1,63 @@
 ## vPoller -- VMware vSphere Distributed Pollers written in Python
 
-*vPoller* is a distributed system written in Python for discoverying and polling of vSphere Objects properties.
+`vPoller` is a distributed system written in Python used for discovering and polling of VMware vSphere Objects properties.
 
-*vPoller* uses the [vSphere API](https://www.vmware.com/support/developer/vc-sdk/) in order to perform discovery and polling of *Objects* from a vSphere host (e.g. ESXi or vCenter server instance).
+`vPoller` uses the [VMware vSphere API](https://www.vmware.com/support/developer/vc-sdk/) in order to perform discovery and polling of `Objects` from a vSphere host (e.g. ESXi or vCenter server instance).
 
-The *vPoller* system consists of a number of components, each performing a different task:
+The system consists of a number of components, each responsible for a specific task. The table below summarizes the `vPoller` components and their purpose.
 
-* *vpoller-proxy* - A ZeroMQ proxy which load-balances client requests to a pool of workers
-* *vpoller-worker* - A vSphere Worker, which does the actual polling and discovering from a vSphere host
-* *vpoller-client* - A client program used for sending and receiving requests to a vSphere Worker
+| Component      | Purpose                                                                 |
+|----------------|-------------------------------------------------------------------------|
+| vpoller-proxy  | ZeroMQ proxy, which load-balances client requests to a pool of workers  |
+| vpoller-worker | vSphere Worker, which does the discovering and polling of objects       |
+| vpoller-client | Client application, used for sending and receiving requests             |
 
 Below you can find more information about the different components along with instructions on how to install and configure them.
 
-The distributed nature of *vPoller* is provided by [ZeroMQ](http://zeromq.org/), which also load balances client requests to a pool of vSphere Workers.
+The distributed nature of `vPoller` is provided by the [ZeroMQ messaging library](http://zeromq.org/), which is also used to load balance client requests to a pool of vSphere Workers.
 
-vPoller was designed to be easy for integration into systems which require access to vSphere Objects properties, but do not have native support for it. 
+`vPoller` was designed to be easy for integration into systems which require access to vSphere Objects properties, but do not have native support for it. 
 
-Possible scenarios where *vPoller* could be used is to integrate it into monitoring systems as part of the polling process in order to provide monitoring of your vSphere hosts. It could also be used in applications for collecting statistics and other metrics from your vSphere environment.
+Possible scenarios where `vPoller` could be used is to integrate it into monitoring systems as part of the discovery and polling process in order to provide monitoring of your VMware vSphere environment. It could also be used in applications for collecting statistics and other metrics from your vSphere environment.
 
-vPoller can also be described as a vSphere API-Proxy, because it translates user requests to vSphere API requests thus allowing the user to use the API without having the need to know how the vSphere API works internally.
+`vPoller` can also be described as a vSphere API-proxy, because it translates user requests to vSphere API requests thus allowing the user to use the API without having the need to know how the vSphere API works internally.
 
-vPoller has been tested with vSphere 5.x and with very limited testing on vSphere 4.x
+You could also use `vPoller` in order to navigate through your vSphere environment, thus we can also say that `vPoller` can be used as command-line navigator for your vSphere environment.
+
+vPoller has been tested with VMware vSphere 5.x and with very limited testing on vSphere 4.x
 
 You might also want to check this [introduction post about vPoller](http://unix-heaven.org/node/103), which contains real-world usage examples of *vPoller*.
+
+The table below summarizes the list of currently supported methods by `vPoller` along with description for each of them.
+
+| vPoller Method         | Description                                                              |
+|------------------------|--------------------------------------------------------------------------|
+| about                  | Get 'about' information for the vSphere host this agent is connected to  |
+| event.latest           | Get the latest registered in the vSphere host the agent is connected to  |
+| datacenter.discover    | Discover all vim.Datacenter managed objects                              |
+| datacenter.get         | Get properties for a vim.Datacenter managed object                       |
+| cluster.discover       | Discover all vim.ClusterComputeResource managed objects                  |
+| cluster.get            | Get properties for a vim.ClusterComputeResource managed object           |
+| resource.pool.discover | Discover all vim.ResourcePool managed objects                            |
+| resource.pool.get      | Get properties for a vim.ResourcePool managed object                     |
+| host.discover          | Discover all vim.HostSystem managed objects                              |
+| host.get               | Get properties for a vim.HostSystem managed object                       |
+| host.vm.get            | Get all Virtual Machines running on a specified vim.HostSystem           |
+| host.datastore.get     | Get all datastores available to a vim.HostSystem                         |
+| vm.discover            | Discover all vim.VirtualMachine managed objects                          |
+| vm.disk.discover       | Discover all guest disks on a vim.VirtualMachine object                  |
+| vm.net.discover        | Discover all network adapters on a vim.VirtualMachine object             |
+| vm.get                 | Get properties for a vim.VirtualMachine object                           |
+| vm.datastore.get       | Get all datastore used by a vim.VirtualMachine object                    |
+| vm.disk.get            | Get information about a guest disk for a vim.VirtualMachine object       |
+| vm.host.get            | Get the HostSystem in which a specified vim.VirtualMachine is running on |
+| datastore.discover     | Discover all vim.Datastore objects
+| datastore.get          | Get properties for a vim.Datastore object
 
 ## Requirements
 
 * Python 2.7.x
-* [vconnector](https://github.com/dnaeon/py-vconnector)
-* [pysphere](https://code.google.com/p/pysphere/)
+* [pyVmomi](https://github.com/vmware/pyvmomi)
 * [pyzmq](https://github.com/zeromq/pyzmq)
 * [docopt](https://github.com/docopt/docopt)
 
@@ -41,245 +70,225 @@ The C client of *vPoller* also requires the following packages to be installed i
 
 *vPoller* is hosted on Github. Please contribute by reporting issues, suggesting features or by sending patches using pull requests.
 
-If you like this project please also consider supporting development using [Gittip](https://www.gittip.com/dnaeon/). Thank you!
-
 ## Installation
 
 In order to install *vPoller* simply execute the command below:
 
-	# python setup.py install
+	$ sudo python setup.py install
+
+If you would like to install `vPoller` in a `virtualenv` execute these commands instead:
+
+	$ virtualenv vpoller-venv
+	$ source vpoller-venv/bin/activate
+	$ cd /path/to/py-vpoller
+	$ python setup.py install
+
+This should take care of installing all the dependencies for you as well.
+
+We need to create a few directories as well, which are used by the `vPoller` components to store their log files and other data, so make sure you create them first:
+
+	$ sudo mkdir /var/lib/vconnector /var/log/vpoller
 	
-And that's it. Now go ahead to the next section which explains how to configure the vPoller components.
+Future versions of `vPoller` will probably provide ready to use packages, so this will be taken care of at that stage as well.
 
-We need to create a few directories as well, which are used by the *vPoller* components to store their log files and lock files as well, so make sure you create them first:
+And that's it with the installation. Now go ahead to the next section which explains how to configure the vPoller components.
 
-	# mkdir /var/log/vpoller /var/run/vpoller
-	
-Future versions of *vPoller* will probably provide ready to use packages, so this will be taken care of at that stage as well.
-	
-## vPoller Proxy
+## Configuration
 
-The vPoller Proxy is a ZeroMQ proxy which load-balances client requests between a pool of vSphere workers. 
+The default configuration file of `vPoller` resides in `/etc/vpoller/vpoller.conf` file.
 
-This is the endpoint where clients connect to in order to have their requests dispatched to the workers.
+Below is an example `vpoller.conf` file:
 
-The default configuration file of the *vpoller-proxy* resides in */etc/vpoller/vpoller-proxy.conf*, although you can specify a different config file from the command-line as well.
-
-Below is an example configuration file used by the *vpoller-proxy*:
-
-	[Default]
+	[proxy]
 	frontend = tcp://*:10123
 	backend  = tcp://*:10124
 	mgmt     = tcp://*:9999
 
-Here is what the config entries mean:
+	[worker]
+	db       = /var/lib/vconnector/vconnector.db
+	proxy    = tcp://localhost:10124
+	mgmt     = tcp://*:10000
 
-* **frontend** - The endpoint which clients connect to
-* **backend** - The endpoint which vSphere workers connect to
-* **mgmt** - An endpoint used for management tasks
+The table below provides information about the config entries used along with a description for each of them.
 
-Starting the vPoller Proxy is now as easy as just executing the command below:
+| Section | Option    | Description                                                                       |
+|---------------------|-----------------------------------------------------------------------------------|
+| proxy   | frontend  | Endpoint to which clients connect and send their requests to                      |
+| proxy   | backend   | Endpoint to which `vPoller Workers` connect and get requests for processing       |
+| proxy   | mgmt      | Management endpoint, used for sending management messages to the `vPoller Proxy`  |
+| worker  | db        | Path to the `vSphere Agents` SQLite database file                                 |
+| worker  | proxy     | Endpoint to the `vPoller Proxy` backend to which the `vPoller Worker` connects    |
+| worker  | mgmt      | Management endpoint, used for sending management messages to the `vPoller Worker` |
 
-	# vpoller-proxy start
+Next thing we need to do is configure our `vSphere Agents`. The `vSphere Agents` are the ones that take care of establishing
+connection to the vSphere hosts and do the actual discovery and polling of vSphere Object properties.
+
+Details of the `vSphere Agents` (such as username, password, host, etc.) are stored in a SQLite database and are managed by the
+`vconnector-cli` tool. By default the SQLite database file used by `vconnector-cli` resides in `/var/lib/vconnector/vconnector.db`.
+
+Let's add one `vSphere Agent`, which will later be used by the `vPoller Worker`. This is how we could do it using the `vconnector-cli` tool:
+
+	$ sudo vconnector-cli -H vc01.example.org -U root -P p4ssw0rd add
+
+Make sure you enable the `vSphere Agent`, otherwise it will not be used by the `vPoller Worker`:
+
+	$ sudo vconnector-cli -H vc01.example.org enable
+
+At any time you can view the currently registered `vSphere Agents` by running the `vconnector-cli get` command, e.g.:
+
+	$ sudo vconnector-cli get
+
+	+--------------+---------------------+-------------+-----------+
+	| Hostname     | Username            | Password    |   Enabled |
+	+==============+=====================+=============+===========+
+	| vc01         | root                | p4ssw0rd    |         1 |
+	+--------------+---------------------+-------------+-----------+
+
+Also make sure that this file is readable only by the user/group you run `vPoller` as, so you don't want to expose any sensitive data to users.
+
+## Starting vPoller components
+
+Once you configure the `vPoller` components and register all `vSphere Agents` you intend to run we can start up everything.
+
+In order to start `vPoller Proxy` execute the command below:
+
+	$ sudo vpoller-proxy start
+
+In order to start `vPoller Worker` execute the command below:
+
+	$ sudo vpoller-worker start
+
+Usually you would want to have more than one `vPoller Worker` connected to the `vPoller Proxy` in order to provide redundancy and scalability.
+
+**NOTE**: You can also use the `init.d` scripts in the repo for starting up `vPoller Proxy` and `vPoller Worker` components, which is probably what you would want to run during boot-time.
+
+Run the commands below in order to get help and usage information:
 	
-NOTE: You can also find init.d script in the repo for Debian-based systems, which is probably what you would want to run during boot-time.
-
-Run the command below in order to get help and usage information:
+	$ vpoller-proxy --help
+	$ vpoller-worker --help
 	
-	# vpoller-proxy --help
-	
-Checking the log file of *vpoller-proxy* should indicate that it started successfully or contain errors in case something went wrong. 
+Checking the log files at `/var/log/vpoller` should indicate that everything started up successfully or contain errors in case something went wrong. 
 
-## vPoller Worker
+## Examples
 
-The vPoller Worker is what does the actual polling and discovering of vSphere objects from a vSphere host.
+The `vPoller Client` is the client application used for sending requests to the `vPoller Workers`.
 
-Internally it runs the vSphere Agents, which take care of connecting to a vSphere host, initiating the user's API requests and send back the result to the client.
+Considering that you have the `vPoller` components configured and started up we will now see how to send example requests to
+`vPoller` in order to perform discovery and polling of vSphere object properties.
 
-A vPoller Worker can connect to any number of vSphere hosts, where each vSphere connection is handled by a separate vSphere Agent object.
-
-The vPoller Worker is connected to a vPoller Proxy through a ZeroMQ socket, from where it receives any requests for processing.
-
-Generally you would be running one vPoller Worker per node in order to provide redundancy of your workers. Automatic load-balancing is provided by the vPoller Proxy.
-
-The table below summarizes the methods `vPoller Worker` currently supports and processes:
-
-| Method               | Description                                              |
-|----------------------|----------------------------------------------------------|
-| host.get             | Get properties of a HostSystem object (ESXi host)        |
-| datastore.get        | Get properties of a Datastore object                     |
-| vm.get               | Get properties of a VirtualMachine object                |
-| datacenter.get       | Get properties a Datacenter object                       |
-| cluster.get          | Get property of a ClusterComputeResource object          |
-| host.discover        | Discovers all HostSystem objects (ESXi hosts)            |
-| datastore.discover   | Discovers all Datastores objects                         | 
-| vm.discover          | Discovers all VirtualMachine objects                     |
-| datacenter.discover  | Discovers all Datacenter objects                         |
-| cluster.discover     | Discovers all ClusterComputeResources objects            |
-| host.counter.get     | Get performance counters for a HostSystem object         |
-| host.counter.all     | Get all performance counters for a HostSystem object     |
-| vm.counter.get       | Get performance counters for a VirtualMachine object     |
-| vm.counter.all       | Get all performance counters for a VirtualMachine object |
-
-The default configuration file of the *vpoller-worker* resides in */etc/vpoller/vpoller-worker.conf*, although you can specify a different config file from the command-line as well.
-
-Below is an example configuration file used by the *vpoller-worker*:
-
-	[Default]
-	proxy             = tcp://localhost:10124
-	mgmt              = tcp://*:10000
-	vsphere_hosts_dir = /etc/vpoller/vsphere
-	
-Here is an explanation of the config entries above:
-
-* **proxy** - This is the endpoint of the ZeroMQ proxy that the vPoller Worker will connect to in order to receive any client requests
-* **mgmt** - This is the vPoller Worker management endpoint
-* **vsphere_hosts_dir** - Should be set to a directory which contains *.conf* files for the vSphere Agents. 
-
-As mentioned already a vSphere Agent is what takes care of establishing a connection to the vSphere host and perform any poll or discovery operations. 
-For each vSphere host you want to use you need a configuration file describing the connection details.
-
-Below is an example configuration file */etc/vpoller/vsphere/my-vc0.conf*, which describes the connection details to our vCenter server.
-
-	[Default]
-	hostname = vc01-test.example.org
-	username = root
-	password = myp4ssw0rd
-	timeout  = 3
-	cachettl = 30
-
-You should take care of securing the files as well, as they contain the password in plain text. Now, let's start the vPoller Worker.
-
-	# vpoller-worker start
-	
-NOTE: You can also find init.d script in the repo for Debian-based systems, which is probably what you would want to run during boot-time.
-	
-Run the command below in order to get help and usage information:
-
-	# vpoller-worker --help
-	
-Checking the log file of *vpoller-worker* should indicate that it started successfully or contain errors in case something went wrong. 
-
-## vPoller Client
-
-The vPoller Client is the client application used for sending requests to the vSphere Workers.
-
-Considering that you have your vPoller Proxy and Workers up and running we can now send some example requests to our workers.
-
-The message we send by using vPoller Client is sent to the vPoller Proxy which in turn will perform load-balancing and dispatch the message to our vPoller Workers.
-
-Of course all this is transparent to the user as you only need to send your message to the vPoller Proxy.
-
-In order to get help and usage information about the *vpoller-client*, execute the command below.
+The tool that we will use in all these examples below is `vpoller-client`. In order to get help and usage information at any time execute the command below:
 
 	$ vpoller-client --help
 
-The documentation below provides examples how to use the vPoller Client in order to send requests to the vSphere Workers.
+Check the examples below which show how to use `vpoller-client` in order to send client requests to `vPoller`.
 
-## vPoller Helpers
+## Discovering objects examples
 
-The *vPoller Helpers* were implemented in order to provide an easy way for connecting your applications to *vPoller*.
+This section provides examples for discovery of vSphere objects using `vPoller`.
 
-The result messages returned by a vPoller Worker are always in JSON format. 
+Example command to discover all `Datacenter` managed objects:
 
-This could be okay for most applications, which require to process a result message, but in some cases you might want to
-receive the result in different formats and feed the data into your application. 
+	$ vpoller-client -m datacenter.discover -V vc01.example.org
 
-Using the *vPoller Helpers* you are able to convert the result message to a format that your application or system understands.
+Example command to discover all `ClusterComputeResource` managed objects:
 
-An example of such a *vPoller Helper* is the [Zabbix vPoller Helper module](https://github.com/dnaeon/py-vpoller/tree/master/src/vpoller/helpers), which can
-translate a result message to [Zabbix LLD format](https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery) and return
-property values ready to be used in Zabbix items.
+	$ vpoller-clinet -m cluster.discover -V vc01.example.org
 
-Here is an example of using the *Zabbix vPoller Helper* for converting the results to *Zabbix LLD format*:
+Example command to discover all `HostSystem` managed objects:
 
-	$ vpoller-client -H vpoller.helpers.zabbix -m datastore.discover -e tcp://localhost:10123 -V vc01.example.org
-	
-This is how you could use the `vpoller.helpers.zabbix` helper to retrieve a property of a vSphere Object.
+	$ vpoller-client -m host.discover -V vc01.example.org
 
-	$ vpoller-client -H vpoller.helpers.zabbix -m datastore.get -e tcp://localhost:10123 -V vc01.example.org -n <datastore-url> -p summary.capacity
-	
-This would return just the value of the property requested, thus making it easy for integrating into a *Zabbix Item*.
+Example command to discover all `Datastore` managed objects:
 
-Possible other usage of the *vPoller Helpers* is an HTML helper, which would return the result in HTML format in order to present the information nicely in a web browser.
+	$ vpoller-client -m datastore.discover -V vc01.example.org
 
-The table below summarizes the currently existing and supported `vPoller Helpers`:
+Example command to discover all `VirtualMachine` managed objects:
 
-| Helper                    | Description                                          |
-|---------------------------|------------------------------------------------------|
-| vpoller.helpers.zabbix    | Helper which returns data in Zabbix-friendly format  |
-| vpoller.helpers.csvhelper | Helper which returns data in CSV format              |
+	$ vpoller-client -m vm.discover -V vc01.example.org
 
-## Discovering ESXi hosts
+Example command to discover all disks in a `VirtualMachine` managed object:
 
-The method we use for discovering the ESXi hosts is `host.discover`. Below is an example command for discovering all ESXi hosts:
+	$ vpoller-client -m vm.disk.discover -V vc01.example.org -n vm01.example.org
 
-	$ vpoller-client -m host.discover -V vc01-test.example.org -e tcp://localhost:10123
+For other methods you could use please refer to the table of supported vPoller methods.
 
-## Discovering Datastores
+For more information about the property names you could use please refer to the [vSphere API documentation](https://www.vmware.com/support/developer/vc-sdk/).
 
-The method we use for discovering datastores is `datastore.discover`. Below is an example command for discovering all datastores:
+## Polling object properties examples
 
-	$ vpoller-client -m datastore.discover -V vc01-test.example.org -e tcp://localhost:10123
+This section provides examples for polling vSphere object properties using `vPoller`:
 
-## Discovering Virtual Machines
+Example command to get the `powerState` property of a `HostSystem` (ESXi host) managed object:
 
-The method we use for discovering datastores is `vm.discover`. Below is an example command for discovering all Virtual Machines:
+	$ vpoller-client -m host.get -n esxi01.example.org -p runtime.powerState -V vc01.example.org
 
-	$ vpoller-client -m vm.discover -V vc01-test.example.org -e tcp://localhost:10123
+Example command to get the `capacity` of a `Datastore` managed object:
 
-## Discovering Datacenters
+	$ vpoller-client -m datastore.get -n ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/ -p summary.capacity -V vc01.example.org
 
-The method we use for discovering datacenters is `datacenter.discover`. Below is an example command for discovering all datacenters:
+Example command to get information about disks in a `VirtualMachine` managed objects:
 
-	$ vpoller-clinet -m datacenter.discover -V vc01-test.example.org -e tcp://localhost:10123
+	$ vpoller-client -m vm.disk.get -n vm01.example.org -V vc01.example.org -k /var
 
-## Discovering Clusters
+Example command to get all `VirtualMachines` running on a `HostSystem` (ESXi host):
 
-The method we use for discovering clusters is `cluster.discover`. Below is an example command for discovering all clusters:
+	$ vpoller-client -m host.vm.get -n esxi01.example.org -V vc01.example.org
 
-	$ vpoller-clinet -m cluster.discover -V vc01-test.example.org -e tcp://localhost:10123
+Example command to get the `HostSystem` on which a `VirtualMachine` is running:
 
-## Polling vSphere Object Properties
+	$ vpoller-client -m vm.host.get -n vm01.example.org -V vc01.example.org
 
-In order to get a vSphere Object property we need to send the property name of the object we are interested in.
+For other methods you could use please refer to the table of supported vPoller methods.
 
-Let's say that we want to get the power state of the ESXi host *esxi01-test.example.org* which is registered to the vCenter *vc01-test.example.org*.
-
-	$ vpoller-client -m host.get -n esxi01-test.example.org -p runtime.powerState -V vc01-test.example.org -e tcp://localhost:10123
-	
-This is an example command we would execute in order to get the capacity of a datastore from our vCenter:
-
-	$ vpoller-client -m datastore.get -n ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/ -p summary.capacity -V vc01-test.example.org -e tcp://localhost:10123
-	
 For more information about the property names you could use please refer to the [vSphere API documentation](https://www.vmware.com/support/developer/vc-sdk/).
 
 ## Getting multiple properties at once
 
 You can also request multiple properties for an object by appending the properties separated by a comma at the command-line.
 
-The example command below would request multiple properties to be returned for an ESXi host: 
+The example command below would request multiple properties to be returned for a `HostSystem` (ESXi host) managed object: 
 
-	$ vpoller-client -m host.get -V vc01-test.example.org -e tcp://localhost:10123 -n esx01.example.org -p runtime.powerState,hardware.memorySize,summary.overallStatus
+	$ vpoller-client -m host.get -V vc01.example.org -n esx01.example.org -p runtime.powerState,hardware.memorySize,summary.overallStatus
 
-## Getting performance counters
+## vPoller Helpers
 
-In order to get performance counters for a vSphere object using vPoller you can use the `vm.counter.*` and `host.counter.*` methods.
+The `vPoller Helpers` were implemented in order to provide an easy way for connecting your applications to `vPoller`.
 
-This is an example to get performance counters for a VirtualMachine object:
+The table below summarizes the currently existing and supported `vPoller Helpers`:
 
-	$ vpoller-client -m vm.counter.get -V vc01-test.example.org -e tcp://localhost:10123 -n vm01.example.org -p cpu.run,cpu.idle
+| vPoller Helper            | Description                                          |
+|---------------------------|------------------------------------------------------|
+| vpoller.helpers.zabbix    | Helper which returns data in Zabbix-friendly format  |
+| vpoller.helpers.csvhelper | Helper which returns data in CSV format              |
 
-And here is an example how to get all performance counter for a HostSystem object:
+The result messages returned by a `vPoller Worker` are always in JSON format. 
 
-	$ vpoller-client -m host.counter.all -V vc01-test.example.org -e tcp://localhost:10123 -n esxi01.example.org
+This could be okay for most applications, which require to process a result message, but in some cases you might want to
+receive the result in different formats and feed the data into your application. 
 
+Using the `vPoller Helpers` you are able to convert the result message to a format that your application or system understands.
 
-## Using the management interface of vPoller
+An example of such a `vPoller Helper` is the [Zabbix vPoller Helper module](https://github.com/dnaeon/py-vpoller/tree/master/src/vpoller/helpers), which can
+translate a result message to [Zabbix LLD format](https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery) and return
+property values ready to be used in Zabbix items.
 
-At any time you can request status information from your vPoller Proxy or Worker by sending a request to the management socket of your `Proxy` or `Worker`.
+Here is an example of using the `Zabbix vPoller Helper` for converting the result to `Zabbix LLD format`:
 
-This is how you could get status information from your vPoller Proxy:
+	$ vpoller-client -H vpoller.helpers.zabbix -m datastore.discover -V vc01.example.org
+	
+This is how you could use the `vpoller.helpers.zabbix` helper to retrieve a property of a vSphere Object.
+
+	$ vpoller-client -H vpoller.helpers.zabbix -m datastore.get -V vc01.example.org -n <datastore-url> -p summary.capacity
+	
+This would return just the value of the property requested, thus making it easy for integrating the result into a `Zabbix Item`.
+
+Possible other usage of the `vPoller Helpers` is an HTML helper, which would return the result in HTML format in order to present the information nicely in a web browser.
+
+## Using the management interfaces of vPoller
+
+At any time you can request status information from your `vPoller Proxy` or `Worker` by sending a request to the management endpoints:
+
+This is how you could get status information from your `vPoller Proxy`:
 
 	$ vpoller-proxy -e tcp://localhost:9999 status
 	
@@ -297,7 +306,7 @@ And this is how you could shutdown your `vPoller Worker` by sending a shutdown m
 
 	$ vpoller-worker -e tcp://localhost:10000 stop
 
-You can also perform these operations using the *init.d* scripts from the vPoller Github repository.
+You can also perform these operations using the `init.d` scripts from the vPoller Github repository.
 
 ## Bugs
 
