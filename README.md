@@ -51,8 +51,8 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 | vm.datastore.get       | Get all datastore used by a vim.VirtualMachine object                    |
 | vm.disk.get            | Get information about a guest disk for a vim.VirtualMachine object       |
 | vm.host.get            | Get the HostSystem in which a specified vim.VirtualMachine is running on |
-| datastore.discover     | Discover all vim.Datastore objects
-| datastore.get          | Get properties for a vim.Datastore object
+| datastore.discover     | Discover all vim.Datastore objects                                       |
+| datastore.get          | Get properties for a vim.Datastore object                                |
 
 ## Requirements
 
@@ -112,7 +112,7 @@ Below is an example `vpoller.conf` file:
 The table below provides information about the config entries used along with a description for each of them.
 
 | Section | Option    | Description                                                                       |
-|---------------------|-----------------------------------------------------------------------------------|
+|---------|-----------|-----------------------------------------------------------------------------------|
 | proxy   | frontend  | Endpoint to which clients connect and send their requests to                      |
 | proxy   | backend   | Endpoint to which `vPoller Workers` connect and get requests for processing       |
 | proxy   | mgmt      | Management endpoint, used for sending management messages to the `vPoller Proxy`  |
