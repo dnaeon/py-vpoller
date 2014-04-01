@@ -60,6 +60,7 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 * [pyVmomi](https://github.com/vmware/pyvmomi)
 * [pyzmq](https://github.com/zeromq/pyzmq)
 * [docopt](https://github.com/docopt/docopt)
+* [tabulate](https://pypi.python.org/pypi/tabulate)
 
 The C client of *vPoller* also requires the following packages to be installed in order to build it:
 
