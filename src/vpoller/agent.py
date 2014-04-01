@@ -668,7 +668,7 @@ class VSphereAgent(VConnector):
         Example client message requesting additional properties to be collected:
 
             {
-                "method":   "vm.guest.disk.discover",
+                "method":   "vm.disk.discover",
         	"hostname": "vc01.example.org",
                 "name":     "vm01.example.org",
                 "properties": [
@@ -712,6 +712,76 @@ class VSphereAgent(VConnector):
         r = {
             'success': 0,
             'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
+        return r
+
+    def vm_net_discover(self, msg):
+        """
+        Discover information about network adapters on a pyVmomi.vim.VirtualMachine managed object
+
+        Note, that this request requires you to have VMware Tools installed in order
+        get information about the guest network adapters.
+
+        Example client message would be:
+        
+            {
+                "method":   "vm.net.discover",
+        	"hostname": "vc01.example.org",
+                "name":     "vm01.example.org"
+            }
+        
+        Example client message requesting additional properties to be collected:
+
+            {
+                "method":   "vm.net.discover",
+        	"hostname": "vc01.example.org",
+                "name":     "vm01.example.org",
+                "properties": [
+                    "network",
+                    "connected",
+                    "macAddress",
+                    "ipConfig"
+                ]
+            }
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        logging.debug('[%s] Discovering guest network adapters for VirtualMachine %s', self.host, msg['name'])
+
+        # Find the VM and get the network adapters
+        data = self._get_object_properties(
+            properties=['name', 'guest.net'],
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        # Get the VM name and network adapters properties from the result
+        props = data['result'][0]
+        vm_name, vm_networks = props['name'], props['guest.net']
+
+        # Properties to be collected for the guest disks
+        properties = ['network']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        # Get the requested properties
+        result = {}
+        result['name'] = vm_name
+        result['net']  = [{prop:getattr(net, prop, None) for prop in properties} for net in vm_networks]
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully retrieved properties',
             'result': result,
         }
 
