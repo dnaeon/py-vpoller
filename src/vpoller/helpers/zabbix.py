@@ -43,11 +43,11 @@ class HelperAgent(object):
 
         Args:
             msg  (dict): The original request message
-            data  (str): The result message data
+            data (dict): The result message data
             
         """
         self.msg = msg
-        self.data = json.loads(data)
+        self.data = data
 
     def run(self):
         """
@@ -58,28 +58,34 @@ class HelperAgent(object):
         """
         # Check whether the request was successful first
         if self.data['success'] != 0:
-            return json.dumps(self.data, indent=4)
+            return self.data['msg']
 
         # The original method requested from the vPoller Workers
-        method = self.msg['method']
+        self.method = self.msg['method']
         
         # Methods that the Helper knows about and how to process
         methods = {
-            'host.get':            self.zabbix_item_value,
-            'host.counter.get':    self.zabbix_counter_value,
-            'datastore.get':       self.zabbix_item_value,
-            'vm.get':              self.zabbix_item_value,
-            'vm.counter.get':      self.zabbix_counter_value,
+            'about':               self.zabbix_item_value,
+            'event.latest':        self.zabbix_item_value,
+            'datacenter.discover': self.zabbix_lld_data,
             'datacenter.get':      self.zabbix_item_value,
+            'cluster.discover':    self.zabbix_lld_data,
             'cluster.get':         self.zabbix_item_value,
             'host.discover':       self.zabbix_lld_data,
-            'datastore.discover':  self.zabbix_lld_data,
+            'host.get':            self.zabbix_item_value,
             'vm.discover':         self.zabbix_lld_data,
-            'datacenter.discover': self.zabbix_lld_data,
-            'cluster.discover':    self.zabbix_lld_data,
-            }
-        
-        result = methods[method]() if methods.get(method) else '[zbx-helper]: Do not know how to process method %s' % method
+            'vm.get':              self.zabbix_item_value,
+            'vm.disk.discover':    self.zabbix_lld_data,
+            'vm.disk.get':         self.zabbix_item_value,
+            'vm.host.get':         self.zabbix_item_value,
+            'datastore.discover':  self.zabbix_lld_data,
+            'datastore.get':       self.zabbix_item_value,
+        }
+
+        if self.method not in methods:
+            return '[zbx-helper]: Do not know how to process %s method' % self.method
+
+        result = methods[self.method]()
 
         return result
 
@@ -98,21 +104,6 @@ class HelperAgent(object):
         
         return self.data['result'][property_name]
 
-    def zabbix_counter_value(self):
-        """
-        Processes a single counter value
-
-        The value we return is not for an instance,
-        so that each item in Zabbix stores a single property value.
-
-        Returns:
-            The counter value from the result message
-
-        """
-	for v in self.data['result']:
-            if not v['instance']:
-                return v['value']
-            
     def zabbix_lld_data(self):
         """
         Translates a discovery request to Zabbix LLD format
@@ -126,16 +117,17 @@ class HelperAgent(object):
 
         The result attribute names are in Zabbix Macro-like format, e.g.
 
-            {#VSPHERE.<ATTRIBUTE>}: <value>
+            {#VSPHERE.<TYPE>.<ATTRIBUTE>}: <value>
             
         """
+        obj_t = self.method.split('.')[0].upper()
         result = self.data['result']
 
         data = []
         
-        for eachItem in result:
-            props = [('{#VSPHERE.' + k.upper() + '}', v) for k, v in eachItem.items()]
+        for item in result:
+            props = [('{#VSPHERE.' + obj_t + '.' + k.upper() + '}', v) for k, v in item.items()]
             data.append(dict(props))
 
         return json.dumps({ 'data': data }, indent=4)
-                
+
