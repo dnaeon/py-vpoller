@@ -783,7 +783,7 @@ class VSphereAgent(VConnector):
         """
         logging.debug('[%s] Getting Network list available for %s host', self.host, msg['name'])
         
-        # Find the HostSystem managed object and get the 'net' property
+        # Find the HostSystem managed object and get the 'network' property
         data = self._get_object_properties(
             properties=['name', 'network'],
             obj_type=pyVmomi.vim.HostSystem,
@@ -1003,6 +1003,58 @@ class VSphereAgent(VConnector):
         r = {
             'success': 0,
             'msg': 'Successfully retrieved properties',
+            'result': result,
+        }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
+        return r
+
+    def vm_net_get(self, msg):
+        """
+        Get all Networks used in this pyVmomi.vim.VirtualMachine managed object
+
+        Example client message would be:
+
+            {
+                "method":     "vm.net.get",
+                "hostname":   "vc01.example.org",
+                "name":       "vm01.example.org",
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        logging.debug('[%s] Getting Network list available for %s VirtualMachine', self.host, msg['name'])
+        
+        # Find the VirtualMachine managed object and get the 'network' property
+        data = self._get_object_properties(
+            properties=['name', 'network'],
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        props = data['result'][0]
+        vm_name, vm_networks = props['name'], props['network']
+
+        # Create a list view for the Network managed objects
+        view_ref = self.get_list_view(obj=vm_networks)
+        result = {}
+        result['name'] = vm_name
+        result['network'] = self.collect_properties(
+            view_ref=view_ref,
+            obj_type=pyVmomi.vim.Network,
+            path_set=['name']
+        )
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
             'result': result,
         }
 
