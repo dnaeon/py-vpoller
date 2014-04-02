@@ -342,10 +342,62 @@ class VSphereAgent(VConnector):
 
         return self._get_object_properties(
             properties=properties,
-            obj_type=pyVmomi.vim.Nework,
+            obj_type=pyVmomi.vim.Network,
             obj_property_name='name',
             obj_property_value=msg['name']
         )
+
+    def net_host_get(self, msg):
+        """
+        Get all Host Systems using this pyVmomi.vim.Network managed object
+
+        Example client message would be:
+
+            {
+                "method":     "net.host.get",
+                "hostname":   "vc01.example.org",
+                "name":       "VM Network",
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        logging.debug('[%s] Getting Host Systems using %s pyVmomi.vim.Network managed object', self.host, msg['name'])
+        
+        # Find the Network managed object and get the 'host' property
+        data = self._get_object_properties(
+            properties=['name', 'host'],
+            obj_type=pyVmomi.vim.Network,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        props = data['result'][0]
+        network_name, network_hosts = props['name'], props['host']
+
+        # Create a list view for the HostSystem managed objects
+        view_ref = self.get_list_view(obj=network_hosts)
+        result = {}
+        result['name'] = network_name
+        result['host'] = self.collect_properties(
+            view_ref=view_ref,
+            obj_type=pyVmomi.vim.HostSystem,
+            path_set=['name']
+        )
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
+        return r
 
     def datacenter_discover(self, msg):
         """
