@@ -282,6 +282,39 @@ class VSphereAgent(VConnector):
 
         return result
 
+    def net_discover(self, msg):
+        """
+        Discover all pyVmomi.vim.Network managed objects
+
+        Example client message would be:
+        
+            {
+                "method":   "net.discover",
+        	"hostname": "vc01.example.org",
+            }
+
+        Example client message which also requests additional properties:
+
+            {
+                "method":     "net.discover",
+                "hostname":   "vc01.example.org",
+                "properties": [
+                    "name",
+                    "summary.accessible"
+                ]
+            }
+        
+        Returns:
+            The discovered objects in JSON format
+        
+        """
+        # Property names to be collected
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.Network)
+
     def datacenter_discover(self, msg):
         """
         Discover all pyVmomi.vim.Datacenter managed objects

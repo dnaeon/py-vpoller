@@ -306,6 +306,10 @@ class VPollerWorker(Daemon):
                 'method':    self.agents[vsphere_host].event_latest,
                 'msg_attr':  ('method', 'hostname'),
             },
+            'net.discover': {
+                'method':    self.agents[vsphere_host].net_discover,
+                'msg_attr':  ('method', 'hostname'),
+            },
             'datacenter.discover': {
                 'method':    self.agents[vsphere_host].datacenter_discover,
                 'msg_attr':  ('method', 'hostname'),
