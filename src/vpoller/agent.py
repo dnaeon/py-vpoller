@@ -765,6 +765,58 @@ class VSphereAgent(VConnector):
 
         return r
 
+    def host_net_get(self, msg):
+        """
+        Get all Networks available for this pyVmomi.vim.HostSystem managed object
+
+        Example client message would be:
+
+            {
+                "method":     "host.net.get",
+                "hostname":   "vc01.example.org",
+                "name":       "esxi01.example.org",
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        logging.debug('[%s] Getting Network list available for %s host', self.host, msg['name'])
+        
+        # Find the HostSystem managed object and get the 'net' property
+        data = self._get_object_properties(
+            properties=['name', 'network'],
+            obj_type=pyVmomi.vim.HostSystem,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        props = data['result'][0]
+        host_name, host_networks = props['name'], props['network']
+
+        # Create a list view for the Network managed objects
+        view_ref = self.get_list_view(obj=host_networks)
+        result = {}
+        result['name'] = host_name
+        result['network'] = self.collect_properties(
+            view_ref=view_ref,
+            obj_type=pyVmomi.vim.Network,
+            path_set=['name']
+        )
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
+        return r
+
     def host_datastore_get(self, msg):
         """
         Get all Datastores available for a pyVmomi.vim.HostSystem managed object
@@ -888,7 +940,7 @@ class VSphereAgent(VConnector):
 
         return r
 
-    def vm_guest_net_discover(self, msg):
+    def vm_guest_net_get(self, msg):
         """
         Discover information about network adapters on a pyVmomi.vim.VirtualMachine managed object
 
