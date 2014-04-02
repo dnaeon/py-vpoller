@@ -102,7 +102,7 @@ class HelperAgent(object):
         """
         property_name = self.msg['properties'][0]
         
-        return self.data['result'][property_name]
+        return self.data['result'][0][property_name]
 
     def zabbix_lld_data(self):
         """
