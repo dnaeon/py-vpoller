@@ -127,6 +127,9 @@ class HelperAgent(object):
         
         for item in result:
             props = [('{#VSPHERE.' + obj_t + '.' + k.upper() + '}', v) for k, v in item.items()]
+
+            # Append the vSphere host in the result as well
+            props.append(("{#VSPHERE.HOST}", self.msg['hostname']))
             data.append(dict(props))
 
         return json.dumps({ 'data': data }, indent=4)
