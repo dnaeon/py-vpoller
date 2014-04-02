@@ -888,7 +888,7 @@ class VSphereAgent(VConnector):
 
         return r
 
-    def vm_net_discover(self, msg):
+    def vm_guest_net_discover(self, msg):
         """
         Discover information about network adapters on a pyVmomi.vim.VirtualMachine managed object
 
