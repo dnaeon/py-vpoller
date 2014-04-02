@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+
+# Simple wrapper script to use with Zabbix helper
+
+vpoller-client -H vpoller.helpers.zabbix "$@"
