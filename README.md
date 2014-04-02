@@ -34,6 +34,10 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 |------------------------|--------------------------------------------------------------------------|
 | about                  | Get 'about' information for the vSphere host this agent is connected to  |
 | event.latest           | Get the latest registered in the vSphere host the agent is connected to  |
+| net.discover           | Discover all vim.Network managed objects                                 |
+| net.get                | Get properties for a vim.Network managed object                          |
+| net.host.get           | Get all HostSystems using a specified vim.Network                        |
+| net.vm.get             | Get all VirtualMachines using a specified vim.Network                    |
 | datacenter.discover    | Discover all vim.Datacenter managed objects                              |
 | datacenter.get         | Get properties for a vim.Datacenter managed object                       |
 | cluster.discover       | Discover all vim.ClusterComputeResource managed objects                  |
@@ -43,10 +47,12 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 | host.discover          | Discover all vim.HostSystem managed objects                              |
 | host.get               | Get properties for a vim.HostSystem managed object                       |
 | host.vm.get            | Get all Virtual Machines running on a specified vim.HostSystem           |
+| host.net.get           | Get all Networks available for a specified vim.HostSystem                |
 | host.datastore.get     | Get all datastores available to a vim.HostSystem                         |
 | vm.discover            | Discover all vim.VirtualMachine managed objects                          |
 | vm.disk.discover       | Discover all guest disks on a vim.VirtualMachine object                  |
-| vm.net.discover        | Discover all network adapters on a vim.VirtualMachine object             |
+| vm.guest.net.get       | Discover all network adapters on a vim.VirtualMachine object             |
+| vm.net.get             | Get all Networks used by a specified vim.VirtualMachine                  |
 | vm.get                 | Get properties for a vim.VirtualMachine object                           |
 | vm.datastore.get       | Get all datastore used by a vim.VirtualMachine object                    |
 | vm.disk.get            | Get information about a guest disk for a vim.VirtualMachine object       |

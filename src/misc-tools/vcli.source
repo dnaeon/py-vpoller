@@ -10,6 +10,11 @@
 _vcli_about() { vpoller-client -m about "$@" | jq '.' ;}
 _vcli_event() { vpoller-client -m event.latest "$@" | jq '.' ;}
 
+_vcli_net_discover() { vpoller-client -m net.discover "$@" | jq '.' ;}
+_vcli_net_get() { vpoller-client -m net.get "$@" | jq '.' ;}
+_vcli_net_host_get() { vpoller-client -m net.host.get "$@" | jq '.' ;}
+_vcli_net_vm_get() { vpoller-client -m net.vm.get "$@" | jq '.' ;}
+
 _vcli_datacenter_discover() { vpoller-client -m datacenter.discover "$@" | jq '.' ;}
 _vcli_datacenter_get() { vpoller-client -m datacenter.get "$@" | jq '.' ;}
 
@@ -23,21 +28,27 @@ _vcli_host_discover() { vpoller-client -m host.discover "$@" | jq '.' ;}
 _vcli_host_get() { vpoller-client -m host.get "$@" | jq '.' ;}
 _vcli_host_vm_get() { vpoller-client -m host.vm.get "$@" | jq '.' ;}
 _vcli_host_datastore_get() { vpoller-client -m host.datastore.get "$@" | jq '.' ;}
+_vcli_host_net_get() { vpoller-client -m host.net.get "$@" | jq '.' ;}
 
 _vcli_vm_discover() { vpoller-client -m vm.discover "$@" | jq '.' ;}
 _vcli_vm_disk_discover() { vpoller-client -m vm.disk.discover "$@" | jq '.' ;}
-_vcli_vm_net_discover() { vpoller-client -m vm.net.discover "$@" | jq '.' ;}
+_vcli_vm_guest_net_get() { vpoller-client -m vm.guest.net.get "$@" | jq '.' ;}
 
 _vcli_vm_get() { vpoller-client -m vm.get "$@" | jq '.' ;}
 _vcli_vm_disk_get() { vpoller-client -m vm.disk.get "$@" | jq '.' ;}
 _vcli_vm_datastore_get() { vpoller-client -m vm.datastore.get "$@" | jq '.' ;}
 _vcli_vm_host_get() { vpoller-client -m vm.host.get "$@" | jq '.' ;}
+_vcli_vm_net_get() { vpoller-client -m vm.net.get "$@" | jq '.' ;}
 
 _vcli_datastore_discover() { vpoller-client -m datastore.discover "$@" | jq '.' ;}
 _vcli_datastore_get() { vpoller-client -m datastore.get "$@" | jq '.' ;}
 
 alias 'vcli-about=_vcli_about'
 alias 'vcli-event=_vcli_event'
+alias 'vcli-net-discover=_vcli_net_discover'
+alias 'vcli-net-get=_vcli_net_get'
+alias 'vcli-net-host-get=_vcli_net_host_get'
+alias 'vcli-net-vm-get=_vcli_net_vm_get'
 alias 'vcli-datacenter-discover=_vcli_datacenter_discover'
 alias 'vcli-datacenter-get=_vcli_datacenter_get'
 alias 'vcli-cluster-discover=_vcli_cluster_discover'
@@ -48,9 +59,11 @@ alias 'vcli-host-discover=_vcli_host_discover'
 alias 'vcli-host-get=_vcli_host_get'
 alias 'vcli-host-vm-get=_vcli_host_vm_get'
 alias 'vcli-host-datastore-get=_vcli_host_datastore_get'
+alias 'vcli-host-net-get=_vcli_host_net_get'
 alias 'vcli-vm-discover=_vcli_vm_discover'
 alias 'vcli-vm-disk-discover=_vcli_vm_disk_discover'
-alias 'vcli-vm-net-discover=_vcli_vm_net_discover'
+alias 'vcli-vm-guest-net-get=_vcli_vm_guest_net_get'
+alias 'vcli-vm-net-get=_vcli_vm_net_get'
 alias 'vcli-vm-get=_vcli_vm_get'
 alias 'vcli-vm-disk-get=_vcli_vm_disk_get'
 alias 'vcli-vm-datastore-get=_vcli_vm_datastore_get'
