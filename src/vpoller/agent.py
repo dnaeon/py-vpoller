@@ -230,7 +230,7 @@ class VSphereAgent(VConnector):
         result = {
             'msg': 'Successfully retrieved event',
             'success': 0,
-            'result': self.si.content.eventManager.latestEvent.fullFormattedMessage,
+            'result': [ {'event': self.si.content.eventManager.latestEvent.fullFormattedMessage} ],
         }
 
         logging.debug('[%s] Returning result from operation: %s', self.host, result)
@@ -275,7 +275,7 @@ class VSphereAgent(VConnector):
         result = {
             'msg': 'Successfully retrieved properties',
             'success': 0,
-            'result': {prop:getattr(self.si.content.about, prop, None) for prop in properties}
+            'result': [ {prop:getattr(self.si.content.about, prop, None) for prop in properties} ]
         }
 
         logging.debug('[%s] Returning result from operation: %s', self.host, result)
