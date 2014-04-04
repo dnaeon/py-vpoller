@@ -110,7 +110,7 @@ class VPollerWorker(Daemon):
                     self.worker_socket.send_json(result)
                 except TypeError as e:
                     logging.warning('Cannot serialize result: %s', e)
-                    self.worker_socket.send_json({ 'success': -1, 'msg': 'Cannot serialize result: %s' % e})
+                    self.worker_socket.send_json({ 'success': 1, 'msg': 'Cannot serialize result: %s' % e})
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
@@ -285,12 +285,12 @@ class VPollerWorker(Daemon):
         logging.debug('Processing client message: %s', msg)
 
         if not isinstance(msg, dict):
-            return { 'success': -1, 'msg': 'Expected a JSON message, received %s' % msg.__class__ }
+            return { 'success': 1, 'msg': 'Expected a JSON message, received %s' % msg.__class__ }
 
         vsphere_host = msg.get('hostname')
         
         if not self.agents.get(vsphere_host):
-            return { 'success': -1, 'msg': 'Unknown or missing vSphere Agent requested' }
+            return { 'success': 1, 'msg': 'Unknown or missing vSphere Agent requested' }
 
         # The methods that the vSphere Agents support and process
         # In the below dict the key is the method name requested by the client,
@@ -413,7 +413,7 @@ class VPollerWorker(Daemon):
         }
 
         if msg['method'] not in methods:
-            return { 'success': -1, 'msg': 'Unknown method received' }
+            return { 'success': 1, 'msg': 'Unknown method received' }
 
         agent_method  = methods[msg['method']]
 
@@ -432,12 +432,12 @@ class VPollerWorker(Daemon):
 
         # Check if we have the required message attributes
         if not all (k in msg for k in agent_method['msg_attr']):
-            return { 'success': -1, 'msg': 'Missing message attributes' }
+            return { 'success': 1, 'msg': 'Missing message attributes' }
 
         # Check if we have correct types of the message attributes
         for k in msg.keys():
             if not isinstance(msg[k], msg_attr_types[k]):
-                return { 'success': -1, 'msg': 'Incorrect message attribute type received' }
+                return { 'success': 1, 'msg': 'Incorrect message attribute type received' }
             
         # Process client request
         result = agent_method['method'](msg)
@@ -467,7 +467,7 @@ class VPollerWorker(Daemon):
         logging.debug('Processing management message: %s', msg)
 
         if 'method' not in msg:
-            return { 'success': -1, 'msg': 'Missing method name' } 
+            return { 'success': 1, 'msg': 'Missing method name' } 
         
         # The vPoller Worker management methods we support and process
         methods = {
@@ -476,7 +476,7 @@ class VPollerWorker(Daemon):
         }
         
         if msg['method'] not in methods:
-            return { 'success': -1, 'msg': 'Unknown method received' }
+            return { 'success': 1, 'msg': 'Unknown method received' }
 
         # Process management request and return result to client
         result = methods[msg['method']](msg)

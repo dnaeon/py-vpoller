@@ -241,7 +241,7 @@ class VPollerProxy(Daemon):
         
         # Check if we have a command to process
         if 'method' not in msg:
-            return { 'success': -1, 'msg': 'Missing method name' }
+            return { 'success': 1, 'msg': 'Missing method name' }
 
         # Methods the vPoller Proxy supports and processes
         methods = {
@@ -250,7 +250,7 @@ class VPollerProxy(Daemon):
         }
 
         if msg['method'] not in methods:
-            return { 'success': -1, 'msg': 'Unknown method received' }
+            return { 'success': 1, 'msg': 'Unknown method received' }
 
         # Process the requested method
         result = methods[msg['method']](msg)

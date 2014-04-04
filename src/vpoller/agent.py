@@ -80,7 +80,7 @@ class VSphereAgent(VConnector):
                 path_set=properties
             )
         except Exception as e:
-            return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e }
+            return { 'success': 1, 'msg': 'Cannot collect properties: %s' % e }
 
         result = {
             'success': 0,
@@ -126,10 +126,10 @@ class VSphereAgent(VConnector):
                 obj_type=obj_type
             )
         except Exception as e:
-            return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e }
+            return { 'success': 1, 'msg': 'Cannot collect properties: %s' % e }
 
         if not obj:
-            return { 'success': -1, 'msg': 'Cannot find object %s' % obj_property_value }
+            return { 'success': 1, 'msg': 'Cannot find object %s' % obj_property_value }
 
         # Create a list view for this object and collect properties
         view_ref = self.get_list_view(obj=[obj])
@@ -142,7 +142,7 @@ class VSphereAgent(VConnector):
                 include_mors=include_mors
             )
         except Exception as e:
-            return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e }
+            return { 'success': 1, 'msg': 'Cannot collect properties: %s' % e }
 
         result = {
             'success': 0,
@@ -1222,7 +1222,7 @@ class VSphereAgent(VConnector):
             if disk['diskPath'] == disk_path:
                 break
         else:
-            return { 'success': -1, 'msg': 'Unable to find guest disk %s' % disk_path }
+            return { 'success': 1, 'msg': 'Unable to find guest disk %s' % disk_path }
 
         result = {}
         result['name'] = msg['name']
@@ -1294,11 +1294,11 @@ class VSphereAgent(VConnector):
 
         # Check if we have VMware Tools installed and running first as we depend on it
         if vm_tools_is_running != 'guestToolsRunning':
-            return { 'success': -1, 'msg': 'VirtualMachine %s is not running VMware Tools' % msg['name'] }
+            return { 'success': 1, 'msg': 'VirtualMachine %s is not running VMware Tools' % msg['name'] }
 
         # Prepare credentials used for authentication in the guest system
         if not msg['username'] or not msg['password']:
-            return { 'success': -1, 'msg': 'Need username and password for authentication in guest system %s' % msg['name'] }
+            return { 'success': 1, 'msg': 'Need username and password for authentication in guest system %s' % msg['name'] }
         
         vm_creds = pyVmomi.vim.vm.guest.NamePasswordAuthentication(
             username=msg['username'],
@@ -1311,7 +1311,7 @@ class VSphereAgent(VConnector):
                 auth=vm_creds
             )
         except Exception as e:
-            return { 'success': -1, 'msg': 'Cannot get guest processes: %s' % e }
+            return { 'success': 1, 'msg': 'Cannot get guest processes: %s' % e }
 
         # Properties to be collected for the guest processes
         properties = ['name']
