@@ -1102,7 +1102,7 @@ class VSphereAgent(VConnector):
         Example client message would be:
 
             {
-                "method":     "vm.running.on.host",
+                "method":     "vm.host.get",
                 "hostname":   "vc01.example.org",
                 "name":       "vm01.example.org",
             }
@@ -1133,8 +1133,8 @@ class VSphereAgent(VConnector):
 
         r = {
             'success': data['success'],
-            'msg': [ data['msg'] ],
-            'result': result,
+            'msg': data['msg'],
+            'result': [ result ],
         }
 
         logging.debug('[%s] Returning result from operation: %s', self.host, r)
