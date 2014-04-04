@@ -92,7 +92,7 @@ class VSphereAgent(VConnector):
 
         return result
 
-    def _get_object_properties(self, properties, obj_type, obj_property_name, obj_property_value):
+    def _get_object_properties(self, properties, obj_type, obj_property_name, obj_property_value, include_mors=False):
         """
         Helper method to simplify retrieving of properties for a single managed object
 
@@ -138,7 +138,8 @@ class VSphereAgent(VConnector):
             data = self.collect_properties(
                 view_ref=view_ref,
                 obj_type=obj_type,
-                path_set=properties
+                path_set=properties,
+                include_mors=include_mors
             )
         except Exception as e:
             return { 'success': -1, 'msg': 'Cannot collect properties: %s' % e }
@@ -1237,6 +1238,101 @@ class VSphereAgent(VConnector):
         
         return r
 
+    def vm_process_get(self, msg):
+        """
+        Get all processes running on a pyVmomi.vim.VirtualMachine managed object
+
+        This method requires you to have VMware Tools installed and running in order
+        to get the list of processes running in a guest system.
+
+        Example client message would be:
+
+            {
+                "method":     "vm.process.get",
+                "hostname":   "vc01.example.org",
+                "name":       "vm01.example.org",
+                "username":   "root",
+                "password":   "p4ssw0rd"
+            }
+
+        Example client message which requests additional properties for the processes:
+
+            {
+                "method":     "vm.process.get",
+                "hostname":   "vc01.example.org",
+                "name":       "vm01.example.org",
+                "username":   "root",
+                "password":   "p4ssw0rd",
+                "properties": [
+                    "name",
+                    "owner",
+                    "pid"
+                ]
+            }
+
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        logging.debug('[%s] Getting processes for VirtualMachine %s', self.host, msg['name'])
+
+        # Get the VirtualMachine managed object
+        data = self._get_object_properties(
+            properties=['name', 'guest.toolsRunningStatus'],
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name'],
+            include_mors=True
+        )
+
+        if data['success'] != 0:
+            return data
+
+        # Get the VM properties
+        props = data['result'][0]
+        vm_name, vm_tools_is_running, vm_obj = props['name'], props['guest.toolsRunningStatus'], props['obj']
+
+        # Check if we have VMware Tools installed and running first as we depend on it
+        if vm_tools_is_running != 'guestToolsRunning':
+            return { 'success': -1, 'msg': 'VirtualMachine %s is not running VMware Tools' % msg['name'] }
+
+        # Prepare credentials used for authentication in the guest system
+        if not msg['username'] or not msg['password']:
+            return { 'success': -1, 'msg': 'Need username and password for authentication in guest system %s' % msg['name'] }
+        
+        vm_creds = pyVmomi.vim.vm.guest.NamePasswordAuthentication(
+            username=msg['username'],
+            password=msg['password']
+        )
+
+        try:
+            vm_processes = self.si.content.guestOperationsManager.processManager.ListProcessesInGuest(
+                vm=vm_obj,
+                auth=vm_creds
+            )
+        except Exception as e:
+            return { 'success': -1, 'msg': 'Cannot get guest processes: %s' % e }
+
+        # Properties to be collected for the guest processes
+        properties = ['name']
+        if msg.has_key('properties') and msg['properties']:
+            properties.extend(msg['properties'])
+
+        # Get the requested process properties
+        result = {}
+        result['name'] = vm_name
+        result['process'] = [{prop:getattr(process, prop, None) for prop in properties} for process in vm_processes]
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully retrieved properties',
+            'result': result,
+        }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
+        return r
+        
     def datastore_discover(self, msg):
         """
         Discover all pyVmomi.vim.Datastore managed objects
