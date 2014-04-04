@@ -26,12 +26,11 @@
 
 
 /* 
- * vPoller C client is intended to be used for polling/discovering
- * information from a vSphere host (ESX or vCenter server).
- * 
- * It works by sending a ZeroMQ message to a vPoller Proxy which in turn will
- * dispatch the message to a pool of ZeroMQ workers for performing any operations.
- * 
+ * vpoller-cclient is the vPoller Client application written in C
+ *
+ * It is used for sending client requests to vPoller Proxy/Workers for
+ * discovering and polling of vSphere Object properties.
+ *
  */
 
 
