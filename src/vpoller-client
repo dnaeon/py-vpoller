@@ -36,6 +36,8 @@ import json
 import logging
 import importlib
 
+from sys import exit
+
 from vpoller.client import VPollerClient
 from docopt import docopt
 
@@ -127,8 +129,9 @@ Examples:
         'properties': args['--properties'].split(',') if args['--properties'] else None,
         }
 
-    # Get the result
+    # Get the result and exit code
     data = client.run(msg)
+    rc = data['success']
 
     # Do we use a helper module?
     if args['--helper'] and args['--helper'] in helpers:
@@ -137,6 +140,8 @@ Examples:
         result = json.dumps(data, indent=4)
     
     print result
+
+    exit(rc)
 
 if __name__ == '__main__':
     main()
