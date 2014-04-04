@@ -934,7 +934,7 @@ class VSphereAgent(VConnector):
         r = {
             'success': 0,
             'msg': 'Successfully discovered objects',
-            'result': result,
+            'result': [ result ],
         }
 
         logging.debug('[%s] Returning result from operation: %s', self.host, r)
