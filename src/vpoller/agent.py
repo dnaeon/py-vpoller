@@ -1133,7 +1133,7 @@ class VSphereAgent(VConnector):
 
         r = {
             'success': data['success'],
-            'msg': data['msg'],
+            'msg': [ data['msg'] ],
             'result': result,
         }
 
@@ -1231,7 +1231,7 @@ class VSphereAgent(VConnector):
         r = {
             'success': 0,
             'msg': 'Successfully retrieved properties',
-            'result': result,
+            'result': [ result ],
         }
 
         logging.debug('[%s] Returning result from operation: %s', self.host, r)
