@@ -50,27 +50,27 @@ usage(void)
 {
   fprintf(stderr, "Usage:\n");
   fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
-  fprintf(stderr, "                    -m <method> -V <host>\n");
+  fprintf(stderr, "                    [-p <properties>] -m <method> -V <host>\n");
   fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
-  fprintf(stderr, "                    -m <method> -n <name> -p <property> -V <host>\n");
-  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
-  fprintf(stderr, "                    -m <method> -u <datastore-url> -p <property> -V <host>\n");
+  fprintf(stderr, "                    [-k <key>] [-U <username>] [-P <password>]\n");
+  fprintf(stderr, "                    -m <method> -n <name> -p <properties> -V <host>\n");
   fprintf(stderr, "    vpoller-cclient -h\n\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "    -h                   Display this usage info\n");
-  fprintf(stderr, "    -V <host>            The vSphere host server to send the request to\n");
+  fprintf(stderr, "    -V <host>            The vSphere host to send the request to\n");
   fprintf(stderr, "    -m <method>          The method to be processed during the client request\n");
-  fprintf(stderr, "    -n <name>            Name of the ESXi host, only applicable to hosts object type\n");
-  fprintf(stderr, "    -p <property>        Name of the property as defined by the vSphere Web SDK\n");
-  fprintf(stderr, "    -u <datastore-url>   Datastore URL, only applicable to datastores object type\n");
+  fprintf(stderr, "    -n <name>            Name of the object, e.g. ESXi hostname, datastore URL, etc.\n");
+  fprintf(stderr, "    -p <properties>      Name of the property as defined by the vSphere Web SDK\n");
   fprintf(stderr, "    -r <retries>         Number of times to retry if a request times out [default: 3]\n");
   fprintf(stderr, "    -t <timeout>         Timeout after that period of milliseconds [default: 3000]\n");
-  fprintf(stderr, "    -e <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to\n");
+  fprintf(stderr, "    -e <endpoint>        Endpoint of vPoller Proxy/Worker the client connects to\n");
   fprintf(stderr, "                         [default: tcp://localhost:10123]\n\n");
-  fprintf(stderr, "Example usage for discovering datastores on a vSphere host:\n\n");
-  fprintf(stderr, "     $ vpoller-cclient -m datastore.discover -V vc1.example.org\n\n");
-  fprintf(stderr, "Example usage for retrieving a property of an ESXi host:\n\n");
-  fprintf(stderr, "     $ vpoller-cclient -m host.poll -V vc01-test.example.org -p runtime.bootTime -n esxi1.example.org\n");
+  fprintf(stderr, "Examples:\n");
+  fprintf(stderr, "     vpoller-cclient -m vm.discover -V vc01.example.org\n");
+  fprintf(stderr, "     vpoller-cclient -m vm.discover -V vc01.example.org -p runtime.powerState\n");
+  fprintf(stderr, "     vpoller-cclient -m vm.get -V vc01.example.org -n vm01.example.org -p summary.overallStatus\n");
+  fprintf(stderr, "     vpoller-cclient -m vm.diks.get -V vc01.example.org -n vm01.example.org -k /var\n");
+  fprintf(stderr, "     vpoller-cclient -m vm.process.get -V vc01.example.org -n vm01.example.org -U user -P pass\n");
 }
 
 int
@@ -89,19 +89,23 @@ main(int argc, char *argv[])
     "\"method\":      \"%s\", "
     "\"hostname\":    \"%s\", "
     "\"name\":        \"%s\", "
-    "\"info.url\":    \"%s\", "
-    "\"property\":    \"%s\""
+    "\"username\":    \"%s\", "
+    "\"password\":    \"%s\", "
+    "\"key\":         \"%s\", "
+    "\"properties\": [ \"%s\" ]"
     "}";
 
-  const char *method,	  /* The method to be processed during client request */
-    *name,		  /* Name of the object, e.g. "datastore1", "esx1-host", .. */
-    *property,		  /* The property we want as defined in the vSphere Web Services SDK */
-    *url,		  /* Datastore URL, only applicable to datastores object type */
-    *vsphere_host;	  /* The vSphere host we send the request message to */
-  
+  const char *method,	  /* The method to be processed during the client request */
+    *hostname,            /* The vSphere host to send the request to */
+    *name,		  /* Name of the object, e.g. ESXi hostname, datastore URL, etc. */
+    *properties,	  /* Name of the properties as defined by the vSphere Web SDK */
+    *username,            /* Username to use for authentication in guest system */
+    *password,            /* Password to use for authentication in guest system */
+    *key;                 /* Provide additional key for data filtering */
+
   char *result;	  	  /* A pointer to hold the result from our request */
   
-  /* The ZeroMQ Broker/Proxy endpoint we connect to */
+  /* The vPoller Proxy/Worker endpoint we connect to */
   const char *endpoint = DEFAULT_ENDPOINT;
 
   int rc      = EX_OK;            /* Return code */
@@ -114,11 +118,11 @@ main(int argc, char *argv[])
   char ch;
 
   /* Initialize the message properties */
-  name = property = url = "None";
-  method = vsphere_host = result = NULL;
+  name = properties = key = username = password = key = NULL;
+  method = hostname = result = NULL;
   
   /* Get the command-line options and arguments */
-  while ((ch = getopt(argc, argv, "m:e:r:t:n:p:u:V:")) != -1) {
+  while ((ch = getopt(argc, argv, "m:e:r:t:n:p:k:U:P:V:")) != -1) {
     switch (ch) {
     case 'm':
       method = optarg;
@@ -127,13 +131,16 @@ main(int argc, char *argv[])
       name = optarg;
       break;
     case 'p':
-      property = optarg;
+      properties = optarg;
       break;
-    case 'u':
-      url = optarg;
+    case 'U':
+      username = optarg;
+      break;
+    case 'P':
+      password = optarg;
       break;
     case 'V':
-      vsphere_host = optarg;
+      hostname = optarg;
       break;
     case 'r':
       retries = atol(optarg);
@@ -144,6 +151,9 @@ main(int argc, char *argv[])
     case 'e':
       endpoint = optarg;
       break;
+    case 'k':
+      key = optarg;
+      break;
     default:
       usage();
       return (EX_USAGE);
@@ -153,13 +163,15 @@ main(int argc, char *argv[])
   argv += optind;
   
   /* Sanity check the provided options and arguments */
-  if (method == NULL || vsphere_host == NULL) {
+  if (method == NULL || hostname == NULL) {
     usage();
     return (EX_USAGE);
   }
-  
+
   /* Create the message to send out */
-  snprintf(msg_buf, 1023, msg_out_template, method, vsphere_host, name, url, property);
+  snprintf(msg_buf, 1023, msg_out_template,
+	   method, hostname, name,
+	   username, password, key, properties);
     
   /* Create a new ZeroMQ Context and Socket */
   zcontext = zmq_ctx_new();
@@ -170,7 +182,7 @@ main(int argc, char *argv[])
     return (EX_PROTOCOL);
   }
 
-  /* Connect to the ZeroMQ Proxy */
+  /* Connect to the vPoller Proxy/Worker */
   zmq_connect(zsocket, endpoint);
   zmq_setsockopt(zsocket, ZMQ_LINGER, &linger, sizeof(linger));
 
@@ -225,7 +237,7 @@ main(int argc, char *argv[])
   
   /* Do we have any result? */
   if (result == NULL) {
-    printf("{ \"success\": -1, \"msg\": \"Did not receive reply from server, aborting...\"\n");
+    printf("{ \"success\": 1, \"msg\": \"Did not receive reply from server, aborting...\"\n");
   } else {
     printf("%s\n", result);
   }
