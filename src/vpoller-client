@@ -70,29 +70,34 @@ def main():
 
     usage="""
 Usage:
-  vpoller-client [-D] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-p <properties>] [-e <endpoint>] -m <method> -V <host> 
-  vpoller-client [-D] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-e <endpoint>] [-k <key>] -m <method> -n <name> -V <host> 
-  vpoller-client [-D] [-r <retries>] [-t <timeout>] [-o <logfile>] [-H <helper>] [-e <endpoint>] [-k <key>] -m <method> -n <name> -p <properties> -V <host>
-  vpoller-client --help
-  vpoller-client --version
+    vpoller-client [options] -m <method> -V <host>
 
 Options:
-  -h, --help                                  Display this usage info
-  -v, --version                               Display version and exit
-  -D, --debug                                 Debug mode, be more verbose
-  -m <method>, --method <method>              The method to be processed during the client request
-  -V <host>, --vsphere-host <host>            The vSphere host to send the request to
-  -n <name>, --name <name>                    Name of the object, e.g. ESXi hostname, datastore URL, etc.
-  -p <properties>, --properties <properties>  Name of the property as defined by the vSphere Web SDK
-  -r <retries>, --retries <retries>           Number of time to retry if a request times out [default: 3]
-  -t <timeout>, --timeout <timeout>           Timeout after that period of milliseconds [default: 3000]
-  -e <endpoint>, --endpoint <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to
-                                              [default: tcp://localhost:10123]
-  -k <key>, --key <key>                       Provide additional key for data filtering 
-  -o <logfile>, --output <logfile>            Specify the log file to use when performing the poll
-                                              [default: /var/log/vpoller/vpoller-client.log]
-  -H <helper>, --helper <helper>              Specify a helper module to use for processing the
-                                              result message, e.g. 'zabbix'
+    -h, --help                                  Display this usage info
+    -v, --version                               Display version and exit
+    -D, --debug                                 Debug mode, be more verbose
+    -m <method>, --method <method>              The method to be processed during the client request
+    -V <host>, --vsphere-host <host>            The vSphere host to send the request to
+    -n <name>, --name <name>                    Name of the object, e.g. ESXi hostname, datastore URL, etc.
+    -p <properties>, --properties <properties>  Name of the property as defined by the vSphere Web SDK
+    -r <retries>, --retries <retries>           Number of time to retry if a request times out [default: 3]
+    -t <timeout>, --timeout <timeout>           Timeout after that period of milliseconds [default: 3000]
+    -e <endpoint>, --endpoint <endpoint>        Endpoint of ZeroMQ Proxy/Broker the client connects to
+                                                [default: tcp://localhost:10123]
+    -k <key>, --key <key>                       Provide additional key for data filtering 
+    -U <username>, --guest-username <username>  Username to use for authentication in guest system
+    -P <username>, --guest-password <password>  Password to use for authentication in guest system
+    -o <logfile>, --output <logfile>            Specify the log file to use when performing the poll
+                                                [default: /var/log/vpoller/vpoller-client.log]
+    -H <helper>, --helper <helper>              Specify a helper module to use for processing the
+                                                result message, e.g. 'zabbix'
+
+Examples:
+    vpoller-client -m vm.discover -V vc01.example.org
+    vpoller-client -m vm.discover -V vc01.example.org -p runtime.powerState
+    vpoller-client -m vm.get -V vc01.example.org -n vm01.example.org -p summary.overallStatus
+    vpoller-client -m vm.diks.get -V vc01.example.org -n vm01.example.org -k /var
+    vpoller-client -m vm.process.get -V vc01.example.org -n vm01.example.org -U user -P pass
 
 """
 
@@ -116,6 +121,8 @@ Options:
         'method':     args['--method'],
         'hostname':   args['--vsphere-host'],
         'name':       args['--name'],
+        'username':   args['--guest-username'],
+        'password':   args['--guest-password'],
         'key':        args['--key'],
         'properties': args['--properties'].split(',') if args['--properties'] else None,
         }
