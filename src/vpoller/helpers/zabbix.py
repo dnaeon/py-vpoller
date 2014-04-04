@@ -76,7 +76,7 @@ class HelperAgent(object):
             'vm.discover':         self.zabbix_lld_data,
             'vm.get':              self.zabbix_item_value,
             'vm.disk.discover':    self.zabbix_lld_data,
-            'vm.disk.get':         self.zabbix_item_value,
+            'vm.disk.get':         self.zabbix_vm_disk_get,
             'vm.host.get':         self.zabbix_item_value,
             'datastore.discover':  self.zabbix_lld_data,
             'datastore.get':       self.zabbix_item_value,
@@ -103,6 +103,21 @@ class HelperAgent(object):
         property_name = self.msg['properties'][0]
         
         return self.data['result'][0][property_name]
+
+    def zabbix_vm_disk_get(self):
+        """
+        Processes a single property value for a VM guest disk
+
+        The value we return is of the first property only,
+        so that each item in Zabbix stores a single property value.
+
+        Returns:
+            The property value from the result message
+
+        """
+        property_name = self.msg['properties'][0]
+        
+        return self.data['result'][0]['disk'][property_name]
 
     def zabbix_lld_data(self):
         """

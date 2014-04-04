@@ -1215,7 +1215,7 @@ class VSphereAgent(VConnector):
         else:
             return data
 
-        props = data['result']
+        props = data['result'][0]
         disks = props['disk']
 
         for disk in disks:
