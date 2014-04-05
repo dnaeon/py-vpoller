@@ -218,6 +218,8 @@ class VConnector(object):
         """
         Get a vSphere Container View reference to all objects of type 'obj_type'
 
+        It is up to the caller to take care of destroying the View when no longer needed.
+
         Args:
             obj_type (list): A list of managed object types
 
@@ -241,6 +243,8 @@ class VConnector(object):
     def get_list_view(self, obj):
         """
         Get a vSphere List View reference 
+
+        It is up to the caller to take care of destroying the View when no longer needed.
 
         Args:
             obj (list): A list of managed object to include in the List View
@@ -276,6 +280,8 @@ class VConnector(object):
             path_set=[property_name],
             include_mors=True
         )
+
+        view_ref.DestroyView()
 
         for each_obj in props:
             if each_obj[property_name] == property_value:

@@ -82,6 +82,8 @@ class VSphereAgent(VConnector):
         except Exception as e:
             return { 'success': 1, 'msg': 'Cannot collect properties: %s' % e }
 
+        view_ref.DestroyView()
+        
         result = {
             'success': 0,
             'msg': 'Successfully discovered objects',
@@ -144,6 +146,8 @@ class VSphereAgent(VConnector):
         except Exception as e:
             return { 'success': 1, 'msg': 'Cannot collect properties: %s' % e }
 
+        view_ref.DestroyView()
+
         result = {
             'success': 0,
             'msg': 'Successfully retrieved object properties',
@@ -200,6 +204,8 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.Datastore,
             path_set=['name', 'info.url']
         )
+
+        view_ref.DestroyView()
 
         r = {
             'success': 0,
@@ -390,6 +396,8 @@ class VSphereAgent(VConnector):
             path_set=['name']
         )
 
+        view_ref.DestroyView()
+
         r = {
             'success': 0,
             'msg': 'Successfully discovered objects',
@@ -441,6 +449,8 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.VirtualMachine,
             path_set=['name']
         )
+
+        view_ref.DestroyView()
 
         r = {
             'success': 0,
@@ -756,6 +766,8 @@ class VSphereAgent(VConnector):
             path_set=['name']
         )
 
+        view_ref.DestroyView()
+
         r = {
             'success': 0,
             'msg': 'Successfully discovered objects',
@@ -807,6 +819,8 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.Network,
             path_set=['name']
         )
+
+        view_ref.DestroyView()
 
         r = {
             'success': 0,
@@ -1052,6 +1066,8 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.Network,
             path_set=['name']
         )
+
+        view_ref.DestroyView()
 
         r = {
             'success': 0,
