@@ -75,7 +75,7 @@ class HelperAgent(object):
             'host.get':            self.zabbix_item_value,
             'vm.discover':         self.zabbix_lld_data,
             'vm.get':              self.zabbix_item_value,
-            'vm.disk.discover':    self.zabbix_lld_data,
+            'vm.disk.discover':    self.zabbix_vm_disk_discover,
             'vm.disk.get':         self.zabbix_vm_disk_get,
             'vm.host.get':         self.zabbix_item_value,
             'datastore.discover':  self.zabbix_lld_data,
@@ -118,6 +118,33 @@ class HelperAgent(object):
         property_name = self.msg['properties'][0]
         
         return self.data['result'][0]['disk'][property_name]
+
+    def zabbix_vm_disk_discover(self):
+        """
+        Translates a VM disk discovery request to Zabbix LLD format
+
+        This method translates a discovery request to the
+        Zabbix Low-Level Discovery format.
+
+        For more information about Zabbix LLD, please refer to link below:
+
+            - https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery
+
+        The result attribute names are in Zabbix Macro-like format, e.g.
+
+            {#VSPHERE.<TYPE>.<ATTRIBUTE>}: <value>
+
+        """
+        obj_t = self.method.split('.')[0].upper()
+        result = self.data['result'][0]['disk']
+
+        data = []
+
+        for item in result:
+            props = [('{#VSPHERE.' + obj_t + '.' + k.upper() + '}', v) for k, v in item.items()]
+            data.append(dict(props))
+
+        return json.dumps({ 'data': data }, indent=4)
 
     def zabbix_lld_data(self):
         """
