@@ -100,7 +100,13 @@ class VPollerWorker(Daemon):
             if socks.get(self.worker_socket) == zmq.POLLIN:
                 _id    = self.worker_socket.recv()
                 _empty = self.worker_socket.recv()
-                msg    = self.worker_socket.recv_json()
+
+                try:
+                    msg = self.worker_socket.recv_json()
+                except Exception as e:
+                    logging.warning('Received bad client message, request will be ignored: %s', e)
+                    continue
+
                 result = self.process_client_msg(msg)
                 
                 # Return result back to client
