@@ -101,8 +101,9 @@ class HelperAgent(object):
 
         """
         property_name = self.msg['properties'][0]
-        
-        return self.data['result'][0][property_name]
+        result = self.data['result'][0]
+
+        return result.get(property_name)
 
     def zabbix_vm_disk_get(self):
         """
@@ -116,8 +117,9 @@ class HelperAgent(object):
 
         """
         property_name = self.msg['properties'][0]
+        result = self.data['result']0['disk']
         
-        return self.data['result'][0]['disk'][property_name]
+        return result.get(property_name)
 
     def zabbix_vm_disk_discover(self):
         """
