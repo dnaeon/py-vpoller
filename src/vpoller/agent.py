@@ -756,6 +756,7 @@ class VSphereAgent(VConnector):
         props = data['result'][0]
         host_name, host_cluster = props['name'], props['parent']
 
+        result = {}
         result['name'] = host_name
         result['cluster'] = host_cluster.name
 
