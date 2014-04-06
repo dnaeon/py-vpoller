@@ -46,6 +46,7 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 | resource.pool.get      | Get properties for a vim.ResourcePool managed object                     |
 | host.discover          | Discover all vim.HostSystem managed objects                              |
 | host.get               | Get properties for a vim.HostSystem managed object                       |
+| host.cluster.get       | Get the cluster name for a vim.HostSystem managed object                 |
 | host.vm.get            | Get all Virtual Machines running on a specified vim.HostSystem           |
 | host.net.get           | Get all Networks available for a specified vim.HostSystem                |
 | host.datastore.get     | Get all datastores available to a vim.HostSystem                         |

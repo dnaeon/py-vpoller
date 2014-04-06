@@ -26,6 +26,7 @@ _vcli_resource_pool_get() { vpoller-client -m resource.pool.get "$@" | jq '.' ;}
 
 _vcli_host_discover() { vpoller-client -m host.discover "$@" | jq '.' ;}
 _vcli_host_get() { vpoller-client -m host.get "$@" | jq '.' ;}
+_vcli_host_cluster_get() { vpoller-client -m host.cluster.get "$@" | jq '.' ;}
 _vcli_host_vm_get() { vpoller-client -m host.vm.get "$@" | jq '.' ;}
 _vcli_host_datastore_get() { vpoller-client -m host.datastore.get "$@" | jq '.' ;}
 _vcli_host_net_get() { vpoller-client -m host.net.get "$@" | jq '.' ;}
@@ -58,6 +59,7 @@ alias 'vcli-resource-pool-discover=_vcli_resource_pool_discover'
 alias 'vcli-resource-pool-get=_vcli_resource_pool_get'
 alias 'vcli-host-discover=_vcli_host_discover'
 alias 'vcli-host-get=_vcli_host_get'
+alias 'vcli-host-cluster-get=_vcli_host_cluster_get'
 alias 'vcli-host-vm-get=_vcli_host_vm_get'
 alias 'vcli-host-datastore-get=_vcli_host_datastore_get'
 alias 'vcli-host-net-get=_vcli_host_net_get'

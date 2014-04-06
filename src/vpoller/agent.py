@@ -724,6 +724,51 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    def host_cluster_get(self, msg):
+        """
+        Get the cluster name for a HostSystem
+
+        Example client message would be:
+
+            {
+                "method":     "host.cluster.get",
+                "hostname":   "vc01.example.org",
+                "name":       "esxi01.example.org",
+            }
+              
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        logging.debug('[%s] Getting cluster name for %s host', self.host, msg['name'])
+        
+        # Find the HostSystem managed object and get the 'parent' property
+        data = self._get_object_properties(
+            properties=['name', 'parent'],
+            obj_type=pyVmomi.vim.HostSystem,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        props = data['result'][0]
+        host_name, host_cluster = props['name'], props['parent']
+
+        result['name'] = host_name
+        result['cluster'] = host_cluster.name
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully retrieved properties',
+            'result': [ result ],
+        }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
+        return r
+
     def host_vm_get(self, msg):
         """
         Get all Virtual Machines running on this HostSystem 
