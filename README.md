@@ -73,7 +73,7 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 The C client of *vPoller* also requires the following packages to be installed in order to build it:
 
 * Python development files (on Debian systems this is usually provided by the *python-dev* package)
-* [ZeroMQ library](https://github.com/zeromq/zeromq3-x)
+* [ZeroMQ 4.x Library](https://github.com/zeromq/zeromq4-x)
 
 ## Contributions
 
