@@ -81,6 +81,15 @@ The C client of *vPoller* also requires the following packages to be installed i
 
 ## Installation
 
+Make sure you have [ZeroMQ 4.x library](https://github.com/zeromq/zeromq4-x) installed first:
+
+	$ git clone https://github.com/zeromq/zeromq4-x.git
+	$ cd zeromq4-x
+	$ ./autogen.sh
+	$ ./configure
+	$ make && sudo make install && make clean
+	$ sudo ldconfig
+
 In order to install *vPoller* simply execute the command below:
 
 	$ sudo python setup.py install
