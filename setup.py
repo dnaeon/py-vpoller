@@ -15,7 +15,7 @@ setup(name='py-vpoller',
         'src/vconnector-cli',
       ],
       install_requires=[
-        'pyzmq >= 13.1.0',
+        'pyzmq >= 14.1.1',
         'docopt >= 0.6.1',
         'pyvmomi >= 5.5.0',
         'tabulate >= 0.7.2',  
