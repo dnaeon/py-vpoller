@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+# Simple wrapper script to use with Zabbix and the C client of vPoller
+# This script is meant to be used for the 'vm.disk.get' vPoller Worker method
+
+_args="$@"
+_property_name=`echo ${_args} | sed -ne 's|.* -p \([a-zA-Z\.]*\)|\1|p'`
+
+vpoller-cclient ${_args} 2>/dev/null | jq -r ".result[0].disk.${_property_name}"
+
