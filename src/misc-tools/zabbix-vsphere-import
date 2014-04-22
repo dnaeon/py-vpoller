@@ -1,0 +1,172 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2014 Marin Atanasov Nikolov <dnaeon@gmail.com>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer
+#    in this position and unchanged.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+"""
+The zabbix-vsphere-import tool is used for importing VMware vSphere objects
+into a Zabbix server as regular Zabbix hosts
+
+"""
+
+import logging
+
+import yaml
+import zabbix_api
+from docopt import docopt
+from vpoller.client import VPollerClient
+
+class ZabbixException(Exception):
+    """
+    Generic exception
+
+    """
+    pass
+
+class ZabbixConnector(object):
+    """
+    Zabbix connector class
+
+    Defines methods for connecting to a Zabbix server and
+    importing of vSphere objects as regular Zabbix hosts
+
+    """
+    def __init__(self, options):
+        self.options = options
+
+    def connect(self):
+        """
+        Establishes a connection to the Zabbix server
+
+        Raises:
+            SystemExit
+
+        """
+        logging.info('Connecting to Zabbix server at %s', self.options['zabbix']['hostname'])
+        
+        self.conn = zabbix_api.ZabbixAPI(server=self.options['zabbix']['hostname'])
+
+        try:
+            self.conn.login(
+                user=self.options['zabbix']['username'],
+                password=self.options['zabbix']['password']
+            )
+        except zabbix_api.ZabbixAPIException as e:
+            logging.warning('Cannot login to Zabbix server: %s', e)
+            raise ZabbixException, 'Cannot login to Zabbix server: %s' % e
+
+    def get_hosts(self):
+        """
+        Get all hosts registered in Zabbix
+
+        """
+        result = self._call_zabbix_method(
+            method='host.get',
+            params={'output': 'extend'}
+        )
+
+        return result
+
+    def get_proxy_hosts(self):
+        """
+        Gets all Zabbix Proxy hosts
+
+        """
+        result = self._call_zabbix_method(
+            method='proxy.get',
+            params={'output': 'extend'}
+        )
+
+        return result
+
+    def _call_zabbix_method(method, params):
+        """
+        Helper method for calling Zabbix API methods
+
+        Args:
+            method  (str): Zabbix API method
+            params (dict): Additional method params
+
+        Returns:
+            Result from calling the Zabbix API method
+
+        """
+        logging.debug('Calling Zabbix API method %s with params %s', method, params)
+
+        req = self.conn.json_obj(method=method, params=params)
+        result = self.conn.do_request(req)
+
+        return result
+
+    def _get_vsphere_objects(self, method, properties):
+        """
+        Helper method for getting vSphere objects using vPoller
+
+        Args:
+            method      (str): vPoller method name
+            properties (list): List of properties to be retrieved
+        
+        """
+        client = VPollerClient(
+            endpoint=self.options['vpoller']['endpoint'],
+            retries=self.options['vpoller']['retries'],
+            timeout=self.options['vpoller']['timeout']
+        )
+
+        msg = {
+            'method':     method,
+            'hostname':   self.options['vsphere']['hostname'],
+            'properties': properties,
+        }
+
+        result = client.run(msg)
+
+        return result
+
+def main():
+    usage="""
+Usage: zabbix-vsphere-import -f <config>
+       zabbix-vsphere-import -v
+       zabbix-vsphere-import -h
+
+Options:
+  -h, --help                    Display this usage info
+  -v, --version                 Display version and exit
+  -f <config>, --file <config>  Configuration file to use
+
+"""
+    
+    args = docopt(usage, version="0.1.0")
+
+    try:
+        with open(args['--file'], 'r') as f:
+            options = yaml.load(f)
+    except Exception as e:
+        logging.warning('Cannot load configuration file %s: %s', args['--file'], e)
+        raise ZabbixException, 'Cannot load configuration file %s: %s' % (args['--file'], e)
+
+    zabbix = ZabbixConnector(options=options)
+
+if __name__ == '__main__':
+    main()
