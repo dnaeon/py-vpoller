@@ -104,6 +104,28 @@ class ZabbixConnector(object):
 
         return result
 
+    def get_host_by_name(self, name):
+        """
+        Get a Zabbix host id by name
+
+        Args:
+            name (str): Name of the host in Zabbix
+
+        Returns:
+            The id of the host in Zabbix
+
+        """
+        result = self.get_hosts()
+        hosts  = result['result']
+
+        for host in hosts:
+            if host['name'] == name:
+                break
+        else:
+            return None
+
+        return host['hostid']
+
     def get_templates(self):
         """
         Gets all Zabbix templates
