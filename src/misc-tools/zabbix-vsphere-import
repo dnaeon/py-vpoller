@@ -118,6 +118,18 @@ class ZabbixConnector(object):
 
         return result
 
+    def get_host_groups(self):
+        """
+        Gets all Zabbix host groups
+        
+        """
+        result = self._call_zabbix_method(
+            method='hostgroup.get',
+            params={'output': 'extend'}
+        )
+
+        return result
+
     def create_host(self, host):
         """
         Create a Zabbix host
