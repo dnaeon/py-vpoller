@@ -81,6 +81,8 @@ class ZabbixConnector(object):
         Get all hosts registered in Zabbix
 
         """
+        logging.info('[%s] Getting Zabbix hosts', self.options['zabbix']['hostname'])
+        
         result = self._call_zabbix_method(
             method='host.get',
             params={'output': 'extend'}
@@ -93,12 +95,59 @@ class ZabbixConnector(object):
         Gets all Zabbix Proxy hosts
 
         """
+        logging.info('[%s]: Getting Zabbix Proxy hosts', self.options['zabbix']['hostname'])
+
         result = self._call_zabbix_method(
             method='proxy.get',
             params={'output': 'extend'}
         )
 
         return result
+
+    def get_templates(self):
+        """
+        Gets all Zabbix templates
+
+        """
+        logging.info('[%s] Getting Zabbix templates', self.options['zabbix']['hostname'])
+
+        result = self._call_zabbix_method(
+            method='template.get',
+            params={'output': 'extend'}
+        )
+
+        return result
+
+    def create_host(self, host):
+        """
+        Create a Zabbix host
+
+        Args:
+            host (str): Hostname of the Zabbix host to create
+
+        """
+        logging.info('Creating Zabbix host: %s', host)
+
+    def import_vsphere_hosts(self):
+        """
+        Import vSphere hosts into Zabbix as regular Zabbix hosts
+
+        """
+        logging.info('Importing vSphere hosts to Zabbix')
+        
+        zabbix_hosts_data = self.get_hosts()
+
+        vsphere_hosts_data = self._get_vsphere_objects(
+            method='host.discover',
+            properties=['name']
+        )
+
+        zabbix_hosts  = [host['host'] for host in zabbix_hosts_data['result']]
+        vsphere_hosts = [host['name'] for host in vsphere_hosts_data['result']]
+        missing_hosts = set(vsphere_hosts) - set(zabbix_hosts)
+
+        for host in missing_hosts:
+            self.create_host(host)
 
     def _call_zabbix_method(method, params):
         """
@@ -128,6 +177,8 @@ class ZabbixConnector(object):
             properties (list): List of properties to be retrieved
         
         """
+        logging.debug('Calling vPoller method %s', method)
+
         client = VPollerClient(
             endpoint=self.options['vpoller']['endpoint'],
             retries=self.options['vpoller']['retries'],
@@ -141,6 +192,10 @@ class ZabbixConnector(object):
         }
 
         result = client.run(msg)
+
+        if result['success']:
+            logging.warning('Failed to get vSphere objects: %s' result)
+            raise ZabbixException, 'Failed to get vSphere objects: %s' result
 
         return result
 
