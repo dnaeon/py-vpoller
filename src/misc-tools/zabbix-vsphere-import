@@ -216,6 +216,30 @@ class ZabbixConnector(object):
 
         return group['groupid']
 
+    def create_host_group(self, name):
+        """
+        Create a Zabbix host group
+
+        Args:
+            name (str): Name of the host group to create
+
+        Returns:
+            The id of the newly create host group
+
+        """
+        logging.info(
+            '[%s] Creating Zabbix host group %s',
+            self.options['zabbix']['hostname'],
+            name
+        )
+
+        result = self._call_zabbix_method(
+            method='hostgroup.create',
+            params={'name': name}
+        )
+
+        return result['groupids']
+
     def create_host(self, host):
         """
         Create a Zabbix host
