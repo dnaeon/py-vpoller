@@ -57,11 +57,8 @@ class ZabbixConnector(object):
         """
         Establishes a connection to the Zabbix server
 
-        Raises:
-            SystemExit
-
         """
-        print 'Connecting to Zabbix server at %s' % self.options['zabbix']['hostname']
+        print '* Connecting to Zabbix server at %s' % self.options['zabbix']['hostname']
         
         self.conn = zabbix_api.ZabbixAPI(server=self.options['zabbix']['hostname'])
 
@@ -71,7 +68,7 @@ class ZabbixConnector(object):
                 password=self.options['zabbix']['password']
             )
         except zabbix_api.ZabbixAPIException as e:
-            print 'Cannot login to Zabbix server: %s' % e
+            print '! Cannot login to Zabbix server: %s' % e
             raise ZabbixException, 'Cannot login to Zabbix server: %s' % e
 
     def get_hosts(self):
@@ -226,7 +223,7 @@ class ZabbixConnector(object):
             params={'name': name}
         )
 
-        return result['groupids']
+        return result['result']['groupids']
 
     def create_host(self, params):
         """
@@ -248,18 +245,17 @@ class ZabbixConnector(object):
         Import vSphere hosts into Zabbix as regular Zabbix hosts
 
         """
-        zabbix_hosts_data  = self.get_hosts()
-        vsphere_hosts_data = self._get_vsphere_objects(
-            method='host.discover',
-            properties=['name']
-        )
+        print '* Importing vSphere hosts in Zabbix'
 
-        zabbix_hosts  = [host['host'] for host in zabbix_hosts_data['result']]
-        vsphere_hosts = [host['name'] for host in vsphere_hosts_data['result']]
+        zabbix_data  = self.get_hosts()
+        vsphere_data = self._get_vsphere_objects(method='host.discover')
+
+        zabbix_hosts  = [host['host'] for host in zabbix_data['result']]
+        vsphere_hosts = [host['name'] for host in vsphere_data['result']]
         missing_hosts = set(vsphere_hosts) - set(zabbix_hosts)
 
         if not missing_hosts:
-            print 'vSphere hosts are in sync with Zabbix'
+            print ' + vSphere hosts are in sync with Zabbix'
             return
 
         # Get hosts options (templates, groups, macros) from the config file
@@ -279,14 +275,66 @@ class ZabbixConnector(object):
 
         # Create the hosts in Zabbix
         for host in missing_hosts:
-            print 'Creating host %s' % host
+            print ' + Creating host %s' % host
             params = {}
             params['host'] = host
             params.update(host_options)
-            result = self.create_host(params)
-            print 'Created host %s with ids %s' %(host, result['result']['hostids'])
 
-        print 'Completed vSphere hosts import to Zabbix'
+            try:
+                result = self.create_host(params)
+                print ' + Created host %s with ids %s' %(host, result['result']['hostids'])
+            except zabbix_api.ZabbixAPIException as e:
+                print ' ! Cannot create host in Zabbix: %s' % e
+
+        print '* Completed vSphere hosts import to Zabbix'
+
+    def import_vsphere_vms(self):
+        """
+        Import vSphere VMs into Zabbix as regular Zabbix hosts
+
+        """
+        print '* Importing vSphere VMs in Zabbix'
+
+        zabbix_data  = self.get_hosts()
+        vsphere_data = self._get_vsphere_objects(method='vm.discover')
+
+        zabbix_vms  = [host['host'] for host in zabbix_data['result']]
+        vsphere_vms = [host['name'] for host in vsphere_data['result']]
+        missing_vms = set(vsphere_vms) - set(zabbix_vms)
+
+        if not missing_vms:
+            print ' + vSphere VMs are in sync with Zabbix'
+            return
+
+        # Get hosts options (templates, groups, macros) from the config file
+        host_options = self._get_zabbix_host_options('vsphere_object_vm')
+        
+        # Add a default interface for the host
+        host_options['interfaces'] = [
+            {
+                'type': 1,
+                'main': 1,
+                'useip': 1,
+                'ip': '127.0.0.1',
+                'dns': '',
+                'port': '10050'
+            }
+        ]
+
+        # Create the hosts in Zabbix
+        for vm in missing_vms:
+            print ' + Creating host %s' % vm
+            params = {}
+            params['host'] = vm
+            params.update(host_options)
+
+            try:
+                result = self.create_host(params)
+                print ' + Created host %s with ids %s' %(vm, result['result']['hostids'])
+            except zabbix_api.ZabbixAPIException as e:
+                print ' ! Cannot create host in Zabbix: %s' % e
+            
+        print '* Completed vSphere VMs import to Zabbix'
 
     def _get_zabbix_host_options(self, name):
         """
@@ -304,7 +352,7 @@ class ZabbixConnector(object):
 
         """
         if not self.options['zabbix'].has_key(name):
-            print "There is no '%s' entry in the config file" % name
+            print "! There is no '%s' entry in the config file" % name
             raise ZabbixException, "There is no '%s' entry in the config file" % name
 
         # Get the Zabbix Proxy if set
@@ -313,41 +361,46 @@ class ZabbixConnector(object):
             proxy_name = self.options['zabbix'][name]['proxy']
             proxy_id = self.get_proxy_host_by_name(proxy_name)
             if not proxy_id:
-                print "Unable to find Zabbix proxy '%s'" % proxy_name
+                print "! Unable to find Zabbix proxy '%s'" % proxy_name
                 raise ZabbixException, "Unable to find Zabbix proxy '%s'" % proxy_name
 
         # Get ids of the Zabbix templates 
         if not self.options['zabbix'][name].has_key('templates'):
-            print "No templates are defined for '%s' config entry" % name
+            print "! No templates are defined for '%s' config entry" % name
             raise ZabbixException, "No templates are defined for '%s' config entry" % name
 
         templates = []
         for template in self.options['zabbix'][name]['templates']:
             template_id = self.get_template_by_name(template)
             if not template_id:
-                print "Template '%s' was not found on the Zabbix server" % template
+                print "! Template '%s' was not found on the Zabbix server" % template
                 continue
             templates.append({ 'templateid': template_id })
             
         if not templates:
-            print "No valid templates found for '%s' config entry" % name
+            print "! No valid templates found for '%s' config entry" % name
             raise ZabbixException, "No valid templates found for '%s' config entry" % name
 
         # Get ids of the Zabbix hostgroups
         if not self.options['zabbix'][name].has_key('groups'):
-            print "No groups are defined for '%s' config entry" % name
+            print "! No groups are defined for '%s' config entry" % name
             raise ZabbixException, "No groups are defined for '%s' config entry" % name
 
         groups = []
         for group in self.options['zabbix'][name]['groups']:
             group_id = self.get_host_group_by_name(group)
             if not group_id:
-                print "Unable to find Zabbix group '%s'" % group
-                continue
+                print "! Unable to find Zabbix group '%s'" % group
+                # Create the group if missing
+                print ' + Creating Zabbix host group %s' % group
+                result = self.create_host_group(name=group)
+                group_id = result['result']['groupids'][0]
+                print ' + Host group created with group id %s' % group_id
+
             groups.append({ 'groupid': group_id })
 
         if not groups:
-            print "No valid groups found for '%s' config entry" % name
+            print "! No valid groups found for '%s' config entry" % name
             raise ZabbixException, "No valid groups found for '%s' config entry" % name
 
         # Get macros if any
@@ -386,7 +439,7 @@ class ZabbixConnector(object):
 
         return result
 
-    def _get_vsphere_objects(self, method, properties):
+    def _get_vsphere_objects(self, method, properties=None):
         """
         Helper method for getting vSphere objects using vPoller
 
@@ -410,7 +463,7 @@ class ZabbixConnector(object):
         result = client.run(msg)
 
         if result['success']:
-            print 'Failed to get vSphere objects: %s' % result
+            print '! Failed to get vSphere objects: %s' % result
             raise ZabbixException, 'Failed to get vSphere objects: %s' % result
 
         return result
@@ -434,12 +487,15 @@ Options:
         with open(args['--file'], 'r') as f:
             options = yaml.load(f)
     except Exception as e:
-        print 'Cannot load configuration file %s: %s' % (args['--file'], e)
+        print '! Cannot load configuration file %s: %s' % (args['--file'], e)
         raise ZabbixException, 'Cannot load configuration file %s: %s' % (args['--file'], e)
 
     zabbix = ZabbixConnector(options=options)
     zabbix.connect()
+    
+    # Import vSphere objects into Zabbix
     zabbix.import_vsphere_hosts()
+    zabbix.import_vsphere_vms()
 
 if __name__ == '__main__':
     main()
