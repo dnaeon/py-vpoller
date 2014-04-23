@@ -115,8 +115,8 @@ class ZabbixConnector(object):
             The id of the host in Zabbix
 
         """
-        result = self.get_hosts()
-        hosts  = result['result']
+        data   = self.get_hosts()
+        hosts  = data['result']
 
         for host in hosts:
             if host['name'] == name:
@@ -139,6 +139,28 @@ class ZabbixConnector(object):
         )
 
         return result
+
+    def get_template_by_name(self, name):
+        """
+        Get a template id by name
+
+        Args:
+            name (str): Name of the template in Zabbix
+        
+        Returns:
+            The id of the template
+    
+        """
+        data      = self.get_templates()
+        templates = data['result']
+        
+        for template in templates:
+            if template['name'] == name:
+                break
+        else:
+            return None
+
+        return template['templateid']
 
     def get_host_groups(self):
         """
