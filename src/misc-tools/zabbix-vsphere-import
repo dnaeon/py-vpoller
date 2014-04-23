@@ -81,7 +81,7 @@ class ZabbixConnector(object):
         Get all hosts registered in Zabbix
 
         """
-        logging.info('[%s] Getting Zabbix hosts', self.options['zabbix']['hostname'])
+        logging.info('Getting Zabbix hosts')
         
         result = self._call_zabbix_method(
             method='host.get',
@@ -95,7 +95,7 @@ class ZabbixConnector(object):
         Gets all Zabbix Proxy hosts
 
         """
-        logging.info('[%s]: Getting Zabbix Proxy hosts', self.options['zabbix']['hostname'])
+        logging.info('Getting Zabbix Proxy hosts')
 
         result = self._call_zabbix_method(
             method='proxy.get',
@@ -115,11 +115,7 @@ class ZabbixConnector(object):
             The id of the host in Zabbix
 
         """
-        logging.debug(
-            '[%s] Getting id of Zabbix host %s',
-            self.options['zabbix']['hostname'],
-            name
-        )
+        logging.debug('Getting id of Zabbix host %s', name)
         
         data   = self.get_hosts()
         hosts  = data['result']
@@ -132,12 +128,36 @@ class ZabbixConnector(object):
 
         return host['hostid']
 
+    def get_proxy_host_by_name(self, name):
+        """
+        Get a Zabbix Proxy host id by name
+
+        Args:
+            name (str): Name of the Proxy host in Zabbix
+
+        Returns:
+            The id of the Proxy host in Zabbix
+
+        """
+        logging.debug('Getting id of Zabbix Proxy host %s', name)
+        
+        data   = self.get_proxy_hosts()
+        hosts  = data['result']
+
+        for host in hosts:
+            if host['host'] == name:
+                break
+        else:
+            return None
+
+        return host['proxyid']
+
     def get_templates(self):
         """
         Gets all Zabbix templates
 
         """
-        logging.info('[%s] Getting Zabbix templates', self.options['zabbix']['hostname'])
+        logging.info('Getting Zabbix templates')
 
         result = self._call_zabbix_method(
             method='template.get',
@@ -157,11 +177,7 @@ class ZabbixConnector(object):
             The id of the template
     
         """
-        logging.debug(
-            '[%s] Getting id of Zabbix template %s',
-            self.options['zabbix']['hostname'],
-            name
-        )
+        logging.debug('Getting id of Zabbix template %s', name)
 
         data      = self.get_templates()
         templates = data['result']
@@ -179,7 +195,7 @@ class ZabbixConnector(object):
         Gets all Zabbix host groups
         
         """
-        logging.info('[%s] Getting Zabbix host groups', self.options['zabbix']['hostname')
+        logging.info('Getting Zabbix host groups')
 
         result = self._call_zabbix_method(
             method='hostgroup.get',
@@ -199,11 +215,7 @@ class ZabbixConnector(object):
             The id of the host group in Zabbix
 
         """
-        logging.debug(
-            '[%s] Getting id of Zabbix host group %s',
-            self.options['zabbix']['hostname'],
-            name
-        )
+        logging.debug('Getting id of Zabbix host group %s', name)
 
         data   = self.get_host_groups()
         groups = data['result']
@@ -227,11 +239,7 @@ class ZabbixConnector(object):
             The id of the newly create host group
 
         """
-        logging.info(
-            '[%s] Creating Zabbix host group %s',
-            self.options['zabbix']['hostname'],
-            name
-        )
+        logging.info('Creating Zabbix host group %s', name)
 
         result = self._call_zabbix_method(
             method='hostgroup.create',
@@ -240,7 +248,7 @@ class ZabbixConnector(object):
 
         return result['groupids']
 
-    def create_host(self, host):
+    def create_host(self, params):
         """
         Create a Zabbix host
 
@@ -248,7 +256,12 @@ class ZabbixConnector(object):
             host (str): Hostname of the Zabbix host to create
 
         """
-        logging.info('Creating Zabbix host: %s', host)
+        result = self._call_zabbix_method(
+            method='host.create',
+            params=params
+        )
+
+        return result
 
     def import_vsphere_hosts(self):
         """
@@ -268,10 +281,122 @@ class ZabbixConnector(object):
         vsphere_hosts = [host['name'] for host in vsphere_hosts_data['result']]
         missing_hosts = set(vsphere_hosts) - set(zabbix_hosts)
 
-        for host in missing_hosts:
-            self.create_host(host)
+        if not missing_hosts:
+            logging.info('[%s] vSphere hosts are in sync with Zabbix', self.options['zabbix']['hostname'])
+            return
 
-    def _call_zabbix_method(method, params):
+        # Get hosts options (templates, groups, macros) from the config file
+        host_options = self._get_zabbix_host_options('vsphere_object_host')
+        
+        # Add a default interface for the host
+        host_options['interfaces'] = [
+            {
+                'type': 1,
+                'main': 1,
+                'useip': 1,
+                'ip': '127.0.0.1',
+                'dns': '',
+                'port': '10050'
+            }
+        ]
+
+
+        print host_options
+
+        # Create the hosts in Zabbix
+        for host in missing_hosts:
+            logging.info('Creating host %s', host)
+            params = {}
+            params['host'] = host
+            params.update(host_options)
+            result = self.create_host(params)
+            print result
+            logging.info('Created host %s with ids %s', host, result['result']['hostids'])
+
+        logging.info('Completed vSphere hosts import to Zabbix')
+
+    def _get_zabbix_host_options(self, name):
+        """
+        Helper method to simplify the retrieving of host 
+        options from the config file.
+
+        Options which are retrieved and returned include
+        the host templates, groups and user defined macros
+
+        Args:
+            name (str): Name of the entry from config file to lookup
+
+        Returns:
+            A dict containing the host options from the config file
+
+        """
+        if not self.options['zabbix'].has_key(name):
+            logging.warning("There is no '%s' entry in the config file", name)
+            raise ZabbixException, "There is no '%s' entry in the config file" % name
+
+        # Get the Zabbix Proxy if set
+        proxy_id = None
+        if self.options['zabbix'][name].has_key('proxy'):
+            proxy_name = self.options['zabbix'][name]['proxy']
+            proxy_id = self.get_proxy_host_by_name(proxy_name)
+            if not proxy_id:
+                logging.warning("Unable to find Zabbix proxy '%s'", proxy_name)
+                raise ZabbixException, "Unable to find Zabbix proxy '%s'" % proxy_name
+
+        # Get ids of the Zabbix templates 
+        if not self.options['zabbix'][name].has_key('templates'):
+            logging.warning("No templates are defined for '%s' config entry", name)
+            raise ZabbixException, "No templates are defined for '%s' config entry" % name
+
+        templates = []
+        for template in self.options['zabbix'][name]['templates']:
+            template_id = self.get_template_by_name(template)
+            if not template_id:
+                logging.warning("Template '%s' was not found on the Zabbix server", template)
+                continue
+            templates.append({ 'templateid': template_id })
+            
+        if not templates:
+            logging.warning("No valid templates found for '%s' config entry", name)
+            raise ZabbixException, "No valid templates found for '%s' config entry" % name
+
+        # Get ids of the Zabbix hostgroups
+        if not self.options['zabbix'][name].has_key('groups'):
+            logging.warning("No groups are defined for '%s' config entry", name)
+            raise ZabbixException, "No groups are defined for '%s' config entry" % name
+
+        groups = []
+        for group in self.options['zabbix'][name]['groups']:
+            group_id = self.get_host_group_by_name(group)
+            if not group_id:
+                logging.warning("Unable to find Zabbix group '%s'", group)
+                continue
+            groups.append({ 'groupid': group_id })
+
+        if not groups:
+            logging.warning("No valid groups found for '%s' config entry", name)
+            raise ZabbixException, "No valid groups found for '%s' config entry" % name
+
+        # Get macros if any
+        macros = []
+        if self.options['zabbix'][name].has_key('macros'):
+            for name, value in self.options['zabbix'][name]['macros'].items():
+                # Convert macro names to Zabbix format -> {$MACRO}
+                m = {}
+                m['macro'] = '{$' + name + '}'
+                m['value'] = value
+                macros.append(m)
+
+        r = {
+            'proxy_hostid': proxy_id,
+            'templates': templates,
+            'groups': groups,
+            'macros': macros
+        }
+
+        return r
+
+    def _call_zabbix_method(self, method, params):
         """
         Helper method for calling Zabbix API methods
 
@@ -316,25 +441,36 @@ class ZabbixConnector(object):
         result = client.run(msg)
 
         if result['success']:
-            logging.warning('Failed to get vSphere objects: %s' result)
-            raise ZabbixException, 'Failed to get vSphere objects: %s' result
+            logging.warning('Failed to get vSphere objects: %s', result)
+            raise ZabbixException, 'Failed to get vSphere objects: %s' % result
 
         return result
 
 def main():
     usage="""
-Usage: zabbix-vsphere-import -f <config>
+Usage: zabbix-vsphere-import [-d] [-o <logfile>] -f <config>
        zabbix-vsphere-import -v
        zabbix-vsphere-import -h
 
 Options:
-  -h, --help                    Display this usage info
-  -v, --version                 Display version and exit
-  -f <config>, --file <config>  Configuration file to use
+  -h, --help                        Display this usage info
+  -v, --version                     Display version and exit
+  -d, --debug                       Be more verbose
+  -o <logfile>, --output <logfile>  Specify log file to use
+                                    [default: /var/log/zabbix/zabbix-vsphere-import.log]
+  -f <config>, --file <config>      Configuration file to use
 
 """
     
-    args = docopt(usage, version="0.1.0")
+    args = docopt(usage, version='0.1.0')
+
+    level = logging.DEBUG if args['--debug'] else logging.INFO
+
+    logging.basicConfig(
+        filename=args['--output'],
+        format='%(asctime)s - %(levelname)s - zabbix-vsphere-import[%(process)s]: %(message)s',
+        level=level
+    )
 
     try:
         with open(args['--file'], 'r') as f:
@@ -344,6 +480,8 @@ Options:
         raise ZabbixException, 'Cannot load configuration file %s: %s' % (args['--file'], e)
 
     zabbix = ZabbixConnector(options=options)
+    zabbix.connect()
+    zabbix.import_vsphere_hosts()
 
 if __name__ == '__main__':
     main()
