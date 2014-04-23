@@ -336,6 +336,68 @@ class ZabbixConnector(object):
             
         print '* Completed vSphere VMs import to Zabbix'
 
+    def import_vsphere_datastores(self):
+        """
+        Import vSphere datastores into Zabbix as regular Zabbix hosts
+
+        """
+        print '* Importing vSphere datastores in Zabbix'
+
+        zabbix_data  = self.get_hosts()
+        vsphere_data = self._get_vsphere_objects(
+            method='datastore.discover',
+            properties=['info.url']
+        )
+
+        zabbix_datastores  = [host['name'] for host in zabbix_data['result']]
+        vsphere_datastores = [host['info.url'] for host in vsphere_data['result']]
+        missing_datastores = set(vsphere_datastores) - set(zabbix_datastores)
+
+        if not missing_datastores:
+            print ' + vSphere datastores are in sync with Zabbix'
+            return
+
+        # Get hosts options (templates, groups, macros) from the config file
+        host_options = self._get_zabbix_host_options('vsphere_object_datastore')
+        
+        # Add a default interface for the host
+        host_options['interfaces'] = [
+            {
+                'type': 1,
+                'main': 1,
+                'useip': 1,
+                'ip': '127.0.0.1',
+                'dns': '',
+                'port': '10050'
+            }
+        ]
+
+        # Create the hosts in Zabbix
+        for datastore in missing_datastores:
+            print ' + Creating host %s' % datastore
+
+            # Get datastore name first and use it as the host name
+            result = self._get_vsphere_objects(
+                method='datastore.get',
+                name=datastore,
+                properties=['name']
+            )
+            datastore_name = result['result'][0]['name']
+
+            params = {}
+            params['name'] = datastore
+            params['host'] = datastore_name
+            
+            params.update(host_options)
+
+            try:
+                result = self.create_host(params)
+                print ' + Created host %s with ids %s' %(datastore, result['result']['hostids'])
+            except zabbix_api.ZabbixAPIException as e:
+                print ' ! Cannot create host in Zabbix: %s' % e
+            
+        print '* Completed vSphere datastores import to Zabbix'
+
     def _get_zabbix_host_options(self, name):
         """
         Helper method to simplify the retrieving of host 
@@ -439,7 +501,7 @@ class ZabbixConnector(object):
 
         return result
 
-    def _get_vsphere_objects(self, method, properties=None):
+    def _get_vsphere_objects(self, method, name=None, properties=None):
         """
         Helper method for getting vSphere objects using vPoller
 
@@ -457,6 +519,7 @@ class ZabbixConnector(object):
         msg = {
             'method':     method,
             'hostname':   self.options['vsphere']['hostname'],
+            'name':       name,
             'properties': properties,
         }
 
@@ -496,6 +559,7 @@ Options:
     # Import vSphere objects into Zabbix
     zabbix.import_vsphere_hosts()
     zabbix.import_vsphere_vms()
+    zabbix.import_vsphere_datastores()
 
 if __name__ == '__main__':
     main()
