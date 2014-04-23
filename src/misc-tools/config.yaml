@@ -1,0 +1,38 @@
+---
+vsphere:
+  hostname: vc01.example.org
+
+vpoller:
+  endpoint: tcp://localhost:10123
+  retries: 3
+  timeout: 3000
+
+zabbix:
+  hostname: http://zabbix.example.org/zabbix
+  username: Admin
+  password: zabbix
+
+  vsphere_object_host:
+    proxy: zbx-proxy.example.org
+    templates:
+      - Template VMware vSphere Hypervisor - vPoller with C client
+    macros:
+      VSPHERE_HOST: vc01.example.org
+    groups:
+      - Hypervisors
+
+  vsphere_object_vm:
+    templates:
+      - Template VMware vSphere Virtual Machine - vPoller with C client
+    macros:
+      VSPHERE_HOST: vc01.example.org
+    groups:
+      - Virtual Machines
+
+  vsphere_object_datastore:
+    templates:
+      - Template VMware vSphere Datastore - vPoller with C client
+    macros:
+      VSPHERE_HOST: vc01.example.org
+    groups:
+      - Datastores
