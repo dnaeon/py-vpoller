@@ -533,7 +533,7 @@ class ZabbixConnector(object):
 
 def main():
     usage="""
-Usage: zabbix-vsphere-import [-o <logfile>] -f <config>
+Usage: zabbix-vsphere-import -f <config>
        zabbix-vsphere-import -v
        zabbix-vsphere-import -h
 
