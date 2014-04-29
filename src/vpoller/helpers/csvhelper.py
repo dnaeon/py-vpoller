@@ -49,7 +49,7 @@ class HelperAgent(object):
             
         """
         self.msg = msg
-        self.data = json.loads(data)
+        self.data = data
 
     def run(self):
         """
@@ -62,23 +62,14 @@ class HelperAgent(object):
         if self.data['success'] != 0:
             return json.dumps(self.data, indent=4)
 
-        data = self.data['result']
-        result = cStringIO.StringIO()
-
-        multi_entries = isinstance(data, (tuple, list))
-
-        if multi_entries:
-            headers = data[0].keys()
-        else:
-            headers = data.keys()
+        data    = self.data['result']
+        result  = cStringIO.StringIO()
+        headers = data[0].keys()
 
         writer = csv.DictWriter(result, headers, restval='None', extrasaction='ignore', quotechar='"')
         writer.writeheader()
 
-        if multi_entries:
-            for eachItem in data:
-                writer.writerow(eachItem)
-        else:
-            writer.writerow(data)
+        for item in data:
+            writer.writerow(item)
 
         return result.getvalue()
