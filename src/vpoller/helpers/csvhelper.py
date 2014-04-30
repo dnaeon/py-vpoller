@@ -64,7 +64,7 @@ class HelperAgent(object):
 
         data    = self.data['result']
         result  = cStringIO.StringIO()
-        headers = data[0].keys()
+        headers = sorted(data[0].keys())
 
         writer = csv.DictWriter(result, headers, restval='None', extrasaction='ignore', quotechar='"')
         writer.writeheader()
