@@ -153,6 +153,10 @@ connection to the vSphere hosts and do the actual discovery and polling of vSphe
 Details of the `vSphere Agents` (such as username, password, host, etc.) are stored in a SQLite database and are managed by the
 `vconnector-cli` tool. By default the SQLite database file used by `vconnector-cli` resides in `/var/lib/vconnector/vconnector.db`.
 
+First make sure that your vConnector database is initialized:
+
+	$ sudo vconnector-cli init
+
 Let's add one `vSphere Agent`, which will later be used by the `vPoller Worker`. This is how we could do it using the `vconnector-cli` tool:
 
 	$ sudo vconnector-cli -H vc01.example.org -U root -P p4ssw0rd add
