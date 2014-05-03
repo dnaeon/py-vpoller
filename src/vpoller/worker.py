@@ -514,7 +514,7 @@ class VPollerWorker(Daemon):
                 'hostname': os.uname()[1],
                 'proxy_endpoint': self.proxy_endpoint,
                 'mgmt_endpoint': self.mgmt_endpoint,
-                'vsphere_hosts_dir': self.vsphere_hosts_dir,
+                'connector_db': self.connector_db,
                 'vsphere_agents': self.agents.keys(),
                 'running_since': self.running_since,
                 'uname': ' '.join(os.uname()),
