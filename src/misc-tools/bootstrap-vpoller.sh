@@ -1,12 +1,9 @@
 #!/usr/bin/env sh
 
 # Bootstrap script for one-time setup of vPoller on Debian GNU/Linux systems
+# The script installs dependencies into system-wide locations
 
 set -e
-
-echo ">>> This script will install and configure vPoller"
-echo ">>> It installs packages and dependencies into system-wide locations"
-read -p ">>> Press ENTER to continue or CTRL-C to abort now ..." _answer
 
 apt-get update
 apt-get -y install gcc g++ git automake autoconf libtool python-pip python-dev
