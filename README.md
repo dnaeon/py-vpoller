@@ -81,6 +81,15 @@ The C client of *vPoller* also requires the following packages to be installed i
 
 ## Installation
 
+For the really quick installation and configuration of `vPoller` you could use the `bootstrap-vpoller.sh` script which would
+install and configure vPoller for you.
+
+This is how to get vPoller installed and configured using the `bootstrap-vpoller.sh` script:
+
+	$ wget -q -O - https://github.com/dnaeon/py-vpoller/raw/master/src/misc-tools/bootstrap-vpoller.sh | sudo sh
+
+For the step-by-step installation and configuration of `vPoller` please follow the instructions from this documentation.
+
 Make sure you have [ZeroMQ 4.x library](https://github.com/zeromq/zeromq4-x) installed first:
 
 	$ git clone https://github.com/zeromq/zeromq4-x.git
