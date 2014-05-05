@@ -26,7 +26,17 @@ You could also use `vPoller` in order to navigate through your vSphere environme
 
 vPoller has been tested with VMware vSphere 5.x and with very limited testing on vSphere 4.x
 
-You might also want to check this [introduction post about vPoller](http://unix-heaven.org/node/103), which contains real-world usage examples of *vPoller*.
+## Example use cases of vPoller
+
+At the links below you can find some example use cases along with additional information about vPoller and how it can be used
+for various purposes.
+
+* [Introduction post about vPoller](http://unix-heaven.org/node/103)
+* [VMware vSphere CLI tips & tricks with vPoller](http://unix-heaven.org/node/111)
+* [VMware monitoring with Zabbix, Python & vPoller](http://unix-heaven.org/node/114)
+* [Exporting Data From a VMware vSphere Environment For Fun And Profit](http://unix-heaven.org/node/116)
+
+## vPoller Supported Methods
 
 The table below summarizes the list of currently supported methods by `vPoller` along with description for each of them.
 
