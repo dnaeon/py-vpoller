@@ -79,7 +79,15 @@ The C client of *vPoller* also requires the following packages to be installed i
 
 *vPoller* is hosted on Github. Please contribute by reporting issues, suggesting features or by sending patches using pull requests.
 
-## Installation
+## Installation from packages
+
+In order to install `vPoller` from packages on Debian GNU/Linux system you can use the Debian packages from the link below:
+
+* [Debian GNU/Linux packages for vPoller](http://files.unix-heaven.org/vpoller-packages/)
+
+Currently only Debian GNU/Linux packages are available.
+
+## Installation from source
 
 For the really quick installation and configuration of `vPoller` you could use the `bootstrap-vpoller.sh` script which would
 install and configure vPoller for you.
