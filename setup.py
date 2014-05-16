@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='vpoller',
-      version='0.2.0',
+      version='0.2.5',
       description='VMware vSphere Distributed Pollers',
       author='Marin Atanasov Nikolov',
       author_email='dnaeon@gmail.com',
