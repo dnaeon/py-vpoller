@@ -44,6 +44,7 @@ _vcli_vm_process_get() { vpoller-client -m vm.process.get "$@" | jq '.' ;}
 
 _vcli_datastore_discover() { vpoller-client -m datastore.discover "$@" | jq '.' ;}
 _vcli_datastore_get() { vpoller-client -m datastore.get "$@" | jq '.' ;}
+_vcli_datastore_host_get() { vpoller-client -m datastore.host.get "$@" | jq '.' ;}
 
 alias 'vcli-about=_vcli_about'
 alias 'vcli-event=_vcli_event'
@@ -74,4 +75,4 @@ alias 'vcli-vm-host-get=_vcli_vm_host_get'
 alias 'vcli-vm-process-get=_vcli_vm_host_get'
 alias 'vcli-datastore-discover=_vcli_datastore_discover'
 alias 'vcli-datastore-get=_vcli_datastore_get'
-
+alias 'vcli-datastore-host-get=_vcli_datastore_host_get'
