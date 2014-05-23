@@ -1494,7 +1494,7 @@ class VSphereAgent(VConnector):
         # obj_host is a list of DatastoreHostMount[] objects, but we need a list of HostSystem ones instead
         obj_host = [h.key for h in obj_host]
 
-        # Get a list view of the hosts from this datastore object and collect properties
+        # Get a list view of the hosts from this datastore object and collect their properties
         view_ref = self.get_list_view(obj=obj_host)
         result = {}
         result['name'] = obj_name
@@ -1502,6 +1502,59 @@ class VSphereAgent(VConnector):
         result['host'] = self.collect_properties(
             view_ref=view_ref,
             obj_type=pyVmomi.vim.HostSystem,
+            path_set=['name']
+        )
+
+        view_ref.DestroyView()
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully discovered objects',
+            'result': result,
+        }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
+        return r
+
+    def datastore_vm_get(self, msg):
+        """
+        Get all VirtualMachine objects using a specific Datastore
+
+        Example client message would be:
+
+            {
+                "method":     "datastore.vm.get",
+                "hostname":   "vc01.example.org",
+                "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
+            }
+        
+        """
+        logging.info('[%s] Getting VirtualMachine list using Datastore %s', self.host, msg['name'])
+
+        # Find the Datastore by it's 'info.url' property and get the VirtualMachine objects using it
+        data = self._get_object_properties(
+            properties=['info.name', 'info.url', 'vm'],
+            obj_type=pyVmomi.vim.Datastore,
+            obj_property_name='info.url',
+            obj_property_value=msg['name']
+        )
+
+        if data['success'] != 0:
+            return data
+
+        # Get properties from the result
+        props = data['result'][0]
+        obj_name, obj_url, obj_host = props['info.name'], props['info.url'], props['vm']
+
+        # Get a list view of the VMs from this datastore object and collect their properties
+        view_ref = self.get_list_view(obj=obj_host)
+        result = {}
+        result['name'] = obj_name
+        result['url']  = obj_url
+        result['vm'] = self.collect_properties(
+            view_ref=view_ref,
+            obj_type=pyVmomi.vim.VirtualMachine,
             path_set=['name']
         )
 

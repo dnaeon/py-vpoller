@@ -72,6 +72,7 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 | datastore.discover     | Discover all vim.Datastore objects                                       |
 | datastore.get          | Get properties for a vim.Datastore object                                |
 | datastore.host.get     | Get all HostSystem objects using a specific datastore                    |
+| datastore.vm.get       | Get all VirtualMachine objects using a specific datastore                |
 
 ## Requirements
 
