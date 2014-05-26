@@ -19,6 +19,13 @@ cd ${libzmq_dir}
 make && make install && make clean
 ldconfig
 
+# Installing vConnector
+vconnector_dir=$( mktemp -d /tmp/vconnector.XXXXXX )
+echo ">>> Installing vConnector ..."
+git clone https://github.com/dnaeon/py-vconnector.git ${vconnector_dir}
+cd ${vconnector_dir}
+python setup.py install
+
 # Installing vPoller
 vpoller_dir=$( mktemp -d /tmp/vpoller.XXXXXX )
 echo ">>> Installing vPoller ..."
@@ -60,6 +67,7 @@ vconnector-cli init
 echo ">>> Removing no longer needed directories ..."
 rm -rf ${libzmq_dir}
 rm -rf ${vpoller_dir}
+rm -rf ${vconnector_dir}
 
 echo ""
 echo ">>> Install completed"

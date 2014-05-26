@@ -37,7 +37,7 @@ import zmq
 from vpoller.core import VPollerException
 from vpoller.agent import VSphereAgent
 from vpoller.daemon import Daemon
-from vpoller.connector import VConnectorDatabase
+from vconnector.core import VConnectorDatabase
 
 class VPollerWorker(Daemon):
     """

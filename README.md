@@ -78,6 +78,7 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 
 * Python 2.7.x
 * [pyVmomi](https://github.com/vmware/pyvmomi)
+* [vconnector](https://github.com/dnaeon/py-vconnector)
 * [pyzmq](https://github.com/zeromq/pyzmq)
 * [docopt](https://github.com/docopt/docopt)
 * [tabulate](https://pypi.python.org/pypi/tabulate)

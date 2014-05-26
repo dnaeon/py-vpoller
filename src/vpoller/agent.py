@@ -40,7 +40,7 @@ import logging
 import zmq
 import pyVmomi
 from vpoller.core import VPollerException
-from vpoller.connector import VConnector
+from vconnector.core import VConnector
 
 class VSphereAgent(VConnector):
     """
