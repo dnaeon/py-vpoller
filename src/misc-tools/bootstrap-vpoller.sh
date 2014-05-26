@@ -46,7 +46,7 @@ update-rc.d vpoller-worker defaults
 
 # Configuring vPoller
 echo ">>> Configuring vPoller ..."
-mkdir -p /etc/vpoller /var/run/vpoller /var/log/vpoller /var/lib/vconnector
+mkdir -p /etc/vpoller /var/run/vpoller /var/log/vpoller /var/lib/vconnector /var/log/vconnector
 
 cat > /etc/vpoller/vpoller.conf <<__EOF__
 [proxy]
