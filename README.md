@@ -69,6 +69,7 @@ The table below summarizes the list of currently supported methods by `vPoller` 
 | vm.disk.get            | Get information about a guest disk for a vim.VirtualMachine object       |
 | vm.host.get            | Get the HostSystem in which a specified vim.VirtualMachine is running on |
 | vm.process.get         | Get the running processes in a vim.VirtualMachine                        |
+| vm.cpu.usage.percent   | Get the CPU usage in percentage of a Virtual Machine                     |
 | datastore.discover     | Discover all vim.Datastore objects                                       |
 | datastore.get          | Get properties for a vim.Datastore object                                |
 | datastore.host.get     | Get all HostSystem objects using a specific datastore                    |
