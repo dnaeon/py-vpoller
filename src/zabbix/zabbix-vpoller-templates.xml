@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-04-22T10:58:18Z</date>
+    <date>2014-05-29T13:39:44Z</date>
     <groups>
         <group>
             <name>Datastores</name>
@@ -5236,6 +5236,48 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <valuemap/>
                 </item>
                 <item>
+                    <name>CPU Usage (Percentage)</name>
+                    <type>10</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>vpoller-zabbix[&quot;-m&quot;, &quot;vm.cpu.usage.percent&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;vm.cpu.usage.percent&quot;]</key>
+                    <delay>300</delay>
+                    <history>30</history>
+                    <trends>30</trends>
+                    <status>0</status>
+                    <value_type>0</value_type>
+                    <allowed_hosts/>
+                    <units>%</units>
+                    <delta>0</delta>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>CPU</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                </item>
+                <item>
                     <name>Guest Family</name>
                     <type>10</type>
                     <snmp_community/>
@@ -6718,6 +6760,48 @@ vSphere Host: {$VSPHERE.HOST}</description>
                     <valuemap/>
                 </item>
                 <item>
+                    <name>CPU Usage (Percentage)</name>
+                    <type>10</type>
+                    <snmp_community/>
+                    <multiplier>0</multiplier>
+                    <snmp_oid/>
+                    <key>cvpoller-zabbix[&quot;-m&quot;, &quot;vm.cpu.usage.percent&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;vm.cpu.usage.percent&quot;]</key>
+                    <delay>300</delay>
+                    <history>30</history>
+                    <trends>30</trends>
+                    <status>0</status>
+                    <value_type>0</value_type>
+                    <allowed_hosts/>
+                    <units>%</units>
+                    <delta>0</delta>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <formula>1</formula>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <data_type>0</data_type>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description/>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>CPU</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                </item>
+                <item>
                     <name>Guest Family</name>
                     <type>10</type>
                     <snmp_community/>
@@ -7944,20 +8028,6 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Datastore - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;freeSpacePercentage&quot;].min(5)}&lt;20</expression>
-            <name>Free space is less than 20% on datastore {HOST.HOST}</name>
-            <url/>
-            <status>0</status>
-            <priority>4</priority>
-            <description>Free space is less than 20% on datastore {HOST.HOST}&#13;
-&#13;
-Datastore URL: {HOST.NAME}&#13;
-Datastore free space: {ITEM.LASTVALUE}%&#13;
-vSphere Host: {$VSPHERE.HOST}</description>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-        <trigger>
             <expression>{Template VMware vSphere Datastore - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;freeSpacePercentage&quot;].min(5)}&lt;20</expression>
             <name>Free space is less than 20% on datastore {HOST.HOST}</name>
             <url/>
@@ -7972,7 +8042,21 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;].min(5)}&gt;90</expression>
+            <expression>{Template VMware vSphere Datastore - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;freeSpacePercentage&quot;].min(5)}&lt;20</expression>
+            <name>Free space is less than 20% on datastore {HOST.HOST}</name>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description>Free space is less than 20% on datastore {HOST.HOST}&#13;
+&#13;
+Datastore URL: {HOST.NAME}&#13;
+Datastore free space: {ITEM.LASTVALUE}%&#13;
+vSphere Host: {$VSPHERE.HOST}</description>
+            <type>0</type>
+            <dependencies/>
+        </trigger>
+        <trigger>
+            <expression>{Template VMware vSphere Hypervisor - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;].min(5)}&gt;90</expression>
             <name>High CPU utilization on host {HOST.NAME}</name>
             <url/>
             <status>0</status>
@@ -7986,7 +8070,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;].min(5)}&gt;90</expression>
+            <expression>{Template VMware vSphere Hypervisor - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;].min(5)}&gt;90</expression>
             <name>High CPU utilization on host {HOST.NAME}</name>
             <url/>
             <status>0</status>
@@ -8054,19 +8138,6 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;runtime.powerState&quot;].iregexp(poweredOff,5)}=1</expression>
-            <name>Host {HOST.NAME} is powered off</name>
-            <url/>
-            <status>0</status>
-            <priority>1</priority>
-            <description>Host {HOST.NAME} is powered off&#13;
-&#13;
-Host: {HOST.NAME}&#13;
-vSphere Host: {$VSPHERE.HOST}</description>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-        <trigger>
             <expression>{Template VMware vSphere Hypervisor - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;runtime.powerState&quot;].iregexp(poweredOff,5)}=1</expression>
             <name>Host {HOST.NAME} is powered off</name>
             <url/>
@@ -8080,14 +8151,14 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.overallStatus&quot;].iregexp(red,5)}=1</expression>
-            <name>Overall status of Virtual Machine {HOST.NAME} is {ITEM.LASTVALUE}</name>
+            <expression>{Template VMware vSphere Hypervisor - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;runtime.powerState&quot;].iregexp(poweredOff,5)}=1</expression>
+            <name>Host {HOST.NAME} is powered off</name>
             <url/>
             <status>0</status>
-            <priority>4</priority>
-            <description>Overall status of Virtual Machine {HOST.NAME} is {ITEM.LASTVALUE}&#13;
+            <priority>1</priority>
+            <description>Host {HOST.NAME} is powered off&#13;
 &#13;
-Virtual Machine: {HOST.NAME}&#13;
+Host: {HOST.NAME}&#13;
 vSphere Host: {$VSPHERE.HOST}</description>
             <type>0</type>
             <dependencies/>
@@ -8106,12 +8177,15 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.overallStatus&quot;].iregexp(red,5)}=1</expression>
-            <name>Overall status of {HOST.NAME} is {ITEM.LASTVALUE}</name>
+            <expression>{Template VMware vSphere Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.overallStatus&quot;].iregexp(red,5)}=1</expression>
+            <name>Overall status of Virtual Machine {HOST.NAME} is {ITEM.LASTVALUE}</name>
             <url/>
             <status>0</status>
             <priority>4</priority>
-            <description/>
+            <description>Overall status of Virtual Machine {HOST.NAME} is {ITEM.LASTVALUE}&#13;
+&#13;
+Virtual Machine: {HOST.NAME}&#13;
+vSphere Host: {$VSPHERE.HOST}</description>
             <type>0</type>
             <dependencies/>
         </trigger>
@@ -8126,7 +8200,17 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.rebootRequired&quot;].min(5)}=1</expression>
+            <expression>{Template VMware vSphere Hypervisor - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.overallStatus&quot;].iregexp(red,5)}=1</expression>
+            <name>Overall status of {HOST.NAME} is {ITEM.LASTVALUE}</name>
+            <url/>
+            <status>0</status>
+            <priority>4</priority>
+            <description/>
+            <type>0</type>
+            <dependencies/>
+        </trigger>
+        <trigger>
+            <expression>{Template VMware vSphere Hypervisor - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.rebootRequired&quot;].min(5)}=1</expression>
             <name>Reboot required for host {HOST.NAME}</name>
             <url/>
             <status>0</status>
@@ -8139,7 +8223,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.rebootRequired&quot;].min(5)}=1</expression>
+            <expression>{Template VMware vSphere Hypervisor - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;host.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.rebootRequired&quot;].min(5)}=1</expression>
             <name>Reboot required for host {HOST.NAME}</name>
             <url/>
             <status>0</status>
@@ -8204,7 +8288,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere - vPoller with C client:icmpping[{HOST.NAME},3,,,].min(5)}#1</expression>
+            <expression>{Template VMware vSphere - vPoller:icmpping[{HOST.NAME},3,,,].min(5)}#1</expression>
             <name>vSphere host {HOST.NAME} is unreachable for 5 minutes</name>
             <url/>
             <status>0</status>
@@ -8214,7 +8298,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere - vPoller:icmpping[{HOST.NAME},3,,,].min(5)}#1</expression>
+            <expression>{Template VMware vSphere - vPoller with C client:icmpping[{HOST.NAME},3,,,].min(5)}#1</expression>
             <name>vSphere host {HOST.NAME} is unreachable for 5 minutes</name>
             <url/>
             <status>0</status>
