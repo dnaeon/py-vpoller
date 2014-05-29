@@ -1394,7 +1394,70 @@ class VSphereAgent(VConnector):
         logging.debug('[%s] Returning result from operation: %s', self.host, r)
 
         return r
+
+    def vm_cpu_usage_percent(self, msg):
+        """
+        Get the CPU usage in percentage for a VirtualMachine
+
+        Example client message would be:
+
+            {
+                "method":     "vm.cpu.usage.percent",
+                "hostname":   "vc01.example.org",
+                "name":       "vm01.example.org",
+            }
+
+        Returns:
+            The managed object properties in JSON format
+
+        """
+        logging.debug('[%s] Getting CPU usage percentage for VirtualMachine %s', self.host, msg['name'])
+
+        # Get the VirtualMachine managed object and collect the
+        # properties required to calculate the CPU usage in percentage.
+        # The CPU usage in percentage is directly related to the host the
+        # Virtual Machine is running on, so we need to collect the 'runtime.host' property as well.
+        data = self._get_object_properties(
+            properties=[
+                'name',
+                'runtime.host',
+                'summary.quickStats.overallCpuUsage',
+                'config.hardware.numCoresPerSocket',
+                'config.hardware.numCPU',
+            ],
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name'],
+        )
+
+        if data['success'] != 0:
+            return data
+
+        # Get the VM properties
+        props = data['result'][0]
+
+        # Calculate CPU usage in percentage
+        # The overall CPU usage returned by vSphere is in MHz, so
+        # we first convert it back to Hz and then calculate percentage
+        cpu_usage = (
+            float(props['summary.quickStats.overallCpuUsage'] * 1048576) /
+            (props['runtime.host'].hardware.cpuInfo.hz * props['config.hardware.numCoresPerSocket'] *
+             props['config.hardware.numCPU']) *
+            100
+        )
+
+        result = { 'name': props['name'], 'vm.cpu.usage.percent': cpu_usage }
         
+        r = {
+            'success': 0,
+            'msg': 'Successfully retrieved properties',
+            'result': [ result ],
+        }
+
+        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+
+        return r
+
     def datastore_discover(self, msg):
         """
         Discover all pyVmomi.vim.Datastore managed objects

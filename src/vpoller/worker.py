@@ -412,6 +412,10 @@ class VPollerWorker(Daemon):
                 'method':    self.agents[vsphere_host].vm_process_get,
                 'msg_attr':  ('method', 'hostname', 'name', 'username', 'password'),
             },
+            'vm.cpu.usage.percent': {
+                'method':    self.agents[vsphere_host].vm_cpu_usage_percent,
+                'msg_attr':  ('method', 'hostname', 'name'),
+            },
             'datastore.discover': {
                 'method':    self.agents[vsphere_host].datastore_discover,
                 'msg_attr':  ('method', 'hostname'),
