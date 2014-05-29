@@ -41,6 +41,7 @@ _vcli_vm_datastore_get() { vpoller-client -m vm.datastore.get "$@" | jq '.' ;}
 _vcli_vm_host_get() { vpoller-client -m vm.host.get "$@" | jq '.' ;}
 _vcli_vm_net_get() { vpoller-client -m vm.net.get "$@" | jq '.' ;}
 _vcli_vm_process_get() { vpoller-client -m vm.process.get "$@" | jq '.' ;}
+_vcli_vm_cpu_usage_percent() { vpoller-client -m vm.cpu.usage.percent "$@" | jq '.' ;}
 
 _vcli_datastore_discover() { vpoller-client -m datastore.discover "$@" | jq '.' ;}
 _vcli_datastore_get() { vpoller-client -m datastore.get "$@" | jq '.' ;}
@@ -74,6 +75,7 @@ alias 'vcli-vm-disk-get=_vcli_vm_disk_get'
 alias 'vcli-vm-datastore-get=_vcli_vm_datastore_get'
 alias 'vcli-vm-host-get=_vcli_vm_host_get'
 alias 'vcli-vm-process-get=_vcli_vm_host_get'
+alias 'vcli-vm-cpu-usage-percent=_vcli_vm_cpu_usage_percent'
 alias 'vcli-datastore-discover=_vcli_datastore_discover'
 alias 'vcli-datastore-get=_vcli_datastore_get'
 alias 'vcli-datastore-host-get=_vcli_datastore_host_get'
