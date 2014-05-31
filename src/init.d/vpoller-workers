@@ -1,0 +1,106 @@
+#!/bin/sh
+#
+# Author: Marin Atanasov Nikolov <dnaeon@gmail.com>
+#
+### BEGIN INIT INFO
+# Provides:          vpoller-workers
+# Required-Start:    
+# Required-Stop:
+# X-Start-Before:    
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6 
+# Short-Description: VPoller Worker daemons
+### END INIT INFO
+ 
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+DESC="vpoller-worker daemons"
+NAME=vpoller-workers
+DAEMON=/usr/bin/vpoller-worker
+SCRIPTNAME=/etc/init.d/"$NAME"
+
+#set -e
+ 
+# /etc/init.d/vpoller-workers: start and stop the VPoller Worker daemons
+
+. /lib/lsb/init-functions
+ 
+do_start() {
+    if [ ! -d /var/run/vpoller ]; then
+	mkdir -p /var/run/vpoller
+    fi
+    
+    workers=$( pgrep -f ${DAEMON} )
+
+    if [ $? -eq 0 ]; then
+	log_failure_msg "vPoller Workers are already started?"
+	return 1
+    fi
+    
+    worker_configs=$( find /etc/vpoller/workers -name '*.conf' 2>/dev/null)
+
+    if [ $? -ne 0 ]; then
+	log_failure_msg "No vPoller Worker config file(s) found in /etc/vpoller/workers"
+	return 1
+    fi
+
+    # Clean up old pid files if any
+    rm -f /var/run/vpoller/worker-*.pid
+    
+    # Start vPoller Workers
+    for each_config in $worker_configs; do
+	worker_name=$( basename ${each_config} .conf )
+	${DAEMON} -d -o /var/log/vpoller/${worker_name}.log -f ${each_config} -p /var/run/vpoller/${worker_name}.pid start
+	log_success_msg "vPoller Worker ${worker_name} started"
+    done
+}
+
+do_stop() {
+    workers=$( pgrep -f ${DAEMON} )
+
+    if [ $? -ne 0 ]; then
+	log_failure_msg "No vPoller Workers currently running"
+	return 1
+    fi
+
+    worker_configs=$( find /etc/vpoller/workers -name '*.conf' 2>/dev/null)
+    
+    for each_config in ${worker_configs}; do
+	# Send the shutdown message to the mgmt endpoint of the vPoller Worker
+	mgmt_port=$( grep mgmt ${each_config} | cut -d ':' -f 3 )
+	worker_name=$( basename ${each_config} .conf )
+	${DAEMON} -e tcp://localhost:${mgmt_port} stop
+	log_success_msg "Stopping vPoller Worker: ${worker_name}"
+    done
+}
+
+do_status() {
+    workers=$( pgrep -f ${DAEMON} )
+
+    if [ $? -ne 0 ]; then
+	log_failure_msg "No vPoller Workers currently running"
+	return 1
+    fi
+
+    for each_worker in ${workers}; do
+	log_success_msg "vPoller Worker with pid ${each_worker} is running ..."
+    done
+}
+ 
+case "${1}" in
+    start)
+        do_start
+        ;;
+    reset|stop)
+        do_stop
+        ;;
+    status)
+        do_status
+        ;;
+    reload|restart|force-reload)
+        do_stop
+        do_start
+        ;;
+    *)
+        log_success_msg "usage: ${0} {start|stop|status|reload|restart|force-reload|reset}" >&2
+        ;;
+esac
