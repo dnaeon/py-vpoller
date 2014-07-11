@@ -97,7 +97,7 @@ def status(endpoint):
 
 def main():
     usage="""
-Usage: vpoller-worker [-d] [-D] [-p <pidfile>] [-f <config>] [-o <logfile>] start
+Usage: vpoller-worker [-d] [-D|-W] [-p <pidfile>] [-f <config>] [-o <logfile>] start
        vpoller-worker [-D] -e <endpoint> stop
        vpoller-worker [-D] -e <endpoint> status
        vpoller-worker --help
@@ -114,6 +114,7 @@ Options:
   -d, --daemon                              Start as a daemon, otherwise
                                             run in the foreground
   -D, --debug                               Debug mode, be more verbose
+  -W, --warning                             Log only warning and error messages
   -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
                                             [default: /var/run/vpoller/vpoller-worker.pid]
   -f <config>, --file <config>              Specify config file to use
@@ -125,7 +126,12 @@ Options:
 
     args = docopt(usage, version="0.1.0")
 
-    level = logging.DEBUG if args['--debug'] else logging.INFO
+    if args['--debug']:
+        level = logging.DEBUG
+    elif args['--warning']:
+        level = logging.WARNING
+    else:
+        level = logging.INFO
 
     logging.basicConfig(
         filename=args['--output'],
