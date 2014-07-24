@@ -1417,14 +1417,16 @@ class VSphereAgent(VConnector):
         # properties required to calculate the CPU usage in percentage.
         # The CPU usage in percentage is directly related to the host the
         # Virtual Machine is running on, so we need to collect the 'runtime.host' property as well.
+        required_properties = [
+            'name',
+            'runtime.host',
+            'summary.quickStats.overallCpuUsage',
+            'config.hardware.numCoresPerSocket',
+            'config.hardware.numCPU',
+        ]
+
         data = self._get_object_properties(
-            properties=[
-                'name',
-                'runtime.host',
-                'summary.quickStats.overallCpuUsage',
-                'config.hardware.numCoresPerSocket',
-                'config.hardware.numCPU',
-            ],
+            properties=required_properties,
             obj_type=pyVmomi.vim.VirtualMachine,
             obj_property_name='name',
             obj_property_value=msg['name'],
@@ -1435,6 +1437,18 @@ class VSphereAgent(VConnector):
 
         # Get the VM properties
         props = data['result'][0]
+
+        # TODO: A fix for VMware vSphere 4.x versions, where not always
+        #       the properties requested are returned by vCenter server,
+        #       which could result in a KeyError exception.
+        #       See this issue for more details:
+        #
+        #           - https://github.com/dnaeon/py-vpoller/issues/33
+        #
+        #       We should ensure that vPoller Workers do not fail under
+        #       such circumstances and return an error message.
+        if not all(required_properties) in props:
+            return { 'success': 1, 'msg': 'Unable to retrieve required properties' }
 
         # Calculate CPU usage in percentage
         # The overall CPU usage returned by vSphere is in MHz, so
