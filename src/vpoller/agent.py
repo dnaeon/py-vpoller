@@ -1447,7 +1447,7 @@ class VSphereAgent(VConnector):
         #
         #       We should ensure that vPoller Workers do not fail under
         #       such circumstances and return an error message.
-        if not all(required_properties) in props:
+        if not all(p in props for p in required_properties):
             return { 'success': 1, 'msg': 'Unable to retrieve required properties' }
 
         # Calculate CPU usage in percentage
