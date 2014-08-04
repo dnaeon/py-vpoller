@@ -77,17 +77,14 @@ class VPollerWorker(Daemon):
         self.create_worker_sockets()
 
         # Spawn the vSphere Agents of the Worker
-        self.spawn_vsphere_agents()
+        self.init_vsphere_agents()
 
         # Start the vSphere Agents
-        self.start_vsphere_agents()
+        self.connect_vsphere_agents()
 
         # Enter the main daemon loop from here
         logging.debug('Entering main daemon loop')
         while not self.time_to_die:
-            # Keep our vSphere Agents alive
-            self.keep_agents_alive()
-
             socks = dict(self.zpoller.poll(1000))
 
             # Worker socket, receives client messages for processing
@@ -127,7 +124,7 @@ class VPollerWorker(Daemon):
         # Shutdown time has arrived, let's clean up a bit
         logging.debug('Shutdown time has arrived, vPoller Worker is going down')
         self.close_worker_sockets()
-        self.shutdown_vsphere_agents()
+        self.disconnect_vsphere_agents()
         self.stop()
 
     def load_worker_config(self, config):
@@ -202,12 +199,12 @@ class VPollerWorker(Daemon):
         self.worker_socket.close()
         self.zcontext.term()
 
-    def spawn_vsphere_agents(self):
+    def init_vsphere_agents(self):
         """
         Prepares the vSphere Agents used by the vPoller Worker
 
         """
-        logging.debug('Spawning vSphere Agents')
+        logging.debug('Initializing vSphere Agents')
 
         self.agents = dict()
 
