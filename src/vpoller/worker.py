@@ -35,6 +35,7 @@ from time import time, asctime
 
 import zmq
 from vpoller.core import VPollerException
+from vpoller.core import VPollerPeriodTask
 from vpoller.agent import VSphereAgent
 from vpoller.daemon import Daemon
 from vconnector.core import VConnectorDatabase
@@ -221,10 +222,15 @@ class VPollerWorker(Daemon):
                 pwd=each_agent['pwd'],
                 host=each_agent['host']
             )
-            agent.last_keep_alive_heartbeat = time()
             self.agents[agent.host] = agent
 
-    def start_vsphere_agents(self):
+        self.agents_heartbeat_task = VPollerPeriodTask(
+            interval=60,
+            callback=self.keep_vsphere_agents_alive,
+        )
+        self.agents_heartbeat_task.start()
+
+    def connect_vsphere_agents(self):
         """
         Connects all vSphere Agents to their respective VMware vSphere hosts
 
@@ -234,21 +240,7 @@ class VPollerWorker(Daemon):
         for agent in self.agents:
             self.agents[agent].connect()
 
-    def keep_agents_alive(self):
-        """
-        Dummy method to keep our vSphere Agents alive
-        
-        This dummy method calls CurrentTime() vSphere method
-        periodically (every 60 seconds) in order to keep the vSphere Agents alive
-        
-        """
-        for each_agent in self.agents:
-            if (time() - self.agents[each_agent].last_keep_alive_heartbeat) > 60.0:
-                logging.debug('[%s] Agent keep-alive heartbeat', self.agents[each_agent].host)
-                self.agents[each_agent].si.CurrentTime()
-                self.agents[each_agent].last_keep_alive_heartbeat = time()
-
-    def shutdown_vsphere_agents(self):
+    def disconnect_vsphere_agents(self):
         """
         Disconnects all vPoller Agents from their respective VMware vSphere hosts
         
@@ -257,7 +249,24 @@ class VPollerWorker(Daemon):
 
         for agent in self.agents:
             self.agents[agent].disconnect()
+
+        self.agents_heartbeat_task.cancel()
+            
+    def keep_vsphere_agents_alive(self):
+        """
+        Dummy method to keep our vSphere Agents alive
         
+        This dummy method calls CurrentTime() vSphere method
+        in order to keep the connection to the vSphere host alive.
+
+        Use a VPollerPeriodTask instance in order to invoke this function
+        at a certain interval.
+        
+        """
+        for agent in self.agents:
+            logging.debug('[%s] Agent keep-alive heartbeat', self.agents[agent].host)
+            self.agents[agent].si.CurrentTime()
+
     def process_client_msg(self, msg):
         """
         Processes a client message received on the vPoller Worker socket
