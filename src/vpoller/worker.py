@@ -224,12 +224,6 @@ class VPollerWorker(Daemon):
             )
             self.agents[agent.host] = agent
 
-        self.agents_heartbeat_task = VPollerPeriodTask(
-            interval=60,
-            callback=self.keep_vsphere_agents_alive,
-        )
-        self.agents_heartbeat_task.start()
-
     def connect_vsphere_agents(self):
         """
         Connects all vSphere Agents to their respective VMware vSphere hosts
@@ -239,6 +233,12 @@ class VPollerWorker(Daemon):
         
         for agent in self.agents:
             self.agents[agent].connect()
+
+        self.agents_heartbeat_task = VPollerPeriodTask(
+            interval=60,
+            callback=self.keep_vsphere_agents_alive,
+        )
+        self.agents_heartbeat_task.start()
 
     def disconnect_vsphere_agents(self):
         """
