@@ -78,9 +78,26 @@ which load balances client requests between two workers.
 
 """   
 
+from threading import Timer
+
 class VPollerException(Exception):
     """
     Generic VPoller exception.
 
     """
     pass
+
+class VPollerPeriodTask(object):
+    """
+    Perform period tasks at a given interval
+
+    """
+    def __init__(self, interval, callback, daemon=True):
+        self.timer = Timer(interval, callback)
+        self.timer.daemon = daemon
+
+    def start(self):
+        self.timer.start()
+
+    def cancel(self):
+        self.timer.cancel()
