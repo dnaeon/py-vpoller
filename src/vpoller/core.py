@@ -92,12 +92,14 @@ class VPollerPeriodTask(object):
     Perform period tasks at a given interval
 
     """
-    def __init__(self, interval, callback, daemon=True):
-        self.timer = Timer(interval, callback)
-        self.timer.daemon = daemon
+    def __init__(self, interval, daemon=True, callback, **kwargs):
+        self.interval = interval
+        self.daemon = daemon
+        self.callback = callback
+        self.kwargs = kwargs
 
-    def start(self):
-        self.timer.start()
-
-    def cancel(self):
-        self.timer.cancel()
+    def run(self):
+        self.callback(**self.kwargs)
+        t = Timer(self.interval, self.run)
+        t.daemon = self.daemon
+        t.start()

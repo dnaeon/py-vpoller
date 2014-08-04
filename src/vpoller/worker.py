@@ -238,7 +238,7 @@ class VPollerWorker(Daemon):
             interval=60,
             callback=self.keep_vsphere_agents_alive,
         )
-        self.agents_heartbeat_task.start()
+        self.agents_heartbeat_task.run()
 
     def disconnect_vsphere_agents(self):
         """
