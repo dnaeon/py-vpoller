@@ -83,41 +83,28 @@ class VPollerWorker(Daemon):
         # Start the vSphere Agents
         self.connect_vsphere_agents()
 
-        # Enter the main daemon loop from here
+        # Start processing tasks
+        self.msg_processor()
+        
+    def msg_processor(self):
+        """
+        Main daemon loop and message processor
+
+        Takes care of distributing tasks to vSphere Agents and 
+        responding to management messages
+
+        """
         logging.debug('Entering main daemon loop')
+        
         while not self.time_to_die:
             socks = dict(self.zpoller.poll(1000))
-
-            # Worker socket, receives client messages for processing
-            #
-            # The routing envelope of the message looks like this:
-            #
-            # Frame 1: [ N ][...]  <- Identity of connection
-            # Frame 2: [ 0 ][]     <- Empty delimiter frame
-            # Frame 3: [ N ][...]  <- Data frame
+            
             if socks.get(self.worker_socket) == zmq.POLLIN:
-                _id    = self.worker_socket.recv()
-                _empty = self.worker_socket.recv()
-
-                try:
-                    msg = self.worker_socket.recv_json()
-                except Exception as e:
-                    logging.warning('Received bad client message, request will be ignored: %s', e)
-                    continue
-
-                result = self.process_client_msg(msg)
-                
-                # Return result back to client
-                self.worker_socket.send(_id, zmq.SNDMORE)
-                self.worker_socket.send("", zmq.SNDMORE)
-                try:
-                    self.worker_socket.send_json(result)
-                except TypeError as e:
-                    logging.warning('Cannot serialize result: %s', e)
-                    self.worker_socket.send_json({ 'success': 1, 'msg': 'Cannot serialize result: %s' % e})
+                self.process_worker_msg()
 
             # Management socket
             if socks.get(self.mgmt_socket) == zmq.POLLIN:
+                # TODO: Move to process_mgmt_msg() method
                 msg = self.mgmt_socket.recv_json()
                 result = self.process_mgmt_msg(msg)
                 self.mgmt_socket.send_json(result)
@@ -127,6 +114,38 @@ class VPollerWorker(Daemon):
         self.close_worker_sockets()
         self.disconnect_vsphere_agents()
         self.stop()
+
+    def process_worker_msg(self):
+        """
+        Processes a message on the worker socket
+        
+        """
+        # Worker socket, receives client messages for processing
+        #
+        # The routing envelope of the message looks like this:
+        #
+        # Frame 1: [ N ][...]  <- Identity of connection
+        # Frame 2: [ 0 ][]     <- Empty delimiter frame
+        # Frame 3: [ N ][...]  <- Data frame
+        _id    = self.worker_socket.recv()
+        _empty = self.worker_socket.recv()
+        
+        try:
+            msg = self.worker_socket.recv_json()
+        except Exception as e:
+            logging.warning('Received bad client message, request will be ignored: %s', e)
+            continue
+
+        result = self.process_client_request(msg)
+        
+        # Return result back to client
+        self.worker_socket.send(_id, zmq.SNDMORE)
+        self.worker_socket.send("", zmq.SNDMORE)
+        try:
+            self.worker_socket.send_json(result)
+        except TypeError as e:
+            logging.warning('Cannot serialize result: %s', e)
+            self.worker_socket.send_json({ 'success': 1, 'msg': 'Cannot serialize result: %s' % e})
 
     def load_worker_config(self, config):
         """
@@ -267,9 +286,9 @@ class VPollerWorker(Daemon):
             logging.debug('[%s] Agent keep-alive heartbeat', self.agents[agent].host)
             self.agents[agent].si.CurrentTime()
 
-    def process_client_msg(self, msg):
+    def process_client_request(self, msg):
         """
-        Processes a client message received on the vPoller Worker socket
+        Processes a client request received on the vPoller Worker socket
     
         The message is passed to the VSphereAgent object of the respective vSphere host
         in order to do the actual polling.
