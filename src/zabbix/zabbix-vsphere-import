@@ -220,8 +220,6 @@ class ZabbixConnector(object):
             The id of the newly create host group
 
         """
-        logging.info("Creating Zabbix host group '%s'", name)
-
         result = self._call_zabbix_method(
             method='hostgroup.create',
             params={'name': name}
@@ -292,6 +290,34 @@ class ZabbixConnector(object):
                 logging.warning('[vSphere HostSystem] Cannot create host in Zabbix: %s', e)
 
         logging.info('[vSphere HostSystem] Import of objects completed')
+
+    def import_vsphere_clusters(self):
+        """
+        Imports vSphere Clusters as Zabbix host groups
+
+        """
+        logging.info('[vSphere ClusterComputeResource] Importing objects to Zabbix')
+        
+        zabbix_data  = self.get_host_groups()
+        vsphere_data = self._get_vsphere_objects(method='cluster.discover')
+
+        zabbix_groups = [group['name'] for group in zabbix_data['result']]
+        vsphere_clusters = [cluster['name'] for cluster in vsphere_data['result']]
+
+        missing_groups = set(vsphere_clusters) - set(zabbix_groups)
+
+        if not missing_groups:
+            logging.info('[vSphere ClusterComputeResource] Objects are in sync with Zabbix')
+            return
+
+        logging.info('[vSphere ClusterComputeResource] Number of objects to be imported: %d', len(missing_groups))
+
+        # Create Zabbix host groups for each vSphere cluster
+        for group in missing_groups:
+            logging.info("[vSphere ClusterComputeResource] Creating Zabbix hostgroup '%s'", group)
+            self.create_host_group(name=group)
+
+        logging.info('[vSphere ClusterComputeResource] Import of objects completed')
 
     def import_vsphere_vms(self):
         """
@@ -571,6 +597,7 @@ Options:
     zabbix.connect()
     
     # Import vSphere objects into Zabbix
+    zabbix.import_vsphere_clusters()
     zabbix.import_vsphere_hosts()
     zabbix.import_vsphere_vms()
     zabbix.import_vsphere_datastores()
