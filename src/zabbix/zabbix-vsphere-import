@@ -30,6 +30,8 @@ into a Zabbix server as regular Zabbix hosts
 
 """
 
+from copy import deepcopy
+
 import yaml
 import zabbix_api
 from docopt import docopt
@@ -308,9 +310,9 @@ class ZabbixConnector(object):
         # Create the hosts in Zabbix
         for host in missing_hosts:
             logging.info("[vSphere HostSystem] Creating Zabbix host '%s'", host) 
-            params = {}
+
+            params = deepcopy(host_options)
             params['host'] = host
-            params.update(host_options)
 
             # Add the host to it's respective hostgroup/cluster in Zabbix
             data = self._get_vsphere_objects(
@@ -366,9 +368,25 @@ class ZabbixConnector(object):
         # Create the hosts in Zabbix
         for vm in missing_vms:
             logging.info("[vSphere VirtualMachine] Creating Zabbix host '%s'", vm)
-            params = {}
+
+            params = deepcopy(host_options)
             params['host'] = vm
-            params.update(host_options)
+
+            # Add the virtual machine to it's respective hostgroup/cluster in Zabbix
+            # We do this by first finding the host this VM runs on and then we get the
+            # cluster where this host resides on.
+            data = self._get_vsphere_objects(
+                method='vm.host.get',
+                name=vm
+            )
+            vm_host = data['result'][0]['host']
+
+            data = self._get_vsphere_objects(
+                method='host.cluster.get',
+                name=vm_host
+            )
+            host_cluster = data['result'][0]['cluster']
+            params['groups'].append({'groupid': self.get_host_group_by_name(name=host_cluster)})
 
             try:
                 result = self.create_host(params)
