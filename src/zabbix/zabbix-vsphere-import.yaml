@@ -17,7 +17,7 @@ zabbix:
     templates:
       - Template VMware vSphere Hypervisor - vPoller with C client
     macros:
-      VSPHERE_HOST: vc01.example.org
+      VSPHERE.HOST: vc01.example.org
     groups:
       - Hypervisors
 
@@ -25,7 +25,7 @@ zabbix:
     templates:
       - Template VMware vSphere Virtual Machine - vPoller with C client
     macros:
-      VSPHERE_HOST: vc01.example.org
+      VSPHERE.HOST: vc01.example.org
     groups:
       - Virtual Machines
 
@@ -33,6 +33,6 @@ zabbix:
     templates:
       - Template VMware vSphere Datastore - vPoller with C client
     macros:
-      VSPHERE_HOST: vc01.example.org
+      VSPHERE.HOST: vc01.example.org
     groups:
       - Datastores
