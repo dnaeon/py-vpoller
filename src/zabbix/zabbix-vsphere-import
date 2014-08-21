@@ -267,7 +267,7 @@ class ZabbixConnector(object):
 
         # Create Zabbix host groups for each vSphere cluster
         for group in missing_groups:
-            logging.info("[vSphere ClusterComputeResource] Creating Zabbix hostgroup '%s'", group)
+            logging.info("[vSphere ClusterComputeResource] Creating Zabbix host group '%s'", group)
             self.create_host_group(name=group)
 
         logging.info('[vSphere ClusterComputeResource] Import of objects completed')
@@ -512,7 +512,8 @@ class ZabbixConnector(object):
         for group in self.options['zabbix'][name]['groups']:
             group_id = self.get_host_group_by_name(group)
             if not group_id:
-                logging.warning("Unable to find Zabbix group '%s'", group)
+                logging.warning("Unable to find Zabbix host group '%s'", group)
+                logging.info("Creating Zabbix host group '%s'", group)
                 result = self.create_host_group(name=group)
                 group_id = result[0]
             groups.append({ 'groupid': group_id })
