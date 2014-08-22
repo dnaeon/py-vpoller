@@ -1,0 +1,3 @@
+## AUTHORS
+
+Marin Atanasov Nikolov <dnaeon@gmail.com>
