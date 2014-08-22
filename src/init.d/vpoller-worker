@@ -26,6 +26,10 @@ set -e
 . /lib/lsb/init-functions
  
 do_start() {
+    if [ ! -d /var/run/vpoller ]; then
+	mkdir -p /var/run/vpoller
+    fi
+    
     ${DAEMON} -d start
 }
 
