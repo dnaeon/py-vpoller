@@ -52,3 +52,7 @@ mv vpoller-cclient /usr/local/bin/
 
 cp src/init.d/vpoller-proxy.gentoo /etc/init.d/vpoller-proxy
 cp src/init.d/vpoller-worker.gentoo /etc/init.d/vpoller-worker
+
+- Install the logrotate template
+
+cp src/logrotate.d/vpoller /etc/logrotate.d/
