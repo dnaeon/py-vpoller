@@ -24,9 +24,6 @@ done;
 #_property_name=`echo ${_args} | sed -ne 's|.* -p \([a-zA-Z\.]*\)|\1|p'`
 _property_name=`echo $@ | sed -ne 's|.* -p \([a-zA-Z\.]*\)|\1|p'`
 
-echo "Args: $_args"
-echo "Property: $_property_name"
-
 # Rename property as it might contain dots in the complete property name, so that 'jq' can parse it
 #vpoller-cclient ${_args} 2>/dev/null | jq -r ".result[0] | {\"property\": .[\"${_property_name}\"]}.property"
 bash -c "vpoller-cclient $_args"
