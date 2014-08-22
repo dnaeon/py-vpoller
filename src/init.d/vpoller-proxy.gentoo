@@ -21,8 +21,8 @@ depend() {
 }
 
 checkconfig() {
-    checkpath --directory ${PID_DIR}
-    checkpath --directory ${LOG_DIR}
+    checkpath --directory -m 0755 -o zabbix:zabbix ${PID_DIR}
+    checkpath --directory -m 0755 -o zabbix:zabbix ${LOG_DIR}
 }
 
 start() {
@@ -37,8 +37,12 @@ start() {
 		eend 1 "${CONF_FILE} does not exist"
 		return 1
 	fi
-  $DAEMON -d start >/dev/null 2>&1
-	eend $?
+#  $DAEMON -d start >/dev/null 2>&1
+  start-stop-daemon --start --quiet \
+    --user zabbix --group zabbix \
+    --exec ${DAEMON} -- \
+    -d start
+  eend $?
 }
 
 stop() {
