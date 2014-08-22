@@ -1,0 +1,54 @@
+#!/sbin/runscript
+# Copyright 1999-2012 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+. /etc/init.d/functions.sh
+
+extra_started_commands="fullstatus"
+
+description_fullstatus="Gives the full status of the server."
+
+DESC="vpoller-worker daemon"
+DAEMON=/usr/bin/vpoller-worker
+MGMT_INTERFACE="tcp://localhost:10000"
+CONF_DIR=/etc/vpoller
+CONF_FILE=${CONF_DIR}/vpoller.conf
+PID_DIR=/var/run/vpoller
+LOG_DIR=/var/log/vpoller
+
+depend() {
+	use logger net
+  after vpoller-proxy
+}
+
+checkconfig() {
+    checkpath --directory ${PID_DIR}
+    checkpath --directory ${LOG_DIR}
+}
+
+start() {
+  checkconfig || return 1
+
+	ebegin "Starting ${DESC}"
+	if [ ! -d ${CONF_DIR} ]; then
+		eend 1 "${CONF_DIR} does not exist"
+		return 1
+	fi
+	if [ ! -f ${CONF_FILE} ]; then
+		eend 1 "${CONF_FILE} does not exist"
+		return 1
+	fi
+  $DAEMON -d start >/dev/null 2>&1
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping ${DESC}"
+  ${DAEMON} -e ${MGMT_INTERFACE} stop >/dev/null 2>&1
+	eend
+}
+
+fullstatus() {
+  ${DAEMON} -e ${MGMT_INTERFACE} status
+}
+
