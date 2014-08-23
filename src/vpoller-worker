@@ -124,7 +124,7 @@ Options:
                                             [default: /var/log/vpoller/vpoller-worker.log]
 """
 
-    args = docopt(usage, version="0.1.0")
+    args = docopt(usage, version='0.2.9')
 
     if args['--debug']:
         level = logging.DEBUG

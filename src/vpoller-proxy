@@ -122,7 +122,7 @@ Options:
 
 """
 
-    args = docopt(usage, version="0.1.0")
+    args = docopt(usage, version='0.2.9')
 
     level = logging.DEBUG if args['--debug'] else logging.INFO
 
