@@ -2,7 +2,7 @@
 # Copyright 1999-2012 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-. /etc/init.d/functions.sh
+#. /etc/init.d/functions.sh
 
 extra_started_commands="fullstatus"
 
@@ -15,6 +15,7 @@ CONF_DIR=/etc/vpoller
 CONF_FILE=${CONF_DIR}/vpoller.conf
 PID_DIR=/var/run/vpoller
 LOG_DIR=/var/log/vpoller
+PID_FILE=${PID_DIR}/vpoller-proxy.pid
 
 depend() {
 	use logger net
@@ -28,17 +29,21 @@ checkconfig() {
 start() {
   checkconfig || return 1
 
-	ebegin "Starting ${DESC}"
-	if [ ! -d ${CONF_DIR} ]; then
-		eend 1 "${CONF_DIR} does not exist"
-		return 1
-	fi
-	if [ ! -f ${CONF_FILE} ]; then
-		eend 1 "${CONF_FILE} does not exist"
-		return 1
-	fi
+  ebegin "Starting ${DESC}"
+  if [ ! -d ${CONF_DIR} ]; then
+    eend 1 "${CONF_DIR} does not exist"
+    return 1
+  fi
+  if [ ! -f ${CONF_FILE} ]; then
+    eend 1 "${CONF_FILE} does not exist"
+    return 1
+  fi
+#	if [ -f ${PID_FILE} ]; then
+#    rm ${PID_FILE}
+#	fi
 #  $DAEMON -d start >/dev/null 2>&1
   start-stop-daemon --start --quiet \
+    --pidfile "${PID_FILE}" \
     --user zabbix --group zabbix \
     --exec ${DAEMON} -- \
     -d start
@@ -46,9 +51,11 @@ start() {
 }
 
 stop() {
-	ebegin "Stopping ${DESC}"
-  ${DAEMON} -e ${MGMT_INTERFACE} stop >/dev/null 2>&1
-	eend
+  ebegin "Stopping ${DESC}"
+#  ${DAEMON} -e ${MGMT_INTERFACE} stop >/dev/null 2>&1
+  start-stop-daemon --stop --pidfile ${PID_FILE}
+  eend $?
+
 }
 
 fullstatus() {
