@@ -237,7 +237,7 @@ main(int argc, char *argv[])
   
   /* Do we have any result? */
   if (result == NULL) {
-    printf("{ \"success\": 1, \"msg\": \"Did not receive reply from server, aborting...\"\n");
+    printf("{ \"success\": 1, \"msg\": \"Did not receive reply from server, aborting...\" }\n");
   } else {
     printf("%s\n", result);
   }
