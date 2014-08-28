@@ -85,9 +85,6 @@ class VPollerWorker(Daemon):
         # Enter the main daemon loop from here
         logging.debug('Entering main daemon loop')
         while not self.time_to_die:
-            # Keep our vSphere Agents alive
-            self.keep_agents_alive()
-
             socks = dict(self.zpoller.poll(1000))
 
             # Worker socket, receives client messages for processing
@@ -236,20 +233,6 @@ class VPollerWorker(Daemon):
         
         for agent in self.agents:
             self.agents[agent].connect()
-
-    def keep_agents_alive(self):
-        """
-        Dummy method to keep our vSphere Agents alive
-        
-        This dummy method calls CurrentTime() vSphere method
-        periodically (every 60 seconds) in order to keep the vSphere Agents alive
-        
-        """
-        for each_agent in self.agents:
-            if (time() - self.agents[each_agent].last_keep_alive_heartbeat) > 60.0:
-                logging.debug('[%s] Agent keep-alive heartbeat', self.agents[each_agent].host)
-                self.agents[each_agent].si.CurrentTime()
-                self.agents[each_agent].last_keep_alive_heartbeat = time()
 
     def shutdown_vsphere_agents(self):
         """
