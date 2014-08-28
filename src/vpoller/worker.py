@@ -218,7 +218,6 @@ class VPollerWorker(Daemon):
                 pwd=each_agent['pwd'],
                 host=each_agent['host']
             )
-            agent.last_keep_alive_heartbeat = time()
             self.agents[agent.host] = agent
 
     def shutdown_vsphere_agents(self):
