@@ -79,9 +79,6 @@ class VPollerWorker(Daemon):
         # Spawn the vSphere Agents of the Worker
         self.spawn_vsphere_agents()
 
-        # Start the vSphere Agents
-        self.start_vsphere_agents()
-
         # Enter the main daemon loop from here
         logging.debug('Entering main daemon loop')
         while not self.time_to_die:
@@ -223,16 +220,6 @@ class VPollerWorker(Daemon):
             )
             agent.last_keep_alive_heartbeat = time()
             self.agents[agent.host] = agent
-
-    def start_vsphere_agents(self):
-        """
-        Connects all vSphere Agents to their respective VMware vSphere hosts
-
-        """
-        logging.debug('Starting vSphere Agents')
-        
-        for agent in self.agents:
-            self.agents[agent].connect()
 
     def shutdown_vsphere_agents(self):
         """
