@@ -18,6 +18,6 @@ setup(name='vpoller',
         'docopt >= 0.6.1',
         'pyvmomi >= 5.5.0',
         'tabulate >= 0.7.2',
-        'vconnector >= 0.2.0',
+        'vconnector >= 0.2.9',
       ]
 )
