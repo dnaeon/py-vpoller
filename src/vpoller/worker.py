@@ -62,6 +62,10 @@ class VPollerWorkerManager(object):
         self.zcontenxt = None
         self.zpoller = None
         self.mgmt_socket = None
+        self.mgmt_methods = {
+            'status': status,
+            'shutdown': shutdown,
+        }
         self.config_defaults = {
             'mgmt': 'tcp://*:10000',
         }
@@ -71,27 +75,35 @@ class VPollerWorkerManager(object):
         Start the vPoller Worker Manager and processes
 
         """
-        logging.info('Starting up vPoller Worker Manager')
+        logging.info('Starting vPoller Worker Manager')
 
         self.load_config()
         self.create_sockets()
         self.start_workers()
 
         while not self.time_to_die.is_set():
-            self.process_mgmt_msg()
+            self.wait_for_mgmt_msg()
 
         self.stop()
 
     def stop(self):
+        """
+        Stop the vPoller Manager and Workers
+
+        """
         self.close_sockets()
         self.stop_workers()
+
+    def shutdown(self):
+        """
+        Set the exit flag for shutting down
+
+        """
+        self.time_to_die.set()
 
     def load_config(self):
         """
         Loads the vPoller Worker Manager configuration settings
-
-        Raises:
-            VPollerException
 
         """
         logging.debug('Loading config file %s', self.config_file)
@@ -100,13 +112,15 @@ class VPollerWorkerManager(object):
         parser.read(self.config_file)
 
         self.config['mgmt'] = parser.get('worker:manager', 'mgmt')
+        self.config['db'] = parser.get('worker', 'db')
+        self.config['proxy'] = parser.get('worker', 'proxy')
         
     def start_workers(self):
         """
         Start the vPoller Worker processes
 
         """
-        logging.info('Starting up vPoller Worker processes')
+        logging.info('Starting vPoller Worker processes')
         
         if self.num_workers <= 0:
             self.num_workers = multiprocessing.cpu_count()
@@ -125,7 +139,7 @@ class VPollerWorkerManager(object):
         logging.info('Stopping vPoller Worker processes')
         
         for worker in self.workers:
-           worker.worker_shutdown()
+           worker.stop()
            worker.join()
 
     def create_sockets(self):
@@ -154,11 +168,74 @@ class VPollerWorkerManager(object):
         self.mgmt_socket.close()
         self.zcontext.term()
 
-    def process_mgmt_msg(self):
+    def wait_for_mgmt_msg(self):
+        """
+        Poll the management socket for management requests
+
+        """
         socks = dict(self.zpoller.poll())
         if socks.get(self.mgmt_socket) == zmq.POLLIN:
-            pass
+            try:
+                msg = self.mgmt_socket.recv_json()
+            except TypeError as e:
+                logging.warning('Invalid message received on management socket: %s', msg)
+                return
+                
+            result = self.process_mgmt_msg(msg)
+            self.mgmt_socket.send_json(result)
+
+    def process_mgmt_msg(self, msg):
+        """
+        Processes a message for the management interface
         
+        Example client message to shutdown the vPoller Worker would be:
+        
+            {
+                "method": "shutdown"
+            }
+
+        Args:
+            msg (dict): The client message for processing
+
+        """
+        logging.debug('Processing management message: %s', msg)
+
+        if 'method' not in msg:
+            return { 'success': 1, 'msg': 'Missing method name' } 
+        
+        if msg['method'] not in self.mgmt_methods:
+            return { 'success': 1, 'msg': 'Unknown method received' }
+
+        method = msg['method']
+        result = self.mgmt_methods[method]
+
+        return result
+ 
+    def status(self):
+        """
+        Get status information about the vPoller Worker
+            
+        """
+        logging.debug('Getting vPoller Worker status')
+
+        result = {
+            'success': 0,
+            'msg': 'vPoller Worker status',
+            'result': {
+                'status': 'running',
+                'hostname': os.uname()[1],
+                'proxy': self.config.get('proxy'),
+                'mgmt': self.config.get('mgmt'),
+                'db': self.config.get('db'),
+                'workers': .len(self.workers),
+                'uname': ' '.join(os.uname()),
+            }
+        }
+
+        logging.debug('Returning result to client: %s', result)
+
+        return result
+            
 class VPollerWorker(multiprocessing.Process):
     """
     VPollerWorker class
