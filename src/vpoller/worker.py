@@ -64,7 +64,7 @@ class VPollerWorkerManager(object):
         self.mgmt_socket = None
         self.mgmt_methods = {
             'status': self.status,
-            'shutdown': self.shutdown,
+            'shutdown': self.signal_stop,
         }
         self.config_defaults = {
             'db': '/var/lib/vconnector/vconnector.db',
@@ -96,18 +96,14 @@ class VPollerWorkerManager(object):
         self.close_sockets()
         self.stop_workers()
 
-    def shutdown(self):
+    def signal_stop(self):
         """
-        Set the exit flag for shutting down
-
-        Usually this method is intended to be called through the management interface
+        Signal the vPoller Worker Manager that shutdown time has arrived
 
         """
-        msg = 'Shutdown time has arrived, stopping vPoller Worker'
-        logging.info(msg)
         self.time_to_die.set()
 
-        return { 'success': 0, 'msg': msg }
+        return { 'success': 0, 'msg': 'Shutdown time has arrived' }
 
     def load_config(self):
         """
@@ -150,7 +146,7 @@ class VPollerWorkerManager(object):
         logging.info('Stopping vPoller Worker processes')
         
         for worker in self.workers:
-           worker.stop()
+           worker.signal_stop()
            worker.join()
 
     def create_sockets(self):
