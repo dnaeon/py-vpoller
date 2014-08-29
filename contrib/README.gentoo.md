@@ -50,8 +50,8 @@ mv vpoller-cclient /usr/local/bin/
 
 - Install init scripts
 
-cp src/init.d/vpoller-proxy.gentoo /etc/init.d/vpoller-proxy
-cp src/init.d/vpoller-worker.gentoo /etc/init.d/vpoller-worker
+cp contrib/init.d/gentoo/vpoller-proxy /etc/init.d/vpoller-proxy
+cp contrib/init.d/gentoo/vpoller-worker /etc/init.d/vpoller-worker
 
 - Install the logrotate template
 

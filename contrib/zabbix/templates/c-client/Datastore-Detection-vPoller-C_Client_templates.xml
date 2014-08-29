@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>2.0</version>
+    <date>2014-08-29T08:00:02Z</date>
+    <groups>
+        <group>
+            <name>Datastores</name>
+        </group>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template VMware vCenter Datastore Detect - vPoller with C client</template>
+            <name>Template VMware vCenter Datastore Detect - vPoller with C client</name>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>vSphere Datastores</name>
+                </application>
+            </applications>
+            <items/>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discover VMware Datastores</name>
+                    <type>10</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>vpoller-zabbix[&quot;-m&quot;, &quot;datastore.discover&quot;, &quot;-p&quot;, &quot;info.url&quot;, &quot;-V&quot;, &quot;{HOST.NAME}&quot;]</key>
+                    <delay>3600</delay>
+                    <status>0</status>
+                    <allowed_hosts/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <filter>:</filter>
+                    <lifetime>30</lifetime>
+                    <description>Discovery of VMware Datastores - Added to a vCenter host&#13;
+&#13;
+- Disable this one if not needed</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Capacity</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;summary.capacity&quot;]</key>
+                            <delay>300</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units>B</units>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Free Space</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;info.freeSpace&quot;]</key>
+                            <delay>300</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units>B</units>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Free Space (Percentage)</name>
+                            <type>15</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;freeSpacePercentage&quot;]</key>
+                            <delay>300</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>0</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params>last(&quot;cvpoller-zabbix[\&quot;-m\&quot;, \&quot;datastore.get\&quot;, \&quot;-V\&quot;, \&quot;{$VSPHERE.HOST}\&quot;, \&quot;-n\&quot;, \&quot;{#VSPHERE.DATASTORE.INFO.URL}\&quot;, \&quot;-p\&quot;, \&quot;info.freeSpace\&quot;]&quot;) / last(&quot;cvpoller-zabbix[\&quot;-m\&quot;, \&quot;datastore.get\&quot;, \&quot;-V\&quot;, \&quot;{$VSPHERE.HOST}\&quot;, \&quot;-n\&quot;, \&quot;{#VSPHERE.DATASTORE.INFO.URL}\&quot;, \&quot;-p\&quot;, \&quot;summary.capacity\&quot;]&quot;) * 100</params>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Is Accessible</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;summary.accessible&quot;]</key>
+                            <delay>300</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>3</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Maintenance Mode</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;summary.maintenanceMode&quot;]</key>
+                            <delay>300</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>1</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Max File Size</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;info.maxFileSize&quot;]</key>
+                            <delay>3600</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units>B</units>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Max Virtual Disk Size</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;info.maxVirtualDiskCapacity&quot;]</key>
+                            <delay>3600</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units>B</units>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Multiple Host Access</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;summary.multipleHostAccess&quot;]</key>
+                            <delay>3600</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>3</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Type</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;summary.type&quot;]</key>
+                            <delay>3600</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>1</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: Uncommitted Space</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;summary.uncommitted&quot;]</key>
+                            <delay>300</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units>B</units>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME}: URL</name>
+                            <type>10</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;info.url&quot;]</key>
+                            <delay>300</delay>
+                            <history>30</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>1</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>vSphere Datastores</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template VMware vCenter Datastore Detect - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;summary.accessible&quot;].min(5)}=0</expression>
+                            <name>Datastore {#VSPHERE.DATASTORE.NAME} is not accessible</name>
+                            <url/>
+                            <status>0</status>
+                            <priority>2</priority>
+                            <description>Datastore {#VSPHERE.DATASTORE.NAME} is not accessible&#13;
+&#13;
+vSphere Host: {$VSPHERE.HOST}</description>
+                            <type>0</type>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template VMware vCenter Datastore Detect - vPoller with C client:cvpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{#VSPHERE.DATASTORE.INFO.URL}&quot;, &quot;-p&quot;, &quot;freeSpacePercentage&quot;].min(5)}&lt;20</expression>
+                            <name>Free space is less than 20% on datastore {#VSPHERE.DATASTORE.NAME}</name>
+                            <url/>
+                            <status>0</status>
+                            <priority>4</priority>
+                            <description>Free space is less than 20% on datastore {#VSPHERE.DATASTORE.NAME}&#13;
+&#13;
+Datastore free space: {ITEM.LASTVALUE}%&#13;
+vSphere Host: {$VSPHERE.HOST}</description>
+                            <type>0</type>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <graph_prototypes/>
+                    <host_prototypes/>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Discover VMware Datastores - Individual objects</name>
+                    <type>10</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>vpoller-zabbix[&quot;-m&quot;, &quot;datastore.discover&quot;, &quot;-V&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;info.url&quot;]</key>
+                    <delay>3600</delay>
+                    <status>1</status>
+                    <allowed_hosts/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <filter>:</filter>
+                    <lifetime>30</lifetime>
+                    <description>Discovery of VMware Datastores - Individual Host objects are created for each Datastore&#13;
+&#13;
+- Enable this one if you want datastores as host objects&#13;
+&#13;
+-&gt; Default is disabled</description>
+                    <item_prototypes/>
+                    <trigger_prototypes/>
+                    <graph_prototypes/>
+                    <host_prototypes>
+                        <host_prototype>
+                            <host>{#VSPHERE.DATASTORE.NAME}</host>
+                            <name>{#VSPHERE.DATASTORE.INFO.URL}</name>
+                            <status>0</status>
+                            <group_links>
+                                <group_link>
+                                    <group>
+                                        <name>Datastores</name>
+                                    </group>
+                                </group_link>
+                            </group_links>
+                            <group_prototypes/>
+                            <templates>
+                                <template>
+                                    <name>Template VMware vCenter Datastore - vPoller with C client</name>
+                                </template>
+                            </templates>
+                        </host_prototype>
+                    </host_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros/>
+            <templates/>
+            <screens/>
+        </template>
+    </templates>
+</zabbix_export>
