@@ -67,7 +67,9 @@ class VPollerWorkerManager(object):
             'shutdown': self.shutdown,
         }
         self.config_defaults = {
+            'db': '/var/lib/vconnector/vconnector.db',
             'mgmt': 'tcp://*:10000',
+            'proxy': 'tcp://localhost:10123',
         }
 
     def start(self):
@@ -132,7 +134,10 @@ class VPollerWorkerManager(object):
             self.num_workers = multiprocessing.cpu_count()
 
         for i in xrange(self.num_workers):
-            worker = VPollerWorker(config=self.config_file)
+            worker = VPollerWorker(
+                db=self.config.get('db'),
+                proxy=self.config.get('proxy')
+            )
             worker.daemon = True
             self.workers.append(worker)
             worker.start()
