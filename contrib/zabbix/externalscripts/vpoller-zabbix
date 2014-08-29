@@ -7,19 +7,25 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Initialize our own variables:
 whitespace="[[:space:]]"
 _vsphere=
-#_args="$@"
-_args=''
+normal=`echo $@ | grep -E "(cluster|datacenter)" | wc -l`
 
-### Process command line with spaces in
-for i in "$@"
-do
+if [ $normal -ne 0 ]
+then
+  _args=''
+
+  ### Process command line with spaces in
+  for i in "$@"
+  do
     if [[ $i =~ $whitespace ]]
     then
        _args="${_args} \"$i\""
     else
        _args="${_args} $i"
     fi
-done
+  done
+else
+  _args="$@"
+fi
 
 ### Processing opts to retrieve vSphere host
 while getopts "hvDm:n:p:r:t:e:V:k:U:P:o:H:" opt
@@ -63,5 +69,9 @@ then
 fi
 
 ### Excute the vpoller-client
-sh -c "vpoller-client -H vpoller.helpers.zabbix ${_args}" | awk '{print $1;}'
-#vpoller-client -H vpoller.helpers.zabbix ${_args}
+if [ $normal -ne 0 ]
+then
+  sh -c "vpoller-client -H vpoller.helpers.zabbix ${_args}" | awk '{print $1;}'
+else
+  vpoller-client -H vpoller.helpers.zabbix ${_args}
+fi
