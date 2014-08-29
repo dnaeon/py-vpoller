@@ -39,7 +39,7 @@ shift $((OPTIND-1))
 ### Detect if vcenter SDK is available
 _url="https://${_vsphere}/sdk"
 _curl_bin=`which curl`
-_curl_options="-k"
+_curl_options="--connect-timeout 3 -k"
 
 if [ ! -f $_curl_bin ]
 then

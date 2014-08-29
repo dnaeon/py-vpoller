@@ -35,7 +35,7 @@ _property_name=`echo ${_args} | sed -ne 's|.* -p \([a-zA-Z\.]*\)|\1|p'`
 ### Detect if vcenter SDK is available
 _url="https://${_vsphere}/sdk"
 _curl_bin=`which curl`
-_curl_options="-k"
+_curl_options="--connect-timeout 3 -k"
 
 if [ ! -f $_curl_bin ]
 then
