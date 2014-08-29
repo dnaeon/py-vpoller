@@ -63,8 +63,8 @@ class VPollerWorkerManager(object):
         self.zpoller = None
         self.mgmt_socket = None
         self.mgmt_methods = {
-            'status': status,
-            'shutdown': shutdown,
+            'status': self.status,
+            'shutdown': self.shutdown,
         }
         self.config_defaults = {
             'mgmt': 'tcp://*:10000',
@@ -98,8 +98,14 @@ class VPollerWorkerManager(object):
         """
         Set the exit flag for shutting down
 
+        Usually this method is intended to be called through the management interface
+
         """
+        msg = 'Shutdown time has arrived, stopping vPoller Worker'
+        logging.info(msg)
         self.time_to_die.set()
+
+        return { 'success': 0, 'msg': msg }
 
     def load_config(self):
         """
@@ -207,7 +213,7 @@ class VPollerWorkerManager(object):
             return { 'success': 1, 'msg': 'Unknown method received' }
 
         method = msg['method']
-        result = self.mgmt_methods[method]
+        result = self.mgmt_methods[method]()
 
         return result
  
@@ -227,7 +233,7 @@ class VPollerWorkerManager(object):
                 'proxy': self.config.get('proxy'),
                 'mgmt': self.config.get('mgmt'),
                 'db': self.config.get('db'),
-                'workers': .len(self.workers),
+                'workers': len(self.workers),
                 'uname': ' '.join(os.uname()),
             }
         }
