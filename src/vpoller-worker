@@ -33,44 +33,42 @@ performing the actual polling from a vCenter server.
 
 """
 
+import os
 import json
 import logging
+import multiprocessing
 
 from sys import exit
 
 from vpoller.client import VPollerClient
-from vpoller.worker import VPollerWorker
+from vpoller.worker import VPollerWorkerManager
 from docopt import docopt
 
-def start(pidfile, config, daemon):
+def start(config, workers):
     """
-    Start the VPoller Worker daemon
+    Start the vPoller Worker
 
     Args:
-        pidfile (string): Location to the daemon's pidfile
-        config  (string): Configuration file of the VPoller Worker
-        daemon    (bool): If True daemonize the VPoller Worker
+        config  (string): Path to the vPoller configuration file
+        workers    (int): Number of Worker processes to start
 
     """
-    worker = VPollerWorker(pidfile)
-
-    if daemon:
-        # Run as daemon
-        worker.start(config)
-    else:
-        # Run in the foreground
-        worker.run(config)
+    manager = VPollerWorkerManager(
+        config_file=config,
+        num_workers=int(workers)
+    )
+    manager.start()
 
 def stop(endpoint):
     """
-    Stops the VPoller Worker daemon
+    Stops the vPoller Worker
 
     Args:
         endpoint (string): The endpoint we send the shutdown message to
 
     """
     # The message we send to initiate the shutdown sequence
-    msg = { "method": "worker.shutdown" }
+    msg = { "method": "shutdown" }
 
     # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
@@ -80,14 +78,14 @@ def stop(endpoint):
 
 def status(endpoint):
     """
-    Get status information from the VPoller Worker daemon
+    Get status information from the vPoller Worker
 
     Args:
         endpoint (string): The endpoint we send the status request to
     
     """
     # The message we send to get status information
-    msg = { "method": "worker.status" }
+    msg = { "method": "status" }
 
     # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
@@ -97,57 +95,50 @@ def status(endpoint):
 
 def main():
     usage="""
-Usage: vpoller-worker [-d] [-D|-W] [-p <pidfile>] [-f <config>] [-o <logfile>] start
-       vpoller-worker [-D] -e <endpoint> stop
-       vpoller-worker [-D] -e <endpoint> status
+Usage: vpoller-worker [-d] [-c <concurrency>] [-f <config>] start
+       vpoller-worker [-d] -e <endpoint> stop
+       vpoller-worker [-d] -e <endpoint> status
        vpoller-worker --help
        vpoller-worker --version
 
 Arguments:
-  start                                     Start the VPoller Worker
-  stop                                      Stop the VPoller Worker
-  status                                    Get status information
+  start                                          Start the VPoller Worker
+  stop                                           Stop the VPoller Worker
+  status                                         Get status information
 
 Options:
-  -h, --help                                Display this usage info
-  -v, --version                             Display version and exit
-  -d, --daemon                              Start as a daemon, otherwise
-                                            run in the foreground
-  -D, --debug                               Debug mode, be more verbose
-  -W, --warning                             Log only warning and error messages
-  -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
-                                            [default: /var/run/vpoller/vpoller-worker.pid]
-  -f <config>, --file <config>              Specify config file to use
-                                            [default: /etc/vpoller/vpoller.conf]
-  -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
-  -o <logfile>, --output <logfile>          Specify the logfile to use
-                                            [default: /var/log/vpoller/vpoller-worker.log]
+  -h, --help                                     Display this usage info
+  -v, --version                                  Display version and exit
+  -d, --debug                                    Debug mode, be more verbose
+  -c <concurrency>, --concurrency <concurrency>  The number of worker processes to be created.
+                                                 The default is the number of CPUs available on
+                                                 the system.
+  -f <config>, --file <config>                   Specify config file to use
+                                                 [default: /etc/vpoller/vpoller.conf]
+  -e <endpoint>, --endpoint <endpoint>           Specify the endpoint we connect to
+
 """
 
     args = docopt(usage, version='0.2.9')
 
+    if not os.path.exists(args['--file']):
+        raise SystemExit, 'Configuration file %s does not exist'
+    
     if args['--debug']:
         level = logging.DEBUG
-    elif args['--warning']:
-        level = logging.WARNING
     else:
         level = logging.INFO
 
-    logging.basicConfig(
-        filename=args['--output'],
-        format='%(asctime)s - %(levelname)s - vpoller-worker[%(process)s]: %(message)s',
-        level=level
-    )
+    logger = multiprocessing.log_to_stderr()
+    logger.setLevel(level)
 
-    result = None
-    rc = 0
-        
     if args['start']:
-        start(
-            args['--pidfile'],
-            args['--file'],
-            args['--daemon']
-        )
+        if not args['--concurrency'] or args['--concurrency'] <= 0:
+            concurrency = multiprocessing.cpu_count()
+        else:
+            concurrency = args['--concurrency']
+            
+        start(config=args['--file'], workers=concurrency)
     elif args['stop']:
         result = stop(args['--endpoint'])
     elif args['status']:
@@ -158,7 +149,7 @@ Options:
         print json.dumps(result, indent=4)
 
     exit(rc)
-        
+
 if __name__ == '__main__':
     main()
 
