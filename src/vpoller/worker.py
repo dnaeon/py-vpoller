@@ -251,18 +251,37 @@ class VPollerWorker(multiprocessing.Process):
     """
     VPollerWorker class
 
-    Prepares all vSphere Agents for polling from the vSphere hosts.
+    A vPoller Worker object runs the vSphere Agents, which are
+    responsible for making vSphere API requests
 
-    This is the main vPoller Worker, which runs the vSphere Agents
-    
     Extends:
-        Daemon class
+        multiprocessing.Process
 
     Overrides:
         run() method
 
     """
-    def run(self, config):
+    def __init__(self, db, proxy):
+        """
+        Initialize a new VPollerWorker object
+
+        Args:
+            db    (str): Path to the vConnector database file
+            proxy (str): Endpoint from which the vPoller Worker receives new tasks
+
+        """
+        super(VPollerWorker, self).__init__()
+        self.config = {
+            'db': db,
+            'proxy': proxy,
+        }
+        self.time_to_die = multiprocessing.Event()
+        self.agents = {}
+        self.zcontext = None
+        self.zpoller = None
+        self.worker_socket = None
+
+    def run(self):
         """
         The main worker method.
 
