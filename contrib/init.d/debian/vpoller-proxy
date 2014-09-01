@@ -12,7 +12,7 @@
 # Short-Description: vPoller Proxy daemon
 ### END INIT INFO
 # /etc/init.d/vpoller-worker: start and stop the VPoller Worker daemon
-set -e
+#set -e
 
 ### Change depending on installation: standalone or together with zabbix
 USER=zabbix
@@ -22,7 +22,8 @@ GROUP=zabbix
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 DESC="vpoller-proxy daemon"
 NAME=vpoller-proxy
-DAEMON=`which vpoller-proxy`
+DAEMON=`which $NAME`
+DAEMON_ARGS="-d start"
 SCRIPTNAME=/etc/init.d/"$NAME"
 MGMT_INTERFACE="tcp://localhost:9999"
 PID_DIR=/var/run/vpoller
@@ -39,47 +40,67 @@ if [ ! -d ${LOG_DIR} ]; then
   chown ${USER}:${GROUP} ${LOG_DIR}
 fi
 
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
+# and status_of_proc is working.
 . /lib/lsb/init-functions
 
+#
+# Function that starts the daemon/service
+#
 do_start() {
-  log_daemon_msg "Starting $DESC" "$NAME"
-  start-stop-daemon -u ${USER} -g ${GROUP} --oknodo --start --pidfile $PID \
-    --exec $DAEMON -- -d start >/dev/null 2>&1
-  case "$?" in
-    0) log_end_msg 0 ;;
-    *) log_end_msg 1; exit 1 ;;
-    esac
+  start-stop-daemon --start --quiet --pidfile $PID \
+    --exec $DAEMON --chuid $USER:$GROUP -- $DAEMON_ARGS --test  >/dev/null 2>&1 || return 1
+  start-stop-daemon --start --quiet --pidfile $PID \
+    --exec $DAEMON --chuid $USER:$GROUP -- $DAEMON_ARGS >/dev/null 2>&1 || return 2
 }
 
 do_stop() {
-  log_daemon_msg "Stopping $DESC" "$NAME"
-  start-stop-daemon --oknodo --stop --pidfile $PID
-  case "$?" in
-    0) log_end_msg 0 ;;
-    *) log_end_msg 1; exit 1 ;;
-  esac
-
+  start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
+  RETVAL="$?"
+  [ "$RETVAL" = 2 ] && return 2
+  rm -f $PIDFILE
+  return "$RETVAL"
 }
 
-do_status() {
+do_full_status() {
     ${DAEMON} -e ${MGMT_INTERFACE} status
 }
 
 case "${1}" in
-    start)
-        do_start
-        ;;
-    reset|stop)
-        do_stop
-        ;;
-    status)
-        do_status
-        ;;
-    reload|restart|force-reload)
-        do_stop
-        do_start
-        ;;
-    *)
-        log_success_msg "usage: ${0} {start|stop|status|reload|restart|force-reload|reset}" >&2
-        ;;
+  start)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+    do_start
+    case "$?" in
+      0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+      2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
+  reset|stop)
+    [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+    do_stop
+    case "$?" in
+      0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+      2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
+  status)
+    status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+    ;;
+  fullstatus)
+    do_full_status
+    ;;
+  reload|restart|force-reload)
+    do_stop
+    do_start
+    ;;
+  *)
+    log_success_msg "usage: ${0} {start|stop|status|fullstatus||reload|restart|force-reload|reset}" >&2
+    ;;
 esac
