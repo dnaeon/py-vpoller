@@ -58,16 +58,14 @@ fi
 #
 do_start() {
   start-stop-daemon --start --quiet --pidfile $PID \
-    --exec $DAEMON --chuid $USER:$GROUP -- $DAEMON_ARGS --test  >/dev/null 2>&1 || return 1
-  start-stop-daemon --start --quiet --pidfile $PID \
     --exec $DAEMON --chuid $USER:$GROUP -- $DAEMON_ARGS >/dev/null 2>&1 || return 2
 }
 
 do_stop() {
-  start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
+  start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PID --name $NAME
   RETVAL="$?"
   [ "$RETVAL" = 2 ] && return 2
-  rm -f $PIDFILE
+  rm -f $PID
   return "$RETVAL"
 }
 
