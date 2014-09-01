@@ -43,7 +43,7 @@ fi
 
 do_start() {
   log_daemon_msg "Starting $DESC" "$NAME"
-  start-stop-daemon -c ${USER}:${GROUP} --oknodo --start --pidfile $PID \
+  start-stop-daemon -u ${USER} -g ${GROUP} --oknodo --start --pidfile $PID \
     --exec $DAEMON -- -d start >/dev/null 2>&1
   case "$?" in
     0) log_end_msg 0 ;;
