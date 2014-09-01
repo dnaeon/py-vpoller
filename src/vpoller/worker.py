@@ -115,7 +115,7 @@ class VPollerWorkerManager(object):
         parser = ConfigParser.ConfigParser(self.config_defaults)
         parser.read(self.config_file)
 
-        self.config['mgmt'] = parser.get('worker:manager', 'mgmt')
+        self.config['mgmt'] = parser.get('worker', 'mgmt')
         self.config['db'] = parser.get('worker', 'db')
         self.config['proxy'] = parser.get('worker', 'proxy')
         
