@@ -1,8 +1,8 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          vpoller-proxy
-# Required-Start:
-# Required-Stop:
+# Required-Start:    $remote_fs $network
+# Required-Stop:     $remote_fs
 # X-Start-Before:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
