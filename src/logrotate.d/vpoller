@@ -6,7 +6,7 @@
 #  rotate 4
 #  monthly
 #  compress
-  create 640 zabbix zabbix
+#  create 660 vpoller vpoller
   notifempty
   size 5M
   sharedscripts
