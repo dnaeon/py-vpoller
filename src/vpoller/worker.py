@@ -157,10 +157,8 @@ class VPollerWorkerManager(object):
         logging.debug('Creating vPoller Worker Manager sockets')
 
         self.zcontext = zmq.Context()
-        
         self.mgmt_socket = self.zcontext.socket(zmq.REP)
         self.mgmt_socket.bind(self.config.get('mgmt'))
-
         self.zpoller = zmq.Poller()
         self.zpoller.register(self.mgmt_socket, zmq.POLLIN)
 
