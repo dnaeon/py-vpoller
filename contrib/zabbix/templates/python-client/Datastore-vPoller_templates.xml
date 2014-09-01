@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-08-21T12:53:51Z</date>
+    <date>2014-09-01T06:51:09Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -9,8 +9,8 @@
     </groups>
     <templates>
         <template>
-            <template>Template VMware vSphere Datastore - vPoller</template>
-            <name>Template VMware vSphere Datastore - vPoller</name>
+            <template>Template VMware vCenter Datastore - vPoller</template>
+            <name>Template VMware vCenter Datastore - vPoller</name>
             <groups>
                 <group>
                     <name>Templates</name>
@@ -535,7 +535,7 @@
     </templates>
     <triggers>
         <trigger>
-            <expression>{Template VMware vSphere Datastore - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.accessible&quot;].min(5)}=0</expression>
+            <expression>{Template VMware vCenter Datastore - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.accessible&quot;].min(5)}=0</expression>
             <name>Datastore {HOST.HOST} is not accessible</name>
             <url/>
             <status>0</status>
@@ -548,7 +548,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Datastore - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;freeSpacePercentage&quot;].min(5)}&lt;20</expression>
+            <expression>{Template VMware vCenter Datastore - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;datastore.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;freeSpacePercentage&quot;].min(5)}&lt;20</expression>
             <name>Free space is less than 20% on datastore {HOST.HOST}</name>
             <url/>
             <status>0</status>

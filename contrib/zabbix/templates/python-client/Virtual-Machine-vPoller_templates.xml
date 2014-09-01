@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-08-21T12:55:40Z</date>
+    <date>2014-09-01T06:53:16Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -9,8 +9,8 @@
     </groups>
     <templates>
         <template>
-            <template>Template VMware vSphere Virtual Machine - vPoller</template>
-            <name>Template VMware vSphere Virtual Machine - vPoller</name>
+            <template>Template VMware vCenter Virtual Machine - vPoller</template>
+            <name>Template VMware vCenter Virtual Machine - vPoller</name>
             <groups>
                 <group>
                     <name>Templates</name>
@@ -1511,7 +1511,7 @@
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template VMware vSphere Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.disk.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-k&quot;, {#VSPHERE.VM.DISKPATH}, &quot;-p&quot;, &quot;freeSpacePercentage&quot;].min(5)}&lt;20</expression>
+                            <expression>{Template VMware vCenter Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.disk.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-k&quot;, {#VSPHERE.VM.DISKPATH}, &quot;-p&quot;, &quot;freeSpacePercentage&quot;].min(5)}&lt;20</expression>
                             <name>Less than 20% of free space on {#VSPHERE.VM.DISKPATH} at {HOST.NAME}</name>
                             <url/>
                             <status>0</status>
@@ -1535,7 +1535,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
     </templates>
     <triggers>
         <trigger>
-            <expression>{Template VMware vSphere Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.overallStatus&quot;].iregexp(red,5)}=1</expression>
+            <expression>{Template VMware vCenter Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;summary.overallStatus&quot;].iregexp(red,5)}=1</expression>
             <name>Overall status of Virtual Machine {HOST.NAME} is {ITEM.LASTVALUE}</name>
             <url/>
             <status>0</status>
@@ -1548,7 +1548,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;runtime.powerState&quot;].iregexp(poweredOff,5)}=1</expression>
+            <expression>{Template VMware vCenter Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;runtime.powerState&quot;].iregexp(poweredOff,5)}=1</expression>
             <name>Virtual Machine {HOST.NAME} is powered off</name>
             <url/>
             <status>0</status>
@@ -1561,7 +1561,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;guest.toolsRunningStatus&quot;].iregexp(guestToolsNotRunning,5)}=1</expression>
+            <expression>{Template VMware vCenter Virtual Machine - vPoller:vpoller-zabbix[&quot;-m&quot;, &quot;vm.get&quot;, &quot;-V&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;-n&quot;, &quot;{HOST.NAME}&quot;, &quot;-p&quot;, &quot;guest.toolsRunningStatus&quot;].iregexp(guestToolsNotRunning,5)}=1</expression>
             <name>VMware Tools not running on {HOST.NAME}</name>
             <url/>
             <status>0</status>
