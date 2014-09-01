@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Simple wrapper script to use with Zabbix and the C client of vPoller
+# Simple wrapper script to use with Zabbix helper
 
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
@@ -7,18 +7,25 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Initialize our own variables:
 whitespace="[[:space:]]"
 _vsphere=
-_args=''
+normal=`echo $@ | grep -E "(cluster|datacenter)" | wc -l`
 
-### Process command line with spaces in
-for i in "$@"
-do
+if [ $normal -ne 0 ]
+then
+  _args=''
+
+  ### Process command line with spaces in
+  for i in "$@"
+  do
     if [[ $i =~ $whitespace ]]
     then
        _args="${_args} \"$i\""
     else
        _args="${_args} $i"
     fi
-done
+  done
+else
+  _args="$@"
+fi
 
 ### Processing opts to retrieve vSphere host
 while getopts "hvDm:n:p:r:t:e:V:k:U:P:o:H:" opt
@@ -29,13 +36,10 @@ do
 done
 shift $((OPTIND-1))
 
-### Filter the property name out of the args
-_property_name=`echo ${_args} | sed -ne 's|.* -p \([a-zA-Z\.]*\)|\1|p'`
-
 ### Detect if vcenter SDK is available
 _url="https://${_vsphere}/sdk"
 _curl_bin=`which curl`
-_curl_options="-k"
+_curl_options="--connect-timeout 3 -k"
 
 if [ ! -f $_curl_bin ]
 then
@@ -64,5 +68,10 @@ then
   fi
 fi
 
-# Rename property as it might contain dots in the complete property name, so that 'jq' can parse it
-sh -c "vpoller-cclient ${_args} 2>/dev/null" | jq -r ".result[0] | {\"property\": .[\"${_property_name}\"]}.property"
+### Excute the vpoller-client
+if [ $normal -ne 0 ]
+then
+  sh -c "vpoller-client -H vpoller.helpers.zabbix ${_args}" | awk '{print $1;}'
+else
+  vpoller-client -H vpoller.helpers.zabbix ${_args}
+fi

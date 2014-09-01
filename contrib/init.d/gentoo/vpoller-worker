@@ -4,18 +4,9 @@
 
 . /etc/init.d/functions.sh
 
-extra_started_commands="fullstatus"
+extra_commands="fullstatus"
 
 description_fullstatus="Gives the full status of the server."
-
-DESC="vpoller-worker daemon"
-DAEMON=/usr/bin/vpoller-worker
-MGMT_INTERFACE="tcp://localhost:10000"
-CONF_DIR=/etc/vpoller
-CONF_FILE=${CONF_DIR}/vpoller.conf
-PID_DIR=/var/run/vpoller
-LOG_DIR=/var/log/vpoller
-PID_FILE=${PID_DIR}/vpoller-worker.pid
 
 depend() {
 	use logger net
@@ -23,8 +14,8 @@ depend() {
 }
 
 checkconfig() {
-    checkpath --directory -m 0755 -o zabbix:zabbix ${PID_DIR}
-    checkpath --directory -m 0755 -o zabbix:zabbix ${LOG_DIR}
+    checkpath --directory -m 0755 -o ${USER}:${GROUP} ${PID_DIR}
+    checkpath --directory -m 0755 -o ${USER}:${GROUP} ${LOG_DIR}
 }
 
 start() {
@@ -46,7 +37,7 @@ start() {
 #  $DAEMON -d start >/dev/null 2>&1
   start-stop-daemon --start --quiet \
     --pidfile "${PID_FILE}" \
-    --user zabbix --group zabbix \
+    --user ${USER} --group ${GROUP} \
     --exec ${DAEMON} -- \
     -d start
   eend $?

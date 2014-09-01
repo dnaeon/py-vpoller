@@ -1,0 +1,19 @@
+# conf.d file for vpoller-proxy
+
+## Standalone proxy
+#USER=vpoller
+#GROUP=vpoller
+### Proxy on zabbix server
+USER=zabbix
+GROUP=zabbix
+
+####
+DESC="vpoller-proxy daemon"
+DAEMON=/usr/bin/vpoller-proxy
+MGMT_INTERFACE="tcp://localhost:9999"
+CONF_DIR=/etc/vpoller
+CONF_FILE=${CONF_DIR}/vpoller.conf
+PID_DIR=/var/run/vpoller
+LOG_DIR=/var/log/vpoller
+PID_FILE=${PID_DIR}/vpoller-proxy.pid
+
