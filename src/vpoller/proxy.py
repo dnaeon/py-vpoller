@@ -28,12 +28,13 @@ vPoller Proxy module for the VMware vSphere Poller
 """
 
 import os
-import logging
 import ConfigParser
 import multiprocessing
 
 import zmq
 from vpoller.core import VPollerException
+
+logger = multiprocessing.get_logger()
 
 class VPollerProxyManager(object):
     """
@@ -70,7 +71,7 @@ class VPollerProxyManager(object):
         Start the vPoller Proxy processes
 
         """
-        logging.info('Starting vPoller Proxy Manager')
+        logger.info('Starting vPoller Proxy Manager')
 
         self.load_config()
         self.create_sockets()
@@ -103,7 +104,7 @@ class VPollerProxyManager(object):
         Load the vPoller Proxy Manager configuration settings
         
         """
-        logging.debug('Loading config file %s', self.config_file)
+        logger.debug('Loading config file %s', self.config_file)
 
         parser = ConfigParser.ConfigParser(self.config_defaults)
         parser.read(self.config_file)
@@ -117,7 +118,7 @@ class VPollerProxyManager(object):
         Start the vPoller Proxy process
 
         """
-        logging.info('Starting vPoller Proxy process')
+        logger.info('Starting vPoller Proxy process')
         
         self.proxy = VPollerProxy(
             frontend=self.config.get('frontend'),
@@ -131,7 +132,7 @@ class VPollerProxyManager(object):
         Stop the vPoller Proxy process
         
         """
-        logging.info('Stopping vPoller Proxy process')
+        logger.info('Stopping vPoller Proxy process')
         
         self.proxy.signal_stop()
         self.proxy.join(3)
@@ -152,7 +153,7 @@ class VPollerProxyManager(object):
         Closes the ZeroMQ sockets used by the vPoller Proxy Manager
 
         """
-        logging.info('Closing vPoller Proxy Manager sockets')
+        logger.info('Closing vPoller Proxy Manager sockets')
 
         self.zpoller.unregister(self.mgmt_socket)
         self.mgmt_socket.close()
@@ -168,7 +169,7 @@ class VPollerProxyManager(object):
             try:
                 msg = self.mgmt_socket.recv_json()
             except TypeError as e:
-                logging.warning('Invalid message received on management interface: %s', msg)
+                logger.warning('Invalid message received on management interface: %s', msg)
                 return
 
             result = self.process_mgmt_task(msg)
@@ -188,7 +189,7 @@ class VPollerProxyManager(object):
             msg (dict): The client message for processing
 
         """
-        logging.debug('Processing management message: %s', msg)
+        logger.debug('Processing management message: %s', msg)
 
         if 'method' not in msg:
             return { 'success': 1, 'msg': 'Missing method name' }
@@ -255,7 +256,7 @@ class VPollerProxy(multiprocessing.Process):
         self.backend = None
         
     def run(self):
-        logging.info('vPoller Proxy process is starting')
+        logger.info('vPoller Proxy process is starting')
 
         self.create_sockets()
 
@@ -283,7 +284,7 @@ class VPollerProxy(multiprocessing.Process):
         Distributes tasks from frontend to backend socket for processing
 
         """
-        socks = dict(self.zpoller.poll())
+        socks = dict(self.zpoller.poll(1000))
 
         # Forward task from frontend to backend socket
         if socks.get(self.frontend) == zmq.POLLIN:
@@ -308,7 +309,7 @@ class VPollerProxy(multiprocessing.Process):
         Creates the ZeroMQ sockets used by the vPoller Proxy process
             
         """
-        logging.info('Creating vPoller Proxy process sockets')
+        logger.info('Creating vPoller Proxy process sockets')
 
         self.zcontext = zmq.Context()
         self.frontend = self.zcontext.socket(zmq.ROUTER)
@@ -324,7 +325,7 @@ class VPollerProxy(multiprocessing.Process):
         Closes the ZeroMQ sockets used by vPoller Proxy process
 
         """
-        logging.info('Closing vPoller Proxy process sockets')
+        logger.info('Closing vPoller Proxy process sockets')
 
         self.zpoller.unregister(self.frontend)
         self.zpoller.unregister(self.backend)

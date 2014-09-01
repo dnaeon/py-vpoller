@@ -30,74 +30,60 @@ between a pool of ZeroMQ workers.
 
 """
 
+import os
 import json
 import logging
+import multiprocessing
 
 from sys import exit
 
 from vpoller.client import VPollerClient
-from vpoller.proxy import VPollerProxy
+from vpoller.proxy import VPollerProxyManager
 from docopt import docopt
 
-def start(pidfile, config, daemon):
+def start(config):
     """
     Start the VPoller Proxy daemon
 
     Args:
-        pidfile (string): Location to the daemon's pidfile
-        config  (string): Configuration file of the VPoller Proxy
-        daemon    (bool): If True daemonize the VPoller Proxy
+        config  (string): Path to the vPoller configuration file
 
     """
-    proxy = VPollerProxy(pidfile)
-
-    if daemon:
-        # Run as daemon
-        proxy.start(config)
-    else:
-        # Run in the foreground
-        proxy.run(config)
+    manager = VPollerProxyManager(config_file=config)
+    manager.start()
 
 def stop(endpoint):
     """
-    Stops the VPoller Proxy daemon
+    Stops the VPoller Proxy
 
     Args:
         endpoint (string): The endpoint we send the shutdown message to
 
     """
-    # The message we send to initiate the shutdown sequence
-    msg = { "method": "proxy.shutdown" }
-
-    # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
-    result = client.run(msg)
+    result = client.run({'method': 'shutdown'})
 
     return result
 
 def status(endpoint):
     """
-    Get status information from the VPoller Proxy daemon
+    Get status information from the VPoller Proxy
 
     Args:
         endpoint (string): The endpoint we send the status message to
     
     """
-    # The message we send to get status information
-    msg = { "method": "proxy.status" }
-
-    # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
-    result = client.run(msg)
+    result = client.run({'method': 'status'})
 
     return result
     
 def main():
 
     usage="""
-Usage: vpoller-proxy [-d] [-D] [-p <pidfile>] [-f <config-file>] [-o <logfile>] start
-       vpoller-proxy [-D] -e <endpoint> stop
-       vpoller-proxy [-D] -e <endpoint> status
+Usage: vpoller-proxy [-d] [-f <config>] start
+       vpoller-proxy [-d] -e <endpoint> stop
+       vpoller-proxy [-d] -e <endpoint> status
        vpoller-proxy --help
        vpoller-proxy --version
 
@@ -109,38 +95,35 @@ Arguments:
 Options:
   -h, --help                                Display this usage info
   -v, --version                             Display version and exit
-  -d, --daemon                              Start as a daemon, otherwise
-                                            run in the foreground
-  -D, --debug                               Debug mode, be more verbose
-  -p <pidfile>, --pidfile <pidfile>         Specify pidfile file to use
-                                            [default: /var/run/vpoller/vpoller-proxy.pid]
-  -f <config-file>, --config <config-file>  Specify config file to use
+  -d, --debug                               Debug mode, be more verbose
+  -f <config>, --file <config>              Specify config file to use
                                             [default: /etc/vpoller/vpoller.conf]
   -e <endpoint>, --endpoint <endpoint>      Specify the endpoint we connect to
-  -o <logfile>, --output <logfile>          Specify the logfile to use
-                                            [default: /var/log/vpoller/vpoller-proxy.log]
 
 """
 
     args = docopt(usage, version='0.2.9')
 
-    level = logging.DEBUG if args['--debug'] else logging.INFO
+    if not os.path.exists(args['--file']):
+        raise SystemExit, 'Configuration file %s does not exist'
+    
+    if args['--debug']:
+        level = logging.DEBUG
+    else:
+        level = logging.INFO
 
-    logging.basicConfig(
-        filename=args['--output'],
-        format='%(asctime)s - %(levelname)s - vpoller-proxy[%(process)s]: %(message)s',
-        level=level
-    )
+    logger = multiprocessing.log_to_stderr()
+    logger.setLevel(level)
 
     result = None
     rc = 0
-        
-    if args["start"]:
-        start(args["--pidfile"], args["--config"], args["--daemon"])
-    elif args["stop"]:
-        result = stop(args["--endpoint"])
+
+    if args['start']:
+        start(args['--file'])
+    elif args['stop']:
+        result = stop(args['--endpoint'])
     elif args["status"]:
-        result = status(args["--endpoint"])
+        result = status(args['--endpoint'])
 
     if result:
         rc = result['success']
