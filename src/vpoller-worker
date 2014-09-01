@@ -44,18 +44,18 @@ from vpoller.client import VPollerClient
 from vpoller.worker import VPollerWorkerManager
 from docopt import docopt
 
-def start(config, workers):
+def start(config, concurrency):
     """
     Start the vPoller Worker
 
     Args:
-        config  (string): Path to the vPoller configuration file
-        workers    (int): Number of Worker processes to start
+        config      (str): Path to the vPoller configuration file
+        concurrency (int): Number of Worker processes to start
 
     """
     manager = VPollerWorkerManager(
         config_file=config,
-        num_workers=int(workers)
+        num_workers=concurrency
     )
     manager.start()
 
@@ -67,12 +67,8 @@ def stop(endpoint):
         endpoint (string): The endpoint we send the shutdown message to
 
     """
-    # The message we send to initiate the shutdown sequence
-    msg = { "method": "shutdown" }
-
-    # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
-    result = client.run(msg)
+    result = client.run({'method': 'shutdown'})
 
     return result
 
@@ -84,12 +80,8 @@ def status(endpoint):
         endpoint (string): The endpoint we send the status request to
     
     """
-    # The message we send to get status information
-    msg = { "method": "status" }
-
-    # Send out our message
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
-    result = client.run(msg)
+    result = client.run({'method': 'status'})
 
     return result
 
@@ -132,13 +124,14 @@ Options:
     logger = multiprocessing.log_to_stderr()
     logger.setLevel(level)
 
+    result = None
+    rc = 0
+
     if args['start']:
-        if not args['--concurrency'] or args['--concurrency'] <= 0:
-            concurrency = multiprocessing.cpu_count()
-        else:
-            concurrency = args['--concurrency']
-            
-        start(config=args['--file'], workers=concurrency)
+        start(
+            config=args['--file'],
+            concurrency=args['--concurrency']
+        )
     elif args['stop']:
         result = stop(args['--endpoint'])
     elif args['status']:
