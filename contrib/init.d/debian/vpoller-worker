@@ -22,7 +22,6 @@ GROUP=zabbix
 PATH=/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 DESC="vpoller-worker daemon"
 NAME=vpoller-worker
-DAEMON=/usr/bin/vpoller-worker
 DAEMON=`which vpoller-worker`
 SCRIPTNAME=/etc/init.d/"$NAME"
 MGMT_INTERFACE="tcp://localhost:10000"
