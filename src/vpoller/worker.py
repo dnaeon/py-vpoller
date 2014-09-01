@@ -147,7 +147,7 @@ class VPollerWorkerManager(object):
         
         for worker in self.workers:
            worker.signal_stop()
-           worker.join()
+           worker.join(3)
 
     def create_sockets(self):
         """
