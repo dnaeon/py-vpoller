@@ -13,9 +13,6 @@
 # Author:          Kurt Dillen
 #
 
-# /etc/init.d/vpoller-worker: start and stop the VPoller Worker daemon
-#set -e
-
 ### Change depending on installation: standalone or together with zabbix
 USER=zabbix
 GROUP=zabbix
