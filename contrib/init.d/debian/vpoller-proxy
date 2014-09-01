@@ -1,7 +1,4 @@
 #!/bin/sh
-#
-# Author:          Kurt Dillen
-#
 ### BEGIN INIT INFO
 # Provides:          vpoller-proxy
 # Required-Start:
@@ -11,6 +8,11 @@
 # Default-Stop:      0 1 6
 # Short-Description: vPoller Proxy daemon
 ### END INIT INFO
+
+#
+# Author:          Kurt Dillen
+#
+
 # /etc/init.d/vpoller-worker: start and stop the VPoller Worker daemon
 #set -e
 
