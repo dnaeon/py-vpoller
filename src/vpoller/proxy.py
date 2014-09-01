@@ -27,9 +27,9 @@ vPoller Proxy module for the VMware vSphere Poller
 
 """
 
-import os
-import ConfigParser
 import multiprocessing
+from platform import node
+from ConfigParser import ConfigParser
 
 import zmq
 from vpoller.core import VPollerException
@@ -49,6 +49,7 @@ class VPollerProxyManager(object):
             config_file (str): Path to the vPoller configuration file
 
         """
+        self.node = node()
         self.config_file = config_file
         self.config = {}
         self.config_defaults = {
@@ -106,7 +107,7 @@ class VPollerProxyManager(object):
         """
         logger.debug('Loading config file %s', self.config_file)
 
-        parser = ConfigParser.ConfigParser(self.config_defaults)
+        parser = ConfigParser(self.config_defaults)
         parser.read(self.config_file)
 
         self.config['mgmt'] = parser.get('proxy', 'mgmt')
@@ -212,11 +213,10 @@ class VPollerProxyManager(object):
             'msg': 'vPoller Proxy status', 
             'result': {
                 'status': 'running',
-                'hostname': os.uname()[1],
+                'hostname': self.node,
                 'mgmt': self.config.get('mgmt'),
                 'frontend': self.config.get('frontend'),
                 'backend': self.config.get('backend'),
-                'uname': ' '.join(os.uname()),
             }
         }
 

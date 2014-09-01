@@ -25,12 +25,12 @@
 """
 vPoller Worker module for the VMware vSphere Poller
 
-"""   
+"""
 
-import os
 import types
-import ConfigParser
 import multiprocessing
+from platform import node
+from ConfigParser import ConfigParser
 
 import zmq
 from vpoller.core import VPollerException
@@ -54,6 +54,7 @@ class VPollerWorkerManager(object):
             num_workers (str): Number of vPoller Worker processes to create
 
         """
+        self.node = node()
         self.config_file = config_file
         self.num_workers = num_workers
         self.time_to_die = multiprocessing.Event()
@@ -112,7 +113,7 @@ class VPollerWorkerManager(object):
         """
         logger.debug('Loading config file %s', self.config_file)
 
-        parser = ConfigParser.ConfigParser(self.config_defaults)
+        parser = ConfigParser(self.config_defaults)
         parser.read(self.config_file)
 
         self.config['mgmt'] = parser.get('worker', 'mgmt')
@@ -228,12 +229,11 @@ class VPollerWorkerManager(object):
             'msg': 'vPoller Worker status',
             'result': {
                 'status': 'running',
-                'hostname': os.uname()[1],
+                'hostname': self.node,
                 'proxy': self.config.get('proxy'),
                 'mgmt': self.config.get('mgmt'),
                 'db': self.config.get('db'),
-                'workers': len(self.workers),
-                'uname': ' '.join(os.uname()),
+                'concurrency': len(self.workers),
             }
         }
 
