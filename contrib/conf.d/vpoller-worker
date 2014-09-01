@@ -1,0 +1,20 @@
+# conf.d file for vpoller-worker
+
+### Select which user to use
+## Standalone proxy
+#USER=vpoller
+#GROUP=vpoller
+### Proxy on zabbix server
+USER=zabbix
+GROUP=zabbix
+
+####
+DESC="vpoller-worker daemon"
+DAEMON=/usr/bin/vpoller-worker
+MGMT_INTERFACE="tcp://localhost:10000"
+CONF_DIR=/etc/vpoller
+CONF_FILE=${CONF_DIR}/vpoller.conf
+PID_DIR=/var/run/vpoller
+LOG_DIR=/var/log/vpoller
+PID_FILE=${PID_DIR}/vpoller-worker.pid
+
