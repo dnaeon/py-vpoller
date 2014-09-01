@@ -35,7 +35,6 @@ from ConfigParser import ConfigParser
 import zmq
 from vpoller.core import VPollerException
 from vpoller.agent import VSphereAgent
-from vpoller.daemon import Daemon
 from vconnector.core import VConnectorDatabase
 
 logger = multiprocessing.get_logger()
