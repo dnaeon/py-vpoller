@@ -59,7 +59,7 @@ class VPollerWorkerManager(object):
         self.time_to_die = multiprocessing.Event()
         self.config = {}
         self.workers = []
-        self.zcontenxt = None
+        self.zcontext = None
         self.zpoller = None
         self.mgmt_socket = None
         self.mgmt_methods = {
@@ -84,7 +84,7 @@ class VPollerWorkerManager(object):
         self.start_workers()
 
         while not self.time_to_die.is_set():
-            self.wait_for_mgmt_msg()
+            self.wait_for_mgmt_task()
 
         self.stop()
 
@@ -173,9 +173,9 @@ class VPollerWorkerManager(object):
         self.mgmt_socket.close()
         self.zcontext.term()
 
-    def wait_for_mgmt_msg(self):
+    def wait_for_mgmt_task(self):
         """
-        Poll the management socket for management requests
+        Poll the management socket for management tasks
 
         """
         socks = dict(self.zpoller.poll())
@@ -183,13 +183,13 @@ class VPollerWorkerManager(object):
             try:
                 msg = self.mgmt_socket.recv_json()
             except TypeError as e:
-                logging.warning('Invalid message received on management socket: %s', msg)
+                logging.warning('Invalid message received on management interface: %s', msg)
                 return
                 
-            result = self.process_mgmt_msg(msg)
+            result = self.process_mgmt_task(msg)
             self.mgmt_socket.send_json(result)
 
-    def process_mgmt_msg(self, msg):
+    def process_mgmt_task(self, msg):
         """
         Processes a message for the management interface
         
@@ -209,7 +209,7 @@ class VPollerWorkerManager(object):
             return { 'success': 1, 'msg': 'Missing method name' } 
         
         if msg['method'] not in self.mgmt_methods:
-            return { 'success': 1, 'msg': 'Unknown method received' }
+            return { 'success': 1, 'msg': 'Unknown method name received' }
 
         method = msg['method']
         result = self.mgmt_methods[method]()
