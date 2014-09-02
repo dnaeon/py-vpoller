@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # Simple wrapper script to use with Zabbix helper
 
 # A POSIX variable
@@ -7,7 +7,7 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Initialize our own variables:
 whitespace="[[:space:]]"
 _vsphere=
-normal=`echo $@ | grep -E "(cluster|datacenter)" | wc -l`
+normal=`echo $@ | grep -E "(cluster.get|datacenter.get)" | wc -l`
 
 if [ $normal -ne 0 ]
 then
@@ -71,7 +71,7 @@ fi
 ### Excute the vpoller-client
 if [ $normal -ne 0 ]
 then
-  sh -c "vpoller-client -H vpoller.helpers.zabbix ${_args}" | awk '{print $1;}'
+  bash -c "vpoller-client -H vpoller.helpers.zabbix ${_args}" | awk '{print $1;}'
 else
   vpoller-client -H vpoller.helpers.zabbix ${_args}
 fi
