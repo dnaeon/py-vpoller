@@ -33,7 +33,6 @@ from platform import node
 from ConfigParser import ConfigParser
 
 import zmq
-from vpoller.core import VPollerException
 
 class VPollerProxyManager(object):
     """
