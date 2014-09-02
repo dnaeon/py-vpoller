@@ -38,9 +38,7 @@ you can request for any specific vSphere managed object
 import types
 import logging
 
-import zmq
 import pyVmomi
-from vpoller.core import VPollerException
 from vconnector.core import VConnector
 
 class VSphereAgent(VConnector):
