@@ -50,7 +50,7 @@ class VPollerWorkerManager(object):
 
         Args:
             config_file (str): Path to the vPoller configuration file
-            num_workers (str): Number of vPoller Worker processes to create
+            num_workers (int): Number of vPoller Worker processes to create
 
         """
         self.node = node()
@@ -59,9 +59,9 @@ class VPollerWorkerManager(object):
         self.time_to_die = multiprocessing.Event()
         self.config = {}
         self.workers = []
-        self.zcontext = None
-        self.zpoller = None
-        self.mgmt_socket = None
+        self.zcontext = zmq.Context()
+        self.zpoller = zmq.Poller()
+        self.mgmt = self.zcontext.socket(zmq.REP)
         self.mgmt_methods = {
             'status': self.status,
             'shutdown': self.signal_stop,
@@ -156,11 +156,8 @@ class VPollerWorkerManager(object):
         """
         logger.debug('Creating vPoller Worker Manager sockets')
 
-        self.zcontext = zmq.Context()
-        self.mgmt_socket = self.zcontext.socket(zmq.REP)
-        self.mgmt_socket.bind(self.config.get('mgmt'))
-        self.zpoller = zmq.Poller()
-        self.zpoller.register(self.mgmt_socket, zmq.POLLIN)
+        self.mgmt.bind(self.config.get('mgmt'))
+        self.zpoller.register(self.mgmt, zmq.POLLIN)
 
     def close_sockets(self):
         """
@@ -169,8 +166,8 @@ class VPollerWorkerManager(object):
         """
         logger.debug('Closing vPoller Worker Manager sockets')
         
-        self.zpoller.unregister(self.mgmt_socket)
-        self.mgmt_socket.close()
+        self.zpoller.unregister(self.mgmt)
+        self.mgmt.close()
         self.zcontext.term()
 
     def wait_for_mgmt_task(self):
@@ -179,15 +176,15 @@ class VPollerWorkerManager(object):
 
         """
         socks = dict(self.zpoller.poll())
-        if socks.get(self.mgmt_socket) == zmq.POLLIN:
+        if socks.get(self.mgmt) == zmq.POLLIN:
             try:
-                msg = self.mgmt_socket.recv_json()
+                msg = self.mgmt.recv_json()
             except TypeError as e:
                 logger.warning('Invalid message received on management interface: %s', msg)
                 return
                 
             result = self.process_mgmt_task(msg)
-            self.mgmt_socket.send_json(result)
+            self.mgmt.send_json(result)
 
     def process_mgmt_task(self, msg):
         """
@@ -270,9 +267,9 @@ class VPollerWorker(multiprocessing.Process):
         }
         self.time_to_die = multiprocessing.Event()
         self.agents = {}
-        self.zcontext = None
-        self.zpoller = None
-        self.worker_socket = None
+        self.zcontext = zmq.Context()
+        self.zpoller = zmq.Poller()
+        self.worker_socket = self.zcontext.socket(zmq.DEALER)
 
     def run(self):
         """
@@ -348,10 +345,7 @@ class VPollerWorker(multiprocessing.Process):
         """
         logger.debug('Creating vPoller Worker sockets')
         
-        self.zcontext = zmq.Context()
-        self.worker_socket = self.zcontext.socket(zmq.DEALER)
         self.worker_socket.connect(self.config.get('proxy'))
-        self.zpoller = zmq.Poller()
         self.zpoller.register(self.worker_socket, zmq.POLLIN)
 
     def close_sockets(self):
