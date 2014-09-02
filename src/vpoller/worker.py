@@ -37,6 +37,7 @@ from vpoller.core import VPollerException
 from vpoller.agent import VSphereAgent
 from vconnector.core import VConnectorDatabase
 
+
 class VPollerWorkerManager(object):
     """
     Manager of vPoller Workers
@@ -101,7 +102,7 @@ class VPollerWorkerManager(object):
         """
         self.time_to_die.set()
 
-        return { 'success': 0, 'msg': 'Shutdown time has arrived' }
+        return {'success': 0, 'msg': 'Shutdown time has arrived'}
 
     def load_config(self):
         """
@@ -116,14 +117,14 @@ class VPollerWorkerManager(object):
         self.config['mgmt'] = parser.get('worker', 'mgmt')
         self.config['db'] = parser.get('worker', 'db')
         self.config['proxy'] = parser.get('worker', 'proxy')
-        
+
     def start_workers(self):
         """
         Start the vPoller Worker processes
 
         """
         logging.info('Starting vPoller Worker processes')
-        
+
         if self.num_workers <= 0:
             self.num_workers = multiprocessing.cpu_count()
 
@@ -142,10 +143,10 @@ class VPollerWorkerManager(object):
 
         """
         logging.info('Stopping vPoller Worker processes')
-        
+
         for worker in self.workers:
-           worker.signal_stop()
-           worker.join(3)
+            worker.signal_stop()
+            worker.join(3)
 
     def create_sockets(self):
         """
@@ -166,7 +167,7 @@ class VPollerWorkerManager(object):
 
         """
         logging.debug('Closing vPoller Worker Manager sockets')
-        
+
         self.zpoller.unregister(self.mgmt_socket)
         self.mgmt_socket.close()
         self.zcontext.term()
@@ -180,19 +181,22 @@ class VPollerWorkerManager(object):
         if socks.get(self.mgmt_socket) == zmq.POLLIN:
             try:
                 msg = self.mgmt_socket.recv_json()
-            except TypeError as e:
-                logging.warning('Invalid message received on management interface: %s', msg)
+            except TypeError:
+                logging.warning(
+                    'Invalid message received on management interface: %s',
+                    msg
+                )
                 return
-                
+
             result = self.process_mgmt_task(msg)
             self.mgmt_socket.send_json(result)
 
     def process_mgmt_task(self, msg):
         """
         Processes a message for the management interface
-        
+
         Example client message to shutdown the vPoller Worker would be:
-        
+
             {
                 "method": "shutdown"
             }
@@ -204,20 +208,20 @@ class VPollerWorkerManager(object):
         logging.debug('Processing management message: %s', msg)
 
         if 'method' not in msg:
-            return { 'success': 1, 'msg': 'Missing method name' } 
-        
+            return {'success': 1, 'msg': 'Missing method name'}
+
         if msg['method'] not in self.mgmt_methods:
-            return { 'success': 1, 'msg': 'Unknown method name received' }
+            return {'success': 1, 'msg': 'Unknown method name received'}
 
         method = msg['method']
         result = self.mgmt_methods[method]()
 
         return result
- 
+
     def status(self):
         """
         Get status information about the vPoller Worker
-            
+
         """
         logging.debug('Getting vPoller Worker status')
 
@@ -237,7 +241,8 @@ class VPollerWorkerManager(object):
         logging.debug('Returning result to client: %s', result)
 
         return result
-            
+
+
 class VPollerWorker(multiprocessing.Process):
     """
     VPollerWorker class
@@ -258,7 +263,8 @@ class VPollerWorker(multiprocessing.Process):
 
         Args:
             db    (str): Path to the vConnector database file
-            proxy (str): Endpoint from which the vPoller Worker receives new tasks
+            proxy (str): Endpoint to which vPoller Workers connect
+                         and receive new tasks for processing
 
         """
         super(VPollerWorker, self).__init__()
@@ -304,7 +310,7 @@ class VPollerWorker(multiprocessing.Process):
 
         """
         self.time_to_die.set()
-        
+
     def wait_for_tasks(self):
         """
         Poll the worker socket for new tasks
@@ -318,34 +324,38 @@ class VPollerWorker(multiprocessing.Process):
         # Frame 2: [ 0 ][]     <- Empty delimiter frame
         # Frame 3: [ N ][...]  <- Data frame
         if socks.get(self.worker_socket) == zmq.POLLIN:
-            # TODO: Use recv_multipart() 
-            _id    = self.worker_socket.recv()
+            # TODO: Use recv_multipart()
+            _id = self.worker_socket.recv()
             _empty = self.worker_socket.recv()
 
             try:
                 msg = self.worker_socket.recv_json()
             except Exception as e:
-                logging.warning('Invalid client message received, will be ignored: %s', msg)
+                logging.warning(
+                    'Invalid client message received, will be ignored: %s',
+                    msg
+                )
 
             # Process task and return result to client
             result = self.process_client_msg(msg)
             self.worker_socket.send(_id, zmq.SNDMORE)
-            self.worker_socket.send("", zmq.SNDMORE)
+            self.worker_socket.send(_empty, zmq.SNDMORE)
             try:
                 self.worker_socket.send_json(result)
             except TypeError as e:
                 logging.warning('Cannot serialize result: %s', e)
-                self.worker_socket.send_json({ 'success': 1, 'msg': 'Cannot serialize result: %s' % e})
+                r = {'success': 1, 'msg': 'Cannot serialize result: %s' % e}
+                self.worker_socket.send_json(r)
 
     def create_sockets(self):
         """
         Creates the ZeroMQ sockets used by the vPoller Worker
 
-        Creates two sockets: 
+        Creates two sockets:
 
         """
         logging.debug('Creating vPoller Worker sockets')
-        
+
         self.zcontext = zmq.Context()
         self.worker_socket = self.zcontext.socket(zmq.DEALER)
         self.worker_socket.connect(self.config.get('proxy'))
@@ -376,7 +386,9 @@ class VPollerWorker(multiprocessing.Process):
 
         if not agents:
             logging.warning('No registered or enabled vSphere Agents found')
-            raise VPollerException, 'No registered or enabled vSphere Agents found'
+            raise VPollerException(
+                'No registered or enabled vSphere Agents found'
+            )
 
         for agent in agents:
             a = VSphereAgent(
@@ -388,20 +400,20 @@ class VPollerWorker(multiprocessing.Process):
 
     def stop_agents(self):
         """
-        Disconnects all vPoller Agents from the VMware vSphere hosts they are connected to
-        
+        Disconnects all vPoller Agents
+
         """
         logging.debug('Shutting down vSphere Agents')
 
         for agent in self.agents:
             self.agents[agent].disconnect()
-        
+
     def process_client_msg(self, msg):
         """
         Processes a client message received on the vPoller Worker socket
-    
-        The message is passed to the VSphereAgent object of the respective vSphere host
-        in order to do the actual polling.
+
+        The message is passed to the VSphereAgent object of the
+        respective vSphere host in order to do the actual polling.
 
         An example message for discovering the hosts could be:
 
@@ -409,28 +421,31 @@ class VPollerWorker(multiprocessing.Process):
                 "method":   "host.discover",
                 "hostname": "vc01.example.org",
             }
-       
+
         An example message for polling a datastore property could be:
 
             {
                 "method":   "datastore.poll",
                 "hostname": "vc01.example.org",
-                "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/",
+                "info.url": "ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2/",
                 "property": "summary.capacity"
             }
 
         Args:
         msg (dict): Client message for processing
-        
+
         """
         logging.debug('Processing client message: %s', msg)
 
         # Check whether the client message is a valid one
         if not isinstance(msg, dict):
-            return { 'success': 1, 'msg': 'Expected a JSON message, received %s' % msg.__class__ }
+            return {
+                'success': 1,
+                'msg': 'Expected a JSON message, received %s' % msg.__class__
+            }
 
-        if not 'method' in msg:
-            return { 'success': 1, 'msg': 'Missing method name' }
+        if 'method' not in msg:
+            return {'success': 1, 'msg': 'Missing method name'}
 
         # Get the vSphere Agent object for handling this request
         requested_method = msg.get('method')
@@ -438,18 +453,21 @@ class VPollerWorker(multiprocessing.Process):
         agent = self.agents.get(requested_agent)
 
         if not agent:
-            return { 'success': 1, 'msg': 'Unknown or missing vSphere Agent requested' }
+            return {
+                'success': 1,
+                'msg': 'Unknown or missing vSphere Agent requested'
+            }
 
         agent_method = agent.agent_methods.get(requested_method)
-        
+
         if not agent_method:
-            return { 'success': 1, 'msg': 'Unknown method name requested' }
+            return {'success': 1, 'msg': 'Unknown method name requested'}
 
         # Validate client message for required message attributes and type
         required = agent.agent_methods.get(requested_method)['required']
         if not agent._validate_client_msg(msg, required):
-            return { 'success': 1, 'msg': 'Incorrect task request received' }
-            
+            return {'success': 1, 'msg': 'Incorrect task request received'}
+
         result = agent_method['method'](msg)
 
         return result
