@@ -33,7 +33,6 @@ between a pool of ZeroMQ workers.
 import os
 import json
 import logging
-import multiprocessing
 
 from sys import exit
 
@@ -112,8 +111,10 @@ Options:
     else:
         level = logging.INFO
 
-    logger = multiprocessing.log_to_stderr()
-    logger.setLevel(level)
+    logging.basicConfig(
+        format='[%(asctime)s - %(levelname)s/%(processName)s] %(message)s',
+        level=level
+    )
 
     result = None
     rc = 0
