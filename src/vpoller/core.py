@@ -30,53 +30,54 @@ The principal work of the vPoller system can be seen in the diagram below.
 The diagram shows clients sending ZeroMQ messages to a ZeroMQ proxy,
 which load balances client requests between two workers.
 
-   		    +---------+   +---------+   +---------+
-    		    |  Client |   |  Client |   |  Client |
-                    +---------+   +---------+   +---------+
-                    |   REQ   |   |   REQ   |   |   REQ   |
-                    +---------+   +---------+   +---------+
-                         |             |             |
-                         +-------------+-------------+
-                                       |
-                                       | 
-                                       |
-                                  +---------+
-                                  |  ROUTER | -> Socket facing clients
-                                  +---------+
-                                  |  Proxy  | -> Load Balancer (ZeroMQ Broker)
-                                  +---------+
-                                  |   Mgmt  | -> Management socket
-                                  +---------+
-                                  |  DEALER | -> Socket to which workers connect
-                                  +---------+
-                                       |
-                                       | 
-                                       |
-                   +-------------------+-------------------+     
-                   |                                       |
-              +---------+                             +---------+
-              |  DEALER |		     	      |  DEALER | -> Worker socket connecting to the Proxy
-              +---------+			      +---------+
-              |   Mgmt  |                             |   Mgmt  | -> Management socket
-              +---------+                             +---------+
-              |  Worker |			      |  Worker | -> Worker process
-              +---------+			      +---------+
-                   |                                       |
-                   +-------------------+-------------------+
-                                       |
-                     +---------------- +----------------+
-                     |                 |                |
-              +-------------+   +-------------+   +-------------+
-              | vSphere API |   | vSphere API |   | vSphere API |
-              +-------------+   +-------------+   +-------------+
-              |   vSphere   |   |   vSphere   |   |   vSphere   |
-              +-------------+   +-------------+   +-------------+
-              |  ESX Hosts  |   |  ESX Hosts  |   |  ESX Hosts  |
-              +-------------+   +-------------+   +-------------+
-              |  Datastores |   |  Datastores |   |  Datastores |
-              +-------------+   +-------------+   +-------------+
++---------+   +---------+   +---------+
+|  Client |   |  Client |   |  Client |
++---------+   +---------+   +---------+
+|   REQ   |   |   REQ   |   |   REQ   |
++---------+   +---------+   +---------+
+     |             |             |
+     +-------------+-------------+
+                   |
+                   |
+                   |
+              +---------+
+              |  ROUTER | -> Socket facing clients
+              +---------+
+              |  Proxy  | -> Load Balancer (ZeroMQ Broker)
+              +---------+
+              |   Mgmt  | -> Management socket
+              +---------+
+              |  DEALER | -> Socket to which workers connect
+              +---------+
+                   |
+                   |
+                   |
+    +--------------+----------------+
+    |                               |
++---------+                    +---------+
+|  DEALER |                    |  DEALER | -> Worker socket
++---------+                    +---------+
+|   Mgmt  |                    |   Mgmt  | -> Management socket
++---------+                    +---------+
+|  Worker |                    |  Worker | -> Worker process
++---------+                    +---------+
+     |                              |
+     +----------------+-------------+
+                      |
+          +-----------+-----------------+
+          |           |                 |
+ +-------------+   +-------------+   +-------------+
+ | vSphere API |   | vSphere API |   | vSphere API |
+ +-------------+   +-------------+   +-------------+
+ |   vSphere   |   |   vSphere   |   |   vSphere   |
+ +-------------+   +-------------+   +-------------+
+ |  ESX Hosts  |   |  ESX Hosts  |   |  ESX Hosts  |
+ +-------------+   +-------------+   +-------------+
+ |  Datastores |   |  Datastores |   |  Datastores |
+ +-------------+   +-------------+   +-------------+
 
-"""   
+"""
+
 
 class VPollerException(Exception):
     """

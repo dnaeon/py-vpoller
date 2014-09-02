@@ -41,13 +41,15 @@ import logging
 import pyVmomi
 from vconnector.core import VConnector
 
+
 class VSphereAgent(VConnector):
     """
     VSphereAgent class
 
     Defines methods for retrieving vSphere object properties
 
-    These are the worker agents that do the actual polling from the vSphere host
+    These are the worker agents that do the actual
+    polling from the VMware vSphere host.
 
     Extends:
         VConnector
@@ -61,13 +63,13 @@ class VSphereAgent(VConnector):
         super(VSphereAgent, self).__init__(user, pwd, host)
 
         # Message attribute types we expect to receive
-        # before we start processing a client task request
+        # before we start processing a task request
         self.msg_attr_types = {
-            'hostname':   (types.StringType, types.UnicodeType),
-            'name':       (types.StringType, types.UnicodeType, types.NoneType),
-            'key':        (types.StringType, types.UnicodeType, types.NoneType),
-            'username':   (types.StringType, types.UnicodeType, types.NoneType),
-            'password':   (types.StringType, types.UnicodeType, types.NoneType),
+            'hostname': (types.StringType, types.UnicodeType),
+            'name': (types.StringType, types.UnicodeType, types.NoneType),
+            'key': (types.StringType, types.UnicodeType, types.NoneType),
+            'username': (types.StringType, types.UnicodeType, types.NoneType),
+            'password': (types.StringType, types.UnicodeType, types.NoneType),
             'properties': (types.TupleType,  types.ListType, types.NoneType),
         }
 
@@ -209,16 +211,21 @@ class VSphereAgent(VConnector):
 
     def _validate_client_msg(self, msg, required):
         """
-        Helper method for validating a client message 
+        Helper method for validating a client message
 
-        Checks whether the required attributes are contained within the received
-        task request and also checks whether they are from the proper type.
+        Checks whether the required attributes are contained
+        within the received task request and also checks whether
+        they are from the proper type.
 
         Returns:
-            True if the client message has been successfully validated, False otherwise
+            True if the message has been successfully validated,
+            False otherwise
 
         """
-        logging.debug('Checking client message, required to have: %s', required)
+        logging.debug(
+            'Checking client message, required to have: %s',
+            required
+        )
 
         # Check if we have the required message attributes
         if not all(k in msg for k in required):
@@ -241,7 +248,7 @@ class VSphereAgent(VConnector):
         """
         Helper method to simplify discovery of vSphere managed objects
 
-        This method is used by the '*.discover' vPoller Worker methods and is 
+        This method is used by the '*.discover' vPoller Worker methods and is
         meant for collecting properties for multiple objects at once, e.g.
         during object discovery operation.
 
@@ -253,7 +260,11 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.info('[%s] Discovering %s managed objects', self.host, obj_type.__name__)
+        logging.info(
+            '[%s] Discovering %s managed objects',
+            self.host,
+            obj_type.__name__
+        )
 
         view_ref = self.get_container_view(obj_type=[obj_type])
         try:
@@ -263,44 +274,55 @@ class VSphereAgent(VConnector):
                 path_set=properties
             )
         except Exception as e:
-            return { 'success': 1, 'msg': 'Cannot collect properties: %s' % e }
+            return {'success': 1, 'msg': 'Cannot collect properties: %s' % e}
 
         view_ref.DestroyView()
-        
+
         result = {
             'success': 0,
             'msg': 'Successfully discovered objects',
             'result': data,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, result)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            result
+        )
 
         return result
 
-    def _get_object_properties(self, properties, obj_type, obj_property_name, obj_property_value, include_mors=False):
+    def _get_object_properties(self,
+                               properties,
+                               obj_type,
+                               obj_property_name,
+                               obj_property_value,
+                               include_mors=False):
         """
-        Helper method to simplify retrieving of properties for a single managed object
+        Helper method to simplify retrieving of properties
 
-        This method is used by the '*.get' vPoller Worker methods and is 
+        This method is used by the '*.get' vPoller Worker methods and is
         meant for collecting properties for a single managed object.
 
-        We first search for the object with property name and value, then create a
-        list view for this object and finally collect it's properties.
+        We first search for the object with property name and value,
+        then create a list view for this object and
+        finally collect it's properties.
 
         Args:
-            properties                  (list): List of properties to be collected
-            obj_type           (pyVmomi.vim.*): Type of vSphere managed object
-            obj_property_name            (str): Property name used while searching for the object
-            obj_property_value           (str): Property value uniquely identifying the object in question
+            properties             (list): List of properties to be collected
+            obj_type       pyVmomi.vim.*): Type of vSphere managed object
+            obj_property_name       (str): Property name used for searching for the object
+            obj_property_value      (str): Property value identifying the object in question
 
         Returns:
             The collected properties for this managed object in JSON format
 
         """
-        logging.info('[%s] Retrieving properties for %s managed object of type %s',
-                     self.host,
-                     obj_property_value,
-                     obj_type.__name__
+        logging.info(
+            '[%s] Retrieving properties for %s managed object of type %s',
+            self.host,
+            obj_property_value,
+            obj_type.__name__
         )
 
         # Find the Managed Object reference for the requested object
@@ -311,10 +333,13 @@ class VSphereAgent(VConnector):
                 obj_type=obj_type
             )
         except Exception as e:
-            return { 'success': 1, 'msg': 'Cannot collect properties: %s' % e }
+            return {'success': 1, 'msg': 'Cannot collect properties: %s' % e}
 
         if not obj:
-            return { 'success': 1, 'msg': 'Cannot find object %s' % obj_property_value }
+            return {
+                'success': 1,
+                'msg': 'Cannot find object %s' % obj_property_value
+            }
 
         # Create a list view for this object and collect properties
         view_ref = self.get_list_view(obj=[obj])
@@ -327,7 +352,7 @@ class VSphereAgent(VConnector):
                 include_mors=include_mors
             )
         except Exception as e:
-            return { 'success': 1, 'msg': 'Cannot collect properties: %s' % e }
+            return {'success': 1, 'msg': 'Cannot collect properties: %s' % e}
 
         view_ref.DestroyView()
 
@@ -337,8 +362,12 @@ class VSphereAgent(VConnector):
             'result': data,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, result)
-        
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            result
+        )
+
         return result
 
     def _object_datastore_get(self, obj_type, name):
@@ -351,19 +380,21 @@ class VSphereAgent(VConnector):
 
         Args:
             obj_type (pyVmomi.vim.*): Managed object type
-            name               (str): Name of the managed object, e.g. host, virtual machine
+            name               (str): Name of the managed object, e.g. host, vm
 
         Returns:
             The discovered objects in JSON format
 
         """
-        logging.debug('[%s] Getting datastores for %s managed object of type %s',
-                      self.host,
-                      name,
-                      obj_type.__name__
+        logging.debug(
+            '[%s] Getting datastores for %s managed object of type %s',
+            self.host,
+            name,
+            obj_type.__name__
         )
 
-        # Find the object by it's 'name' property and get the datastores available/used by it
+        # Find the object by it's 'name' property
+        # and get the datastores available/used by it
         data = self._get_object_properties(
             properties=['name', 'datastore'],
             obj_type=obj_type,
@@ -378,7 +409,8 @@ class VSphereAgent(VConnector):
         props = data['result'][0]
         obj_name, obj_datastores = props['name'], props['datastore']
 
-        # Get a list view of the datastores available/used by this object and collect properties
+        # Get a list view of the datastores available/used by
+        # this object and collect properties
         view_ref = self.get_list_view(obj=obj_datastores)
         result = {}
         result['name'] = obj_name
@@ -405,10 +437,10 @@ class VSphereAgent(VConnector):
         Get the latest event registered
 
         Example client message would be:
-        
+
             {
                 "method":   "event.latest",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
             }
 
         Returns:
@@ -417,32 +449,38 @@ class VSphereAgent(VConnector):
         """
         logging.info('[%s] Retrieving latest registered event', self.host)
 
+        e = self.si.content.eventManager.latestEvent.fullFormattedMessage
+
         result = {
             'msg': 'Successfully retrieved event',
             'success': 0,
-            'result': [ {'event': self.si.content.eventManager.latestEvent.fullFormattedMessage} ],
+            'result': [{'event': e}],
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, result)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            result
+        )
 
         return result
 
     def about(self, msg):
         """
-        Get the 'about' information for the vSphere host this agent is connected to
+        Get the 'about' information for the vSphere host
 
         Example client message would be:
-        
+
             {
                 "method":   "about",
-        	"hostname": "vc01.example.org"
+                "hostname": "vc01.example.org"
             }
 
         Example client message requesting additional properties:
-        
+
             {
                 "method":   "about",
-        	"hostname": "vc01.example.org"
+                "hostname": "vc01.example.org"
                 "properties": [
                     "apiType",
                     "apiVersion",
@@ -457,18 +495,23 @@ class VSphereAgent(VConnector):
         logging.info("[%s] Retrieving 'about' information", self.host)
 
         # If no properties are specified just return the 'fullName' property
-        if not msg.has_key('properties') or not msg['properties']:
+        if 'properties' not in msg or not msg['properties']:
             properties = ['fullName']
         else:
             properties = msg['properties']
 
+        about = {prop: getattr(self.si.content.about, prop, None) for prop in properties}
         result = {
             'msg': 'Successfully retrieved properties',
             'success': 0,
-            'result': [ {prop:getattr(self.si.content.about, prop, None) for prop in properties} ]
+            'result': [about],
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, result)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            result
+        )
 
         return result
 
@@ -477,10 +520,10 @@ class VSphereAgent(VConnector):
         Discover all pyVmomi.vim.Network managed objects
 
         Example client message would be:
-        
+
             {
                 "method":   "net.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
             }
 
         Example client message which also requests additional properties:
@@ -493,17 +536,22 @@ class VSphereAgent(VConnector):
                     "summary.accessible"
                 ]
             }
-        
+
         Returns:
             The discovered objects in JSON format
-        
+
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
-        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.Network)
+        r = self._discover_objects(
+            properties=properties,
+            obj_type=pyVmomi.vim.Network
+        )
+
+        return r
 
     def net_get(self, msg):
         """
@@ -520,14 +568,14 @@ class VSphereAgent(VConnector):
                     "overallStatus"
                 ]
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         return self._get_object_properties(
@@ -548,13 +596,17 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "VM Network",
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting Host Systems using %s pyVmomi.vim.Network managed object', self.host, msg['name'])
-        
+        logging.debug(
+            '[%s] Getting hosts using %s pyVmomi.vim.Network managed object',
+            self.host,
+            msg['name']
+        )
+
         # Find the Network managed object and get the 'host' property
         data = self._get_object_properties(
             properties=['name', 'host'],
@@ -602,13 +654,17 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "VM Network",
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting Virtual Machines using %s pyVmomi.vim.Network managed object', self.host, msg['name'])
-        
+        logging.debug(
+            '[%s] Getting VMs using %s pyVmomi.vim.Network managed object',
+            self.host,
+            msg['name']
+        )
+
         # Find the Network managed object and get the 'vm' property
         data = self._get_object_properties(
             properties=['name', 'vm'],
@@ -650,10 +706,10 @@ class VSphereAgent(VConnector):
         Discover all pyVmomi.vim.Datacenter managed objects
 
         Example client message would be:
-        
+
             {
                 "method":   "datacenter.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
             }
 
         Example client message which also requests additional properties:
@@ -666,17 +722,22 @@ class VSphereAgent(VConnector):
                     "overallStatus"
                 ]
             }
-        
+
         Returns:
             The discovered objects in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
-        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.Datacenter)
+        r = self._discover_objects(
+            properties=properties,
+            obj_type=pyVmomi.vim.Datacenter
+        )
+
+        return r
 
     def datacenter_get(self, msg):
         """
@@ -693,14 +754,14 @@ class VSphereAgent(VConnector):
                     "overallStatus"
                 ]
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         return self._get_object_properties(
@@ -715,10 +776,10 @@ class VSphereAgent(VConnector):
         Discover all pyVmomi.vim.ClusterComputeResource managed objects
 
         Example client message would be:
-        
+
             {
                 "method":   "cluster.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
             }
 
         Example client message which also requests additional properties:
@@ -731,21 +792,26 @@ class VSphereAgent(VConnector):
                     "overallStatus"
                 ]
             }
-              
+
         Returns:
             The discovered objects in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
-            
-        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.ClusterComputeResource)
+
+        r = self._discover_objects(
+            properties=properties,
+            obj_type=pyVmomi.vim.ClusterComputeResource
+        )
+
+        return r
 
     def cluster_get(self, msg):
         """
-        Get properties of a single pyVmomi.vim.ClusterComputeResource managed object
+        Get properties of a pyVmomi.vim.ClusterComputeResource managed object
 
         Example client message would be:
 
@@ -758,14 +824,14 @@ class VSphereAgent(VConnector):
                     "overallStatus"
                 ]
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         return self._get_object_properties(
@@ -780,10 +846,10 @@ class VSphereAgent(VConnector):
         Discover all pyVmomi.vim.ResourcePool managed objects
 
         Example client message would be:
-        
+
             {
                 "method":   "resource.pool.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
             }
 
         Example client message which also requests additional properties:
@@ -796,17 +862,22 @@ class VSphereAgent(VConnector):
                     "overallStatus"
                 ]
             }
-              
+
         Returns:
             The discovered objects in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
-            
-        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.ResourcePool)
+
+        r = self._discover_objects(
+            properties=properties,
+            obj_type=pyVmomi.vim.ResourcePool
+        )
+
+        return r
 
     def resource_pool_get(self, msg):
         """
@@ -825,14 +896,14 @@ class VSphereAgent(VConnector):
                     "runtime.overallStatus"
                 ]
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         return self._get_object_properties(
@@ -847,10 +918,10 @@ class VSphereAgent(VConnector):
         Discover all pyVmomi.vim.HostSystem managed objects
 
         Example client message would be:
-        
+
             {
                 "method":   "host.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
             }
 
         Example client message which also requests additional properties:
@@ -863,17 +934,22 @@ class VSphereAgent(VConnector):
                     "runtime.powerState"
                 ]
             }
-              
+
         Returns:
             The discovered objects in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
-        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.HostSystem)
+        r = self._discover_objects(
+            properties=properties,
+            obj_type=pyVmomi.vim.HostSystem
+        )
+
+        return r
 
     def host_get(self, msg):
         """
@@ -890,14 +966,14 @@ class VSphereAgent(VConnector):
                     "runtime.powerState"
                 ]
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         return self._get_object_properties(
@@ -918,13 +994,17 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "esxi01.example.org",
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting cluster name for %s host', self.host, msg['name'])
-        
+        logging.debug(
+            '[%s] Getting cluster name for %s host',
+            self.host,
+            msg['name']
+        )
+
         # Find the HostSystem managed object and get the 'parent' property
         data = self._get_object_properties(
             properties=['name', 'parent'],
@@ -946,7 +1026,7 @@ class VSphereAgent(VConnector):
         r = {
             'success': 0,
             'msg': 'Successfully retrieved properties',
-            'result': [ result ],
+            'result': [result],
         }
 
         logging.debug('[%s] Returning result from operation: %s', self.host, r)
@@ -955,7 +1035,7 @@ class VSphereAgent(VConnector):
 
     def host_vm_get(self, msg):
         """
-        Get all Virtual Machines running on this HostSystem 
+        Get all Virtual Machines running on this HostSystem
 
         Example client message would be:
 
@@ -964,13 +1044,17 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "esxi01.example.org",
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting VirtualMachine list running on %s host', self.host, msg['name'])
-        
+        logging.debug(
+            '[%s] Getting VirtualMachine list running on %s host',
+            self.host,
+            msg['name']
+        )
+
         # Find the HostSystem managed object and get the 'vm' property
         data = self._get_object_properties(
             properties=['name', 'vm'],
@@ -1003,13 +1087,17 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
     def host_net_get(self, msg):
         """
-        Get all Networks available for this pyVmomi.vim.HostSystem managed object
+        Get all Networks used by a vim.HostSystem managed object
 
         Example client message would be:
 
@@ -1018,14 +1106,19 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "esxi01.example.org",
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting Network list available for %s host', self.host, msg['name'])
-        
-        # Find the HostSystem managed object and get the 'network' property
+        logging.debug(
+            '[%s] Getting Network list available for %s host',
+            self.host,
+            msg['name']
+        )
+
+        # Find the HostSystem managed object
+        # and get the 'network' property
         data = self._get_object_properties(
             properties=['name', 'network'],
             obj_type=pyVmomi.vim.HostSystem,
@@ -1057,19 +1150,23 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
     def host_datastore_get(self, msg):
         """
-        Get all Datastores available for a pyVmomi.vim.HostSystem managed object
+        Get all Datastores used by a vim.HostSystem managed object
 
         Example client message would be:
-        
+
             {
                 "method":   "host.datastore.get",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
                 "name":     "esxi01.example.org",
             }
 
@@ -1087,13 +1184,14 @@ class VSphereAgent(VConnector):
         Discover all pyVmomi.vim.VirtualMachine managed objects
 
         Example client message would be:
-        
+
             {
                 "method":   "vm.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
             }
 
-        Example client message which also requests additional properties:
+        Example client message which also
+        requests additional properties:
 
             {
                 "method":     "vm.discover",
@@ -1103,38 +1201,45 @@ class VSphereAgent(VConnector):
                     "runtime.powerState"
                 ]
             }
-              
+
         Returns:
             The discovered objects in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
-        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.VirtualMachine)
+        r = self._discover_objects(
+            properties=properties,
+            obj_type=pyVmomi.vim.VirtualMachine
+        )
+
+        return r
 
     def vm_disk_discover(self, msg):
         """
-        Discover all disks used by a pyVmomi.vim.VirtualMachine managed object
+        Discover all disks used by a vim.VirtualMachine managed object
 
-        Note, that this request requires you to have VMware Tools installed in order
-        get information about the guest disks.
+        Note, that this request requires you to have
+        VMware Tools installed in order get information about the
+        guest disks.
 
         Example client message would be:
-        
-            {
-                "method":   "vm.disk.discover",
-        	"hostname": "vc01.example.org",
-                "name":     "vm01.example.org"
-            }
-        
-        Example client message requesting additional properties to be collected:
 
             {
                 "method":   "vm.disk.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
+                "name":     "vm01.example.org"
+            }
+
+        Example client message requesting
+        additional properties to be collected:
+
+            {
+                "method":   "vm.disk.discover",
+                "hostname": "vc01.example.org",
                 "name":     "vm01.example.org",
                 "properties": [
                     "capacity",
@@ -1147,7 +1252,11 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.debug('[%s] Discovering guest disks for VirtualMachine %s', self.host, msg['name'])
+        logging.debug(
+            '[%s] Discovering guest disks for VirtualMachine %s',
+            self.host,
+            msg['name']
+        )
 
         # Find the VM and get the guest disks
         data = self._get_object_properties(
@@ -1166,44 +1275,50 @@ class VSphereAgent(VConnector):
 
         # Properties to be collected for the guest disks
         properties = ['diskPath']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         # Get the requested disk properties
         result = {}
         result['name'] = vm_name
-        result['disk'] = [{prop:getattr(disk, prop, None) for prop in properties} for disk in vm_disks]
+        result['disk'] = [{prop: getattr(disk, prop, None) for prop in properties} for disk in vm_disks]
 
         r = {
             'success': 0,
             'msg': 'Successfully discovered objects',
-            'result': [ result ],
+            'result': [result],
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
     def vm_guest_net_get(self, msg):
         """
-        Discover information about network adapters on a pyVmomi.vim.VirtualMachine managed object
+        Discover network adapters for a vim.VirtualMachine  object
 
-        Note, that this request requires you to have VMware Tools installed in order
-        get information about the guest network adapters.
+        Note, that this request requires you to have
+        VMware Tools installed in order get information about the
+        guest network adapters.
 
         Example client message would be:
-        
-            {
-                "method":   "vm.net.discover",
-        	"hostname": "vc01.example.org",
-                "name":     "vm01.example.org"
-            }
-        
-        Example client message requesting additional properties to be collected:
 
             {
                 "method":   "vm.net.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
+                "name":     "vm01.example.org"
+            }
+
+        Example client message requesting
+        additional properties to be collected:
+
+            {
+                "method":   "vm.net.discover",
+                "hostname": "vc01.example.org",
                 "name":     "vm01.example.org",
                 "properties": [
                     "network",
@@ -1217,7 +1332,11 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.debug('[%s] Discovering guest network adapters for VirtualMachine %s', self.host, msg['name'])
+        logging.debug(
+            '[%s] Discovering network adapters for VirtualMachine %s',
+            self.host,
+            msg['name']
+        )
 
         # Find the VM and get the network adapters
         data = self._get_object_properties(
@@ -1230,19 +1349,20 @@ class VSphereAgent(VConnector):
         if data['success'] != 0:
             return data
 
-        # Get the VM name and network adapters properties from the result
+        # Get the VM name and network adapters
+        # properties from the result
         props = data['result'][0]
         vm_name, vm_networks = props['name'], props['guest.net']
 
         # Properties to be collected for the guest disks
         properties = ['network']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         # Get the requested properties
         result = {}
         result['name'] = vm_name
-        result['net']  = [{prop:getattr(net, prop, None) for prop in properties} for net in vm_networks]
+        result['net'] = [{prop: getattr(net, prop, None) for prop in properties} for net in vm_networks]
 
         r = {
             'success': 0,
@@ -1250,13 +1370,17 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
     def vm_net_get(self, msg):
         """
-        Get all Networks used in this pyVmomi.vim.VirtualMachine managed object
+        Get all Networks used by a vim.VirtualMachine managed object
 
         Example client message would be:
 
@@ -1265,14 +1389,19 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "vm01.example.org",
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting Network list available for %s VirtualMachine', self.host, msg['name'])
-        
-        # Find the VirtualMachine managed object and get the 'network' property
+        logging.debug(
+            '[%s] Getting Networks available for %s VirtualMachine',
+            self.host,
+            msg['name']
+        )
+
+        # Find the VirtualMachine managed object and
+        # get the 'network' property
         data = self._get_object_properties(
             properties=['name', 'network'],
             obj_type=pyVmomi.vim.VirtualMachine,
@@ -1304,13 +1433,17 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
     def vm_get(self, msg):
         """
-        Get properties of a single pyVmomi.vim.VirtualMachine managed object
+        Get properties for a vim.VirtualMachine managed object
 
         Example client message would be:
 
@@ -1323,14 +1456,14 @@ class VSphereAgent(VConnector):
                     "runtime.powerState"
                 ]
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         return self._get_object_properties(
@@ -1351,13 +1484,17 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "vm01.example.org",
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting HostSystem where %s VirtualMachine is running on', self.host, msg['name']) 
-            
+        logging.debug(
+            '[%s] Getting host where %s VirtualMachine is running on',
+            self.host,
+            msg['name']
+        )
+
         data = self._get_object_properties(
             properties=['name', 'runtime.host'],
             obj_type=pyVmomi.vim.VirtualMachine,
@@ -1379,22 +1516,26 @@ class VSphereAgent(VConnector):
         r = {
             'success': data['success'],
             'msg': data['msg'],
-            'result': [ result ],
+            'result': [result],
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
     def vm_datastore_get(self, msg):
         """
-        Get all Datastores used by a pyVmomi.vim.VirtualMachine managed object
+        Get all Datastores used by a vim.VirtualMachine managed object
 
         Example client message would be:
-        
+
             {
                 "method":   "vm.datastore.get",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
                 "name":     "vm01.example.org",
             }
 
@@ -1409,25 +1550,27 @@ class VSphereAgent(VConnector):
 
     def vm_disk_get(self, msg):
         """
-        Get properties for a single disk of a pyVmomi.vim.VirtualMachine managed object
+        Get properties for a disk of a vim.VirtualMachine object
 
-        Note, that this request requires you to have VMware Tools installed in order
-        get information about the guest disks.
+        Note, that this request requires you to have
+        VMware Tools installed in order get information about the
+        guest disks.
 
         Example client message would be:
-        
+
             {
                 "method":   "vm.disk.get",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
                 "name":     "vm01.example.org"
                 "key":      "/var"
             }
-        
-        Example client message requesting additional properties to be collected:
+
+        Example client message requesting
+        additional properties to be collected:
 
             {
                 "method":   "vm.disk.get",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
                 "name":     "vm01.example.org",
                 "key":      "/var",
                 "properties": [
@@ -1447,15 +1590,16 @@ class VSphereAgent(VConnector):
             msg['key'],
             msg['name']
         )
-        
+
         # Discover the VM disks
         data = self.vm_disk_discover(msg)
 
         if data['success'] != 0:
             return data
 
-        # If we have no key for the disk, just return the result from discovery
-        if msg.has_key('key') and msg['key']:
+        # If we have no key for the disk,
+        # just return the result from discovery
+        if 'key' in msg and msg['key']:
             disk_path = msg['key']
         else:
             return data
@@ -1467,7 +1611,10 @@ class VSphereAgent(VConnector):
             if disk['diskPath'] == disk_path:
                 break
         else:
-            return { 'success': 1, 'msg': 'Unable to find guest disk %s' % disk_path }
+            return {
+                'success': 1,
+                'msg': 'Unable to find guest disk %s' % disk_path
+            }
 
         result = {}
         result['name'] = msg['name']
@@ -1476,19 +1623,24 @@ class VSphereAgent(VConnector):
         r = {
             'success': 0,
             'msg': 'Successfully retrieved properties',
-            'result': [ result ],
+            'result': [result],
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
-        
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
+
         return r
 
     def vm_process_get(self, msg):
         """
-        Get all processes running on a pyVmomi.vim.VirtualMachine managed object
+        Get processes running on a vim.VirtualMachine managed object
 
-        This method requires you to have VMware Tools installed and running in order
-        to get the list of processes running in a guest system.
+        This method requires you to have VMware Tools installed and
+        running in order to get the list of processes running in a
+        guest system.
 
         Example client message would be:
 
@@ -1500,7 +1652,8 @@ class VSphereAgent(VConnector):
                 "password":   "p4ssw0rd"
             }
 
-        Example client message which requests additional properties for the processes:
+        Example client message which requests
+        additional properties for the processes:
 
             {
                 "method":     "vm.process.get",
@@ -1519,7 +1672,11 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting processes for VirtualMachine %s', self.host, msg['name'])
+        logging.debug(
+            '[%s] Getting processes for VirtualMachine %s',
+            self.host,
+            msg['name']
+        )
 
         # Get the VirtualMachine managed object
         data = self._get_object_properties(
@@ -1537,14 +1694,19 @@ class VSphereAgent(VConnector):
         props = data['result'][0]
         vm_name, vm_tools_is_running, vm_obj = props['name'], props['guest.toolsRunningStatus'], props['obj']
 
-        # Check if we have VMware Tools installed and running first as we depend on it
+        # Check if we have VMware Tools installed and running first
+        # as this request depends on it
         if vm_tools_is_running != 'guestToolsRunning':
-            return { 'success': 1, 'msg': 'VirtualMachine %s is not running VMware Tools' % msg['name'] }
+            return {
+                'success': 1,
+                'msg': '%s is not running VMware Tools' % msg['name']
+            }
 
-        # Prepare credentials used for authentication in the guest system
+        # Prepare credentials used for
+        # authentication in the guest system
         if not msg['username'] or not msg['password']:
-            return { 'success': 1, 'msg': 'Need username and password for authentication in guest system %s' % msg['name'] }
-        
+            return {'success': 1, 'msg': 'Need username and password for authentication in guest system %s' % msg['name']}
+
         vm_creds = pyVmomi.vim.vm.guest.NamePasswordAuthentication(
             username=msg['username'],
             password=msg['password']
@@ -1556,17 +1718,20 @@ class VSphereAgent(VConnector):
                 auth=vm_creds
             )
         except Exception as e:
-            return { 'success': 1, 'msg': 'Cannot get guest processes: %s' % e }
+            return {
+                'success': 1,
+                'msg': 'Cannot get guest processes: %s' % e
+            }
 
         # Properties to be collected for the guest processes
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         # Get the requested process properties
         result = {}
         result['name'] = vm_name
-        result['process'] = [{prop:getattr(process, prop, None) for prop in properties} for process in vm_processes]
+        result['process'] = [{prop: getattr(process, prop, None) for prop in properties} for process in vm_processes]
 
         r = {
             'success': 0,
@@ -1574,7 +1739,11 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
@@ -1594,12 +1763,17 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug('[%s] Getting CPU usage percentage for VirtualMachine %s', self.host, msg['name'])
+        logging.debug(
+            '[%s] Getting CPU usage percentage for VirtualMachine %s',
+            self.host,
+            msg['name']
+        )
 
         # Get the VirtualMachine managed object and collect the
-        # properties required to calculate the CPU usage in percentage.
-        # The CPU usage in percentage is directly related to the host the
-        # Virtual Machine is running on, so we need to collect the 'runtime.host' property as well.
+        # properties required to calculate the CPU usage percentage.
+        # The CPU usage in percentage is directly related to the
+        # host the where the Virtual Machine is running on,
+        # so we need to collect the 'runtime.host' property as well.
         required_properties = [
             'name',
             'runtime.host',
@@ -1621,17 +1795,20 @@ class VSphereAgent(VConnector):
         # Get the VM properties
         props = data['result'][0]
 
-        # TODO: A fix for VMware vSphere 4.x versions, where not always
-        #       the properties requested are returned by vCenter server,
-        #       which could result in a KeyError exception.
-        #       See this issue for more details:
+        # TODO: A fix for VMware vSphere 4.x versions, where not
+        #       always the properties requested are returned by the
+        #       vCenter server, which could result in a KeyError
+        #       exception. See this issue for more details:
         #
         #           - https://github.com/dnaeon/py-vpoller/issues/33
         #
-        #       We should ensure that vPoller Workers do not fail under
-        #       such circumstances and return an error message.
+        #       We should ensure that vPoller Workers do not fail
+        #       under such circumstances and return an error message.
         if not all(p in props for p in required_properties):
-            return { 'success': 1, 'msg': 'Unable to retrieve required properties' }
+            return {
+                'success': 1,
+                'msg': 'Unable to retrieve required properties'
+            }
 
         # Calculate CPU usage in percentage
         # The overall CPU usage returned by vSphere is in MHz, so
@@ -1643,15 +1820,22 @@ class VSphereAgent(VConnector):
             100
         )
 
-        result = { 'name': props['name'], 'vm.cpu.usage.percent': cpu_usage }
-        
+        result = {
+            'name': props['name'],
+            'vm.cpu.usage.percent': cpu_usage
+        }
+
         r = {
             'success': 0,
             'msg': 'Successfully retrieved properties',
-            'result': [ result ],
+            'result': [result],
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
@@ -1660,13 +1844,14 @@ class VSphereAgent(VConnector):
         Discover all pyVmomi.vim.Datastore managed objects
 
         Example client message would be:
-        
+
             {
                 "method":   "datastore.discover",
-        	"hostname": "vc01.example.org",
+                "hostname": "vc01.example.org",
             }
 
-        Example client message which also requests additional properties:
+        Example client message which also requests
+        additional properties:
 
             {
                 "method":     "datastore.discover",
@@ -1676,21 +1861,26 @@ class VSphereAgent(VConnector):
                     "summary.url"
                 ]
             }
-              
+
         Returns:
             The discovered objects in JSON format
 
         """
         # Property names to be collected
         properties = ['name']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
-        return self._discover_objects(properties=properties, obj_type=pyVmomi.vim.Datastore)
+        r = self._discover_objects(
+            properties=properties,
+            obj_type=pyVmomi.vim.Datastore
+        )
+
+        return r
 
     def datastore_get(self, msg):
         """
-        Get properties of a single pyVmomi.vim.Datastore managed object
+        Get properties for a vim.Datastore managed object
 
         Example client message would be:
 
@@ -1704,14 +1894,14 @@ class VSphereAgent(VConnector):
                     "summary.capacity"
                 ]
             }
-              
+
         Returns:
             The managed object properties in JSON format
 
         """
         # Property names to be collected
         properties = ['name', 'info.url']
-        if msg.has_key('properties') and msg['properties']:
+        if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         return self._get_object_properties(
@@ -1732,11 +1922,16 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
             }
-        
-        """
-        logging.info('[%s] Getting HostSystem list using Datastore %s', self.host, msg['name'])
 
-        # Find the Datastore by it's 'info.url' property and get the HostSystem objects using it
+        """
+        logging.info(
+            '[%s] Getting HostSystem list using Datastore %s',
+            self.host,
+            msg['name']
+        )
+
+        # Find the Datastore by it's 'info.url' property
+        # and get the HostSystem objects using it
         data = self._get_object_properties(
             properties=['info.name', 'info.url', 'host'],
             obj_type=pyVmomi.vim.Datastore,
@@ -1751,14 +1946,16 @@ class VSphereAgent(VConnector):
         props = data['result'][0]
         obj_name, obj_url, obj_host = props['info.name'], props['info.url'], props['host']
 
-        # obj_host is a list of DatastoreHostMount[] objects, but we need a list of HostSystem ones instead
+        # obj_host is a list of DatastoreHostMount[] objects,
+        # but we need a list of HostSystem ones instead
         obj_host = [h.key for h in obj_host]
 
-        # Get a list view of the hosts from this datastore object and collect their properties
+        # Get a list view of the hosts from this datastore object
+        # and collect their properties
         view_ref = self.get_list_view(obj=obj_host)
         result = {}
         result['name'] = obj_name
-        result['url']  = obj_url
+        result['url'] = obj_url
         result['host'] = self.collect_properties(
             view_ref=view_ref,
             obj_type=pyVmomi.vim.HostSystem,
@@ -1773,7 +1970,11 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r
 
@@ -1788,11 +1989,16 @@ class VSphereAgent(VConnector):
                 "hostname":   "vc01.example.org",
                 "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
             }
-        
-        """
-        logging.info('[%s] Getting VirtualMachine list using Datastore %s', self.host, msg['name'])
 
-        # Find the Datastore by it's 'info.url' property and get the VirtualMachine objects using it
+        """
+        logging.info(
+            '[%s] Getting VirtualMachine list using Datastore %s',
+            self.host,
+            msg['name']
+        )
+
+        # Find the Datastore by it's 'info.url' property and get the
+        # VirtualMachine objects using it
         data = self._get_object_properties(
             properties=['info.name', 'info.url', 'vm'],
             obj_type=pyVmomi.vim.Datastore,
@@ -1807,11 +2013,12 @@ class VSphereAgent(VConnector):
         props = data['result'][0]
         obj_name, obj_url, obj_host = props['info.name'], props['info.url'], props['vm']
 
-        # Get a list view of the VMs from this datastore object and collect their properties
+        # Get a list view of the VMs from this datastore object
+        # and collect their properties
         view_ref = self.get_list_view(obj=obj_host)
         result = {}
         result['name'] = obj_name
-        result['url']  = obj_url
+        result['url'] = obj_url
         result['vm'] = self.collect_properties(
             view_ref=view_ref,
             obj_type=pyVmomi.vim.VirtualMachine,
@@ -1826,6 +2033,10 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
 
         return r

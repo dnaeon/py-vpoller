@@ -25,11 +25,12 @@
 """
 vPoller Client module for the VMware vSphere Poller
 
-"""   
+"""
 
 import logging
 
 import zmq
+
 
 class VPollerClient(object):
     """
@@ -42,7 +43,7 @@ class VPollerClient(object):
 
     Returns:
         The result message back to the client
-        
+
     """
     def __init__(self, endpoint, timeout=3000, retries=3):
         """
@@ -54,8 +55,8 @@ class VPollerClient(object):
             endpoint (str): Endpoint we connect the client to
 
         """
-        self.timeout  = timeout
-        self.retries  = retries
+        self.timeout = timeout
+        self.retries = retries
         self.endpoint = endpoint
 
     def run(self, msg):
@@ -64,11 +65,11 @@ class VPollerClient(object):
 
         Partially based on the Lazy Pirate Pattern:
 
-            - http://zguide.zeromq.org/py:all#Client-Side-Reliability-Lazy-Pirate-Pattern
+        http://zguide.zeromq.org/py:all#Client-Side-Reliability-Lazy-Pirate-Pattern
 
         Args:
             msg (dict): The client message to send
-            
+
         """
         logging.debug('Initiating message flow')
         logging.debug('Endpoint: %s', self.endpoint)
@@ -77,23 +78,20 @@ class VPollerClient(object):
         logging.debug('Message: %s', msg)
 
         self.zcontext = zmq.Context()
-        
         self.zclient = self.zcontext.socket(zmq.REQ)
         self.zclient.connect(self.endpoint)
         self.zclient.setsockopt(zmq.LINGER, 0)
-
         self.zpoller = zmq.Poller()
         self.zpoller.register(self.zclient, zmq.POLLIN)
-        
         result = None
-        
+
         while self.retries > 0:
             logging.debug('Sending client message')
             logging.debug('Retries left: %d', self.retries)
 
             # Send our message out
             self.zclient.send_json(msg)
-            
+
             socks = dict(self.zpoller.poll(self.timeout))
 
             # Do we have a reply?
@@ -104,15 +102,20 @@ class VPollerClient(object):
             else:
                 # We didn't get a reply back from the server, let's retry
                 self.retries -= 1
-                logging.warning('Did not receive reply from server, retrying...')
-                
+                logging.warning(
+                    'Did not receive reply from server, retrying...'
+                )
+
                 # Socket is confused. Close and remove it.
                 logging.debug('Closing client socket and removing it')
                 self.zclient.close()
                 self.zpoller.unregister(self.zclient)
 
                 # Re-establish the connection
-                logging.debug('Re-establishing connection to endpoint %s', self.endpoint)
+                logging.debug(
+                    'Re-establishing connection to endpoint %s',
+                    self.endpoint
+                )
                 self.zclient = self.zcontext.socket(zmq.REQ)
                 self.zclient.connect(self.endpoint)
                 self.zclient.setsockopt(zmq.LINGER, 0)
@@ -126,9 +129,14 @@ class VPollerClient(object):
 
         # Did we have any result reply at all?
         if not result:
-            logging.error('Did not receive a reply from the server, aborting...')
-            return { 'success': 1, 'msg': 'Did not receive reply from the server, aborting...' }
+            logging.error(
+                'Did not receive a reply from the server, aborting...'
+            )
+            return {
+                'success': 1,
+                'msg': 'Did not receive reply from the server, aborting...'
+            }
 
         logging.debug('Received reply was: %s', result)
-        
+
         return result

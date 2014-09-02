@@ -34,6 +34,7 @@ import csv
 import json
 import cStringIO
 
+
 class HelperAgent(object):
     """
     HelperAgent class of the CSV vPoller Helper
@@ -46,7 +47,7 @@ class HelperAgent(object):
         Args:
             msg  (dict): The original request message
             data  (str): The result message data
-            
+
         """
         self.msg = msg
         self.data = data
@@ -62,11 +63,17 @@ class HelperAgent(object):
         if self.data['success'] != 0:
             return json.dumps(self.data, indent=4)
 
-        data    = self.data['result']
-        result  = cStringIO.StringIO()
+        data = self.data['result']
+        result = cStringIO.StringIO()
         headers = sorted(data[0].keys())
 
-        writer = csv.DictWriter(result, headers, restval='None', extrasaction='ignore', quotechar='"')
+        writer = csv.DictWriter(
+            result,
+            headers,
+            restval='None',
+            extrasaction='ignore',
+            quotechar='"'
+        )
         writer.writeheader()
 
         for item in data:

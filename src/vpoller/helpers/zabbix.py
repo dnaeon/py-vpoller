@@ -32,6 +32,7 @@ translating a result vPoller message to a Zabbix-friendly format.
 
 import json
 
+
 class HelperAgent(object):
     """
     HelperAgent class of the Zabbix vPoller Helper
@@ -44,7 +45,7 @@ class HelperAgent(object):
         Args:
             msg  (dict): The original request message
             data (dict): The result message data
-            
+
         """
         self.msg = msg
         self.data = data
@@ -62,7 +63,7 @@ class HelperAgent(object):
 
         # The original method requested from the vPoller Workers
         self.method = self.msg['method']
-        
+
         # Methods that the Helper knows about and how to process
         methods = {
             'about':                self.zabbix_item_value,
@@ -79,7 +80,7 @@ class HelperAgent(object):
             'vm.disk.discover':     self.zabbix_vm_disk_discover,
             'vm.disk.get':          self.zabbix_vm_disk_get,
             'vm.host.get':          self.zabbix_item_value,
-            'vm.cpu.usage.percent': self.zabbix_item_value, 
+            'vm.cpu.usage.percent': self.zabbix_item_value,
             'datastore.discover':   self.zabbix_lld_data,
             'datastore.get':        self.zabbix_item_value,
         }
@@ -120,7 +121,7 @@ class HelperAgent(object):
         """
         property_name = self.msg['properties'][0]
         result = self.data['result'][0]['disk']
-        
+
         return result.get(property_name)
 
     def zabbix_vm_disk_discover(self):
@@ -130,7 +131,8 @@ class HelperAgent(object):
         This method translates a discovery request to the
         Zabbix Low-Level Discovery format.
 
-        For more information about Zabbix LLD, please refer to link below:
+        For more information about Zabbix LLD,
+        please refer to link below:
 
             - https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery
 
@@ -148,7 +150,7 @@ class HelperAgent(object):
             props = [('{#VSPHERE.' + obj_t + '.' + k.upper() + '}', v) for k, v in item.items()]
             data.append(dict(props))
 
-        return json.dumps({ 'data': data }, indent=4)
+        return json.dumps({'data': data}, indent=4)
 
     def zabbix_lld_data(self):
         """
@@ -156,24 +158,23 @@ class HelperAgent(object):
 
         This method translates a discovery request to the
         Zabbix Low-Level Discovery format.
-        
-        For more information about Zabbix LLD, please refer to link below:
+
+        For more information about Zabbix LLD,
+        please refer to link below:
 
             - https://www.zabbix.com/documentation/2.2/manual/discovery/low_level_discovery
 
         The result attribute names are in Zabbix Macro-like format, e.g.
 
             {#VSPHERE.<TYPE>.<ATTRIBUTE>}: <value>
-            
+
         """
         obj_t = self.method.split('.')[0].upper()
         result = self.data['result']
 
         data = []
-        
         for item in result:
             props = [('{#VSPHERE.' + obj_t + '.' + k.upper() + '}', v) for k, v in item.items()]
             data.append(dict(props))
 
-        return json.dumps({ 'data': data }, indent=4)
-
+        return json.dumps({'data': data}, indent=4)
