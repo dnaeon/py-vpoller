@@ -27,6 +27,7 @@ vPoller Worker module for the VMware vSphere Poller
 
 """
 
+import logging
 import multiprocessing
 from platform import node
 from ConfigParser import ConfigParser
@@ -35,8 +36,6 @@ import zmq
 from vpoller.core import VPollerException
 from vpoller.agent import VSphereAgent
 from vconnector.core import VConnectorDatabase
-
-logger = multiprocessing.get_logger()
 
 class VPollerWorkerManager(object):
     """
@@ -76,7 +75,7 @@ class VPollerWorkerManager(object):
         Start the vPoller Worker Manager and processes
 
         """
-        logger.info('Starting vPoller Worker Manager')
+        logging.info('Starting vPoller Worker Manager')
 
         self.load_config()
         self.create_sockets()
@@ -109,7 +108,7 @@ class VPollerWorkerManager(object):
         Loads the vPoller Worker Manager configuration settings
 
         """
-        logger.debug('Loading config file %s', self.config_file)
+        logging.debug('Loading config file %s', self.config_file)
 
         parser = ConfigParser(self.config_defaults)
         parser.read(self.config_file)
@@ -123,7 +122,7 @@ class VPollerWorkerManager(object):
         Start the vPoller Worker processes
 
         """
-        logger.info('Starting vPoller Worker processes')
+        logging.info('Starting vPoller Worker processes')
         
         if self.num_workers <= 0:
             self.num_workers = multiprocessing.cpu_count()
@@ -142,7 +141,7 @@ class VPollerWorkerManager(object):
         Stop the vPoller Worker processes
 
         """
-        logger.info('Stopping vPoller Worker processes')
+        logging.info('Stopping vPoller Worker processes')
         
         for worker in self.workers:
            worker.signal_stop()
@@ -153,7 +152,7 @@ class VPollerWorkerManager(object):
         Creates the ZeroMQ sockets used by the vPoller Worker Manager
 
         """
-        logger.debug('Creating vPoller Worker Manager sockets')
+        logging.debug('Creating vPoller Worker Manager sockets')
 
         self.zcontext = zmq.Context()
         self.mgmt_socket = self.zcontext.socket(zmq.REP)
@@ -166,7 +165,7 @@ class VPollerWorkerManager(object):
         Closes the ZeroMQ sockets used by the Manager
 
         """
-        logger.debug('Closing vPoller Worker Manager sockets')
+        logging.debug('Closing vPoller Worker Manager sockets')
         
         self.zpoller.unregister(self.mgmt_socket)
         self.mgmt_socket.close()
@@ -182,7 +181,7 @@ class VPollerWorkerManager(object):
             try:
                 msg = self.mgmt_socket.recv_json()
             except TypeError as e:
-                logger.warning('Invalid message received on management interface: %s', msg)
+                logging.warning('Invalid message received on management interface: %s', msg)
                 return
                 
             result = self.process_mgmt_task(msg)
@@ -202,7 +201,7 @@ class VPollerWorkerManager(object):
             msg (dict): The client message for processing
 
         """
-        logger.debug('Processing management message: %s', msg)
+        logging.debug('Processing management message: %s', msg)
 
         if 'method' not in msg:
             return { 'success': 1, 'msg': 'Missing method name' } 
@@ -220,7 +219,7 @@ class VPollerWorkerManager(object):
         Get status information about the vPoller Worker
             
         """
-        logger.debug('Getting vPoller Worker status')
+        logging.debug('Getting vPoller Worker status')
 
         result = {
             'success': 0,
@@ -235,7 +234,7 @@ class VPollerWorkerManager(object):
             }
         }
 
-        logger.debug('Returning result to client: %s', result)
+        logging.debug('Returning result to client: %s', result)
 
         return result
             
@@ -281,7 +280,7 @@ class VPollerWorker(multiprocessing.Process):
             config (str): Path to the confuguration file for vPoller Worker
 
         """
-        logger.info('vPoller Worker process is starting')
+        logging.info('vPoller Worker process is starting')
 
         self.create_sockets()
         self.create_agents()
@@ -326,7 +325,7 @@ class VPollerWorker(multiprocessing.Process):
             try:
                 msg = self.worker_socket.recv_json()
             except Exception as e:
-                logger.warning('Invalid client message received, will be ignored: %s', msg)
+                logging.warning('Invalid client message received, will be ignored: %s', msg)
 
             # Process task and return result to client
             result = self.process_client_msg(msg)
@@ -335,7 +334,7 @@ class VPollerWorker(multiprocessing.Process):
             try:
                 self.worker_socket.send_json(result)
             except TypeError as e:
-                logger.warning('Cannot serialize result: %s', e)
+                logging.warning('Cannot serialize result: %s', e)
                 self.worker_socket.send_json({ 'success': 1, 'msg': 'Cannot serialize result: %s' % e})
 
     def create_sockets(self):
@@ -345,7 +344,7 @@ class VPollerWorker(multiprocessing.Process):
         Creates two sockets: 
 
         """
-        logger.debug('Creating vPoller Worker sockets')
+        logging.debug('Creating vPoller Worker sockets')
         
         self.zcontext = zmq.Context()
         self.worker_socket = self.zcontext.socket(zmq.DEALER)
@@ -370,13 +369,13 @@ class VPollerWorker(multiprocessing.Process):
             VPollerException
 
         """
-        logger.debug('Creating vSphere Agents')
+        logging.debug('Creating vSphere Agents')
 
         db = VConnectorDatabase(self.config.get('db'))
         agents = db.get_agents(only_enabled=True)
 
         if not agents:
-            logger.warning('No registered or enabled vSphere Agents found')
+            logging.warning('No registered or enabled vSphere Agents found')
             raise VPollerException, 'No registered or enabled vSphere Agents found'
 
         for agent in agents:
@@ -392,7 +391,7 @@ class VPollerWorker(multiprocessing.Process):
         Disconnects all vPoller Agents from the VMware vSphere hosts they are connected to
         
         """
-        logger.debug('Shutting down vSphere Agents')
+        logging.debug('Shutting down vSphere Agents')
 
         for agent in self.agents:
             self.agents[agent].disconnect()
@@ -424,7 +423,7 @@ class VPollerWorker(multiprocessing.Process):
         msg (dict): Client message for processing
         
         """
-        logger.debug('Processing client message: %s', msg)
+        logging.debug('Processing client message: %s', msg)
 
         # Check whether the client message is a valid one
         if not isinstance(msg, dict):
