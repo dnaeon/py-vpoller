@@ -71,7 +71,7 @@ fi
 ### Excute the vpoller-client
 if [ $normal -ne 0 ]
 then
-  sh -c "vpoller-client -H vpoller.helpers.zabbix ${_args}" | awk '{print $1;}'
+  bash -c "vpoller-client -H vpoller.helpers.zabbix ${_args}" | awk '{print $1;}'
 else
   vpoller-client -H vpoller.helpers.zabbix ${_args}
 fi
