@@ -53,6 +53,9 @@ def start(config, concurrency):
         concurrency (int): Number of Worker processes to start
 
     """
+    if not concurrency:
+        concurrency = 0
+
     manager = VPollerWorkerManager(
         config_file=config,
         num_workers=int(concurrency)
