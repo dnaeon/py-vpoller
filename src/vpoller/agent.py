@@ -35,6 +35,7 @@ you can request for any specific vSphere managed object
 
 """
 
+import types
 import multiprocessing
 
 import zmq
@@ -56,6 +57,190 @@ class VSphereAgent(VConnector):
         VConnector
 
     """
+    def __init__(self, user, pwd, host):
+        """
+        Initialize a new vSphere Agent
+
+        """
+        super(VSphereAgent, self).__init__(user, pwd, host)
+
+        # Message attribute types we expect to receive
+        # before we start processing a client task request
+        self.msg_attr_types = {
+            'hostname':   (types.StringType, types.UnicodeType),
+            'name':       (types.StringType, types.UnicodeType, types.NoneType),
+            'key':        (types.StringType, types.UnicodeType, types.NoneType),
+            'username':   (types.StringType, types.UnicodeType, types.NoneType),
+            'password':   (types.StringType, types.UnicodeType, types.NoneType),
+            'properties': (types.TupleType,  types.ListType, types.NoneType),
+        }
+
+        # Supported vSphere Agent methods where the
+        # 'method' key is a reference to the actual method
+        # which will be called and 'required' is a list of
+        # required message attributes that a client task
+        # must provide during the call
+        self.agent_methods = {
+            'about': {
+                'method': self.about,
+                'required': ['hostname'],
+            },
+            'event.latest': {
+                'method': self.event_latest,
+                'required': ['hostname'],
+            },
+            'net.discover': {
+                'method': self.net_discover,
+                'required': ['hostname'],
+            },
+            'net.get': {
+                'method': self.net_get,
+                'required': ['hostname', 'name'],
+            },
+            'net.host.get': {
+                'method': self.net_host_get,
+                'required': ['hostname', 'name'],
+            },
+            'net.vm.get': {
+                'method': self.net_vm_get,
+                'required': ['hostname', 'name'],
+            },
+            'datacenter.discover': {
+                'method': self.datacenter_discover,
+                'required': ['hostname'],
+            },
+            'datacenter.get': {
+                'method': self.datacenter_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'cluster.discover': {
+                'method': self.cluster_discover,
+                'required': ['hostname'],
+            },
+            'cluster.get': {
+                'method': self.cluster_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'resource.pool.discover': {
+                'method': self.resource_pool_discover,
+                'required': ['hostname'],
+            },
+            'resource.pool.get': {
+                'method': self.resource_pool_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'host.discover': {
+                'method': self.host_discover,
+                'required': ['hostname'],
+            },
+            'host.get': {
+                'method': self.host_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'host.cluster.get': {
+                'method': self.host_cluster_get,
+                'required': ['hostname', 'name'],
+            },
+            'host.vm.get': {
+                'method': self.host_vm_get,
+                'required': ['hostname', 'name'],
+            },
+            'host.datastore.get': {
+                'method': self.host_datastore_get,
+                'required': ['hostname'],
+            },
+            'host.net.get': {
+                'method': self.host_net_get,
+                'required': ['hostname', 'name'],
+            },
+            'vm.discover': {
+                'method': self.vm_discover,
+                'required': ['hostname'],
+            },
+            'vm.disk.discover': {
+                'method': self.vm_disk_discover,
+                'required': ['hostname', 'name'],
+            },
+            'vm.get': {
+                'method': self.vm_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'vm.datastore.get': {
+                'method': self.vm_datastore_get,
+                'required': ['hostname', 'name'],
+            },
+            'vm.disk.get': {
+                'method': self.vm_disk_get,
+                'required': ['hostname', 'name', 'key'],
+            },
+            'vm.host.get': {
+                'method': self.vm_host_get,
+                'required': ['hostname', 'name'],
+            },
+            'vm.guest.net.get': {
+                'method': self.vm_guest_net_get,
+                'required': ['hostname', 'name'],
+            },
+            'vm.net.get': {
+                'method': self.vm_net_get,
+                'required': ['hostname', 'name'],
+            },
+            'vm.process.get': {
+                'method': self.vm_process_get,
+                'required': ['hostname', 'name', 'username', 'password'],
+            },
+            'vm.cpu.usage.percent': {
+                'method': self.vm_cpu_usage_percent,
+                'required': ['hostname', 'name'],
+            },
+            'datastore.discover': {
+                'method': self.datastore_discover,
+                'required': ['hostname'],
+            },
+            'datastore.get': {
+                'method': self.datastore_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'datastore.host.get': {
+                'method': self.datastore_host_get,
+                'required': ['hostname', 'name'],
+            },
+            'datastore.vm.get': {
+                'method': self.datastore_vm_get,
+                'required': ['hostname', 'name'],
+            },
+        }
+
+    def _validate_client_msg(self, msg, required):
+        """
+        Helper method for validating a client message 
+
+        Checks whether the required attributes are contained within the received
+        task request and also checks whether they are from the proper type.
+
+        Returns:
+            True if the client message has been successfully validated, False otherwise
+
+        """
+        logger.debug('Checking client message, required to have: %s', required)
+
+        # Check if we have the required message attributes
+        if not all(k in msg for k in required):
+            logger.debug('Required message attributes are missing')
+            return False
+
+        # Check if we have correct types of the message attributes
+        for k in msg.keys():
+            if k not in self.msg_attr_types:
+                continue
+            if not isinstance(msg[k], self.msg_attr_types.get(k)):
+                logger.debug("Incorrect type for '%s' message attribute", k)
+                return False
+
+        logger.debug('Client message successfully validated')
+
+        return True
+
     def _discover_objects(self, properties, obj_type):
         """
         Helper method to simplify discovery of vSphere managed objects

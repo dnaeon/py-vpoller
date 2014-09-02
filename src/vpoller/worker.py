@@ -27,7 +27,6 @@ vPoller Worker module for the VMware vSphere Poller
 
 """
 
-import types
 import multiprocessing
 from platform import node
 from ConfigParser import ConfigParser
@@ -427,178 +426,31 @@ class VPollerWorker(multiprocessing.Process):
         """
         logger.debug('Processing client message: %s', msg)
 
+        # Check whether the client message is a valid one
         if not isinstance(msg, dict):
             return { 'success': 1, 'msg': 'Expected a JSON message, received %s' % msg.__class__ }
 
-        vsphere_host = msg.get('hostname')
-        
-        if not self.agents.get(vsphere_host):
+        if not 'method' in msg:
+            return { 'success': 1, 'msg': 'Missing method name' }
+
+        # Get the vSphere Agent object for handling this request
+        requested_method = msg.get('method')
+        requested_agent = msg.get('hostname')
+        agent = self.agents.get(requested_agent)
+
+        if not agent:
             return { 'success': 1, 'msg': 'Unknown or missing vSphere Agent requested' }
 
-        # The methods that the vSphere Agents support and process
-        # In the below dict the key is the method name requested by the client,
-        # where 'method' is the actual method invoked and the 'msg_attr' key is a
-        # tuple/list of required attributes the message must have in order for this
-        # request to be passed to and processed by the vSphere Agent
-        methods = {
-            'about': {
-                'method':   self.agents[vsphere_host].about,
-                'msg_attr': ('method', 'hostname'),
-            },
-            'event.latest': {
-                'method':    self.agents[vsphere_host].event_latest,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'net.discover': {
-                'method':    self.agents[vsphere_host].net_discover,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'net.get': {
-                'method':    self.agents[vsphere_host].net_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'net.host.get': {
-                'method':    self.agents[vsphere_host].net_host_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'net.vm.get': {
-                'method':    self.agents[vsphere_host].net_vm_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'datacenter.discover': {
-                'method':    self.agents[vsphere_host].datacenter_discover,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'datacenter.get': {
-                'method':    self.agents[vsphere_host].datacenter_get,
-                'msg_attr':  ('method', 'hostname', 'name', 'properties'),
-            },
-            'cluster.discover': {
-                'method':    self.agents[vsphere_host].cluster_discover,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'cluster.get': {
-                'method':    self.agents[vsphere_host].cluster_get,
-                'msg_attr':  ('method', 'hostname', 'name', 'properties'),
-            },
-            'resource.pool.discover': {
-                'method':    self.agents[vsphere_host].resource_pool_discover,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'resource.pool.get': {
-                'method':    self.agents[vsphere_host].resource_pool_get,
-                'msg_attr':  ('method', 'hostname', 'name', 'properties'),
-            },
-            'host.discover': {
-                'method':    self.agents[vsphere_host].host_discover,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'host.get': {
-                'method':    self.agents[vsphere_host].host_get,
-                'msg_attr':  ('method', 'hostname', 'name', 'properties'),
-            },
-            'host.cluster.get': {
-                'method':    self.agents[vsphere_host].host_cluster_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'host.vm.get': {
-                'method':    self.agents[vsphere_host].host_vm_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'host.datastore.get': {
-                'method':    self.agents[vsphere_host].host_datastore_get,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'host.net.get': {
-                'method':    self.agents[vsphere_host].host_net_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'vm.discover': {
-                'method':    self.agents[vsphere_host].vm_discover,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'vm.disk.discover': {
-                'method':    self.agents[vsphere_host].vm_disk_discover,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'vm.get': {
-                'method':    self.agents[vsphere_host].vm_get,
-                'msg_attr':  ('method', 'hostname', 'name', 'properties'),
-            },
-            'vm.datastore.get': {
-                'method':    self.agents[vsphere_host].vm_datastore_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'vm.disk.get': {
-                'method':    self.agents[vsphere_host].vm_disk_get,
-                'msg_attr':  ('method', 'hostname', 'name', 'key'),
-            },
-            'vm.host.get': {
-                'method':    self.agents[vsphere_host].vm_host_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'vm.guest.net.get': {
-                'method':    self.agents[vsphere_host].vm_guest_net_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'vm.net.get': {
-                'method':    self.agents[vsphere_host].vm_net_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'vm.process.get': {
-                'method':    self.agents[vsphere_host].vm_process_get,
-                'msg_attr':  ('method', 'hostname', 'name', 'username', 'password'),
-            },
-            'vm.cpu.usage.percent': {
-                'method':    self.agents[vsphere_host].vm_cpu_usage_percent,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'datastore.discover': {
-                'method':    self.agents[vsphere_host].datastore_discover,
-                'msg_attr':  ('method', 'hostname'),
-            },
-            'datastore.get': {
-                'method':    self.agents[vsphere_host].datastore_get,
-                'msg_attr':  ('method', 'hostname', 'name', 'properties'),
-            },
-            'datastore.host.get': {
-                'method':    self.agents[vsphere_host].datastore_host_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-            'datastore.vm.get': {
-                'method':    self.agents[vsphere_host].datastore_vm_get,
-                'msg_attr':  ('method', 'hostname', 'name'),
-            },
-        }
+        agent_method = agent.agent_methods.get(requested_method)
+        
+        if not agent_method:
+            return { 'success': 1, 'msg': 'Unknown method name requested' }
 
-        if msg['method'] not in methods:
-            return { 'success': 1, 'msg': 'Unknown method received' }
-
-        agent_method  = methods[msg['method']]
-
-        logger.debug('Checking client message, required to have: %s', agent_method['msg_attr'])
-
-        # The message attributes type we expect to receive
-        msg_attr_types = {
-            'method':     (types.StringType, types.UnicodeType),
-            'hostname':   (types.StringType, types.UnicodeType),
-            'name':       (types.StringType, types.UnicodeType, types.NoneType),
-            'key':        (types.StringType, types.UnicodeType, types.NoneType),
-            'username':   (types.StringType, types.UnicodeType, types.NoneType),
-            'password':   (types.StringType, types.UnicodeType, types.NoneType),
-            'properties': (types.TupleType,  types.ListType, types.NoneType),
-        }
-
-        # Check if we have the required message attributes
-        if not all (k in msg for k in agent_method['msg_attr']):
-            return { 'success': 1, 'msg': 'Missing message attributes' }
-
-        # Check if we have correct types of the message attributes
-        for k in msg.keys():
-            if not isinstance(msg[k], msg_attr_types.get(k, types.NoneType)):
-                return { 'success': 1, 'msg': 'Incorrect message attribute type received' }
+        # Validate client message for required message attributes and type
+        required = agent.agent_methods.get(requested_method)['required']
+        if not agent._validate_client_msg(msg, required):
+            return { 'success': 1, 'msg': 'Incorrect task request received' }
             
-        # Process client request
         result = agent_method['method'](msg)
 
         return result
