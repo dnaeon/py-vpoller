@@ -55,7 +55,7 @@ def start(config, concurrency):
     """
     manager = VPollerWorkerManager(
         config_file=config,
-        num_workers=concurrency
+        num_workers=int(concurrency)
     )
     manager.start()
 
