@@ -7,7 +7,7 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 # Initialize our own variables:
 whitespace="[[:space:]]"
 _vsphere=
-normal=`echo $@ | grep -E "(cluster|datacenter)" | wc -l`
+normal=`echo $@ | grep -E "(cluster.get|datacenter.get)" | wc -l`
 
 if [ $normal -ne 0 ]
 then
