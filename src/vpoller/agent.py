@@ -223,7 +223,7 @@ class VSphereAgent(VConnector):
 
         """
         logging.debug(
-            'Checking client message, required to have: %s',
+            'Validating client message, required to have: %s',
             required
         )
 
@@ -492,7 +492,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.info("[%s] Retrieving 'about' information", self.host)
+        logging.info("[%s] Retrieving vSphere About information", self.host)
 
         # If no properties are specified just return the 'fullName' property
         if 'properties' not in msg or not msg['properties']:
@@ -602,7 +602,7 @@ class VSphereAgent(VConnector):
 
         """
         logging.debug(
-            '[%s] Getting hosts using %s pyVmomi.vim.Network managed object',
+            '[%s] Getting hosts using %s vim.Network managed object',
             self.host,
             msg['name']
         )
@@ -660,7 +660,7 @@ class VSphereAgent(VConnector):
 
         """
         logging.debug(
-            '[%s] Getting VMs using %s pyVmomi.vim.Network managed object',
+            '[%s] Getting VMs using %s vim.Network managed object',
             self.host,
             msg['name']
         )
@@ -703,7 +703,7 @@ class VSphereAgent(VConnector):
 
     def datacenter_discover(self, msg):
         """
-        Discover all pyVmomi.vim.Datacenter managed objects
+        Discover all vim.Datacenter managed objects
 
         Example client message would be:
 
@@ -741,7 +741,7 @@ class VSphereAgent(VConnector):
 
     def datacenter_get(self, msg):
         """
-        Get properties of a single pyVmomi.vim.Datacenter managed object
+        Get properties of a single vim.Datacenter managed object
 
         Example client message would be:
 
@@ -773,7 +773,7 @@ class VSphereAgent(VConnector):
 
     def cluster_discover(self, msg):
         """
-        Discover all pyVmomi.vim.ClusterComputeResource managed objects
+        Discover all vim.ClusterComputeResource managed objects
 
         Example client message would be:
 
@@ -811,7 +811,7 @@ class VSphereAgent(VConnector):
 
     def cluster_get(self, msg):
         """
-        Get properties of a pyVmomi.vim.ClusterComputeResource managed object
+        Get properties of a vim.ClusterComputeResource managed object
 
         Example client message would be:
 
@@ -843,7 +843,7 @@ class VSphereAgent(VConnector):
 
     def resource_pool_discover(self, msg):
         """
-        Discover all pyVmomi.vim.ResourcePool managed objects
+        Discover all vim.ResourcePool managed objects
 
         Example client message would be:
 
@@ -881,7 +881,7 @@ class VSphereAgent(VConnector):
 
     def resource_pool_get(self, msg):
         """
-        Get properties of a single pyVmomi.vim.ResourcePool managed object
+        Get properties of a single vim.ResourcePool managed object
 
         Example client message would be:
 
@@ -915,7 +915,7 @@ class VSphereAgent(VConnector):
 
     def host_discover(self, msg):
         """
-        Discover all pyVmomi.vim.HostSystem managed objects
+        Discover all vim.HostSystem managed objects
 
         Example client message would be:
 
@@ -953,7 +953,7 @@ class VSphereAgent(VConnector):
 
     def host_get(self, msg):
         """
-        Get properties of a single pyVmomi.vim.HostSystem managed object
+        Get properties of a single vim.HostSystem managed object
 
         Example client message would be:
 
@@ -1035,7 +1035,7 @@ class VSphereAgent(VConnector):
 
     def host_vm_get(self, msg):
         """
-        Get all Virtual Machines running on this HostSystem
+        Get all vim.VirtualMachine objects of a HostSystem
 
         Example client message would be:
 
