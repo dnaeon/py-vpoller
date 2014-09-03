@@ -106,11 +106,7 @@ Options:
     if not os.path.exists(args['--file']):
         raise SystemExit, 'Configuration file %s does not exist'
     
-    if args['--debug']:
-        level = logging.DEBUG
-    else:
-        level = logging.INFO
-
+    level = logging.DEBUG if args['--debug'] else logging.INFO
     logging.basicConfig(
         format='[%(asctime)s - %(levelname)s/%(processName)s] %(message)s',
         level=level
