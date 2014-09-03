@@ -49,7 +49,8 @@ class VPollerWorkerManager(object):
 
         Args:
             config_file (str): Path to the vPoller configuration file
-            num_workers (str): Number of vPoller Worker processes to create
+            num_workers (str): Number of vPoller Worker 
+                               processes to create
 
         """
         self.node = node()
@@ -76,12 +77,13 @@ class VPollerWorkerManager(object):
         Start the vPoller Worker Manager and processes
 
         """
-        logging.info('Starting vPoller Worker Manager')
+        logging.info('Starting Worker Manager')
 
         self.load_config()
         self.create_sockets()
         self.start_workers()
 
+        logging.info('Worker Manager is ready and running')
         while not self.time_to_die.is_set():
             self.wait_for_mgmt_task()
 
@@ -92,6 +94,7 @@ class VPollerWorkerManager(object):
         Stop the vPoller Manager and Workers
 
         """
+        logging.info('Worker Manager is shutting down')
         self.close_sockets()
         self.stop_workers()
 
@@ -100,6 +103,7 @@ class VPollerWorkerManager(object):
         Signal the vPoller Worker Manager that shutdown time has arrived
 
         """
+        logging.info('Received shutdown signal')
         self.time_to_die.set()
 
         return {'success': 0, 'msg': 'Shutdown time has arrived'}
@@ -117,16 +121,26 @@ class VPollerWorkerManager(object):
         self.config['mgmt'] = parser.get('worker', 'mgmt')
         self.config['db'] = parser.get('worker', 'db')
         self.config['proxy'] = parser.get('worker', 'proxy')
-
+        
+        logging.debug(
+            'Worker Manager configuration: %s',
+            self.config
+        )
+        
     def start_workers(self):
         """
         Start the vPoller Worker processes
 
         """
-        logging.info('Starting vPoller Worker processes')
+        logging.info('Starting Worker processes')
 
         if self.num_workers <= 0:
             self.num_workers = multiprocessing.cpu_count()
+
+        logging.info(
+            'Concurrency: %d (processes)',
+            self.num_workers
+        )
 
         for i in xrange(self.num_workers):
             worker = VPollerWorker(
@@ -142,7 +156,7 @@ class VPollerWorkerManager(object):
         Stop the vPoller Worker processes
 
         """
-        logging.info('Stopping vPoller Worker processes')
+        logging.info('Stopping Worker processes')
 
         for worker in self.workers:
             worker.signal_stop()
@@ -153,7 +167,7 @@ class VPollerWorkerManager(object):
         Creates the ZeroMQ sockets used by the vPoller Worker Manager
 
         """
-        logging.debug('Creating vPoller Worker Manager sockets')
+        logging.debug('Creating Worker Manager sockets')
 
         self.zcontext = zmq.Context()
         self.mgmt_socket = self.zcontext.socket(zmq.REP)
@@ -166,7 +180,7 @@ class VPollerWorkerManager(object):
         Closes the ZeroMQ sockets used by the Manager
 
         """
-        logging.debug('Closing vPoller Worker Manager sockets')
+        logging.debug('Closing Worker Manager sockets')
 
         self.zpoller.unregister(self.mgmt_socket)
         self.mgmt_socket.close()
@@ -223,7 +237,7 @@ class VPollerWorkerManager(object):
         Get status information about the vPoller Worker
 
         """
-        logging.debug('Getting vPoller Worker status')
+        logging.debug('Getting Worker status')
 
         result = {
             'success': 0,
@@ -286,11 +300,12 @@ class VPollerWorker(multiprocessing.Process):
             config (str): Path to the confuguration file for vPoller Worker
 
         """
-        logging.info('vPoller Worker process is starting')
+        logging.info('Worker process is starting')
 
         self.create_sockets()
         self.create_agents()
 
+        logging.info('Worker process is ready and running')
         while not self.time_to_die.is_set():
             self.wait_for_tasks()
 
@@ -301,6 +316,7 @@ class VPollerWorker(multiprocessing.Process):
         Stop vPoller Worker process
 
         """
+        logging.info('Worker process is shutting down')
         self.close_sockets()
         self.stop_agents()
 
@@ -354,7 +370,7 @@ class VPollerWorker(multiprocessing.Process):
         Creates two sockets:
 
         """
-        logging.debug('Creating vPoller Worker sockets')
+        logging.info('Creating Worker sockets')
 
         self.zcontext = zmq.Context()
         self.worker_socket = self.zcontext.socket(zmq.DEALER)
@@ -367,6 +383,8 @@ class VPollerWorker(multiprocessing.Process):
         Closes the ZeroMQ sockets used by the vPoller Worker
 
         """
+        logging.info('Closing Worker process sockets')
+        
         self.zpoller.unregister(self.worker_socket)
         self.worker_socket.close()
         self.zcontext.term()

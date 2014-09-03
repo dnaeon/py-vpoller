@@ -71,12 +71,13 @@ class VPollerProxyManager(object):
         Start the vPoller Proxy processes
 
         """
-        logging.info('Starting vPoller Proxy Manager')
+        logging.info('Starting Proxy Manager')
 
         self.load_config()
         self.create_sockets()
         self.start_proxy_process()
 
+        logging.info('Proxy Manager is ready and running')
         while not self.time_to_die.is_set():
             self.wait_for_mgmt_task()
 
@@ -87,6 +88,7 @@ class VPollerProxyManager(object):
         Stop the vPoller Proxy processes
 
         """
+        logging.info('Proxy Manager is shutting down')
         self.close_sockets()
         self.stop_proxy_process()
 
@@ -95,8 +97,9 @@ class VPollerProxyManager(object):
         Signal the Proxy Manager that shutdown time has arrived
 
         """
+        logging.info('Received shutdown signal')
         self.time_to_die.set()
-
+        
         return {'success': 0, 'msg': 'Shutdown time has arrived'}
 
     def load_config(self):
@@ -113,12 +116,17 @@ class VPollerProxyManager(object):
         self.config['frontend'] = parser.get('proxy', 'frontend')
         self.config['backend'] = parser.get('proxy', 'backend')
 
+        logging.debug(
+            'Proxy Manager configuration: %s',
+            self.config
+        )
+
     def start_proxy_process(self):
         """
         Start the vPoller Proxy process
 
         """
-        logging.info('Starting vPoller Proxy process')
+        logging.info('Starting Proxy process')
 
         self.proxy = VPollerProxy(
             frontend=self.config.get('frontend'),
@@ -132,7 +140,7 @@ class VPollerProxyManager(object):
         Stop the vPoller Proxy process
 
         """
-        logging.info('Stopping vPoller Proxy process')
+        logging.info('Stopping Proxy process')
 
         self.proxy.signal_stop()
         self.proxy.join(3)
@@ -142,6 +150,7 @@ class VPollerProxyManager(object):
         Creates the ZeroMQ sockets used by the vPoller Proxy Manager
 
         """
+        logging.info('Creating Proxy Manager sockets')
         self.zcontext = zmq.Context()
         self.mgmt_socket = self.zcontext.socket(zmq.REP)
         self.mgmt_socket.bind(self.config.get('mgmt'))
@@ -153,8 +162,7 @@ class VPollerProxyManager(object):
         Closes the ZeroMQ sockets used by the vPoller Proxy Manager
 
         """
-        logging.info('Closing vPoller Proxy Manager sockets')
-
+        logging.info('Closing Proxy Manager sockets')
         self.zpoller.unregister(self.mgmt_socket)
         self.mgmt_socket.close()
         self.zcontext.term()
@@ -265,10 +273,11 @@ class VPollerProxy(multiprocessing.Process):
         self.backend = None
 
     def run(self):
-        logging.info('vPoller Proxy process is starting')
+        logging.info('Proxy process is starting')
 
         self.create_sockets()
 
+        logging.info('Proxy process is ready and running')
         while not self.time_to_die.is_set():
             self.distribute_tasks()
 
@@ -279,6 +288,7 @@ class VPollerProxy(multiprocessing.Process):
         Stop the vPoller Proxy process
 
         """
+        logging.info('Proxy process is shutting down')
         self.close_sockets()
 
     def signal_stop(self):
@@ -297,29 +307,39 @@ class VPollerProxy(multiprocessing.Process):
 
         # Forward task from frontend to backend socket
         if socks.get(self.frontend) == zmq.POLLIN:
+            logging.debug('Message received on frontend socket')
             task = self.frontend.recv()
             more = self.frontend.getsockopt(zmq.RCVMORE)
             if more:
                 self.backend.send(task, zmq.SNDMORE)
             else:
                 self.backend.send(task)
+            logging.debug(
+                'Sending message to backend socket: %s',
+                task
+            )
 
         # Forward result from backend to frontend socket
         if socks.get(self.backend) == zmq.POLLIN:
+            logging.debug('Message received on backend socket')
             result = self.backend.recv()
             more = self.backend.getsockopt(zmq.RCVMORE)
             if more:
                 self.frontend.send(result, zmq.SNDMORE)
             else:
                 self.frontend.send(result)
+            logging.debug(
+                'Sending message to frontend socket: %s',
+                result
+            )
 
     def create_sockets(self):
         """
         Creates the ZeroMQ sockets used by the vPoller Proxy process
 
         """
-        logging.info('Creating vPoller Proxy process sockets')
-
+        logging.info('Creating Proxy process sockets')
+        
         self.zcontext = zmq.Context()
         self.frontend = self.zcontext.socket(zmq.ROUTER)
         self.backend = self.zcontext.socket(zmq.DEALER)
@@ -334,7 +354,7 @@ class VPollerProxy(multiprocessing.Process):
         Closes the ZeroMQ sockets used by vPoller Proxy process
 
         """
-        logging.info('Closing vPoller Proxy process sockets')
+        logging.info('Closing Proxy process sockets')
 
         self.zpoller.unregister(self.frontend)
         self.zpoller.unregister(self.backend)
