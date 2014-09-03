@@ -35,7 +35,6 @@ discovering and polling of vSphere Object properties.
 import json
 import logging
 import importlib
-
 from sys import exit
 
 from vpoller.client import VPollerClient
@@ -77,7 +76,7 @@ Usage:
 Options:
     -h, --help                                  Display this usage info
     -v, --version                               Display version and exit
-    -D, --debug                                 Debug mode, be more verbose
+    -d, --debug                                 Debug mode, be more verbose
     -m <method>, --method <method>              The method to be processed during the client request
     -V <host>, --vsphere-host <host>            The vSphere host to send the request to
     -n <name>, --name <name>                    Name of the object, e.g. ESXi hostname, datastore URL, etc.
@@ -89,8 +88,6 @@ Options:
     -k <key>, --key <key>                       Provide additional key for data filtering 
     -U <username>, --guest-username <username>  Username to use for authentication in guest system
     -P <username>, --guest-password <password>  Password to use for authentication in guest system
-    -o <logfile>, --output <logfile>            Specify the log file to use when performing the poll
-                                                [default: /var/log/vpoller/vpoller-client.log]
     -H <helper>, --helper <helper>              Specify a helper module to use for processing the
                                                 result message, e.g. 'zabbix'
 
@@ -106,17 +103,19 @@ Examples:
     args = docopt(usage, version='0.2.9')
 
     level = logging.DEBUG if args['--debug'] else logging.INFO
-
     logging.basicConfig(
-        filename=args['--output'],
-        format='%(asctime)s - %(levelname)s - vpoller-client[%(process)s]: %(message)s',
+        format='[%(asctime)s - %(levelname)s/%(processName)s] %(message)s',
         level=level
     )
-        
-    client = VPollerClient(endpoint=args["--endpoint"], retries=int(args["--retries"]), timeout=int(args["--timeout"]))
 
     # List of available helpers
     helpers = ['vpoller.helpers.zabbix', 'vpoller.helpers.csvhelper']
+
+    client = VPollerClient(
+        endpoint=args["--endpoint"],
+        retries=int(args["--retries"]),
+        timeout=int(args["--timeout"])
+    )
 
     # Message we send out to workers
     msg = {
