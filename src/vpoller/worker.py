@@ -85,7 +85,10 @@ class VPollerWorkerManager(object):
 
         logging.info('Worker Manager is ready and running')
         while not self.time_to_die.is_set():
-            self.wait_for_mgmt_task()
+            try:
+                self.wait_for_mgmt_task()
+            except KeyboardInterrupt:
+                self.signal_stop()
 
         self.stop()
 
@@ -307,7 +310,10 @@ class VPollerWorker(multiprocessing.Process):
 
         logging.info('Worker process is ready and running')
         while not self.time_to_die.is_set():
-            self.wait_for_tasks()
+            try:
+                self.wait_for_tasks()
+            except KeyboardInterrupt:
+                self.signal_stop()
 
         self.stop()
 
