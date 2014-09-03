@@ -93,6 +93,13 @@ The C client of *vPoller* also requires the following packages to be installed i
 
 *vPoller* is hosted on Github. Please contribute by reporting issues, suggesting features or by sending patches using pull requests.
 
+## Installation
+
+**NOTE**: The `master` branch of `vPoller` is where main development happens and things change a lot.
+
+In order to install a development version of `vPoller` use the `master` branch and for stable releases please
+use the [available stable releases of vPoller](https://github.com/dnaeon/py-vpoller/releases).
+
 ## Installation from packages
 
 In order to install `vPoller` from packages on Debian GNU/Linux system you can use the Debian packages from the link below:
