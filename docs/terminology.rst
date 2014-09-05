@@ -5,7 +5,7 @@ Terminology
 ===========
 
 ``vPoller Proxy``
-   ZeroMQ proxy which distributes tasks to and load balances client
+   ZeroMQ proxy which distributes tasks and load balances client
    requests. The application running the ``vPoller Proxy`` is
    ``vpoller-proxy``.
 

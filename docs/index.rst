@@ -35,6 +35,14 @@ issues, suggesting features or by sending patches using pull requests.
 
 .. _`vPoller is hosted on Github`: https://github.com/dnaeon/py-vpoller
 
+Bugs
+====
+
+Probably. If you experience a bug issue, please report it to the
+`vPoller issue tracker on Github`_
+
+.. _`vPoller issue tracker on Github`: https://github.com/dnaeon/py-vpoller/issues
+
 Getting started
 ===============
 
