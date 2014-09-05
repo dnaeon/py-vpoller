@@ -30,7 +30,7 @@ suggesting features or by sending patches using pull requests.
 
 The online documentation of vPoller can be found on the link below:
 
-* vpoller-documentation
+* http://vpoller.readthedocs.org/en/latest/
 
 ## Bugs
 
