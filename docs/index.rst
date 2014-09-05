@@ -35,6 +35,20 @@ issues, suggesting features or by sending patches using pull requests.
 
 .. _`vPoller is hosted on Github`: https://github.com/dnaeon/py-vpoller
 
+Getting started
+===============
+
+A good place to start with vPoller is the to go over the
+:ref:`terminology` page in order to get familiar with the concepts and
+terms used in vPoller.
+
+Once ready with that head to the :ref:`installation` and
+:ref:`configuration` documentations, which provide all the details
+about how to install and configure vPoller.
+
+Make sure to also check the :ref:`examples` page and see how to run
+your first vPoller task requests.
+
 Contents
 ========
 
