@@ -73,3 +73,7 @@ Contents
 
    methods
 
+.. toctree::
+   :maxdepth: 1
+
+   terminology
