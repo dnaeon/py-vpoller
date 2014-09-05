@@ -7,8 +7,8 @@ Installation of vPoller
 This document walks you through the installation of vPoller.
 
 There are a number of ways to install vPoller on your system -
-you could either install vPoller from source from the Github repo or
-use binary packages.
+you could either install vPoller from source from the Github repo,
+use binary packages or install via ``pip``.
 
 As of now binary packages of vPoller are only available for
 `Debian GNU/Linux`_ systems.
@@ -49,7 +49,7 @@ Coming soon.
 Installation from packages
 ==========================
 
-In order to install vPoller from packages on `Debian GNU/Linux`_
+In order to install vPoller from packages on a `Debian GNU/Linux`_
 system you can use the Debian packages from the link below:
 
 * `Debian GNU/Linux packages for vPoller`_
