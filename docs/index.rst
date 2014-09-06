@@ -46,11 +46,11 @@ Probably. If you experience a bug issue, please report it to the
 Getting started
 ===============
 
-A good place to start with vPoller is the to go over the
+A good place to start with vPoller is to go over the
 :ref:`terminology` page in order to get familiar with the concepts and
 terms used in vPoller.
 
-Once ready with that head to the :ref:`installation` and
+Once ready with that go ahead to the :ref:`installation` and
 :ref:`configuration` documentations, which provide all the details
 about how to install and configure vPoller.
 
@@ -89,7 +89,12 @@ Contents
    :maxdepth: 2
 
    api
-   
+
+.. toctree::
+   :maxdepth: 2
+
+   vpoller-zabbix
+
 .. toctree::
    :maxdepth: 1
 

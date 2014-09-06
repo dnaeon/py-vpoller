@@ -19,7 +19,7 @@ in order to provide monitoring of your VMware vSphere environment.
 vPoller has been tested with VMware vSphere 5.x and with very limited
 testing on vSphere 4.x
 
-vPoller is Open Source and licensed under the [BSD License](http://opensource.org/licenses/BSD-2-Clause)
+vPoller is Open Source and licensed under the [BSD License](http://opensource.org/licenses/BSD-2-Clause).
 
 ## Contributions
 
