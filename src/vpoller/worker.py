@@ -200,9 +200,9 @@ class VPollerWorkerManager(object):
                 msg = self.mgmt_socket.recv_json()
             except TypeError:
                 logging.warning(
-                    'Invalid message received on management interface: %s',
-                    msg
+                    'Invalid message received on management interface',
                 )
+                self.mgmt_socket.send('Invalid message received')
                 return
 
             result = self.process_mgmt_task(msg)

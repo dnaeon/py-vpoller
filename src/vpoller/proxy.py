@@ -181,9 +181,9 @@ class VPollerProxyManager(object):
                 msg = self.mgmt_socket.recv_json()
             except TypeError:
                 logging.warning(
-                    'Invalid management message received:  %s',
-                    msg
+                    'Invalid management message received',
                 )
+                self.mgmt_socket.send('Invalid message received')
                 return
 
             result = self.process_mgmt_task(msg)
