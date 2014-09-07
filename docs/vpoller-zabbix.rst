@@ -199,7 +199,7 @@ tool would be regular Zabbix hosts, which you could update -
 adding the host to groups you want, linking arbitrary
 templates to it, etc.
 
-.. _`zabbix-vsphere-import`: https://github.com/dnaeon/py-vpoller/master/src/zabbix/vsphere-import
+.. _`zabbix-vsphere-import`: https://github.com/dnaeon/py-vpoller/tree/master/src/zabbix/vsphere-import
 
 First, let's create the config file which `zabbix-vsphere-import`_
 will be using. Below is an example config file used by
