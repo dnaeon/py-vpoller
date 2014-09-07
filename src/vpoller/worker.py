@@ -354,9 +354,14 @@ class VPollerWorker(multiprocessing.Process):
                 msg = self.worker_socket.recv_json()
             except Exception as e:
                 logging.warning(
-                    'Invalid client message received, will be ignored: %s',
-                    msg
+                    'Invalid client message received, will be ignored',
                 )
+                self.worker_socket.send(_id, zmq.SNDMORE)
+                self.worker_socket.send(_empty, zmq.SNDMORE)
+                self.worker_socket.send_json(
+                    {'success': 1, 'msg': 'Invalid message received'}
+                )
+                return
 
             # Process task and return result to client
             result = self.process_client_msg(msg)
