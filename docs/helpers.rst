@@ -42,6 +42,7 @@ configuration option for loading the ``zabbix`` helper
 module in your ``vPoller Worker``:
 
 .. code-block:: ini
+
    [proxy]
    frontend = tcp://*:10123
    backend  = tcp://*:10124
