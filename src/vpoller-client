@@ -34,38 +34,9 @@ discovering and polling of vSphere Object properties.
 
 import json
 import logging
-import importlib
-from sys import exit
 
 from vpoller.client import VPollerClient
 from docopt import docopt
-
-def vpoller_helpers(helper, msg, data):
-    """
-    vPoller Helpers
-
-    Dynamically loads a vPoller helper for post-processing
-    any result messages. Useful when you need to return a
-    result in other formats to be used by other tools/systems.
-
-    An example of such a helper is the Zabbix helper, which
-    takes care of returning result in Zabbix-friendly format.
-
-    Args:
-        helper  (str): The helper module name
-        msg    (dict): The original request message
-        data    (str): The result message from the request
-
-    """
-    try:
-        helper_module = importlib.import_module(helper)
-    except ImportError as e:
-        return 'Cannot import helper module: %s' % e
-
-    agent = helper_module.HelperAgent(msg, data)
-    result = agent.run()
-
-    return result
 
 def main():
 
@@ -108,40 +79,35 @@ Examples:
         level=level
     )
 
-    # List of available helpers
-    helpers = ['vpoller.helpers.zabbix', 'vpoller.helpers.csvhelper']
-
     client = VPollerClient(
         endpoint=args["--endpoint"],
         retries=int(args["--retries"]),
         timeout=int(args["--timeout"])
     )
 
-    # Message we send out to workers
+    # Message we send out for processing
     msg = {
-        'method':     args['--method'],
-        'hostname':   args['--vsphere-host'],
-        'name':       args['--name'],
-        'username':   args['--guest-username'],
-        'password':   args['--guest-password'],
-        'key':        args['--key'],
+        'method': args['--method'],
+        'hostname': args['--vsphere-host'],
+        'name': args['--name'],
+        'username': args['--guest-username'],
+        'password': args['--guest-password'],
+        'key': args['--key'],
         'properties': args['--properties'].split(',') if args['--properties'] else None,
-        }
+        'helper': args['--helper'],
+    }
 
-    # Get the result and exit code
     data = client.run(msg)
-    rc = data['success']
-
-    # Do we use a helper module?
-    if args['--helper'] and args['--helper'] in helpers:
-        result = vpoller_helpers(args['--helper'], msg, data)
+    if isinstance(data, dict):
+        result = json.dumps(
+            data,
+            indent=4,
+            ensure_ascii=False
+        )
     else:
-        result = json.dumps(data, indent=4)
-    
-    print result
+        result = data
 
-    exit(rc)
+    print result
 
 if __name__ == '__main__':
     main()
-

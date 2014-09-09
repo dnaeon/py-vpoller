@@ -28,6 +28,7 @@ vPoller Worker module for the VMware vSphere Poller
 """
 
 import logging
+import importlib
 import multiprocessing
 from platform import node
 from ConfigParser import ConfigParser
@@ -70,6 +71,7 @@ class VPollerWorkerManager(object):
             'db': '/var/lib/vconnector/vconnector.db',
             'mgmt': 'tcp://*:10000',
             'proxy': 'tcp://localhost:10123',
+            'helpers': None,
         }
 
     def start(self):
@@ -124,6 +126,10 @@ class VPollerWorkerManager(object):
         self.config['mgmt'] = parser.get('worker', 'mgmt')
         self.config['db'] = parser.get('worker', 'db')
         self.config['proxy'] = parser.get('worker', 'proxy')
+        self.config['helpers'] = parser.get('worker', 'helpers')
+        
+        if self.config['helpers']:
+            self.config['helpers'] = self.config['helpers'].split(',')
         
         logging.debug(
             'Worker Manager configuration: %s',
@@ -148,7 +154,8 @@ class VPollerWorkerManager(object):
         for i in xrange(self.num_workers):
             worker = VPollerWorker(
                 db=self.config.get('db'),
-                proxy=self.config.get('proxy')
+                proxy=self.config.get('proxy'),
+                helpers=self.config.get('helpers')
             )
             worker.daemon = True
             self.workers.append(worker)
@@ -251,7 +258,8 @@ class VPollerWorkerManager(object):
                 'proxy': self.config.get('proxy'),
                 'mgmt': self.config.get('mgmt'),
                 'db': self.config.get('db'),
-                'concurrency': len(self.workers),
+                'concurrency': self.num_workers,
+                'helpers': self.config.get('helpers'),
             }
         }
 
@@ -274,21 +282,24 @@ class VPollerWorker(multiprocessing.Process):
         run() method
 
     """
-    def __init__(self, db, proxy):
+    def __init__(self, db, proxy, helpers):
         """
         Initialize a new VPollerWorker object
 
         Args:
-            db    (str): Path to the vConnector database file
-            proxy (str): Endpoint to which vPoller Workers connect
-                         and receive new tasks for processing
+            db       (str): Path to the vConnector database file
+            proxy    (str): Endpoint to which vPoller Workers connect
+                            and receive new tasks for processing
+            helpers (list): A list of helper modules to be loaded
 
         """
         super(VPollerWorker, self).__init__()
         self.config = {
             'db': db,
             'proxy': proxy,
+            'helpers': helpers,
         }
+        self.helpers = {} 
         self.time_to_die = multiprocessing.Event()
         self.agents = {}
         self.zcontext = None
@@ -305,6 +316,7 @@ class VPollerWorker(multiprocessing.Process):
         """
         logging.info('Worker process is starting')
 
+        self.load_helpers()
         self.create_sockets()
         self.create_agents()
 
@@ -333,6 +345,74 @@ class VPollerWorker(multiprocessing.Process):
         """
         self.time_to_die.set()
 
+    def load_helpers(self):
+        """
+        Loads helper modules for post-processing of results
+
+        """
+        if not self.config.get('helpers'):
+            return
+
+        for helper in self.config.get('helpers'):
+            logging.info('Loading helper module %s', helper)
+            try:
+                module = importlib.import_module(helper)
+            except ImportError as e:
+                logging.warning(
+                    'Cannot import helper module: %s',
+                    e
+                )
+                continue
+
+            if not hasattr(module, 'HelperAgent'):
+                logging.warning(
+                    'Module %s does not provide a HelperAgent interface',
+                    helper
+                )
+                continue
+
+            if not hasattr(module.HelperAgent, 'run'):
+                logging.warning(
+                    'In module %s HelperAgent class does not provide a run() method',
+                    helper
+                )
+                continue
+
+            logging.info(
+                'Helper module %s successfully loaded',
+                helper
+            )
+            self.helpers[helper] = module
+
+    def run_helper(self, helper, msg, data):
+        """
+        Run a helper to post-process result data
+
+        Args:
+            helper (str): Name of the helper to run
+            msg   (dict): The original message request
+            data  (dict): The data to be processed
+
+        """
+        if helper not in self.helpers:
+            return data
+
+        logging.debug(
+            'Invoking helper module %s for processing of data',
+            helper
+        )
+
+        module = self.helpers[helper]
+        h = module.HelperAgent(msg=msg, data=data)
+
+        try:
+            result = h.run()
+        except Exception as e:
+            logging.warning('Helper module raised an exception: %s', e)
+            return data
+
+        return result
+    
     def wait_for_tasks(self):
         """
         Poll the worker socket for new tasks
@@ -365,6 +445,16 @@ class VPollerWorker(multiprocessing.Process):
 
             # Process task and return result to client
             result = self.process_client_msg(msg)
+            
+            # Process data using a helper before sending it to client?
+            if 'helper' in msg:
+                r = self.run_helper(
+                    helper=msg['helper'],
+                    msg=msg,
+                    data=result
+                )
+                result = r
+
             self.worker_socket.send(_id, zmq.SNDMORE)
             self.worker_socket.send(_empty, zmq.SNDMORE)
             try:
