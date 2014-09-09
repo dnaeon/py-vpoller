@@ -27,6 +27,32 @@ supported ``vPoller Helpers`` along with a short description:
 | vpoller.helpers.csvhelper | Helper which returns result in CSV format              |
 +---------------------------+--------------------------------------------------------+
 
+The ``vPoller Helpers`` are simply Python modules and are
+loaded by the ``vPoller Workers`` upon startup.
+
+Enabling helpers
+================
+
+In order to enable helpers in your ``vPoller Workers`` you need to
+specify in the ``vpoller.conf`` file the helper modules, which you
+wish to be loaded and available to clients.
+
+Here is a sample ``vpoller.conf`` file which includes the ``helpers``
+configuration option for loading the ``zabbix`` helper
+module in your ``vPoller Worker``:
+
+.. code-block:: ini
+   [proxy]
+   frontend = tcp://*:10123
+   backend  = tcp://*:10124
+   mgmt     = tcp://*:9999
+   
+   [worker]
+   db       = /var/lib/vconnector/vconnector.db
+   proxy    = tcp://localhost:10124
+   mgmt     = tcp://*:10000
+   helpers  = vpoller.helpers.zabbix
+
 vPoller Zabbix Helper
 =====================
 
