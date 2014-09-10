@@ -100,7 +100,7 @@ In order to use the C client of vPoller you need to make sure that
 you have the `ZeroMQ 4.x library`_ installed as the C client is
 linked against it.
 
-Here is how to install the `ZeroMQ 4.x library` on your system
+Here is how to install the `ZeroMQ 4.x library`_ on your system
 from source:
 
 .. code-block:: bash

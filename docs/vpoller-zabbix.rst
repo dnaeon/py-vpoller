@@ -63,19 +63,187 @@ vPoller templates.
 Native vPoller support for Zabbix
 =================================
 
-Native vPoller support for Zabbix will make it possible for
+Native vPoller support for Zabbix makes it possible for
 Zabbix to talk natively to vPoller via a `Zabbix loadable module`_
 
 .. _`Zabbix loadable module`: https://www.zabbix.com/documentation/2.2/manual/config/items/loadablemodules
 
-Native vPoller support for Zabbix will be available only for Zabbix
+Native vPoller support for Zabbix is available only for Zabbix
 release versions 2.2.x or above, as loadable modules in Zabbix
 were introduced since the 2.2.x release of Zabbix.
 
-Native vPoller support for Zabbix is planned for the next release of
-vPoller and you can track it's progress in this issue here:
+Now, let's see how to build, install and configure the vPoller
+loadable module for Zabbix.
 
-* https://github.com/dnaeon/py-vpoller/issues/51
+First, make sure that you have the `ZeroMQ 4.x library`_ installed
+as the vPoller loadable module for Zabbix is linked against it.
+
+.. _`ZeroMQ 4.x library`: https://github.com/zeromq/zeromq4-x
+
+Here is how to install the `ZeroMQ 4.x library`_ on your system
+from source:
+
+.. code-block:: bash
+
+   $ git clone https://github.com/zeromq/zeromq4-x.git
+   $ cd zeromq4-x
+   $ ./autogen.sh
+   $ ./configure
+   $ make && sudo make install && make clean
+   $ sudo ldconfig
+
+Next thing you need to do is get the Zabbix source package for your
+Zabbix release from the `Zabbix Download page`_. We need the
+source package of Zabbix in order to build the vPoller loadable
+module.
+
+.. _`Zabbix Download page`: http://www.zabbix.com/download.php
+
+Get the source package for your Zabbix release. For instance if you
+are running Zabbix version 2.2.5 you should download the source
+package for version 2.2.5 of Zabbix.
+
+In the example commands below we are using the source package for
+Zabbix version 2.2.5.
+
+.. code-block:: bash
+
+   $ tar zxvf zabbix-2.2.5.tar.gz
+   $ cd zabbix-2.2.5
+   $ ./configure
+
+The next step we need to do is to grab the
+`vPoller loadable module for Zabbix`_ from the
+`Github repo of vPoller`_ and place the module in the
+``zabbix-2.2.5/src/modules`` directory where you have unpacked the
+Zabbix source package.
+
+.. _`vPoller loadable module for Zabbix`: https://github.com/dnaeon/py-vpoller/tree/master/src/zabbix/vpoller-module
+.. _`Github repo of vPoller`: https://github.com/dnaeon/py-vpoller
+
+.. code-block:: bash
+
+   $ cp -a py-vpoller/src/zabbix/vpoller-module zabbix-2.2.5/src/modules
+
+Building the vPoller module for Zabbix is now easy.
+
+.. code-block:: bash
+
+   $ cd zabbix-2.2.5/src/modules/vpoller-module
+   $ make
+
+Running the ``make(1)`` command will create the shared library
+``vpoller.so``, which can now be loaded by your Zabbix Server,
+Proxy and Agents.
+
+Let's now load the ``vpoller.so`` module in the Zabbix Server during
+startup. In order to load the module you need to edit your
+``zabbix_server.conf`` file and update the ``LoadModulePath`` and
+``LoadModule`` configuration options. Below is an example snippet
+from the ``zabbix_server.conf`` file, which loads the ``vpoller.so``
+module.
+
+.. code-block:: ini
+		
+   ####### LOADABLE MODULES #######
+		
+   ### Option: LoadModulePath
+   #       Full path to location of server modules.
+   #       Default depends on compilation options.
+   #
+   # Mandatory: no
+   # Default:
+   LoadModulePath=/usr/local/lib/zabbix
+   
+   ### Option: LoadModule
+   #       Module to load at server startup. Modules are used to extend functionality of the server.
+   #       Format: LoadModule=<module.so>
+   #       The modules must be located in directory specified by LoadModulePath.
+   #       It is allowed to include multiple LoadModule parameters.
+   #
+   # Mandatory: no
+   # Default:
+   LoadModule=vpoller.so
+
+Make sure that you copy the ``vpoller.so`` module, which you've built
+to your ``LoadModulePath`` directory.
+
+.. code-block:: bash
+
+   $ sudo cp zabbix-2.2.5/src/modules/vpoller-module/vpoller.so /usr/local/lib/zabbix
+
+Once ready with the configuration changes make sure to restart any
+service for which you've just updated the config file.
+
+You can verify that the ``vpoller.so`` module has been successfully
+loaded by inspecting your Zabbix logs. In the log snippet below
+you can see that our Zabbix Server has successfully loaded
+the ``vpoller.so`` module.
+
+.. code-block:: bash
+
+   13352:20140910:080628.011 Starting Zabbix Server. Zabbix 2.2.5 (revision 47411).
+   13352:20140910:080628.012 ****** Enabled features ******
+   13352:20140910:080628.012 SNMP monitoring:           YES
+   13352:20140910:080628.012 IPMI monitoring:           YES
+   13352:20140910:080628.012 WEB monitoring:            YES
+   13352:20140910:080628.012 VMware monitoring:         YES
+   13352:20140910:080628.012 Jabber notifications:      YES
+   13352:20140910:080628.012 Ez Texting notifications:  YES
+   13352:20140910:080628.012 ODBC:                      YES
+   13352:20140910:080628.012 SSH2 support:              YES
+   13352:20140910:080628.012 IPv6 support:              YES
+   13352:20140910:080628.012 ******************************
+   13352:20140910:080628.012 using configuration file: /etc/zabbix/zabbix_server.conf
+   13352:20140910:080628.015 loaded modules: vpoller.so
+
+Once loaded the vPoller module for Zabbix exposes a single key of
+type ``Simple check`` that can be used by your Zabbix items and is
+called ``vpoller[*]``.
+
+The ``vpoller[*]`` Zabbix key has the following form:
+
+.. code-block:: bash
+
+   vpoller[<method>, <hostname>, <name>, <properties>, <key>]
+
+And the parameters that ``vpoller[*]`` key expects are these.
+
++------------+------------------------------------------------------+
+| Parameter  | Description                                          |
++============+======================================================+
+| method     | vPoller method to be processed                       |
++------------+------------------------------------------------------+
+| hostname   | VMware vSphere server hostname                       |
++------------+------------------------------------------------------+
+| name       | Name of the vSphere object (e.g. VM name, ESXi name) |
++------------+------------------------------------------------------+
+| properties | vSphere object properties to be collected by vPoller |
++------------+------------------------------------------------------+
+| key        | Additional information to be passed to vPoller       |
++------------+------------------------------------------------------+
+
+If your Zabbix Agents are also loading the ``vpoller.so`` module
+you can use ``zabbix_get(8)`` tool from the command-line in order to
+send task requests to vPoller.
+
+Here is one example that uses ``zabbix_get(8)`` in order check the
+power state of VM using the ``vpoller[*]`` key.
+
+.. code-block:: bash
+
+   $ zabbix_get -s 127.0.0.1 -p 10050 -k "vpoller[vm.get, vc01.example.org, ns01.example.org, runtime.powerState, null]"
+   "poweredOn"
+
+The vPoller loadable module for Zabbix can use an optional
+configuration file which allows you to manage some of the vPoller
+settings, such as the vPoller timeout, retries and endpoint of the
+``vPoller Proxy`` to which task requests are being sent.
+
+The configuration of the ``vpoller.so`` module resides in the
+``/etc/zabbix/vpoller_module.conf`` file and you can find a sample
+configuration file in the `vPoller loadable module for Zabbix`_
+directory from the Github repo.
 
 Setting up vPoller externalscripts for Zabbix
 =============================================
