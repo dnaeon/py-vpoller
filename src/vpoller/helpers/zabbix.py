@@ -101,21 +101,21 @@ class HelperAgent(object):
             return self.data['msg']
 
         # The original method requested by the client
-        method = self.msg['method']
+        self.method = self.msg['method']
 
-        if method not in self.methods:
+        if self.method not in self.methods:
             logging.warning(
                 '[zbx-helper]: Do not know how to process %s method',
-                method
+                self.method
             )
-            return '[zbx-helper]: Do not know how to process %s method' % method
+            return '[zbx-helper]: Do not know how to process %s method' % self.method
 
         logging.debug(
             '[zbx-helper]: Processing data using %s() method',
-            self.methods[method].__name__
+            self.methods[self.method].__name__
         )
         
-        result = self.methods[method]()
+        result = self.methods[self.method]()
 
         logging.debug(
             '[zbx-helper]: Returning result after data processing: %s',
