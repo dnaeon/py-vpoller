@@ -161,7 +161,7 @@ main(int argc, char *argv[])
       key = optarg;
       break;
     case 'H':
-      helper = optart;
+      helper = optarg;
       break;
     default:
       usage();
