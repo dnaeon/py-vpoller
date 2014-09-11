@@ -32,7 +32,6 @@ discovering and polling of vSphere Object properties.
 
 """
 
-import json
 import logging
 
 from vpoller.client import VPollerClient
@@ -98,14 +97,6 @@ Examples:
     }
 
     data = client.run(msg)
-    if isinstance(data, dict):
-        result = json.dumps(
-            data,
-            indent=4,
-            ensure_ascii=False
-        )
-    else:
-        result = data
 
     print result
 
