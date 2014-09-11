@@ -96,7 +96,8 @@ main(int argc, char *argv[])
     "\"username\":    \"%s\", "
     "\"password\":    \"%s\", "
     "\"key\":         \"%s\", "
-    "\"properties\": [ \"%s\" ]"
+    "\"properties\": [ \"%s\" ], "
+    "\"helper\":      \"%s\" "
     "}";
 
   const char *method,	  /* The method to be processed during the client request */
@@ -105,6 +106,7 @@ main(int argc, char *argv[])
     *properties,	  /* Name of the properties as defined by the vSphere Web SDK */
     *username,            /* Username to use for authentication in guest system */
     *password,            /* Password to use for authentication in guest system */
+    *helper,              /* Specify a helper module to use for processing of result data */
     *key;                 /* Provide additional key for data filtering */
 
   char *result;	  	  /* A pointer to hold the result from our request */
@@ -122,11 +124,11 @@ main(int argc, char *argv[])
   char ch;
 
   /* Initialize the message properties */
-  name = properties = key = username = password = key = NULL;
+  name = properties = key = username = password = helper = NULL;
   method = hostname = result = NULL;
   
   /* Get the command-line options and arguments */
-  while ((ch = getopt(argc, argv, "m:e:r:t:n:p:k:U:P:V:")) != -1) {
+  while ((ch = getopt(argc, argv, "m:e:r:t:n:p:k:U:P:V:H:")) != -1) {
     switch (ch) {
     case 'm':
       method = optarg;
@@ -158,6 +160,9 @@ main(int argc, char *argv[])
     case 'k':
       key = optarg;
       break;
+    case 'H':
+      helper = optart;
+      break;
     default:
       usage();
       return (EX_USAGE);
@@ -175,7 +180,7 @@ main(int argc, char *argv[])
   /* Create the message to send out */
   snprintf(msg_buf, 1023, msg_out_template,
 	   method, hostname, name,
-	   username, password, key, properties);
+	   username, password, key, properties, helper);
     
   /* Create a new ZeroMQ Context and Socket */
   zcontext = zmq_ctx_new();
