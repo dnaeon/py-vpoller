@@ -463,7 +463,7 @@ class VPollerWorker(multiprocessing.Process):
                 # so that C clients can properly get the data we send
                 data = json.dumps(result, ensure_ascii=False)
                 data += '\0'
-                self.worker_socket.send(data)
+                self.worker_socket.send_unicode(data)
             except TypeError as e:
                 logging.warning('Cannot serialize result: %s', e)
                 r = {'success': 1, 'msg': 'Cannot serialize result: %s' % e}
