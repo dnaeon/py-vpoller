@@ -110,7 +110,6 @@ main(int argc, char *argv[])
     *helper,              /* Specify a helper module to use for processing of result data */
     *key;                 /* Provide additional key for data filtering */
 
-  char *r = NULL;         /* Pointer to hold any result from vPoller */
   bool got_reply = false; /* A flag to indicate whether a reply from vPoller is received or not */
 
   /* The vPoller Proxy/Worker endpoint we connect to */
@@ -238,9 +237,7 @@ main(int argc, char *argv[])
     rc = EX_UNAVAILABLE;
     printf("{ \"success\": 1, \"msg\": \"Did not receive reply from server, aborting...\" }\n");
   } else {
-    r = zmq_msg_data(&msg_in);
-    r[msg_len] = '\0';
-    printf("%s\n", r);
+    printf("%s\n", zmq_msg_data(&msg_in));
   }
 
   zmq_msg_close(&msg_in);
