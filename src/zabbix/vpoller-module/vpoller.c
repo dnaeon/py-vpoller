@@ -174,6 +174,7 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
     *properties,	   /* vSphere properties to be collected */
     *key;                  /* Provide additional data to vPoller as a 'key' */
 
+  char *r = NULL;          /* Pointer to hold any result from vPoller */
   bool got_reply = false;  /* A flag to indicate whether a reply from vPoller was received or not */
   
   int retries = CONFIG_VPOLLER_RETRIES;  /* Number of retries */
@@ -268,7 +269,9 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
     return (SYSINFO_RET_FAIL);
   }
 
-  SET_STR_RESULT(result, strdup(zmq_msg_data(&msg_in)));
+  r = zmq_msg_data(&msg_in);
+  r[msg_len] = '\0';
+  SET_STR_RESULT(result, strdup(r));
 
   zmq_msg_close(&msg_in);
   zmq_close(zsocket);
