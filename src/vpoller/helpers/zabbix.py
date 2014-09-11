@@ -31,6 +31,7 @@ translating a result vPoller message to a Zabbix-friendly format.
 """
 
 import json
+import logging
 
 
 class HelperAgent(object):
@@ -44,28 +45,14 @@ class HelperAgent(object):
 
         Args:
             msg  (dict): The original request message
-            data (dict): The result message data
+            data (dict): The data to be processed by the helper
 
         """
         self.msg = msg
         self.data = data
 
-    def run(self):
-        """
-        Main Helper method
-
-        Processes the data and does any translations if needed
-
-        """
-        # Check whether the request was successful first
-        if self.data['success'] != 0:
-            return self.data['msg']
-
-        # The original method requested from the vPoller Workers
-        self.method = self.msg['method']
-
         # Methods that the Helper knows about and how to process
-        methods = {
+        self.methods = {
             'about':                self.zabbix_item_value,
             'event.latest':         self.zabbix_item_value,
             'datacenter.discover':  self.zabbix_lld_data,
@@ -85,10 +72,55 @@ class HelperAgent(object):
             'datastore.get':        self.zabbix_item_value,
         }
 
-        if self.method not in methods:
+    def run(self):
+        """
+        Main Helper method
+
+        Processes the data and does any translations if needed
+
+        """
+        logging.debug('[zbx-helper]: Initiating data processing')
+        logging.debug(
+            '[zbx-helper]: Original client task request: %s',
+            self.msg
+        )
+        logging.debug(
+            '[zbx-helper]: Received data for processing: %s',
+            self.data
+        )
+
+        # Check whether the request was successful first
+        if self.data['success'] != 0:
+            logging.debug(
+                '[zbx-helper]: Task request was not successful (exitcode: %d)',
+                self.data['success']
+            )
+            logging.debug(
+                '[zbx-helper]: No processing will be done by the helper'
+            )
+            return self.data['msg']
+
+        # The original method requested by the client
+        method = self.msg['method']
+
+        if method not in self.methods:
+            logging.warning(
+                '[zbx-helper]: Do not know how to process %s method',
+                self.method
+            )
             return '[zbx-helper]: Do not know how to process %s method' % self.method
 
+        logging.debug(
+            '[zbx-helper]: Processing data using %s method',
+            method.__name__
+        )
+        
         result = methods[self.method]()
+
+        logging.debug(
+            '[zbx-helper]: Returning result after data processing: %s',
+            result
+        )
 
         return result
 
