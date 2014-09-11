@@ -25,6 +25,8 @@
  */
 
 
+#include <stdbool.h>
+
 #include <zmq.h>
 
 #include "threads.h"
@@ -163,16 +165,16 @@ zbx_module_item_list(void)
 int
 zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
-  void *zsocket = NULL;  /* ZeroMQ socket */
-  zmq_msg_t msg_in;      /* Incoming ZeroMQ message from vPoller */
+  void *zsocket = NULL;    /* ZeroMQ socket */
+  zmq_msg_t msg_in;        /* Incoming ZeroMQ message from vPoller */
 
-  const char *method,    /* vPoller method to be processed */
-    *hostname,           /* VMware vSphere server hostname */
-    *name,		 /* Name of the vSphere object, e.g. VM name, ESXi name */
-    *properties,	 /* vSphere properties to be collected */
-    *key;                /* Provide additional data to vPoller as a 'key' */
+  const char *method,      /* vPoller method to be processed */
+    *hostname,             /* VMware vSphere server hostname */
+    *name,		   /* Name of the vSphere object, e.g. VM name, ESXi name */
+    *properties,	   /* vSphere properties to be collected */
+    *key;                  /* Provide additional data to vPoller as a 'key' */
 
-  char *vpoller_result;  /* Holds the result from our vPoller request */
+  bool got_reply = false;  /* A flag to indicate whether a reply from vPoller was received or not */
   
   int retries = CONFIG_VPOLLER_RETRIES;  /* Number of retries */
   int linger = 0;                        /* Set the ZeroMQ socket option ZMQ_LINGER to 0 */
@@ -180,7 +182,7 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 
   char msg_buf[MAX_BUFFER_LEN];          /* Buffer to hold the final message we send out to vPoller */
 
-  method = hostname = name = properties = key = vpoller_result = NULL;
+  method = hostname = name = properties = key = NULL;
 
   /*
    * The `vpoller` key expects five parameters in the following order:
@@ -236,19 +238,7 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
     if (items[0].revents & ZMQ_POLLIN) {
       zabbix_log(LOG_LEVEL_DEBUG, "Received reply from vPoller");
       if ((msg_len = zmq_msg_recv(&msg_in, zsocket, 0)) != -1) {
-	/* 
-	 * Allocate a buffer to hold the result message from vPoller.
-	 */
-	if ((vpoller_result = malloc(msg_len + 1)) == NULL) {
-	  SET_MSG_RESULT(result, strdup("Cannot allocate memory"));
-	  zmq_msg_close(&msg_in);
-	  zmq_close(zsocket);
-	  return (SYSINFO_RET_FAIL);
-	}
-
-	/* Get the result from vPoller and NULL-terminate it */
-	vpoller_result = zmq_msg_data(&msg_in);
-	vpoller_result[msg_len] = '\0';
+	got_reply = true;
 	break;
       }
     } else {
@@ -273,17 +263,15 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
   }
   
   /* Do we have any result? */
-  if (vpoller_result == NULL) {
+  if (got_reply == false) {
     SET_MSG_RESULT(result, strdup("Did not receive response from vPoller"));
     return (SYSINFO_RET_FAIL);
   }
 
-  zabbix_log(LOG_LEVEL_DEBUG, "Received response from vPoller was: %s", vpoller_result);
+  SET_STR_RESULT(result, strdup(zmq_msg_data(&msg_in)));
 
   zmq_msg_close(&msg_in);
   zmq_close(zsocket);
-
-  SET_STR_RESULT(result, strdup(vpoller_result));
   
   return (SYSINFO_RET_OK);
 }
