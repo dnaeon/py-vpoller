@@ -106,16 +106,16 @@ class HelperAgent(object):
         if method not in self.methods:
             logging.warning(
                 '[zbx-helper]: Do not know how to process %s method',
-                self.method
+                method
             )
-            return '[zbx-helper]: Do not know how to process %s method' % self.method
+            return '[zbx-helper]: Do not know how to process %s method' % method
 
         logging.debug(
-            '[zbx-helper]: Processing data using %s method',
-            method.__name__
+            '[zbx-helper]: Processing data using %s() method',
+            self.methods[method].__name__
         )
         
-        result = methods[self.method]()
+        result = self.methods[method]()
 
         logging.debug(
             '[zbx-helper]: Returning result after data processing: %s',
