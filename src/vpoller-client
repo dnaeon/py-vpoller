@@ -58,9 +58,9 @@ Options:
                                                 [default: tcp://localhost:10123]
     -k <key>, --key <key>                       Provide additional key for data filtering 
     -U <username>, --guest-username <username>  Username to use for authentication in guest system
-    -P <username>, --guest-password <password>  Password to use for authentication in guest system
-    -H <helper>, --helper <helper>              Specify a helper module to use for processing the
-                                                result message, e.g. 'zabbix'
+    -P <password>, --guest-password <password>  Password to use for authentication in guest system
+    -H <helper>, --helper <helper>              Specify a helper module to use for processing of the
+                                                result message, e.g. 'vpoller.helpers.zabbix'
 
 Examples:
     vpoller-client -m vm.discover -V vc01.example.org

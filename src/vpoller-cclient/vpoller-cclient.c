@@ -50,7 +50,7 @@ usage(void)
 {
   fprintf(stderr, "Usage:\n");
   fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
-  fprintf(stderr, "                    [-p <properties>] -m <method> -V <host>\n");
+  fprintf(stderr, "                    [-p <properties>] [-n <name>] -m <method> -V <host>\n");
   fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
   fprintf(stderr, "                    [-k <key>] [-U <username>] [-P <password>]\n");
   fprintf(stderr, "                    -m <method> -n <name> -p <properties> -V <host>\n");
@@ -64,7 +64,11 @@ usage(void)
   fprintf(stderr, "    -r <retries>         Number of times to retry if a request times out [default: 3]\n");
   fprintf(stderr, "    -t <timeout>         Timeout after that period of milliseconds [default: 3000]\n");
   fprintf(stderr, "    -e <endpoint>        Endpoint of vPoller Proxy/Worker the client connects to\n");
-  fprintf(stderr, "                         [default: tcp://localhost:10123]\n\n");
+  fprintf(stderr, "                         [default: tcp://localhost:10123]\n");
+  fprintf(stderr, "    -U <username>        Username to use for authentication in guest system\n");
+  fprintf(stderr, "    -P <password>        Password to use for authentication in guest system\n");
+  fprintf(stderr, "    -H <helper>          Specify a helper module to use for processing of the\n");
+  fprintf(stderr, "                         result message, e.g. 'vpoller.helper.zabbix'\n\n");
   fprintf(stderr, "Examples:\n");
   fprintf(stderr, "     vpoller-cclient -m vm.discover -V vc01.example.org\n");
   fprintf(stderr, "     vpoller-cclient -m vm.discover -V vc01.example.org -p runtime.powerState\n");
