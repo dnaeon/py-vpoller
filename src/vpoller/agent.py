@@ -500,7 +500,7 @@ class VSphereAgent(VConnector):
         else:
             properties = msg['properties']
 
-        about = {prop: getattr(self.si.content.about, prop, None) for prop in properties}
+        about = {prop: getattr(self.si.content.about, prop, '(null)') for prop in properties}
         result = {
             'msg': 'Successfully retrieved properties',
             'success': 0,
@@ -1281,7 +1281,7 @@ class VSphereAgent(VConnector):
         # Get the requested disk properties
         result = {}
         result['name'] = vm_name
-        result['disk'] = [{prop: getattr(disk, prop, None) for prop in properties} for disk in vm_disks]
+        result['disk'] = [{prop: getattr(disk, prop, '(null)') for prop in properties} for disk in vm_disks]
 
         r = {
             'success': 0,
@@ -1362,7 +1362,7 @@ class VSphereAgent(VConnector):
         # Get the requested properties
         result = {}
         result['name'] = vm_name
-        result['net'] = [{prop: getattr(net, prop, None) for prop in properties} for net in vm_networks]
+        result['net'] = [{prop: getattr(net, prop, '(null)') for prop in properties} for net in vm_networks]
 
         r = {
             'success': 0,
@@ -1731,7 +1731,7 @@ class VSphereAgent(VConnector):
         # Get the requested process properties
         result = {}
         result['name'] = vm_name
-        result['process'] = [{prop: getattr(process, prop, None) for prop in properties} for process in vm_processes]
+        result['process'] = [{prop: getattr(process, prop, '(null)') for prop in properties} for process in vm_processes]
 
         r = {
             'success': 0,
