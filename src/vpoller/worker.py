@@ -27,6 +27,7 @@ vPoller Worker module for the VMware vSphere Poller
 
 """
 
+import json
 import logging
 import importlib
 import multiprocessing
@@ -458,7 +459,11 @@ class VPollerWorker(multiprocessing.Process):
             self.worker_socket.send(_id, zmq.SNDMORE)
             self.worker_socket.send(_empty, zmq.SNDMORE)
             try:
-                self.worker_socket.send_json(result)
+                # Add a NULL terminator at the end of the result
+                # so that C clients can properly get the data we send
+                data = json.dumps(result, ensure_ascii=False)
+                data += '\0'
+                self.worker_socket.send(data)
             except TypeError as e:
                 logging.warning('Cannot serialize result: %s', e)
                 r = {'success': 1, 'msg': 'Cannot serialize result: %s' % e}
