@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sysexits.h>
@@ -109,8 +110,8 @@ main(int argc, char *argv[])
     *helper,              /* Specify a helper module to use for processing of result data */
     *key;                 /* Provide additional key for data filtering */
 
-  char *result;	  	  /* A pointer to hold the result from our request */
-  
+  bool got_reply = false; /* A flag to indicate whether a reply from vPoller is received or not */
+
   /* The vPoller Proxy/Worker endpoint we connect to */
   const char *endpoint = DEFAULT_ENDPOINT;
 
@@ -124,8 +125,7 @@ main(int argc, char *argv[])
   char ch;
 
   /* Initialize the message properties */
-  name = properties = key = username = password = helper = NULL;
-  method = hostname = result = NULL;
+  method = hostname = name = properties = username = password = key = helper = NULL;
   
   /* Get the command-line options and arguments */
   while ((ch = getopt(argc, argv, "m:e:r:t:n:p:k:U:P:V:H:")) != -1) {
@@ -210,19 +210,7 @@ main(int argc, char *argv[])
      /* Do we have a reply? */
      if (items[0].revents & ZMQ_POLLIN) {
        if ((msg_len = zmq_msg_recv(&msg_in, zsocket, 0)) != -1) {
-	 /* 
-	  * Allocate a buffer to hold our resulting message
-	  * The resulting message needs to be NULL-terminated as well
-	  */
-	 if ((result = malloc(msg_len + 1)) == NULL) {
-	   fprintf(stderr, "Cannot allocate memory\n");
-	   zmq_msg_close(&msg_in);
-	   zmq_ctx_destroy(zcontext);
-	   return (EX_OSERR);
-	 }
-	 
-	 result = zmq_msg_data(&msg_in);
-	 result[msg_len] = '\0';
+	 got_reply = true;
 	 break;
        }
      } else {
@@ -245,11 +233,11 @@ main(int argc, char *argv[])
   }
   
   /* Do we have any result? */
-  if (result == NULL) {
+  if (got_reply == false) {
     rc = EX_UNAVAILABLE;
     printf("{ \"success\": 1, \"msg\": \"Did not receive reply from server, aborting...\" }\n");
   } else {
-    printf("%s\n", result);
+    printf("%s\n", zmq_msg_data(&msg_in));
   }
 
   zmq_msg_close(&msg_in);
