@@ -252,9 +252,9 @@ main(int argc, char *argv[])
     printf("%s\n", result);
   }
 
-  /* zmq_msg_close(&msg_in); */
+  zmq_msg_close(&msg_in);
   zmq_close(zsocket);
-  /* zmq_ctx_destroy(zcontext); */
+  zmq_ctx_destroy(zcontext);
 
   return (rc);
 }
