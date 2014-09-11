@@ -30,7 +30,6 @@ translating a result vPoller message to a Zabbix-friendly format.
 
 """
 
-import json
 import logging
 
 
@@ -182,7 +181,7 @@ class HelperAgent(object):
             props = [('{#VSPHERE.' + obj_t + '.' + k.upper() + '}', v) for k, v in item.items()]
             data.append(dict(props))
 
-        return json.dumps({'data': data}, indent=4)
+        return {'data': data}
 
     def zabbix_lld_data(self):
         """
@@ -209,4 +208,4 @@ class HelperAgent(object):
             props = [('{#VSPHERE.' + obj_t + '.' + k.upper() + '}', v) for k, v in item.items()]
             data.append(dict(props))
 
-        return json.dumps({'data': data}, indent=4)
+        return {'data': data}
