@@ -468,6 +468,11 @@ Generally you would want to run the import perhaps once an hour
 (e.g. from ``cron(8)``), so that your Zabbix server is in sync with
 your vSphere environment.
 
+If you are importing your vSphere objects in Zabbix using the
+``zabbix-vsphere-import`` tool make sure to disable any
+Zabbix LLD discovery rules in order to avoid any conflicts between
+them.
+
 Example screenshots
 ===================
 
