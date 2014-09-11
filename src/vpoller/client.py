@@ -125,7 +125,7 @@ class VPollerClient(object):
         self.zcontext.term()
 
         # Did we have any result reply at all?
-        if not result:
+        if result is None:
             logging.error(
                 'Did not receive response, aborting...'
             )
