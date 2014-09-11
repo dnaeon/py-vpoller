@@ -177,7 +177,8 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
   int retries = CONFIG_VPOLLER_RETRIES;  /* Number of retries */
   int linger = 0;                        /* Set the ZeroMQ socket option ZMQ_LINGER to 0 */
   int msg_len = 0;                       /* Length of the received message */
-  char msg_buf[MAX_STRING_LEN];          /* Buffer to hold the final message we send out to vPoller */
+
+  char msg_buf[MAX_BUFFER_LEN];          /* Buffer to hold the final message we send out to vPoller */
 
   method = hostname = name = properties = key = vpoller_result = NULL;
 
