@@ -161,7 +161,7 @@ zbx_module_item_list(void)
  *    zbx_module_vpoller()
  *
  * Purpose:
- *    Send task requests to vPoller for processing
+ *    Sends task requests to vPoller for processing
  *
  *    The `vpoller` key expects the following parameters
  *    when called through Zabbix:
@@ -259,7 +259,11 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
       /* We didn't get a reply from the server, let's retry */
       retries--;
 
-      zabbix_log(LOG_LEVEL_WARNING, "Did not receive response from vPoller, retrying...");
+      if (retries > 0) {
+	zabbix_log(LOG_LEVEL_WARNING, "Did not receive response from vPoller, retrying...");
+      } else {
+	zabbix_log(LOG_LEVEL_WARNING, "Did not receive response from vPoller, giving up.");
+      }
       
       /* Socket is confused, close and remove it */
       zabbix_log(LOG_LEVEL_DEBUG, "Closing socket and re-establishing connection to vPoller...");
@@ -278,6 +282,8 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
   
   /* Do we have any result? */
   if (got_reply == false) {
+    zmq_msg_close(&msg_in);
+    zmq_close(zsocket);
     SET_MSG_RESULT(result, strdup("Did not receive response from vPoller"));
     return (SYSINFO_RET_FAIL);
   }
