@@ -58,6 +58,25 @@ module in your ``vPoller Worker``:
    mgmt     = tcp://*:10000
    helpers  = vpoller.helpers.zabbix
 
+Multiple vPoller helpers can be loaded as well by separating them
+using a comma.
+
+Here's an example ``vpoller.conf`` file which loads multiple helpers
+in your ``vPoller Worker``:
+
+.. code-block:: ini
+
+   [proxy]
+   frontend = tcp://*:10123
+   backend  = tcp://*:10124
+   mgmt     = tcp://*:9999
+   
+   [worker]
+   db       = /var/lib/vconnector/vconnector.db
+   proxy    = tcp://localhost:10124
+   mgmt     = tcp://*:10000
+   helpers  = vpoller.helpers.zabbix,vpoller.helpers.czabbix
+
 vPoller Zabbix Helper
 =====================
 
