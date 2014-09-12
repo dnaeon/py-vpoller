@@ -24,7 +24,11 @@ supported ``vPoller Helpers`` along with a short description:
 +===========================+========================================================+
 | vpoller.helpers.zabbix    | Helper which returns result in Zabbix-friendly format  |
 +---------------------------+--------------------------------------------------------+
+| vpoller.helpers.czabbix   | vPoller Zabbix helper for C clients                    |
++---------------------------+--------------------------------------------------------+
 | vpoller.helpers.csvhelper | Helper which returns result in CSV format              |
++---------------------------+--------------------------------------------------------+
+| vpoller.helpers.cclient   | Helper for vPoller C clients                           |
 +---------------------------+--------------------------------------------------------+
 
 The ``vPoller Helpers`` are simply Python modules and are
