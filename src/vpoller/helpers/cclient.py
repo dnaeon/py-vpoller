@@ -29,6 +29,8 @@ This module is to be used by vPoller C clients only.
 
 """
 
+import json
+
 
 class HelperAgent(object):
     """
