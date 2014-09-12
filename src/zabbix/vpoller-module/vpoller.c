@@ -84,9 +84,9 @@ zbx_module_load_config(void)
    * PARAMETER, VAR, TYPE, MANDATORY, MIN, MAX
    */
   static struct cfg_line cfg[] = {
-    { "vPollerTimeout", &CONFIG_VPOLLER_TIMEOUT, TYPE_INT, PARM_MAND, 1000, 60000 },
-    { "vPollerRetries", &CONFIG_VPOLLER_RETRIES, TYPE_INT, PARM_MAND, 1, 100 },
-    { "vPollerProxy", &CONFIG_VPOLLER_PROXY, TYPE_STRING, PARM_MAND, 0, 0 },
+    { "vPollerTimeout", &CONFIG_VPOLLER_TIMEOUT, TYPE_INT, PARM_OPT, 1000, 60000 },
+    { "vPollerRetries", &CONFIG_VPOLLER_RETRIES, TYPE_INT, PARM_OPT, 1, 100 },
+    { "vPollerProxy", &CONFIG_VPOLLER_PROXY, TYPE_STRING, PARM_OPT, 0, 0 },
     { NULL },
   };
   
