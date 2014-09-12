@@ -125,7 +125,10 @@ main(int argc, char *argv[])
   char ch;
 
   /* Initialize the message properties */
-  method = hostname = name = properties = username = password = key = helper = NULL;
+  method = hostname = name = properties = username = password = key = NULL;
+
+  /* By default we request the vpoller.helpers.cclient helper */
+  helper = "vpoller.helpers.cclient";
   
   /* Get the command-line options and arguments */
   while ((ch = getopt(argc, argv, "m:e:r:t:n:p:k:U:P:V:H:")) != -1) {
