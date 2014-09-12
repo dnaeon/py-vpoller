@@ -395,9 +395,6 @@ class VPollerWorker(multiprocessing.Process):
             data  (dict): The data to be processed
 
         """
-        if helper not in self.helpers:
-            return data
-
         logging.debug(
             'Invoking helper module %s for processing of data',
             helper
@@ -448,26 +445,33 @@ class VPollerWorker(multiprocessing.Process):
             result = self.process_client_msg(msg)
             
             # Process data using a helper before sending it to client?
-            if 'helper' in msg:
-                r = self.run_helper(
+            if 'helper' in msg and msg['helper'] in self.helpers:
+                data = self.run_helper(
                     helper=msg['helper'],
                     msg=msg,
                     data=result
                 )
-                result = r
+            else:
+                # No helper specified, dump data to JSON
+                try:
+                    data = json.dumps(result, ensure_ascii=False)
+                except ValueError as e:
+                    logging.warning('Cannot serialize result: %s', e)
+                    r = {
+                        'success': 1,
+                        'msg': 'Cannot serialize result: %s' % e
+                    }
+                    data = json.dumps(r)
 
+            # Send data to client
             self.worker_socket.send(_id, zmq.SNDMORE)
             self.worker_socket.send(_empty, zmq.SNDMORE)
             try:
-                # Add a NULL terminator at the end of the result
-                # so that C clients can properly get the data we send
-                data = json.dumps(result, ensure_ascii=False)
-                data += '\0'
                 self.worker_socket.send_unicode(data)
             except TypeError as e:
-                logging.warning('Cannot serialize result: %s', e)
-                r = {'success': 1, 'msg': 'Cannot serialize result: %s' % e}
-                self.worker_socket.send_json(r)
+                logging.warning('Cannot send result: %s', e)
+                r = {'success': 1, 'msg': 'Cannot send result: %s' % e}
+                self.worker_socket.send_unicode(json.dumps(r))
 
     def create_sockets(self):
         """
