@@ -1,1 +1,1 @@
-__all__ = ['zabbix', 'czabbix', 'csvhelper']
+__all__ = ['zabbix', 'czabbix', , 'cclient', 'csvhelper']
