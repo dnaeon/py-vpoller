@@ -53,7 +53,7 @@ static int item_timeout = 0;
 /* Default vPoller settings */
 static unsigned CONFIG_VPOLLER_TIMEOUT = 10000;
 static unsigned CONFIG_VPOLLER_RETRIES = 1;
-static char    *CONFIG_VPOLLER_PROXY   = "tcp://localhost:10123";
+static char    *CONFIG_VPOLLER_PROXY   = NULL;
 
 /* ZeroMQ context used for creating sockets that connect to vPoller */ 
 static void *zcontext = NULL;
@@ -91,6 +91,20 @@ zbx_module_load_config(void)
   };
   
   parse_cfg_file(MODULE_CONFIG_FILE, cfg, ZBX_CFG_FILE_OPTIONAL, ZBX_CFG_STRICT);
+}
+
+/*
+ * Function:
+ *    zbx_module_set_defaults()
+ * 
+ * Purpose:
+ *     Set default settings for vPoller
+ */
+void
+zbx_module_set_defaults(void)
+{
+  if (CONFIG_VPOLLER_PROXY == NULL)
+    CONFIG_VPOLLER_PROXY = "tcp://localhost:10123";
 }
 
 /*
@@ -295,6 +309,7 @@ int
 zbx_module_init(void)
 {
   zbx_module_load_config();
+  zbx_module_set_defaults();
   
   zabbix_log(LOG_LEVEL_DEBUG, "Creating ZeroMQ context for vPoller sockets");
   zcontext = zmq_ctx_new();
