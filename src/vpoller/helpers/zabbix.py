@@ -30,6 +30,7 @@ translating a result vPoller message to a Zabbix-friendly format.
 
 """
 
+import json
 import logging
 
 
@@ -121,7 +122,7 @@ class HelperAgent(object):
             result
         )
 
-        return result
+        return json.dumps(result, ensure_ascii=False)
 
     def zabbix_item_value(self):
         """
