@@ -294,6 +294,8 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 int
 zbx_module_init(void)
 {
+  zbx_module_load_config();
+  
   zabbix_log(LOG_LEVEL_DEBUG, "Creating ZeroMQ context for vPoller sockets");
   zcontext = zmq_ctx_new();
 
