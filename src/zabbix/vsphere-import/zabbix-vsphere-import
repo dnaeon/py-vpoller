@@ -30,6 +30,7 @@ into a Zabbix server as regular Zabbix hosts
 
 """
 
+import json
 from copy import deepcopy
 
 import yaml
@@ -587,11 +588,13 @@ class ZabbixConnector(object):
 
         result = client.run(msg)
 
-        if result['success']:
+        data = json.loads(result)
+
+        if data['success']:
             logging.warning('Failed to get vSphere objects: %s', result)
             raise ZabbixException, 'Failed to get vSphere objects: %s' % result
 
-        return result
+        return data
 
 def main():
     usage="""
