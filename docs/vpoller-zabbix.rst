@@ -195,6 +195,7 @@ the ``vpoller.so`` module.
    13352:20140910:080628.012 IPv6 support:              YES
    13352:20140910:080628.012 ******************************
    13352:20140910:080628.012 using configuration file: /etc/zabbix/zabbix_server.conf
+   13352:20140910:080628.013 Loading vPoller module configuration file /etc/zabbix/vpoller_module.conf
    13352:20140910:080628.015 loaded modules: vpoller.so
 
 Once loaded the vPoller module for Zabbix exposes a single key of
