@@ -47,6 +47,21 @@ If you haven't installed and configured vPoller yet, please
 refer to the :ref:`installation` and :ref:`configuration`
 documentations first.
 
+Enabling the vPoller Helpers for Zabbix
+=======================================
+
+In order to be able to integrate vPoller with Zabbix we need to
+enable some of the vPoller helpers first.
+
+Make sure that these vPoller helpers are enabled in your
+``vPoller Workers``:
+
+* vpoller.helpers.zabbix
+* vpoller.helpers.czabbix
+
+For more information about how to enable the helpers in your
+``vPoller Workers``, please refer to the :ref:`helpers` documentation.
+
 Importing the vPoller templates in Zabbix
 =========================================
 
