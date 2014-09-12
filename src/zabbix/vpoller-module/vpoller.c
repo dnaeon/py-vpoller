@@ -42,7 +42,7 @@
                                    \"name\": \"%s\", \
 			           \"properties\": [ \"%s\" ], \
 			           \"key\": \"%s\", \
-			           \"helper\": \"vpoller.helpers.zabbix\" \
+			           \"helper\": \"vpoller.helpers.czabbix\" \
                                }"
 
 int zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result);
