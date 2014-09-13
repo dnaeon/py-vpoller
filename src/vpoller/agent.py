@@ -396,7 +396,7 @@ class VSphereAgent(VConnector):
         # Find the object by it's 'name' property
         # and get the datastores available/used by it
         data = self._get_object_properties(
-            properties=['name', 'datastore'],
+            properties=['datastore'],
             obj_type=obj_type,
             obj_property_name='name',
             obj_property_value=name
@@ -407,14 +407,12 @@ class VSphereAgent(VConnector):
 
         # Get the name and datastore properties from the result
         props = data['result'][0]
-        obj_name, obj_datastores = props['name'], props['datastore']
+        obj_datastores = props['datastore']
 
         # Get a list view of the datastores available/used by
         # this object and collect properties
         view_ref = self.get_list_view(obj=obj_datastores)
-        result = {}
-        result['name'] = obj_name
-        result['datastore'] = self.collect_properties(
+        result = self.collect_properties(
             view_ref=view_ref,
             obj_type=pyVmomi.vim.Datastore,
             path_set=['name', 'info.url']
