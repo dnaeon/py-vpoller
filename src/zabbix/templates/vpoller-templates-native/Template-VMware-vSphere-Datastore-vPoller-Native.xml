@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-09-13T09:04:21Z</date>
+    <date>2014-09-13T14:40:41Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -19,6 +19,12 @@
             <applications>
                 <application>
                     <name>General</name>
+                </application>
+                <application>
+                    <name>Hypervisors</name>
+                </application>
+                <application>
+                    <name>Virtual Machines</name>
                 </application>
             </applications>
             <items>
@@ -527,7 +533,160 @@
                     <valuemap/>
                 </item>
             </items>
-            <discovery_rules/>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discover VMware Hypervisors using the datastore</name>
+                    <type>3</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>vpoller[&quot;datastore.host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.NAME}&quot;, &quot;null&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <status>0</status>
+                    <allowed_hosts/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <filter>:</filter>
+                    <lifetime>7</lifetime>
+                    <description>Discover VMware Hypervisors using this datastore</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Hypervisor &quot;{#VSPHERE.DATASTORE.HOST.NAME}&quot; is using the datastore</name>
+                            <type>3</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>vpoller.echo[&quot;{#VSPHERE.DATASTORE.HOST.NAME}&quot;]</key>
+                            <delay>3600</delay>
+                            <history>7</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>1</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>Hypervisors</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes/>
+                    <graph_prototypes/>
+                    <host_prototypes/>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Discover VMware Virtual Machines using the datastore</name>
+                    <type>3</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>vpoller[&quot;datastore.vm.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.NAME}&quot;, &quot;null&quot;, &quot;null&quot;]</key>
+                    <delay>3</delay>
+                    <status>0</status>
+                    <allowed_hosts/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <delay_flex/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <filter>:</filter>
+                    <lifetime>7</lifetime>
+                    <description>Discover VMware Virtual Machines using the datastore</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Virtual Machine &quot;{#VSPHERE.DATASTORE.VM.NAME}&quot; is using the datastore</name>
+                            <type>3</type>
+                            <snmp_community/>
+                            <multiplier>0</multiplier>
+                            <snmp_oid/>
+                            <key>vpoller.echo[&quot;{#VSPHERE.DATASTORE.VM.NAME}&quot;]</key>
+                            <delay>3</delay>
+                            <history>7</history>
+                            <trends>365</trends>
+                            <status>0</status>
+                            <value_type>1</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <delta>0</delta>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <formula>1</formula>
+                            <delay_flex/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <data_type>0</data_type>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description/>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>Virtual Machines</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes/>
+                    <graph_prototypes/>
+                    <host_prototypes/>
+                </discovery_rule>
+            </discovery_rules>
             <macros/>
             <templates/>
             <screens/>
