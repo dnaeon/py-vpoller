@@ -1929,7 +1929,7 @@ class VSphereAgent(VConnector):
         # Find the Datastore by it's 'info.url' property
         # and get the HostSystem objects using it
         data = self._get_object_properties(
-            properties=['info.name', 'info.url', 'host'],
+            properties=['host'],
             obj_type=pyVmomi.vim.Datastore,
             obj_property_name='info.url',
             obj_property_value=msg['name']
@@ -1940,7 +1940,7 @@ class VSphereAgent(VConnector):
 
         # Get properties from the result
         props = data['result'][0]
-        obj_name, obj_url, obj_host = props['info.name'], props['info.url'], props['host']
+        obj_host = props['host']
 
         # obj_host is a list of DatastoreHostMount[] objects,
         # but we need a list of HostSystem ones instead
@@ -1949,10 +1949,7 @@ class VSphereAgent(VConnector):
         # Get a list view of the hosts from this datastore object
         # and collect their properties
         view_ref = self.get_list_view(obj=obj_host)
-        result = {}
-        result['name'] = obj_name
-        result['url'] = obj_url
-        result['host'] = self.collect_properties(
+        result = self.collect_properties(
             view_ref=view_ref,
             obj_type=pyVmomi.vim.HostSystem,
             path_set=['name']
