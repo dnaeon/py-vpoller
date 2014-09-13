@@ -70,6 +70,15 @@ repo of vPoller.
 
 .. _`vPoller templates for Zabbix`: https://github.com/dnaeon/py-vpoller/tree/master/src/zabbix/templates
 
+In the `vPoller templates for Zabbix`_ directory you will find two
+directories:
+
+* `vpoller-templates-externalchecks` - contains legacy templates to
+  be used only with Zabbix external scripts
+* `vpoller-templates-native` - contains the templates with native
+  vPoller support for Zabbix. It is recommended that you always use
+  the native vPoller support for Zabbix.
+  
 Once you import the templates you should see the newly imported
 vPoller templates.
 
@@ -312,7 +321,10 @@ going to monitor and add it to a group, e.g. vCenters in my case.
 .. image:: images/vpoller-zabbix-add-host-1.jpg
 
 Next, click on the ``Templates`` and link the
-``Template VMware vSphere - vPoller`` template to your vCenter.
+``Template VMware vSphere - vPoller`` template if you are using
+vPoller with external checks support or use the
+``Template VMware vSphere - vPoller Native`` template for native
+vPoller support in Zabbix.
 
 .. image:: images/vpoller-zabbix-add-host-2.jpg
 
