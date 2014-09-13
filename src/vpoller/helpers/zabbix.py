@@ -66,6 +66,7 @@ class HelperAgent(object):
             'host.cluster.get':     self.zabbix_item_value,
             'vm.discover':          self.zabbix_lld_data,
             'vm.get':               self.zabbix_item_value,
+            'vm.datastore.get':     self.zabbix_lld_data,
             'vm.disk.discover':     self.zabbix_vm_disk_discover,
             'vm.disk.get':          self.zabbix_vm_disk_get,
             'vm.host.get':          self.zabbix_item_value,
