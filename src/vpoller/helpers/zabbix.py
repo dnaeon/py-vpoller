@@ -201,12 +201,17 @@ class HelperAgent(object):
             {#VSPHERE.<TYPE>.<ATTRIBUTE>}: <value>
 
         """
-        obj_t = self.method.split('.')[0].upper()
+        # Get the vPoller method name without the last part of it,
+        # which is usually the operation performed like '.get' and
+        # '.discover'. From that method name construct the macro
+        # which will be used in Zabbix.
+        m = self.method.split('.')[:-1]
+        method_name = '.'.join(m).upper()
         result = self.data['result']
 
         data = []
         for item in result:
-            props = [('{#VSPHERE.' + obj_t + '.' + k.upper() + '}', v) for k, v in item.items()]
+            props = [('{#VSPHERE.' + method_name + '.' + k.upper() + '}', v) for k, v in item.items()]
             data.append(dict(props))
 
         return {'data': data}
