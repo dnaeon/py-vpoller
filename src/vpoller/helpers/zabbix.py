@@ -74,6 +74,7 @@ class HelperAgent(object):
             'datastore.discover':   self.zabbix_lld_data,
             'datastore.get':        self.zabbix_item_value,
             'datastore.host.get':   self.zabbix_lld_data,
+            'datastore.vm.get':     self.zabbix_lld_data,
         }
 
     def run(self):
