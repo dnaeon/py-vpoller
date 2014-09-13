@@ -1993,7 +1993,7 @@ class VSphereAgent(VConnector):
         # Find the Datastore by it's 'info.url' property and get the
         # VirtualMachine objects using it
         data = self._get_object_properties(
-            properties=['info.name', 'info.url', 'vm'],
+            properties=['vm'],
             obj_type=pyVmomi.vim.Datastore,
             obj_property_name='info.url',
             obj_property_value=msg['name']
@@ -2004,15 +2004,12 @@ class VSphereAgent(VConnector):
 
         # Get properties from the result
         props = data['result'][0]
-        obj_name, obj_url, obj_host = props['info.name'], props['info.url'], props['vm']
+        obj_vm = props['vm']
 
         # Get a list view of the VMs from this datastore object
         # and collect their properties
-        view_ref = self.get_list_view(obj=obj_host)
-        result = {}
-        result['name'] = obj_name
-        result['url'] = obj_url
-        result['vm'] = self.collect_properties(
+        view_ref = self.get_list_view(obj=obj_vm)
+        result = self.collect_properties(
             view_ref=view_ref,
             obj_type=pyVmomi.vim.VirtualMachine,
             path_set=['name']
