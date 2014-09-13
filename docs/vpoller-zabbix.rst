@@ -12,11 +12,13 @@ In this documentation we will see how we can integrate vPoller with
 
 .. _`Zabbix`: http://www.zabbix.com/
 
-**NOTE**: This document is about VMware monitoring with vPoller and
-Zabbix, and **NOT** about VMware monitoring with stock Zabbix.
+.. note::
 
-If you are looking for VMware monitoring with stock Zabbix,
-please refer to the `official Zabbix documentation`_.
+   This document is about VMware monitoring with vPoller and
+   Zabbix, and **NOT** about VMware monitoring with stock Zabbix.
+
+   If you are looking for VMware monitoring with stock Zabbix,
+   please refer to the `official Zabbix documentation`_.
 
 .. _`official Zabbix documentation`: https://www.zabbix.com/documentation/2.2/manual/vm_monitoring
 
@@ -273,14 +275,17 @@ directory from the Github repo.
 Setting up vPoller externalscripts for Zabbix
 =============================================
 
-**NOTE**: This section of the documentation provides instructions
-how to install the vPoller ``externalscripts`` in Zabbix. It is
-recommended that you always use the
-``native vPoller support for Zabbix`` when integrating vPoller with
-Zabbix, and use ``externalscripts`` only if you cannot have the
-native vPoller support for Zabbix, e.g. you are running an older
-Zabbix release which doesn't support loadable modules or the loadable
-module is not available for your platform.
+.. note::
+
+   This section of the documentation provides instructions
+   how to install the vPoller ``externalscripts`` in Zabbix.
+
+   It is recommended that you always use the
+   ``native vPoller support for Zabbix`` when integrating vPoller
+   with Zabbix, and use ``externalscripts`` only if you cannot
+   have the native vPoller support for Zabbix, e.g. you are
+   running an older Zabbix release which doesn't support loadable
+   modules or the loadable module is not available for your platform.
 
 Get the ``vpoller-zabbix`` and ``cvpoller-zabbix`` wrapper scripts
 from the links below and place them in your Zabbix
