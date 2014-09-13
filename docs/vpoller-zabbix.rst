@@ -408,7 +408,7 @@ will be using. Below is an example config file used by
    vsphere_object_host:
      proxy: zbx-proxy.example.org
      templates:
-       - Template VMware vSphere Hypervisor - vPoller
+       - Template VMware vSphere Hypervisor - vPoller Native
      macros:
        VSPHERE.HOST: vc01.example.org
      groups:
@@ -416,7 +416,7 @@ will be using. Below is an example config file used by
 
    vsphere_object_vm:
      templates:
-       - Template VMware vSphere Virtual Machine - vPoller
+       - Template VMware vSphere Virtual Machine - vPoller Native
      macros:
        VSPHERE.HOST: vc01.example.org
      groups:
@@ -424,7 +424,7 @@ will be using. Below is an example config file used by
 
    vsphere_object_datastore:
      templates:
-       - Template VMware vSphere Datastore - vPoller
+       - Template VMware vSphere Datastore - vPoller Native
      macros:
        VSPHERE.HOST: vc01.example.org
      groups:

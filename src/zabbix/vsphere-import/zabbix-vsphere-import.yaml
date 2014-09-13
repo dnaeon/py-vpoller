@@ -15,7 +15,7 @@ zabbix:
   vsphere_object_host:
     proxy: zbx-proxy.example.org
     templates:
-      - Template VMware vSphere Hypervisor - vPoller with C client
+      - Template VMware vSphere Hypervisor - vPoller Native
     macros:
       VSPHERE.HOST: vc01.example.org
     groups:
@@ -23,7 +23,7 @@ zabbix:
 
   vsphere_object_vm:
     templates:
-      - Template VMware vSphere Virtual Machine - vPoller with C client
+      - Template VMware vSphere Virtual Machine - vPoller Native
     macros:
       VSPHERE.HOST: vc01.example.org
     groups:
@@ -31,7 +31,7 @@ zabbix:
 
   vsphere_object_datastore:
     templates:
-      - Template VMware vSphere Datastore - vPoller with C client
+      - Template VMware vSphere Datastore - vPoller Native
     macros:
       VSPHERE.HOST: vc01.example.org
     groups:
