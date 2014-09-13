@@ -62,6 +62,7 @@ class HelperAgent(object):
             'host.discover':        self.zabbix_lld_data,
             'host.get':             self.zabbix_item_value,
             'host.vm.get':          self.zabbix_lld_data,
+            'host.datastore.get':   self.zabbix_lld_data,
             'host.cluster.get':     self.zabbix_item_value,
             'vm.discover':          self.zabbix_lld_data,
             'vm.get':               self.zabbix_item_value,
