@@ -73,6 +73,7 @@ class HelperAgent(object):
             'vm.cpu.usage.percent': self.zabbix_item_value,
             'datastore.discover':   self.zabbix_lld_data,
             'datastore.get':        self.zabbix_item_value,
+            'datastore.host.get':   self.zabbix_lld_data,
         }
 
     def run(self):
