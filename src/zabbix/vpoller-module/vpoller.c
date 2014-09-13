@@ -61,7 +61,8 @@ static void *zcontext = NULL;
 /* Zabbix keys provided by this module */
 static ZBX_METRIC keys[] = {
   /* KEY,       FLAG,          FUNCTION,           TEST PARAMS */
-  { "vpoller",	CF_HAVEPARAMS, zbx_module_vpoller, NULL },
+  { "vpoller",	        CF_HAVEPARAMS, zbx_module_vpoller,      NULL },
+  { "vpoller.echo",	CF_HAVEPARAMS, zbx_module_vpoller_echo, NULL },
   { NULL },
 };
 
@@ -293,6 +294,33 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
   zmq_msg_close(&msg_in);
   zmq_close(zsocket);
   
+  return (SYSINFO_RET_OK);
+}
+
+/*
+ * Function:
+ *    zbx_module_vpoller_echo()
+ *
+ * Purpose:
+ *    Will echo back the first parameter you provide to it
+ *
+ * Return value:
+ *    The value it was invoked with
+ */
+int
+zbx_module_vpoller_echo(AGENT_REQUEST *request, AGENT_RESULT *result)
+{
+  const char *param;
+
+  if (request->nparam != 1) {
+    SET_MSG_RESULT(result, strdup("Invalid number of key parameters"));
+    return (SYSINFO_RET_FAIL);
+  }
+
+  param = get_rparam(request, 0);
+
+  SET_STR_RESULT(result, strdup(param));
+
   return (SYSINFO_RET_OK);
 }
 
