@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-09-13T14:40:41Z</date>
+    <date>2014-09-14T18:19:42Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -616,7 +616,7 @@
                     <snmp_community/>
                     <snmp_oid/>
                     <key>vpoller[&quot;datastore.vm.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.NAME}&quot;, &quot;null&quot;, &quot;null&quot;]</key>
-                    <delay>3</delay>
+                    <delay>3600</delay>
                     <status>0</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
@@ -646,7 +646,7 @@
                             <multiplier>0</multiplier>
                             <snmp_oid/>
                             <key>vpoller.echo[&quot;{#VSPHERE.DATASTORE.VM.NAME}&quot;]</key>
-                            <delay>3</delay>
+                            <delay>3600</delay>
                             <history>7</history>
                             <trends>365</trends>
                             <status>0</status>
