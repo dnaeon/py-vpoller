@@ -3,10 +3,13 @@ from setuptools import setup
 setup(
     name='vpoller',
     version='0.2.9',
-    description='VMware vSphere Distributed Pollers',
+    description='Distributed VMware vSphere API Proxy',
+    long_description=open('README.rst').read(),
     author='Marin Atanasov Nikolov',
     author_email='dnaeon@gmail.com',
     license='BSD',
+    url='https://github.com/dnaeon/py-vpoller',
+    download_url='https://github.com/dnaeon/py-vpoller/releases',
     packages=['vpoller', 'vpoller.helpers'],
     package_dir={'': 'src'},
     scripts=[
