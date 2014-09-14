@@ -112,7 +112,7 @@ Options:
 
 """
 
-    args = docopt(usage, version='0.2.9')
+    args = docopt(usage, version='0.3.3')
 
     if not os.path.exists(args['--file']):
         raise SystemExit, 'Configuration file %s does not exist'

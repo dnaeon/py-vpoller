@@ -70,7 +70,7 @@ Examples:
 
 """
 
-    args = docopt(usage, version='0.2.9')
+    args = docopt(usage, version='0.3.3')
 
     level = logging.DEBUG if args['--debug'] else logging.INFO
     logging.basicConfig(

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='vpoller',
-    version='0.2.9',
+    version='0.3.3',
     description='Distributed VMware vSphere API Proxy',
     long_description=open('README.rst').read(),
     author='Marin Atanasov Nikolov',
@@ -22,6 +22,6 @@ setup(
         'docopt >= 0.6.1',
         'pyvmomi >= 5.5.0',
         'tabulate >= 0.7.2',
-        'vconnector >= 0.2.9',
+        'vconnector >= 0.3.0',
     ]
 )
