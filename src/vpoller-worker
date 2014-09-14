@@ -34,9 +34,7 @@ performing the actual polling from a vCenter server.
 """
 
 import os
-import json
 import logging
-from sys import exit
 
 from vpoller.client import VPollerClient
 from vpoller.worker import VPollerWorkerManager
@@ -71,7 +69,7 @@ def stop(endpoint):
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run({'method': 'shutdown'})
 
-    return result
+    print result
 
 def status(endpoint):
     """
@@ -84,7 +82,7 @@ def status(endpoint):
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run({'method': 'status'})
 
-    return result
+    print result
 
 def main():
     usage="""
@@ -123,24 +121,15 @@ Options:
         level=level
     )
 
-    result = None
-    rc = 0
-
     if args['start']:
         start(
             config=args['--file'],
             concurrency=args['--concurrency']
         )
     elif args['stop']:
-        result = stop(args['--endpoint'])
+        stop(args['--endpoint'])
     elif args['status']:
-        result = status(args['--endpoint'])
-
-    if result:
-        rc = result['success']
-        print json.dumps(result, indent=4)
-
-    exit(rc)
+        status(args['--endpoint'])
 
 if __name__ == '__main__':
     main()
