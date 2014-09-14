@@ -21,7 +21,7 @@ vPoller has been tested with VMware vSphere 5.x and with very limited
 testing on vSphere 4.x.
 
 vPoller is Open Source and licensed under the
-`BSD License <http://opensource.org/licenses/BSD-2-Clause`_.
+`BSD License <http://opensource.org/licenses/BSD-2-Clause>`_.
 
 Contributions
 =============
