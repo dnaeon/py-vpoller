@@ -44,7 +44,20 @@ installed in order to build it:
 Installation with pip
 =====================
 
-Coming soon.
+In order to install vPoller using ``pip``, simply execute this command:
+
+.. code-block:: bash
+
+   $ pip install vpoller
+
+If you would like to install vPoller in a ``virtualenv``, then
+follow these steps instead:
+
+.. code-block:: bash
+
+   $ virtualenv vpoller-venv
+   $ source vpoller-venv/bin/activate
+   $ pip install vpoller
 
 Installation from packages
 ==========================
