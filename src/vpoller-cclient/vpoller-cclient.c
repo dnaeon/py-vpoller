@@ -240,7 +240,7 @@ main(int argc, char *argv[])
     rc = EX_UNAVAILABLE;
     printf("{ \"success\": 1, \"msg\": \"Did not receive reply from server, aborting...\" }\n");
   } else {
-    printf("%s\n", zmq_msg_data(&msg_in));
+    printf("%s\n", (char *)zmq_msg_data(&msg_in));
   }
 
   zmq_msg_close(&msg_in);
