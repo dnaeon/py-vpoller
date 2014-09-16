@@ -18,10 +18,10 @@ setup(
         'src/vpoller-worker',
     ],
     install_requires=[
-        'pyzmq >= 14.1.1',
-        'docopt >= 0.6.1',
-        'pyvmomi >= 5.5.0',
-        'tabulate >= 0.7.2',
+        'pyzmq >= 14.3.1',
+        'docopt >= 0.6.2',
+        'pyvmomi >= 5.5.0-2014.1.1',
+        'tabulate >= 0.7.3',
         'vconnector >= 0.3.0',
     ]
 )
