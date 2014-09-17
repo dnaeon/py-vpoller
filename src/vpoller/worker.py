@@ -355,6 +355,7 @@ class VPollerWorker(multiprocessing.Process):
             return
 
         for helper in self.config.get('helpers'):
+            helper = helper.strip()
             logging.info('Loading helper module %s', helper)
             try:
                 module = importlib.import_module(helper)
