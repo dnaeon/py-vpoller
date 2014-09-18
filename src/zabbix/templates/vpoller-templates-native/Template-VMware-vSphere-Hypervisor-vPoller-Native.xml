@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-09-18T07:53:22Z</date>
+    <date>2014-09-18T09:23:41Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -1436,7 +1436,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.inMaintenanceMode&quot;, &quot;null&quot;].last()}=1</expression>
+            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.inMaintenanceMode&quot;, &quot;null&quot;].iregexp(true,5)}=1</expression>
             <name>Host {HOST.NAME} is in maintenance mode</name>
             <url/>
             <status>0</status>
@@ -1472,7 +1472,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
             <dependencies/>
         </trigger>
         <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.rebootRequired&quot;, &quot;null&quot;].min(5)}=1</expression>
+            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.rebootRequired&quot;, &quot;null&quot;].iregexp(true,5)}=1</expression>
             <name>Reboot required for host {HOST.NAME}</name>
             <url/>
             <status>0</status>
