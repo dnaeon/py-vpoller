@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-09-14T18:19:42Z</date>
+    <date>2014-09-18T07:50:41Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -163,9 +163,9 @@
                     <key>vpoller[&quot;datastore.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.NAME}&quot;, &quot;summary.accessible&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
                     <history>30</history>
-                    <trends>30</trends>
+                    <trends>365</trends>
                     <status>0</status>
-                    <value_type>3</value_type>
+                    <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
                     <delta>0</delta>
@@ -180,7 +180,7 @@
                     <delay_flex/>
                     <params/>
                     <ipmi_sensor/>
-                    <data_type>3</data_type>
+                    <data_type>0</data_type>
                     <authtype>0</authtype>
                     <username/>
                     <password/>
