@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-09-18T07:50:41Z</date>
+    <date>2014-09-18T09:03:49Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -694,7 +694,7 @@
     </templates>
     <triggers>
         <trigger>
-            <expression>{Template VMware vSphere Datastore - vPoller Native:vpoller[&quot;datastore.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.NAME}&quot;, &quot;summary.accessible&quot;, &quot;null&quot;].min(5)}=0</expression>
+            <expression>{Template VMware vSphere Datastore - vPoller Native:vpoller[&quot;datastore.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.NAME}&quot;, &quot;summary.accessible&quot;, &quot;null&quot;].regexp(false,#2)}#0</expression>
             <name>Datastore {HOST.HOST} is not accessible</name>
             <url/>
             <status>0</status>
