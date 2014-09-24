@@ -55,6 +55,7 @@ class HelperAgent(object):
         self.methods = {
             'about':                self.zabbix_item_value,
             'event.latest':         self.zabbix_item_value,
+            'session.get':          self.zabbix_lld_data,
             'datacenter.discover':  self.zabbix_lld_data,
             'datacenter.get':       self.zabbix_item_value,
             'cluster.discover':     self.zabbix_lld_data,
