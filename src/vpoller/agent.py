@@ -87,6 +87,10 @@ class VSphereAgent(VConnector):
                 'method': self.event_latest,
                 'required': ['hostname'],
             },
+            'session.get': {
+                'method': self.session_get,
+                'required': ['hostname'],
+            },
             'net.discover': {
                 'method': self.net_discover,
                 'required': ['hostname'],
@@ -503,6 +507,63 @@ class VSphereAgent(VConnector):
             'msg': 'Successfully retrieved properties',
             'success': 0,
             'result': [about],
+        }
+
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            result
+        )
+
+        return result
+
+    def session_get(self, msg):
+        """
+        Get the established vSphere sessions
+
+        Example client message would be:
+
+            {
+                "method":   "session.get",
+                "hostname": "vc01.example.org",
+            }
+
+        Returns:
+            The established vSphere sessions in JSON format
+
+        """
+        logging.info('[%s] Retrieving established sessions', self.host)
+
+        try:
+            sm = self.si.content.sessionManager
+            session_list = sm.sessionList
+        except pyVmomi.vim.NoPermission:
+            return {
+                'msg': 'No permissions to view established sessions',
+                'success': 1
+            }
+
+        # Session properties to be collected
+        props = [
+            'key',
+            'userName',
+            'fullName',
+            'loginTime',
+            'lastActiveTime',
+            'ipAddress',
+            'userAgent',
+            'callCount'
+        ]
+
+        sessions = []
+        for session in session_list:
+            s = {k: str(getattr(session, k)) for k in props}
+            sessions.append(s)
+
+        result = {
+            'msg': 'Successfully retrieved sessions',
+            'success': 0,
+            'result': sessions,
         }
 
         logging.debug(
