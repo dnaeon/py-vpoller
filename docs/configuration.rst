@@ -58,6 +58,17 @@ managed by the `vconnector-cli`_ tool.
 .. _`vconnector-cli`: https://github.com/dnaeon/py-vconnector
 .. _`SQLite`: http://www.sqlite.org/
 
+.. note::
+
+   The example commands below use the ``root`` account for
+   configuring a vSphere Agent for a vCenter Server.
+
+   The ``root`` account in a vCenter Server by default has full
+   administrative privileges.
+
+   If security is a concern you should use an account for your
+   vSphere Agents that has a restricted set of privileges.
+
 First let's initialize the ``vConnector`` database file:
 
 .. code-block:: bash
@@ -93,12 +104,11 @@ by running the ``vconnector-cli get`` command, e.g.:
 .. code-block:: bash
 
    $ sudo vconnector-cli get
-
-   +--------------+---------------------+-------------+-----------+
-   | Hostname     | Username            | Password    |   Enabled |
-   +==============+=====================+=============+===========+
-   | vc01         | root                | p4ssw0rd    |         1 |
-   +--------------+---------------------+-------------+-----------+
+   +------------------+------------+------------+-----------+
+   | Hostname         | Username   | Password   |   Enabled |
+   +==================+============+============+===========+
+   | vc01.example.org | root       | p4ssw0rd   |         1 |
+   +------------------+------------+------------+-----------+
 
 As the ``vconnector.db`` database contains connection details about
 your VMware vSphere hosts in order to avoid any leak of sensitive
