@@ -174,3 +174,27 @@ specific ``Datastore``.
    $ vpoller-client --method datastore.host.get --vsphere-host vc01.example.org \
 		--name ds:///vmfs/volumes/5190e2a7-d2b7c58e-b1e2-90b11c29079d/
 		
+Viewing established Sessions
+============================
+
+vPoller can also be used for viewing the established
+sessions to your vSphere hosts.
+
+.. note::
+
+   Viewing vSphere sessions by unauthorized parties may be
+   considered as a security hole, as it may provide an attacker
+   with information such as Session IDs, which could be used for
+   spoofing a user's session.
+
+   If security is a concern make sure that your ``vSphere Agents`` are
+   configured to use an account with restricted set of privileges,
+   which cannot view the established vSphere sessions.
+
+Here is an example command that will return the established sessions
+for your vSphere host:
+
+.. code-block:: bash
+
+   $ vpoller-client --method session.get --vsphere-host vc01.example.org
+

@@ -14,6 +14,8 @@ with description for each of them.
 +------------------------+--------------------------------------------------------------------------+
 | event.latest           | Get the latest registered event from a vSphere host                      |
 +------------------------+--------------------------------------------------------------------------+
+| session.get            | Get the established vSphere sessions                                     |
++------------------------+--------------------------------------------------------------------------+
 | net.discover           | Discover all vim.Network managed objects                                 |
 +------------------------+--------------------------------------------------------------------------+
 | net.get                | Get properties of a vim.Network managed object                           |
