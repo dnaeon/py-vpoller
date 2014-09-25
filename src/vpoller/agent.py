@@ -434,6 +434,68 @@ class VSphereAgent(VConnector):
 
         return r
 
+    def _object_alarm_get(self,
+                          obj_type,
+                          obj_property_name,
+                          obj_property_value):
+        """
+        Helper method for retrieving alarms for a single Managed Object
+
+        Args:
+            obj_type      (pyVmomi.vim.*): Type of the Managed Object
+            obj_property_name       (str): Property name used for searching for the object
+            obj_property_value      (str): Property value identifying the object in question
+
+        Returns:
+            The triggered alarms for the Managed Object
+
+        """
+        logging.debug(
+            '[%s] Retrieving alarms for %s managed object of type %s',
+            self.host,
+            obj_property_value,
+            obj_type.__name__
+        )
+
+        # Get the 'triggeredAlarmState' property for the managed object
+        data = self._get_object_properties(
+            properties=['triggeredAlarmState'],
+            obj_type=obj_type,
+            obj_property_name=obj_property_name,
+            obj_property_value=obj_property_value
+        )
+
+        if data['success'] != 0:
+            return data
+
+        result = []
+        props = data['result'][0]
+        alarms = props['triggeredAlarmState']
+        for alarm in alarms:
+            a = {
+                'key': str(alarm.key),
+                'info': alarm.alarm.info.name,
+                'time': str(alarm.time),
+                'entity': alarm.entity.name,
+                'acknowledged': str(alarm.acknowledged),
+                'overallStatus': alarm.overallStatus,
+            }
+            result.append(a)
+
+        r = {
+            'success': 0,
+            'msg': 'Successfully retrieved alarms',
+            'result': result,
+        }
+
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            r
+        )
+
+        return r
+
     def event_latest(self, msg):
         """
         Get the latest event registered
