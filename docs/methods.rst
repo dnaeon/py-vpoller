@@ -54,6 +54,8 @@ with description for each of them.
 +------------------------+--------------------------------------------------------------------------+
 | host.datastore.get     | Get all datastores available to a vim.HostSystem                         |
 +------------------------+--------------------------------------------------------------------------+
+| vm.alarm.get           | Get all alarms for a vim.VirtualMachine managed object                   |
++------------------------+--------------------------------------------------------------------------+
 | vm.discover            | Discover all vim.VirtualMachine managed objects                          |
 +------------------------+--------------------------------------------------------------------------+
 | vm.disk.discover       | Discover all guest disks on a vim.VirtualMachine object                  |

@@ -167,6 +167,10 @@ class VSphereAgent(VConnector):
                 'method': self.host_net_get,
                 'required': ['hostname', 'name'],
             },
+            'vm.alarm.get': {
+                'method': self.vm_alarm_get,
+                'required': ['hostname', 'name'],
+            },
             'vm.discover': {
                 'method': self.vm_discover,
                 'required': ['hostname'],
@@ -1382,6 +1386,30 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.HostSystem,
             name=msg['name']
         )
+
+    def vm_alarm_get(self, msg):
+        """
+        Get all alarms for a vim.VirtualMachine managed object
+
+        Example client message would be:
+
+            {
+                "method":   "vm.alarm.get",
+                "hostname": "vc01.example.org",
+                "name":     "vm01.example.org"
+            }
+
+        Returns:
+            The discovered alarms in JSON format
+
+        """
+        result = self._object_alarm_get(
+            obj_type=pyVmomi.vim.VirtualMachine,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        return result
 
     def vm_discover(self, msg):
         """
