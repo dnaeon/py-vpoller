@@ -40,6 +40,8 @@ with description for each of them.
 +------------------------+--------------------------------------------------------------------------+
 | host.get               | Get properties of a vim.HostSystem managed object                        |
 +------------------------+--------------------------------------------------------------------------+
+| host.alarm.get         | Get all alarms for a vim.HostSystem managed object                       |
++------------------------+--------------------------------------------------------------------------+
 | host.cluster.get       | Get the cluster a vim.HostSystem managed object                          |
 +------------------------+--------------------------------------------------------------------------+
 | host.vm.get            | Get all Virtual Machines registered on a vim.HostSystem                  |
