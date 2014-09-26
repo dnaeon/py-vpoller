@@ -115,6 +115,10 @@ class VSphereAgent(VConnector):
                 'method': self.datacenter_get,
                 'required': ['hostname', 'name', 'properties'],
             },
+            'datacenter.alarm.get': {
+                'method': self.datacenter_alarm_get,
+                'required': ['hostname', 'name'],
+            },
             'cluster.discover': {
                 'method': self.cluster_discover,
                 'required': ['hostname'],
@@ -896,6 +900,30 @@ class VSphereAgent(VConnector):
             obj_property_name='name',
             obj_property_value=msg['name']
         )
+
+    def datacenter_alarm_get(self, msg):
+        """
+        Get all alarms for a vim.Datacenter managed object
+
+        Example client message would be:
+
+            {
+                "method":   "datacenter.alarm.get",
+                "hostname": "vc01.example.org",
+                "name":     "MyDatacenter"
+            }
+
+        Returns:
+            The discovered alarms in JSON format
+
+        """
+        result = self._object_alarm_get(
+            obj_type=pyVmomi.vim.Datacenter,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        return result
 
     def cluster_discover(self, msg):
         """

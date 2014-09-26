@@ -28,6 +28,8 @@ with description for each of them.
 +------------------------+--------------------------------------------------------------------------+
 | datacenter.get         | Get properties of a vim.Datacenter managed object                        |
 +------------------------+--------------------------------------------------------------------------+
+| datacenter.alarm.get   | Get all alarms for a vim.Datacenter managed object                       |
++------------------------+--------------------------------------------------------------------------+
 | cluster.discover       | Discover all vim.ClusterComputeResource managed objects                  |
 +------------------------+--------------------------------------------------------------------------+
 | cluster.get            | Get properties of a vim.ClusterComputeResource managed object            |
