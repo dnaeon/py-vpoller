@@ -219,6 +219,10 @@ class VSphereAgent(VConnector):
                 'method': self.datastore_get,
                 'required': ['hostname', 'name', 'properties'],
             },
+            'datastore.alarm.get': {
+                'method': self.datastore_alarm_get,
+                'required': ['hostname', 'name'],
+            },
             'datastore.host.get': {
                 'method': self.datastore_host_get,
                 'required': ['hostname', 'name'],
@@ -2142,6 +2146,30 @@ class VSphereAgent(VConnector):
             obj_property_name='info.url',
             obj_property_value=msg['name']
         )
+
+    def datastore_alarm_get(self, msg):
+        """
+        Get all alarms for a vim.Datastore managed object
+
+        Example client message would be:
+
+            {
+                "method":   "datastore.alarm.get",
+                "hostname": "vc01.example.org",
+                "name":     "ds:///vmfs/volumes/643f118a-a970df28/"
+            }
+
+        Returns:
+            The discovered alarms in JSON format
+
+        """
+        result = self._object_alarm_get(
+            obj_type=pyVmomi.vim.Datastore,
+            obj_property_name='info.url',
+            obj_property_value=msg['name']
+        )
+
+        return result
 
     def datastore_host_get(self, msg):
         """

@@ -76,6 +76,8 @@ with description for each of them.
 +------------------------+--------------------------------------------------------------------------+
 | vm.cpu.usage.percent   | Get the CPU usage in percentage of a Virtual Machine                     |
 +------------------------+--------------------------------------------------------------------------+
+| datastore.alarm.get    | Get all alarms for a vim.Datastore managed object                        |
++------------------------+--------------------------------------------------------------------------+
 | datastore.discover     | Discover all vim.Datastore objects                                       |
 +------------------------+--------------------------------------------------------------------------+
 | datastore.get          | Get properties of a vim.Datastore object                                 |
