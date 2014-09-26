@@ -34,6 +34,8 @@ with description for each of them.
 +------------------------+--------------------------------------------------------------------------+
 | cluster.get            | Get properties of a vim.ClusterComputeResource managed object            |
 +------------------------+--------------------------------------------------------------------------+
+| cluster.alarm.get      | Get all alarms for a vim.ClusterComputeResource managed object           |
++------------------------+--------------------------------------------------------------------------+
 | resource.pool.discover | Discover all vim.ResourcePool managed objects                            |
 +------------------------+--------------------------------------------------------------------------+
 | resource.pool.get      | Get properties of a vim.ResourcePool managed object                      |

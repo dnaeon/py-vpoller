@@ -127,6 +127,10 @@ class VSphereAgent(VConnector):
                 'method': self.cluster_get,
                 'required': ['hostname', 'name', 'properties'],
             },
+            'cluster.alarm.get': {
+                'method': self.cluster_alarm_get,
+                'required': ['hostname', 'name'],
+            },
             'resource.pool.discover': {
                 'method': self.resource_pool_discover,
                 'required': ['hostname'],
@@ -994,6 +998,30 @@ class VSphereAgent(VConnector):
             obj_property_name='name',
             obj_property_value=msg['name']
         )
+
+    def cluster_alarm_get(self, msg):
+        """
+        Get all alarms for a vim.ClusterComputeResource managed object
+
+        Example client message would be:
+
+            {
+                "method":   "cluster.alarm.get",
+                "hostname": "vc01.example.org",
+                "name":     "MyCluster"
+            }
+
+        Returns:
+            The discovered alarms in JSON format
+
+        """
+        result = self._object_alarm_get(
+            obj_type=pyVmomi.vim.ClusterComputeResource,
+            obj_property_name='name',
+            obj_property_value=msg['name']
+        )
+
+        return result
 
     def resource_pool_discover(self, msg):
         """
