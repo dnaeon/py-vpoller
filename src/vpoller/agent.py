@@ -481,8 +481,9 @@ class VSphereAgent(VConnector):
                 'info': alarm.alarm.info.name,
                 'time': str(alarm.time),
                 'entity': alarm.entity.name,
-                'acknowledged': str(alarm.acknowledged),
+                'acknowledged': alarm.acknowledged,
                 'overallStatus': alarm.overallStatus,
+                'acknowledgedByUser': alarm.acknowledgedByUser,
             }
             result.append(a)
 
