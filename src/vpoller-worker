@@ -113,7 +113,7 @@ Options:
     args = docopt(usage, version='0.3.3')
 
     if not os.path.exists(args['--file']):
-        raise SystemExit, 'Configuration file %s does not exist'
+        raise SystemExit, 'Configuration file %s does not exist' % args['--file']
 
     level = logging.DEBUG if args['--debug'] else logging.INFO
     logging.basicConfig(
