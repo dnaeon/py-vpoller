@@ -189,7 +189,7 @@ Now reload ``Supervisord`` by executing these commands:
 
 .. code-block:: bash
 
-   $ sudo supervisordtl reread
+   $ sudo supervisorctl reread
    $ sudo supervisorctl reload
 
 In order to start the ``vpoller-proxy`` and ``vpoller-worker``
