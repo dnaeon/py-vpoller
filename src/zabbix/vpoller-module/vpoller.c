@@ -190,6 +190,8 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
     *properties,	   /* vSphere properties to be collected */
     *key;                  /* Provide additional data to vPoller as a 'key' */
 
+  char *key_esc;           /* Escaped version of the 'key' passed to vPoller */
+
   bool got_reply = false;  /* A flag to indicate whether a reply from vPoller was received or not */
   
   int retries = CONFIG_VPOLLER_RETRIES;  /* Number of retries */
@@ -198,7 +200,7 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 
   char msg_buf[MAX_BUFFER_LEN];          /* Buffer to hold the final message we send out to vPoller */
 
-  method = hostname = name = properties = key = NULL;
+  method = hostname = name = properties = key = key_esc = NULL;
 
   /*
    * The `vpoller` key expects five parameters in the following order:
@@ -215,12 +217,14 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
   name = get_rparam(request, 2);
   properties = get_rparam(request, 3);
   key = get_rparam(request, 4);
+  key_esc = zbx_dyn_escape_string(key, "\\");
 
   /* 
    * Create the task request which we send to vPoller
    */
   zbx_snprintf(msg_buf, sizeof(msg_buf), VPOLLER_TASK_TEMPLATE,
-	       method, hostname, name, properties, key);
+	       method, hostname, name, properties, key_esc);
+  zbx_free(key_esc);
 
   zabbix_log(LOG_LEVEL_DEBUG, "Creating a ZeroMQ socket for connecting to vPoller");
   if ((zsocket = zmq_socket(zcontext, ZMQ_REQ)) == NULL) {
