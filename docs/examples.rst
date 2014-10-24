@@ -147,6 +147,24 @@ running on you could use the ``vm.host.get`` vPoller method:
    $ vpoller-client --method vm.host.get --vsphere-host vc01.example.org \
 		--name vm01.example.org
 
+Using the ``vm.process.get`` vPoller method we can get a list of all
+processes running in a Virtual Machine. Note, that we need to supply a
+username and password when using the ``vm.process.get`` method, which
+are used for authentication in the guest system.
+
+.. code-block:: bash
+
+   $ vpoller-client --method vm.process.get --vsphere-host vc01.example.org \
+		--name vm01.example.org --properties name,owner,pid,cmdLine \
+		--guest-username root --guest-password p4ssw0rd
+
+.. note::
+
+   The above example command uses the ``root`` user for authentication
+   in the guest system. It is recommended that you use a user
+   with restricted privileges when using the ``vm.process.get``
+   vPoller method if security is a concern.
+
 Datastore examples
 ==================
 
