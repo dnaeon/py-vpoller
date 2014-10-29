@@ -1960,14 +1960,12 @@ class VSphereAgent(VConnector):
             }
 
         # Properties to be collected for the guest processes
-        properties = ['name']
+        properties = ['cmdLine']
         if 'properties' in msg and msg['properties']:
             properties.extend(msg['properties'])
 
         # Get the requested process properties
-        result = {}
-        result['name'] = vm_name
-        result['process'] = [{prop: getattr(process, prop, '(null)') for prop in properties} for process in vm_processes]
+        result = [{prop: getattr(process, prop, '(null)') for prop in properties} for process in vm_processes]
 
         r = {
             'success': 0,
