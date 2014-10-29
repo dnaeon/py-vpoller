@@ -71,6 +71,7 @@ class HelperAgent(object):
             'vm.disk.discover':     self.zabbix_vm_disk_discover,
             'vm.disk.get':          self.zabbix_vm_disk_get,
             'vm.host.get':          self.zabbix_item_value,
+            'vm.process.get':       self.zabbix_vm_process_get,
             'vm.cpu.usage.percent': self.zabbix_item_value,
             'datastore.discover':   self.zabbix_lld_data,
             'datastore.get':        self.zabbix_item_value,
@@ -189,6 +190,13 @@ class HelperAgent(object):
             data.append(dict(props))
 
         return {'data': data}
+
+    def zabbix_vm_process_get(self):
+        """
+        Returns the number of processes in a Virtual Machine
+
+        """
+        return len(self.data['result'])
 
     def zabbix_lld_data(self):
         """
