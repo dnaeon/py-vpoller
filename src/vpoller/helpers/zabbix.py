@@ -195,8 +195,19 @@ class HelperAgent(object):
         """
         Returns the number of processes in a Virtual Machine
 
+        Matching for specific processes in the Virtual Machine is
+        done by passing the 'key' attribute in the original client
+        task request.
+
         """
-        return len(self.data['result'])
+        processes = self.data['result']
+
+        if 'key' in self.msg and self.msg['key']:
+            result = len([p for p in processes if self.msg['key'] in p['cmdLine']])
+        else:
+            result = len(processes)
+
+        return result
 
     def zabbix_lld_data(self):
         """
