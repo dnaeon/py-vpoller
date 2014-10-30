@@ -224,6 +224,19 @@ the ``vpoller.so`` module.
    13352:20140910:080628.013 Loading vPoller module configuration file /etc/zabbix/vpoller_module.conf
    13352:20140910:080628.015 loaded modules: vpoller.so
 
+The vPoller loadable module for Zabbix can use an optional
+configuration file which allows you to manage some of the vPoller
+settings, such as the task timeout, retries and endpoint of the
+``vPoller Proxy`` to which task requests are being sent.
+
+The configuration of the ``vpoller.so`` module resides in the
+``/etc/zabbix/vpoller_module.conf`` file and you can find a sample
+configuration file in the `vPoller loadable module for Zabbix`_
+directory from the Github repo.
+
+The Zabbix vPoller Key
+======================
+
 Once loaded the vPoller module for Zabbix exposes a single key of
 type ``Simple check`` that can be used by your Zabbix items and is
 called ``vpoller[*]``.
@@ -232,45 +245,43 @@ The ``vpoller[*]`` Zabbix key has the following form:
 
 .. code-block:: bash
 
-   vpoller[<method>, <hostname>, <name>, <properties>, <key>]
+   vpoller[method, hostname, name, properties, <key>, <username>, <password>]
 
 And the parameters that ``vpoller[*]`` key expects are these.
 
-+------------+------------------------------------------------------+
-| Parameter  | Description                                          |
-+============+======================================================+
-| method     | vPoller method to be processed                       |
-+------------+------------------------------------------------------+
-| hostname   | VMware vSphere server hostname                       |
-+------------+------------------------------------------------------+
-| name       | Name of the vSphere object (e.g. VM name, ESXi name) |
-+------------+------------------------------------------------------+
-| properties | vSphere object properties to be collected by vPoller |
-+------------+------------------------------------------------------+
-| key        | Additional information to be passed to vPoller       |
-+------------+------------------------------------------------------+
++------------+------------------------------------------------------+----------+
+| Parameter  | Description                                          | Required |
++============+======================================================+==========+
+| method     | vPoller method to be processed                       | True     |
++------------+------------------------------------------------------+----------+
+| hostname   | VMware vSphere server hostname                       | True     |
++------------+------------------------------------------------------+----------+
+| name       | Name of the vSphere object (e.g. VM name, ESXi name) | True     |
++------------+------------------------------------------------------+----------+
+| properties | vSphere object properties to be collected by vPoller | True     |
++------------+------------------------------------------------------+----------+
+| <key>      | Additional information to be passed to vPoller       | False    |
++------------+------------------------------------------------------+----------+
+| <username> | Username to use when logging into the guest system   | False    |
++------------+------------------------------------------------------+----------+
+| <password> | Password to use when logging into the guest system   | False    |
++------------+------------------------------------------------------+----------+
+
+Note that some of the above parameters are mandatory and some are
+optional depending on what vPoller method you are requesting to be
+processed.
 
 If your Zabbix Agents are also loading the ``vpoller.so`` module
-you can use ``zabbix_get(8)`` tool from the command-line in order to
-send task requests to vPoller.
+you can use the ``zabbix_get(8)`` tool from the command-line in order
+to send task requests to vPoller.
 
 Here is one example that uses ``zabbix_get(8)`` in order check the
 power state of VM using the ``vpoller[*]`` key.
 
 .. code-block:: bash
 
-   $ zabbix_get -s 127.0.0.1 -p 10050 -k "vpoller[vm.get, vc01.example.org, ns01.example.org, runtime.powerState, null]"
+   $ zabbix_get -s 127.0.0.1 -p 10050 -k "vpoller[vm.get, vc01.example.org, ns01.example.org, runtime.powerState]"
    "poweredOn"
-
-The vPoller loadable module for Zabbix can use an optional
-configuration file which allows you to manage some of the vPoller
-settings, such as the vPoller timeout, retries and endpoint of the
-``vPoller Proxy`` to which task requests are being sent.
-
-The configuration of the ``vpoller.so`` module resides in the
-``/etc/zabbix/vpoller_module.conf`` file and you can find a sample
-configuration file in the `vPoller loadable module for Zabbix`_
-directory from the Github repo.
 
 Setting up vPoller externalscripts for Zabbix
 =============================================
