@@ -42,6 +42,8 @@
                                    \"name\": \"%s\", \
 			           \"properties\": [ \"%s\" ], \
 			           \"key\": \"%s\", \
+                                   \"username\": \"%s\", \
+                                   \"password\": \"%s\", \
 			           \"helper\": \"vpoller.helpers.czabbix\" \
                                }"
 
@@ -168,15 +170,17 @@ zbx_module_item_list(void)
  *    The `vpoller` key expects the following parameters
  *    when called through Zabbix:
  *
- *    vpoller[<method>, <hostname>, <name>, <properties>, <key>]
+ *    vpoller[method, hostname, name, properties, <key>, <username>, <password>]
  * 
  *    And the parameters that it expects are these:
  *
- *    <method> - vPoller method to be processed
- *    <hostname> - VMware vSphere server hostname
- *    <name> - Name of the vSphere object (e.g. VM name, ESXi name)
- *    <properties> - vSphere properties to be collected
- *    <key> - Additional information passed as a 'key' to vPoller 
+ *    method - vPoller method to be processed
+ *    hostname - VMware vSphere server hostname
+ *    name - Name of the vSphere object (e.g. VM name, ESXi name)
+ *    properties - vSphere properties to be collected
+ *    <key> - Additional information passed as a 'key' to vPoller
+ *    <username> - Username to use when logging into the guest system
+ *    <password> - Password to use when logging into the guest system
  */
 int
 zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
@@ -188,7 +192,9 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
     *hostname,             /* VMware vSphere server hostname */
     *name,		   /* Name of the vSphere object, e.g. VM name, ESXi name */
     *properties,	   /* vSphere properties to be collected */
-    *key;                  /* Provide additional data to vPoller as a 'key' */
+    *key,                  /* Provide additional data to vPoller as a 'key' */
+    *username,             /* Username for logging into the guest system */
+    *password;             /* Password for logging into the guest system */
 
   char *key_esc;           /* Escaped version of the 'key' passed to vPoller */
 
@@ -200,30 +206,50 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 
   char msg_buf[MAX_BUFFER_LEN];          /* Buffer to hold the final message we send out to vPoller */
 
-  method = hostname = name = properties = key = key_esc = NULL;
+  method = hostname = name = properties = key = key_esc = username = password = "(null)";
 
   /*
-   * The `vpoller` key expects five parameters in the following order:
+   * The Zabbix `vpoller` key expects these parameters
+   * in the following order:
    *
-   * vpoller[<method>, <hostname>, <name>, <properties>, <key>]
+   * vpoller[method, hostname, name, properties, <key>, <username>, <password>]
    */
-  if (request->nparam != 5) {
+  if (request->nparam == 4) {
+    method = get_rparam(request, 0);
+    hostname = get_rparam(request, 1);
+    name = get_rparam(request, 2);
+    properties = get_rparam(request, 3);
+  } else if (request->nparam == 5) {
+    method = get_rparam(request, 0);
+    hostname = get_rparam(request, 1);
+    name = get_rparam(request, 2);
+    properties = get_rparam(request, 3);
+    key = get_rparam(request, 4);
+  } else if (request->nparam == 7) {
+    method = get_rparam(request, 0);
+    hostname = get_rparam(request, 1);
+    name = get_rparam(request, 2);
+    properties = get_rparam(request, 3);
+    key = get_rparam(request, 4);
+    username = get_rparam(request, 5);
+    password = get_rparam(request, 6);
+  } else {
     SET_MSG_RESULT(result, strdup("Invalid number of key parameters"));
     return (SYSINFO_RET_FAIL);
   }
-  
-  method = get_rparam(request, 0);
-  hostname = get_rparam(request, 1);
-  name = get_rparam(request, 2);
-  properties = get_rparam(request, 3);
-  key = get_rparam(request, 4);
-  key_esc = zbx_dyn_escape_string(key, "\\");
 
   /* 
    * Create the task request which we send to vPoller
    */
+  key_esc = zbx_dyn_escape_string(key, "\\");
   zbx_snprintf(msg_buf, sizeof(msg_buf), VPOLLER_TASK_TEMPLATE,
-	       method, hostname, name, properties, key_esc);
+	       method,
+	       hostname,
+	       name,
+	       properties,
+	       key_esc,
+	       username,
+	       password);
   zbx_free(key_esc);
 
   zabbix_log(LOG_LEVEL_DEBUG, "Creating a ZeroMQ socket for connecting to vPoller");
