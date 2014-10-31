@@ -188,15 +188,14 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
   void *zsocket = NULL;    /* ZeroMQ socket */
   zmq_msg_t msg_in;        /* Incoming ZeroMQ message from vPoller */
 
-  const char *method,      /* vPoller method to be processed */
+  char *method,            /* vPoller method to be processed */
     *hostname,             /* VMware vSphere server hostname */
     *name,		   /* Name of the vSphere object, e.g. VM name, ESXi name */
     *properties,	   /* vSphere properties to be collected */
     *key,                  /* Provide additional data to vPoller as a 'key' */
+    *key_esc,              /* Escaped version of the 'key' passed to vPoller */
     *username,             /* Username for logging into the guest system */
     *password;             /* Password for logging into the guest system */
-
-  char *key_esc;           /* Escaped version of the 'key' passed to vPoller */
 
   bool got_reply = false;  /* A flag to indicate whether a reply from vPoller was received or not */
   
