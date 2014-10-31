@@ -396,9 +396,6 @@ Like mentioned earlier - your host is immutable, so that means
 no changes at all after your hosts have been discovered with a
 Zabbix LLD rule.
 
-And all these things are quite frustrating, at least to me, because
-Zabbix does not allow me to manage my environment the way I want.
-
 So, what can we do about it?
 
 Well, we can solve this issue! And vPoller is going to help us do that! :)
@@ -516,6 +513,119 @@ If you are importing your vSphere objects in Zabbix using the
 ``zabbix-vsphere-import`` tool make sure to disable any
 Zabbix LLD discovery rules in order to avoid any conflicts between
 them.
+
+Agent-less process monitoring in Virtual Machines
+=================================================
+
+Another cool feature of vPoller is the ability to perform process
+monitoring inside VMware Virtual Machines without the need of having
+Zabbix Agents (or any other software) installed and running on your
+systems.
+
+This can be quite handy in situations where you don't have the
+Zabbix Agents installed or you are not even allowed to install any
+software on your Virtual Machines.
+
+A good example is a service provider where customers request
+that specific process availability be monitored in Virtual Machines,
+but don't want to have any third-party software installed on the
+customers' systems.
+
+In case you are wondering how we perform the agent-less process
+monitoring of VMware Virtual Machines using vPoller, you may want to
+check the `vSphere API documentation for GuestProcessManager()`_.
+
+.. _`vSphere API documentation for GuestProcessManager()`: http://pubs.vmware.com/vsphere-55/index.jsp#com.vmware.wssdk.apiref.doc/vim.vm.guest.ProcessManager.html
+
+Let's see now how we can use vPoller with Zabbix integration in order
+to provide agent-less process monitoring for our Virtual Machines.
+
+First we will create a Zabbix item that will monitor the
+total number of processes in a Virtual Machine and then we will see
+how we can monitor the availability for certain processes.
+
+The Zabbix key that we will use for agent-less process
+monitoring is of type ``Simple check`` and has the following format:
+
+.. code-block:: bash
+
+   vpoller["vm.process.get", "{$VSPHERE.HOST}", "{HOST.HOST}", "cmdLine", "", username, password]
+
+In the above Zabbix key the ``username`` and ``password`` parameters
+should be a valid username and password that can login to the guest
+system.
+
+On the screenshot below we are creating a new Zabbix item that will
+monitor the total number of processes in our Virtual Machine.
+
+.. image:: images/vpoller-zabbix-processes-1.jpg
+
+The key that we've used for monitoring the total number of processes
+in our guest system is this:
+
+.. code-block:: bash
+
+   vpoller["vm.process.get", "{$VSPHERE.HOST}", "{HOST.HOST}", "cmdLine", "", root, p4ssw0rd]
+
+We can also create a trigger for our item which will go into certain
+state whenever the total number of processes exceeds a certain value.
+
+.. image:: images/vpoller-zabbix-processes-2.jpg
+
+Now, let's add a second item which this time will be monitoring the
+number of Apache processes in our Virtual Machine.
+
+.. image:: images/vpoller-zabbix-processes-3.jpg
+
+On the screenshot above we have used the following
+Zabbix key in order to monitor the number of Apache processes in our
+Virtual Machine.
+
+.. code-block:: bash
+
+   vpoller["vm.process.get", "{$VSPHERE.HOST}", "{HOST.HOST}", "cmdLine", "/usr/sbin/apache2", root, p4ssw0rd]
+
+Should we want to be notified in case our process is not running we can
+create a trigger for our item and set the severity level of the issue.
+
+.. image:: images/vpoller-zabbix-processes-4.jpg
+
+.. note::
+
+   It is recommended that you use a system account with restricted
+   set of privileges when you perform agent-less process monitoring
+   with vPoller and Zabbix.
+
+   You may also want to consider creating a global Zabbix macro
+   for the system account username and password and use it in your
+   Zabbix keys, without having the need to include the username and
+   password in every single process-monitoring item that you
+   want to have.
+
+   Global macros in Zabbix can be created by navigating to
+   ``Administration -> General -> Macros`` in your Zabbix Dashboard.
+
+As a final example on agent-less process monitoring with vPoller and
+Zabbix we will see how to query the number of process from the
+command-line using the ``zabbix_get(8)`` tool.
+
+Here's how to query the total number of processes in a Virtual
+Machine from the command-line:
+
+.. code-block:: bash
+
+   $ zabbix_get -s 127.0.0.1 \
+                -p 10050 \
+		-k 'vpoller[vm.process.get, vc01.example.org, vm01.example.org, cmdLine, "", root, p4ssw0rd]'
+
+And this is how to query the number of certain processes in a Virtual
+Machine using ``zabbix_get(8)``:
+
+.. code-block:: bash
+
+   $ zabbix_get -s 127.0.0.1 \
+                -p 10050 \
+		-k 'vpoller[vm.process.get, vc01.example.org, vm01.example.org, cmdLine, "/usr/sbin/apache2", root, p4ssw0rd]'
 
 Example screenshots
 ===================
