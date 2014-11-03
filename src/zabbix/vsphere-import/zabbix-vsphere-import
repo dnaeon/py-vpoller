@@ -392,7 +392,13 @@ class ZabbixConnector(object):
                 name=vm_host
             )
             host_cluster = data['result'][0]['cluster']
-            params['groups'].append({'groupid': self.get_host_group_by_name(name=host_cluster)})
+            cluster_group_id = self.get_host_group_by_name(name=host_cluster)
+
+            if not cluster_group_id:
+                self.create_host_group(name=host_cluster)
+                cluster_group_id = self.get_host_group_by_name(name=host_cluster)
+
+            params['groups'].append({'groupid': cluster_group_id})
 
             try:
                 result = self.create_host(params)
