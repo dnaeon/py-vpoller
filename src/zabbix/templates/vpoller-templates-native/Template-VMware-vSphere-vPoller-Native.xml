@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-09-24T12:25:54Z</date>
+    <date>2014-11-13T10:17:29Z</date>
     <groups>
         <group>
             <name>Datastores</name>
@@ -87,6 +87,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere API Version</name>
@@ -129,6 +130,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere Events</name>
@@ -171,6 +173,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere FullName</name>
@@ -213,6 +216,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere Name</name>
@@ -255,6 +259,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere OS Type</name>
@@ -297,6 +302,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere Vendor</name>
@@ -339,6 +345,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere Version</name>
@@ -381,6 +388,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
             </items>
             <discovery_rules>
@@ -454,6 +462,7 @@
                                 </application>
                             </applications>
                             <valuemap/>
+                            <logtimefmt/>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
@@ -545,6 +554,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                             <valuemap>
                                 <name>VMware status</name>
                             </valuemap>
+                            <logtimefmt/>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes>
@@ -727,7 +737,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <snmp_oid/>
                     <key>vpoller[&quot;session.get&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;null&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <status>0</status>
+                    <status>1</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -790,6 +800,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                                 </application>
                             </applications>
                             <valuemap/>
+                            <logtimefmt/>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes/>
