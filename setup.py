@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='vpoller',
-    version='0.3.3',
+    version='0.3.5',
     description='Distributed VMware vSphere API Proxy',
     long_description=open('README.rst').read(),
     author='Marin Atanasov Nikolov',
