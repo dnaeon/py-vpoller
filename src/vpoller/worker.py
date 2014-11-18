@@ -36,7 +36,7 @@ from ConfigParser import ConfigParser
 
 import zmq
 from vpoller.core import VPollerException
-from vpoller.agent import VSphereAgent
+from vpoller.agent.core import VSphereAgent
 from vconnector.core import VConnectorDatabase
 
 
@@ -504,11 +504,16 @@ class VPollerWorker(multiprocessing.Process):
         """
         Prepares the vSphere Agents used by the vPoller Worker
 
+        Loads the vSphere Agent task modules and instantiates
+        the agents for each vSphere host.
+
         Raises:
             VPollerException
 
         """
         logging.debug('Creating vSphere Agents')
+
+        import vpoller.agent.datacenter
 
         db = VConnectorDatabase(self.config.get('db'))
         agents = db.get_agents(only_enabled=True)
@@ -576,27 +581,15 @@ class VPollerWorker(multiprocessing.Process):
         if 'method' not in msg:
             return {'success': 1, 'msg': 'Missing method name'}
 
-        # Get the vSphere Agent object for handling this request
-        requested_method = msg.get('method')
-        requested_agent = msg.get('hostname')
-        agent = self.agents.get(requested_agent)
-
+        agent = self.agents.get(msg.get('hostname'))
         if not agent:
             return {
                 'success': 1,
                 'msg': 'Unknown or missing vSphere Agent requested'
             }
 
-        agent_method = agent.agent_methods.get(requested_method)
-
-        if not agent_method:
-            return {'success': 1, 'msg': 'Unknown method name requested'}
-
-        # Validate client message for required message attributes and type
-        required = agent.agent_methods.get(requested_method)['required']
-        if not agent._validate_client_msg(msg, required):
-            return {'success': 1, 'msg': 'Incorrect task request received'}
-
-        result = agent_method['method'](msg)
+        result = agent.call_task(msg['method'], msg)
 
         return result
+
+
