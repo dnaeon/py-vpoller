@@ -34,7 +34,7 @@ discovering and polling of vSphere Object properties.
 
 import logging
 
-from vpoller.client import VPollerClient
+from vpoller.client.core import VPollerClient
 from docopt import docopt
 
 def main():

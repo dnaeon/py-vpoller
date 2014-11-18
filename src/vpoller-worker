@@ -36,9 +36,10 @@ performing the actual polling from a vCenter server.
 import os
 import logging
 
-from vpoller.client import VPollerClient
+from vpoller.client.core import VPollerClient
 from vpoller.worker import VPollerWorkerManager
 from docopt import docopt
+
 
 def start(config, concurrency):
     """
