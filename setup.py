@@ -10,7 +10,12 @@ setup(
     license='BSD',
     url='https://github.com/dnaeon/py-vpoller',
     download_url='https://github.com/dnaeon/py-vpoller/releases',
-    packages=['vpoller', 'vpoller.helpers'],
+    packages=[
+        'vpoller',
+        'vpoller.agent',
+        'vpoller.client',
+        'vpoller.helpers'
+    ],
     package_dir={'': 'src'},
     scripts=[
         'src/vpoller-client',
