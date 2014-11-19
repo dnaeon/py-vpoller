@@ -571,25 +571,13 @@ class VPollerWorker(multiprocessing.Process):
         """
         logging.debug('Processing client message: %s', msg)
 
-        # Check whether the client message is a valid one
-        if not isinstance(msg, dict):
-            return {
-                'success': 1,
-                'msg': 'Expected a JSON message, received %s' % msg.__class__
-            }
-
-        if 'method' not in msg:
-            return {'success': 1, 'msg': 'Missing method name'}
-
         agent = self.agents.get(msg.get('hostname'))
         if not agent:
             return {
                 'success': 1,
-                'msg': 'Unknown or missing vSphere Agent requested'
+                'msg': 'Unknown vSphere Agent requested'
             }
 
         result = agent.call_task(msg['method'], msg)
 
         return result
-
-

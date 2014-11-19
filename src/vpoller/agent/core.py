@@ -76,7 +76,11 @@ class VSphereAgent(VConnector):
         """
         if name not in self._tasks:
             return {'success': 1, 'msg': 'Unknown task requested'}
-        
+
+        msg, _ = args[0], args[1:]
+        if not VPollerClientMessage.validate_msg(msg, required):
+            return {'success': 1, 'msg': 'Invalid task request received'}
+
         return self._tasks[name]['function'](self, *args, **kwargs)
 
     def _discover_objects(self, properties, obj_type):
@@ -347,10 +351,6 @@ def task(name, required):
         )
         @wraps(function)
         def wrapper(*args, **kwargs):
-            agent, msg = args
-            if not VPollerClientMessage.validate_msg(required, msg):
-                return {'success': 1, 'msg': 'Incorrect task request received'}
-            
             return function(*args, **kwargs)
 
         VSphereAgent._add_task(

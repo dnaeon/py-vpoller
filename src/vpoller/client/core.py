@@ -140,9 +140,7 @@ class VPollerClient(object):
 
 
 class VPollerClientMessage(object):
-    # Message attribute types we expect to receive
-    # before we start processing a task request
-    msg_attr_types = {
+    _msg_attr_types = {
         'hostname': (types.StringType, types.UnicodeType),
         'name': (types.StringType, types.UnicodeType, types.NoneType),
         'key': (types.StringType, types.UnicodeType, types.NoneType),
@@ -152,7 +150,7 @@ class VPollerClientMessage(object):
     }
 
     @classmethod
-    def validate_msg(cls, required, msg):
+    def validate_msg(cls, msg, required):
         """
         Helper method for validating a client message
 
@@ -170,16 +168,24 @@ class VPollerClientMessage(object):
             required
         )
 
-        # Check if we have the required message attributes
+        if not isinstance(msg, dict):
+            logging.debug(
+                'Expected a JSON message, received %s' % msg.__class__
+            )
+            return False
+
+        if 'method' not in msg:
+            logging.debug('No task name specified')
+            return False
+
         if not all(k in msg for k in required):
             logging.debug('Required message attributes are missing')
             return False
 
-        # Check if we have correct types of the message attributes
         for k in msg.keys():
-            if k not in cls.msg_attr_types:
+            if k not in cls._msg_attr_types:
                 continue
-            if not isinstance(msg[k], cls.msg_attr_types.get(k)):
+            if not isinstance(msg[k], cls._msg_attr_types.get(k)):
                 logging.debug("Incorrect type for '%s' message attribute", k)
                 return False
 
