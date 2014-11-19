@@ -21,7 +21,6 @@ setup(
         'pyzmq >= 14.3.1',
         'docopt >= 0.6.2',
         'pyvmomi >= 5.5.0-2014.1.1',
-        'tabulate >= 0.7.3',
         'vconnector >= 0.3.1',
     ]
 )
