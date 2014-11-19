@@ -35,7 +35,7 @@ from vpoller.agent.core import task
 
 
 @task(name='about', required=['hostname'])
-def about(self, msg):
+def about(agent, msg):
     """
     Get the 'about' information for the vSphere host
 
@@ -62,14 +62,14 @@ def about(self, msg):
         The discovered objects in JSON format
 
     """
-    logging.info("[%s] Retrieving vSphere About information", self.host)
+    logging.info("[%s] Retrieving vSphere About information", agent.host)
 
     if 'properties' not in msg or not msg['properties']:
         properties = ['fullName']
     else:
         properties = msg['properties']
 
-    about = {prop: getattr(self.si.content.about, prop, '(null)') for prop in properties}
+    about = {prop: getattr(agent.si.content.about, prop, '(null)') for prop in properties}
     result = {
         'msg': 'Successfully retrieved properties',
         'success': 0,
@@ -78,7 +78,7 @@ def about(self, msg):
 
     logging.debug(
         '[%s] Returning result from operation: %s',
-        self.host,
+        agent.host,
         result
     )
 
