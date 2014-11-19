@@ -531,6 +531,7 @@ class VPollerWorker(multiprocessing.Process):
                 host=agent['host']
             )
             self.agents[a.host] = a
+            logging.debug('vSphere Agent for %s loaded', agent['host'])
 
     def stop_agents(self):
         """
