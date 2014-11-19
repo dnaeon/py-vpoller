@@ -511,10 +511,10 @@ class VPollerWorker(multiprocessing.Process):
             VPollerException
 
         """
-        logging.debug('Creating vSphere Agents')
-
+        logging.debug('Importing vSphere Agent task modules')
         import vpoller.agent.datacenter
 
+        logging.debug('Creating vSphere Agents')
         db = VConnectorDatabase(self.config.get('db'))
         agents = db.get_agents(only_enabled=True)
 
