@@ -78,7 +78,7 @@ class VSphereAgent(VConnector):
             return {'success': 1, 'msg': 'Unknown task requested'}
 
         msg, _ = args[0], args[1:]
-        if not VPollerClientMessage.validate_msg(msg, required):
+        if not VPollerClientMessage.validate_msg(msg, self._tasks[name]['required']):
             return {'success': 1, 'msg': 'Invalid task request received'}
 
         return self._tasks[name]['function'](self, *args, **kwargs)
