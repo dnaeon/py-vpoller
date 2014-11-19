@@ -32,7 +32,7 @@ import pyVmomi
 from vpoller.agent.core import task
 
 
-@task(name='datacenter.discover', required=['hostname', 'name'])
+@task(name='datacenter.discover', required=['hostname'])
 def datacenter_discover(agent, msg):
     """
     Discover all vim.Datacenter managed objects
