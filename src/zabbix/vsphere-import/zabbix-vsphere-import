@@ -25,140 +25,94 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-The zabbix-vsphere-import tool is used for importing VMware vSphere objects
-into a Zabbix server as regular Zabbix hosts
+The zabbix-vsphere-import tool is used for importing 
+VMware vSphere objects into a Zabbix server as regular hosts
 
 """
 
 import json
+import logging
 from copy import deepcopy
 
 import yaml
-import zabbix_api
+import pyzabbix
 from docopt import docopt
 from vpoller.client import VPollerClient
 
-import logging
 
-class ZabbixException(Exception):
+class ZabbixVSphere(object):
     """
-    Generic exception
-
-    """
-    pass
-
-class ZabbixConnector(object):
-    """
-    Zabbix connector class
-
-    Defines methods for connecting to a Zabbix server and
-    importing of vSphere objects as regular Zabbix hosts
+    Zabbix vSphere connector
 
     """
     def __init__(self, options):
         self.options = options
+        self.zapi = pyzabbix.ZabbixAPI(
+            server=self.options['zabbix']['hostname']
+        )
+        self.vclient = VPollerClient(
+            endpoint=self.options['vpoller']['endpoint'],
+            retries=self.options['vpoller']['retries'],
+            timeout=self.options['vpoller']['timeout']
+        )
+
+    def _call_vpoller_task(self, msg):
+        """
+        Call a vPoller task
+
+        """
+        data = json.loads(self.vclient.run(msg=msg))
+
+        if data['success'] != 0:
+            logging.warning('vPoller task failed: %s', data)
+            raise SystemExit
+
+        return data['result']
 
     def connect(self):
         """
-        Establishes a connection to the Zabbix server
+        Establish a connection to the Zabbix server
 
         """
-        logging.info('Connecting to Zabbix server at %s', self.options['zabbix']['hostname'])
+        logging.info(
+            'Connecting to Zabbix server at %s',
+            self.options['zabbix']['hostname']
+        )
         
-        self.conn = zabbix_api.ZabbixAPI(server=self.options['zabbix']['hostname'])
-
-        try:
-            self.conn.login(
-                user=self.options['zabbix']['username'],
-                password=self.options['zabbix']['password']
-            )
-        except zabbix_api.ZabbixAPIException as e:
-            logging.error('Cannot login to Zabbix server: %s', e)
-            raise ZabbixException, 'Cannot login to Zabbix server: %s' % e
-
-    def get_hosts(self):
-        """
-        Get all hosts registered in Zabbix
-
-        """
-        result = self._call_zabbix_method(
-            method='host.get',
-            params={'output': 'extend'}
+        self.zapi.login(
+            user=self.options['zabbix']['username'],
+            password=self.options['zabbix']['password']
         )
 
-        return result
-
-    def get_proxy_hosts(self):
-        """
-        Gets all Zabbix Proxy hosts
-
-        """
-        result = self._call_zabbix_method(
-            method='proxy.get',
-            params={'output': 'extend'}
+        logging.info(
+            'Zabbix API version is %s',
+            self.zapi.api_version()
         )
 
-        return result
-
-    def get_host_by_name(self, name):
+    def get_proxy_id(self, name):
         """
-        Get a Zabbix host id by name
-
-        Args:
-            name (str): Name of the host in Zabbix
-
-        Returns:
-            The id of the host in Zabbix
-
-        """
-        data   = self.get_hosts()
-        hosts  = data['result']
-
-        for host in hosts:
-            if host['name'] == name:
-                break
-        else:
-            return None
-
-        return host['hostid']
-
-    def get_proxy_host_by_name(self, name):
-        """
-        Get a Zabbix Proxy host id by name
+        Get a Zabbix Proxy id
 
         Args:
             name (str): Name of the Proxy host in Zabbix
 
         Returns:
-            The id of the Proxy host in Zabbix
+            The id of the Proxy in Zabbix
 
         """
-        data   = self.get_proxy_hosts()
-        hosts  = data['result']
+        proxies = self.zapi.proxy.get(output='extend')
 
-        for host in hosts:
-            if host['host'] == name:
+        for proxy in proxies:
+            if proxy['name'] == name:
                 break
         else:
             return None
 
-        return host['proxyid']
+        return proxy['proxyid']
 
-    def get_templates(self):
+    def get_template_id(self, name):
         """
-        Gets all Zabbix templates
-
-        """
-        result = self._call_zabbix_method(
-            method='template.get',
-            params={'output': 'extend'}
-        )
-
-        return result
-
-    def get_template_by_name(self, name):
-        """
-        Get a template id by name
+        Get a template id
 
         Args:
             name (str): Name of the template in Zabbix
@@ -167,9 +121,8 @@ class ZabbixConnector(object):
             The id of the template
     
         """
-        data      = self.get_templates()
-        templates = data['result']
-        
+        templates = self.zapi.template.get(output='extend')
+
         for template in templates:
             if template['name'] == name:
                 break
@@ -178,21 +131,9 @@ class ZabbixConnector(object):
 
         return template['templateid']
 
-    def get_host_groups(self):
+    def get_hostgroup_id(self, name):
         """
-        Gets all Zabbix host groups
-        
-        """
-        result = self._call_zabbix_method(
-            method='hostgroup.get',
-            params={'output': 'extend'}
-        )
-
-        return result
-
-    def get_host_group_by_name(self, name):
-        """
-        Get a Zabbix hostgroup id by name
+        Get a Zabbix hostgroup id
 
         Args:
             name (str): Name of the host group in Zabbix
@@ -201,101 +142,107 @@ class ZabbixConnector(object):
             The id of the host group in Zabbix
 
         """
-        data   = self.get_host_groups()
-        groups = data['result']
+        hostgroups = self.zapi.hostgroup.get(output='extend')
 
-        for group in groups:
-            if group['name'] == name:
+        for hostgroup in hostgroups:
+            if hostgroup['name'].lower() == name.lower():
                 break
         else:
             return None
 
-        return group['groupid']
-
-    def create_host_group(self, name):
-        """
-        Create a Zabbix host group
-
-        Args:
-            name (str): Name of the host group to create
-
-        Returns:
-            The id of the newly create host group
-
-        """
-        result = self._call_zabbix_method(
-            method='hostgroup.create',
-            params={'name': name}
-        )
-
-        return result['result']['groupids']
-
-    def create_host(self, params):
-        """
-        Create a Zabbix host
-
-        Args:
-            host (str): Hostname of the Zabbix host to create
-
-        """
-        result = self._call_zabbix_method(
-            method='host.create',
-            params=params
-        )
-
-        return result
+        return hostgroup['groupid']
 
     def import_vsphere_clusters(self):
         """
-        Imports vSphere Clusters as Zabbix host groups
+        Import vSphere Clusters as Zabbix host groups
 
         """
-        logging.info('[vSphere ClusterComputeResource] Importing objects to Zabbix')
+        logging.info(
+            '[ClusterComputeResource@%s] Importing objects to Zabbix',
+            self.options['vsphere']['hostname']
+        )
         
-        zabbix_data  = self.get_host_groups()
-        vsphere_data = self._get_vsphere_objects(method='cluster.discover')
+        zabbix_data = self.zapi.hostgroup.get(
+            output='extend'
+        )
+        zabbix_hostgroups = [g['name'] for g in zabbix_data]
 
-        zabbix_groups = [group['name'] for group in zabbix_data['result']]
-        vsphere_clusters = [cluster['name'] for cluster in vsphere_data['result']]
+        msg = {
+            'method': 'cluster.discover',
+            'hostname': self.options['vsphere']['hostname']
+        }
+        vpoller_data = self._call_vpoller_task(msg=msg)
+        vsphere_clusters = [c['name'] for c in vpoller_data]
 
-        missing_groups = set(vsphere_clusters) - set(zabbix_groups)
+        missing_hostgroups = set(vsphere_clusters) - set(zabbix_hostgroups)
 
-        if not missing_groups:
-            logging.info('[vSphere ClusterComputeResource] Objects are in sync with Zabbix')
+        if not missing_hostgroups:
+            logging.info(
+                '[ClusterComputeResource@%s] Objects are in sync with Zabbix',
+                self.options['vsphere']['hostname']
+            )
             return
 
-        logging.info('[vSphere ClusterComputeResource] Number of objects to be imported: %d', len(missing_groups))
+        logging.info(
+            '[ClusterComputeResource@%s] Number of objects to be imported: %d',
+            self.options['vsphere']['hostname'],
+            len(missing_hostgroups)
+        )
 
-        # Create Zabbix host groups for each vSphere cluster
-        for group in missing_groups:
-            logging.info("[vSphere ClusterComputeResource] Creating Zabbix host group '%s'", group)
-            self.create_host_group(name=group)
+        for hostgroup in missing_hostgroups:
+            logging.info(
+                "[ClusterComputeResource@%s] Creating Zabbix host group '%s'",
+                self.options['vsphere']['hostname'],
+                hostgroup
+            )
+            self.zapi.hostgroup.create(name=hostgroup)
 
-        logging.info('[vSphere ClusterComputeResource] Import of objects completed')
+        logging.info(
+            '[ClusterComputeResource@%s] Import of objects completed',
+            self.options['vsphere']['hostname']
+        )
 
     def import_vsphere_hosts(self):
         """
-        Import vSphere hosts into Zabbix as regular Zabbix hosts
+        Import vSphere hosts into Zabbix
 
         """
-        logging.info('[vSphere HostSystem] Importing objects to Zabbix')
+        logging.info(
+            '[HostSystem@%s] Importing objects to Zabbix',
+            self.options['vsphere']['hostname']
+        )
 
-        zabbix_data  = self.get_hosts()
-        vsphere_data = self._get_vsphere_objects(method='host.discover')
+        zabbix_data  = self.zapi.host.get(
+            output='extend'
+        )
+        zabbix_hosts = [h['name'] for h in zabbix_data]
 
-        zabbix_hosts  = [host['host'] for host in zabbix_data['result']]
-        vsphere_hosts = [host['name'] for host in vsphere_data['result']]
+        msg = {
+            'method': 'host.discover',
+            'hostname': self.options['vsphere']['hostname']
+        }
+        vpoller_data = self._call_vpoller_task(msg=msg)
+        vsphere_hosts = [h['name'] for h in vpoller_data]
+        
         missing_hosts = set(vsphere_hosts) - set(zabbix_hosts)
 
         if not missing_hosts:
-            logging.info('[vSphere HostSystem] Objects are in sync with Zabbix')
+            logging.info(
+                '[HostSystem@%s] Objects are in sync with Zabbix',
+                self.options['vsphere']['hostname']
+            )
             return
 
-        logging.info('[vSphere HostSystem] Number of objects to be imported: %d', len(missing_hosts))
+        logging.info(
+            '[HostSystem@%s] Number of objects to be imported: %d',
+            self.options['vsphere']['hostname'],
+            len(missing_hosts)
+        )
 
         # Get hosts options (templates, groups, macros) from the config file
-        host_options = self._get_zabbix_host_options('vsphere_object_host')
-        
+        host_options = self._get_zabbix_host_options(
+            name='vsphere_object_host'
+        )
         # Add a default interface for the host
         host_options['interfaces'] = [
             {
@@ -308,53 +255,81 @@ class ZabbixConnector(object):
             }
         ]
 
-        # Create the hosts in Zabbix
         for host in missing_hosts:
-            logging.info("[vSphere HostSystem] Creating Zabbix host '%s'", host) 
+            logging.info(
+                "[HostSystem@%s] Creating Zabbix host '%s'",
+                self.options['vsphere']['hostname'],
+                host
+            )
 
             params = deepcopy(host_options)
             params['host'] = host
 
             # Add the host to it's respective hostgroup/cluster in Zabbix
-            data = self._get_vsphere_objects(
-                method='host.cluster.get',
-                name=host
-            )
-            host_cluster = data['result'][0]['cluster']
-
-            cluster_group_id = self.get_host_group_by_name(name=host_cluster)
+            msg = {
+                'method': 'host.cluster.get',
+                'hostname': self.options['vsphere']['hostname'],
+                'name': host
+            }
+            vpoller_data = self._call_vpoller_task(msg=msg)
+            vsphere_cluster = vpoller_data[0]['cluster']
+            cluster_group_id = self.get_hostgroup_id(name=vsphere_cluster)
+            
             if not cluster_group_id:
-                self.create_host_group(name=host_cluster)
-                cluster_group_id = self.get_host_group_by_name(name=host_cluster)
-
+                self.zapi.hostgroup.create(name=vsphere_cluster)
+                cluster_group_id = self.get_hostgroup_id(name=vsphere_cluster)
             params['groups'].append({'groupid': cluster_group_id})
             
             try:
-                result = self.create_host(params)
-            except zabbix_api.ZabbixAPIException as e:
-                logging.warning('[vSphere HostSystem] Cannot create host in Zabbix: %s', e)
+                result = self.zapi.host.create(params)
+            except pyzabbix.ZabbixAPIException as e:
+                logging.warning(
+                    '[HostSystem@%s] Cannot create host in Zabbix: %s',
+                    self.options['vsphere']['hostname'],
+                    e
+                )
 
-        logging.info('[vSphere HostSystem] Import of objects completed')
+        logging.info(
+            '[HostSystem@%s] Import of objects completed',
+            self.options['vsphere']['hostname']
+        )
 
     def import_vsphere_vms(self):
         """
         Import vSphere VMs into Zabbix as regular Zabbix hosts
 
         """
-        logging.info('[vSphere VirtualMachine] Importing objects to Zabbix')
+        logging.info(
+            '[VirtualMachine@%s] Importing objects to Zabbix',
+            self.options['vsphere']['hostname']
+        )
 
-        zabbix_data  = self.get_hosts()
-        vsphere_data = self._get_vsphere_objects(method='vm.discover')
+        zabbix_data = self.zapi.host.get(
+            output='extend'
+        )
+        zabbix_hosts = [h['name'] for h in zabbix_data]
 
-        zabbix_vms  = [host['host'] for host in zabbix_data['result']]
-        vsphere_vms = [host['name'] for host in vsphere_data['result']]
-        missing_vms = set(vsphere_vms) - set(zabbix_vms)
+        msg = {
+            'method': 'vm.discover',
+            'hostname': self.options['vsphere']['hostname']
+        }
+        vpoller_data = self._call_vpoller_task(msg=msg)
+        vsphere_vms = [vm['name'] for vm in vpoller_data]
 
-        if not missing_vms:
-            logging.info('[vSphere VirtualMachine] Objects are in sync with Zabbix')
+        missing_hosts = set(vsphere_vms) - set(zabbix_hosts)
+
+        if not missing_hosts:
+            logging.info(
+                '[VirtualMachine@%s] Objects are in sync with Zabbix',
+                self.options['vsphere']['hostname']
+            )
             return
 
-        logging.info('[vSphere VirtualMachine] Number of objects to be imported: %d', len(missing_vms))
+        logging.info(
+            '[VirtualMachine%s] Number of objects to be imported: %d',
+            self.options['vsphere']['hostname'],
+            len(missing_hosts)
+        )
 
         # Get hosts options (templates, groups, macros) from the config file
         host_options = self._get_zabbix_host_options('vsphere_object_vm')
@@ -372,63 +347,94 @@ class ZabbixConnector(object):
         ]
 
         # Create the hosts in Zabbix
-        for vm in missing_vms:
-            logging.info("[vSphere VirtualMachine] Creating Zabbix host '%s'", vm)
+        for host in missing_hosts:
+            logging.info(
+                "[VirtualMachine@%s] Creating Zabbix host '%s'",
+                self.options['vsphere']['hostname'],
+                host
+            )
 
             params = deepcopy(host_options)
-            params['host'] = vm
+            params['host'] = host
 
             # Add the virtual machine to it's respective hostgroup/cluster in Zabbix
             # We do this by first finding the host this VM runs on and then we get the
             # cluster where this host resides on.
-            data = self._get_vsphere_objects(
-                method='vm.host.get',
-                name=vm
-            )
-            vm_host = data['result'][0]['host']
+            msg = {
+                'method': 'vm.host.get',
+                'hostname': self.options['vsphere']['hostname'],
+                'name': host
+            }
+            vpoller_data = self._call_vpoller_task(msg=msg)
+            vm_host = vpoller_data[0]['host']
 
-            data = self._get_vsphere_objects(
-                method='host.cluster.get',
-                name=vm_host
-            )
-            host_cluster = data['result'][0]['cluster']
-            cluster_group_id = self.get_host_group_by_name(name=host_cluster)
+            # Now find the cluster of the VM's host
+            msg = {
+                'method': 'host.cluster.get',
+                'hostname': self.options['vsphere']['hostname'],
+                'name': vm_host
+            }
+            vpoller_data = self._call_vpoller_task(msg=msg)
+            host_cluster = vpoller_data[0]['cluster']
 
+            # Get the Zabbix hostgroup id matching the vSphere cluster name
+            cluster_group_id = self.get_hostgroup_id(name=host_cluster)
             if not cluster_group_id:
-                self.create_host_group(name=host_cluster)
-                cluster_group_id = self.get_host_group_by_name(name=host_cluster)
-
+                self.zapi.hostgroup.create(name=host_cluster)
+                cluster_group_id = self.get_hostgroup_id(name=host_cluster)
             params['groups'].append({'groupid': cluster_group_id})
 
             try:
-                result = self.create_host(params)
-            except zabbix_api.ZabbixAPIException as e:
-                logging.warning('[vSphere VirtualMachine] Cannot create host in Zabbix: %s', e)
+                result = self.zapi.host.create(params)
+            except pyzabbix.ZabbixAPIException as e:
+                logging.warning(
+                    '[VirtualMachine@%s] Cannot create host in Zabbix: %s',
+                    self.options['vsphere']['hostname'],
+                    e
+                )
             
-        logging.info('[vSphere VirtualMachine] Import of objects completed')
+        logging.info(
+            '[VirtualMachine@%s] Import of objects completed',
+            self.options['vsphere']['hostname']
+        )
 
     def import_vsphere_datastores(self):
         """
-        Import vSphere datastores into Zabbix as regular Zabbix hosts
+        Import vSphere datastores into Zabbix
 
         """
-        logging.info('[vSphere Datastore] Importing objects to Zabbix')
-
-        zabbix_data  = self.get_hosts()
-        vsphere_data = self._get_vsphere_objects(
-            method='datastore.discover',
-            properties=['info.url']
+        logging.info(
+            '[Datastore@%s] Importing objects to Zabbix',
+            self.options['vsphere']['hostname']
         )
 
-        zabbix_datastores  = [host['name'] for host in zabbix_data['result']]
-        vsphere_datastores = [host['info.url'] for host in vsphere_data['result']]
-        missing_datastores = set(vsphere_datastores) - set(zabbix_datastores)
+        zabbix_data  = self.zapi.host.get(
+            output='extend'
+        )
+        zabbix_hosts = [h['name'] for h in zabbix_data]
 
-        if not missing_datastores:
-            logging.info('[vSphere Datastore] Objects are in sync with Zabbix')
+        msg = {
+            'method': 'datastore.discover',
+            'hostname': self.options['vsphere']['hostname'],
+            'properties': ['info.url']
+        }
+        vpoller_data = self._call_vpoller_task(msg=msg)
+        vsphere_datastores = [d['info.url'] for d in vpoller_data]
+
+        missing_hosts = set(vsphere_datastores) - set(zabbix_hosts)
+
+        if not missing_hosts:
+            logging.info(
+                '[Datastore@%s] Objects are in sync with Zabbix',
+                self.options['vsphere']['hostname']
+            )
             return
 
-        logging.info('[vSphere Datastore] Number of objects to be imported: %d', len(missing_datastores))
+        logging.info(
+            '[Datastore@%s] Number of objects to be imported: %d',
+            self.options['vsphere']['hostname'],
+            len(missing_hosts)
+        )
 
         # Get hosts options (templates, groups, macros) from the config file
         host_options = self._get_zabbix_host_options('vsphere_object_datastore')
@@ -445,30 +451,42 @@ class ZabbixConnector(object):
             }
         ]
 
-        # Create the hosts in Zabbix
-        for datastore in missing_datastores:
-            logging.info("[vSphere Datastore] Creating host '%s'", datastore)
+        for host in missing_hosts:
+            logging.info(
+                "[Datastore@%s] Creating host '%s'",
+                self.options['vsphere']['hostname'],
+                host
+            )
 
             # Get datastore name first and use it as the host name
-            result = self._get_vsphere_objects(
-                method='datastore.get',
-                name=datastore,
-                properties=['name']
-            )
-            datastore_name = result['result'][0]['name']
+            msg = {
+                'method': 'datastore.get',
+                'hostname': self.options['vsphere']['hostname'],
+                'name': host,
+                'properties': ['name']
+            }
+            vpoller_data = self._call_vpoller_task(msg=msg)
+            datastore_name = vpoller_data[0]['name']
 
             params = {}
-            params['name'] = datastore
+            params['name'] = host
             params['host'] = datastore_name
             
             params.update(host_options)
 
             try:
-                result = self.create_host(params)
-            except zabbix_api.ZabbixAPIException as e:
-                logging.warning('[vSphere Datastore] Cannot create host in Zabbix: %s', e)
+                result = self.zapi.host.create(params)
+            except pyzabbix.ZabbixAPIException as e:
+                logging.warning(
+                    '[Datastore@%s] Cannot create host in Zabbix: %s',
+                    self.options['vsphere']['hostname'],
+                    e
+                )
             
-        logging.info('[vSphere Datastore] Import of objects completed')
+        logging.info(
+            '[Datastore@%s] Import of objects completed',
+            self.options['vsphere']['hostname']
+        )
 
     def _get_zabbix_host_options(self, name):
         """
@@ -476,7 +494,7 @@ class ZabbixConnector(object):
         options from the config file.
 
         Options which are retrieved and returned include
-        the host templates, groups and user defined macros
+        the host templates, proxy, groups and user defined macros
 
         Args:
             name (str): Name of the entry from config file to lookup
@@ -485,64 +503,70 @@ class ZabbixConnector(object):
             A dict containing the host options from the config file
 
         """
-        if not self.options['zabbix'].has_key(name):
-            logging.warning("There is no '%s' entry in the config file", name)
-            raise ZabbixException, "There is no '%s' entry in the config file" % name
+        if name not in self.options['zabbix']:
+            logging.warning(
+                "There is no '%s' entry in the config file",
+                name
+            )
+            raise pyzabbix.ZabbixException("There is no '%s' config entry" % name)
 
         # Get the Zabbix Proxy if set
         proxy_id = None
-        if self.options['zabbix'][name].has_key('proxy'):
+        if 'proxy' in self.options['zabbix'][name]:
             proxy_name = self.options['zabbix'][name]['proxy']
-            proxy_id = self.get_proxy_host_by_name(proxy_name)
+            proxy_id = self.get_proxy_id(name=proxy_name)
             if not proxy_id:
-                logging.warning("Unable to find Zabbix proxy '%s'", proxy_name)
-                raise ZabbixException, "Unable to find Zabbix proxy '%s'" % proxy_name
+                logging.warning(
+                    "Unable to find Zabbix proxy '%s'",
+                    proxy_name
+                )
+                raise SystemExit
 
-        # Get ids of the Zabbix templates 
-        if not self.options['zabbix'][name].has_key('templates'):
-            logging.warning("No templates are defined for '%s' config entry", name)
-            raise ZabbixException, "No templates are defined for '%s' config entry" % name
+        # Get ids of the Zabbix templates
+        if 'templates' not in self.options['zabbix'][name]:
+            logging.warning(
+                "No templates are defined for '%s' config entry",
+                name
+            )
+            raise SystemExit
 
         templates = []
         for template in self.options['zabbix'][name]['templates']:
-            template_id = self.get_template_by_name(template)
+            template_id = self.get_template_id(name=template)
             if not template_id:
-                logging.warning("Template '%s' was not found on the Zabbix server", template)
+                logging.warning("Unable to find '%s' template", template)
                 continue
-            templates.append({ 'templateid': template_id })
-            
+            templates.append({'templateid': template_id})
+
         if not templates:
             logging.warning("No valid templates found for '%s' config entry", name)
-            raise ZabbixException, "No valid templates found for '%s' config entry" % name
+            raise SystemExit
 
         # Get ids of the Zabbix hostgroups
-        if not self.options['zabbix'][name].has_key('groups'):
-            logging.warning("No groups are defined for '%s' config entry", name)
-            raise ZabbixException, "No groups are defined for '%s' config entry" % name
+        if 'groups' not in self.options['zabbix'][name]:
+            logging.warning("No groups defined for '%s' config entry", name)
+            raise SystemExit
 
         groups = []
         for group in self.options['zabbix'][name]['groups']:
-            group_id = self.get_host_group_by_name(group)
+            group_id = self.get_hostgroup_id(name=group)
             if not group_id:
                 logging.warning("Unable to find Zabbix host group '%s'", group)
                 logging.info("Creating Zabbix host group '%s'", group)
-                result = self.create_host_group(name=group)
-                group_id = result[0]
-            groups.append({ 'groupid': group_id })
-            
-        if not groups:
-            logging.warning("No valid groups found for '%s' config entry", name)
-            raise ZabbixException, "No valid groups found for '%s' config entry" % name
+                _result = self.zapi.hostgroup.create(name=group)
+                group_id = _result['groupids'][0]
+            groups.append({'groupid': group_id})
 
         # Get macros if any
         macros = []
-        if self.options['zabbix'][name].has_key('macros'):
-            for name, value in self.options['zabbix'][name]['macros'].items():
+        if 'macros' in self.options['zabbix'][name]:
+            m = self.options['zabbix'][name]['macros']
+            for name, value in m.items():
                 # Convert macro names to Zabbix format -> {$MACRO}
-                m = {}
-                m['macro'] = '{$' + name + '}'
-                m['value'] = value
-                macros.append(m)
+                macro = {}
+                macro['macro'] = '{$' + name + '}'
+                macro['value'] = value
+                macros.append(macro)
 
         r = {
             'proxy_hostid': proxy_id,
@@ -552,55 +576,6 @@ class ZabbixConnector(object):
         }
 
         return r
-
-    def _call_zabbix_method(self, method, params):
-        """
-        Helper method for calling Zabbix API methods
-
-        Args:
-            method  (str): Zabbix API method
-            params (dict): Additional method params
-
-        Returns:
-            Result from calling the Zabbix API method
-
-        """
-        req = self.conn.json_obj(method=method, params=params)
-        result = self.conn.do_request(req)
-
-        return result
-
-    def _get_vsphere_objects(self, method, name=None, properties=None):
-        """
-        Helper method for getting vSphere objects using vPoller
-
-        Args:
-            method      (str): vPoller method name
-            properties (list): List of properties to be retrieved
-        
-        """
-        client = VPollerClient(
-            endpoint=self.options['vpoller']['endpoint'],
-            retries=self.options['vpoller']['retries'],
-            timeout=self.options['vpoller']['timeout']
-        )
-
-        msg = {
-            'method':     method,
-            'hostname':   self.options['vsphere']['hostname'],
-            'name':       name,
-            'properties': properties,
-        }
-
-        result = client.run(msg)
-
-        data = json.loads(result)
-
-        if data['success']:
-            logging.warning('Failed to get vSphere objects: %s', result)
-            raise ZabbixException, 'Failed to get vSphere objects: %s' % result
-
-        return data
 
 def main():
     usage="""
@@ -615,14 +590,8 @@ Options:
 
 """
     
-    args = docopt(usage, version='0.1.0')
+    args = docopt(usage, version='0.1.1')
 
-    # Silence the 'zabbix_api' module logger as it
-    # can be quite noisy ...
-    _logger = logging.getLogger('zabbix_api')
-    _logger.setLevel(logging.ERROR)
-    
-    # Set our logging here
     logging.basicConfig(
         format='[%(asctime)s] - %(levelname)s - %(message)s',
         level=logging.INFO
@@ -631,14 +600,16 @@ Options:
     try:
         with open(args['--file'], 'r') as f:
             options = yaml.load(f)
-    except Exception as e:
-        logging.warning('Cannot load configuration file %s: %s', args['--file'], e)
-        raise ZabbixException, 'Cannot load configuration file %s: %s' % (args['--file'], e)
+    except IOError as e:
+        logging.warning(
+            'Cannot load configuration file %s: %s',
+            args['--file'],
+            e
+        )
+        raise SystemExit
 
-    zabbix = ZabbixConnector(options=options)
+    zabbix = ZabbixVSphere(options=options)
     zabbix.connect()
-    
-    # Import vSphere objects into Zabbix
     zabbix.import_vsphere_clusters()
     zabbix.import_vsphere_hosts()
     zabbix.import_vsphere_vms()
