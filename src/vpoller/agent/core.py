@@ -61,6 +61,14 @@ class VSphereAgent(VConnector):
 
     @classmethod
     def _add_task(cls, name, function, required):
+        """
+        Register a new task
+
+        """
+        #
+        # TODO: Implement a task registry interface, where all
+        # tasks register themselves.
+        #
         cls._tasks[name] = {
             'function': function,
             'required': required,
