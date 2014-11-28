@@ -60,7 +60,7 @@ class VSphereAgent(VConnector):
     _tasks = {}
 
     @classmethod
-    def _add_task(cls, name, function, required):
+    def _add_task(cls, name, task, required):
         """
         Register a new task
 
@@ -69,15 +69,16 @@ class VSphereAgent(VConnector):
         # TODO: Implement a task registry interface, where all
         # tasks register themselves.
         #
-        if not callable(function):
+        if not callable(task):
             logging.warning(
                 'Cannot add task: %s is not callable',
-                function.__class__
+                task.__class__
             )
             return
 
+        setattr(cls, task.__name__, task)
         cls._tasks[name] = {
-            'function': function,
+            'callable': task,
             'required': required,
         }
 
@@ -96,7 +97,7 @@ class VSphereAgent(VConnector):
         if not VPollerClientMessage.validate_msg(msg, self._tasks[name]['required']):
             return {'success': 1, 'msg': 'Invalid task request received'}
 
-        return self._tasks[name]['function'](self, *args, **kwargs)
+        return self._tasks[name]['callable'](self, *args, **kwargs)
 
     def _discover_objects(self, properties, obj_type):
         """
