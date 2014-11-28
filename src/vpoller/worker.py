@@ -579,6 +579,6 @@ class VPollerWorker(multiprocessing.Process):
                 'msg': 'Unknown vSphere Agent requested'
             }
 
-        result = agent.call_task(msg['method'], msg)
+        result = agent.call_task(name=msg['method'], msg)
 
         return result
