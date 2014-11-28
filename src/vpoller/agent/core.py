@@ -44,6 +44,13 @@ from vpoller.client.core import VPollerClientMessage
 
 __all__ = ['VSphereAgent', 'task']
 
+#
+# TODO: Implement a BaseAgent class which all
+#       agent classes will extend upon.
+#       The BaseAgent class should provide an interface
+#       for calling tasks, which new Agent interfaces should be
+#       implementing themselves.
+#
 class VSphereAgent(VConnector):
     """
     VSphereAgent class
