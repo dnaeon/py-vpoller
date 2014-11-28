@@ -374,8 +374,14 @@ def task(name, required):
         )
         @wraps(function)
         def wrapper(*args, **kwargs):
-            return function(*args, **kwargs)
+            try:
+                result = function(*args, **kwargs)
+            except Exception as e:
+                result = {'success': 1,'msg': e}
+            finally:
+                return result
 
+        # TODO: Check whether 'function' is callable
         VSphereAgent._add_task(
             name=name,
             function=wrapper,
