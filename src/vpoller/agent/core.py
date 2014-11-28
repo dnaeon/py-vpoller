@@ -374,6 +374,7 @@ def task(name, required):
         )
         @wraps(function)
         def wrapper(*args, **kwargs):
+            # TODO: Implement a TaskResult class for storing results
             try:
                 result = function(*args, **kwargs)
             except Exception as e:
