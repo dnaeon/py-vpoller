@@ -69,6 +69,13 @@ class VSphereAgent(VConnector):
         # TODO: Implement a task registry interface, where all
         # tasks register themselves.
         #
+        if not callable(function):
+            logging.warning(
+                'Cannot add task: %s is not callable',
+                function.__class__
+            )
+            return
+
         cls._tasks[name] = {
             'function': function,
             'required': required,
