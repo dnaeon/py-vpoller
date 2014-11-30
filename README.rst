@@ -1,8 +1,13 @@
 vPoller - Distributed VMware vSphere API Proxy
 ==============================================
 
-.. image:: https://badge.fury.io/py/vpoller.svg
-    :target: http://badge.fury.io/py/vpoller
+.. image:: https://pypip.in/version/vpoller/badge.svg
+    :target: https://pypi.python.org/pypi/vpoller/
+    :alt: Latest Version
+
+.. image:: https://pypip.in/download/vpoller/badge.svg
+    :target: https://pypi.python.org/pypi/vpoller/
+    :alt: Downloads
 
 vPoller is a distributed VMware vSphere API Proxy, designed for
 discovering and polling of vSphere objects.
