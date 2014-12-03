@@ -64,7 +64,7 @@ class ZabbixVSphere(object):
         data = json.loads(self.vclient.run(msg=msg))
 
         if data['success'] != 0:
-            logging.warning('vPoller task failed: %s', data)
+            logging.error('vPoller task failed: %s', data)
             raise SystemExit
 
         return data['result']
