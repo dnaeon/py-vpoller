@@ -27,7 +27,9 @@ vPoller Client module for the VMware vSphere Poller
 
 """
 
+import json
 import logging
+
 import zmq
 
 
@@ -129,9 +131,10 @@ class VPollerClient(object):
             logging.error(
                 'Did not receive response, aborting...'
             )
-            return {
+            r = {
                 'success': 1,
                 'msg': 'Did not receive response, aborting...'
             }
+            return json.dumps(r, ensure_ascii=False)
 
         return result
