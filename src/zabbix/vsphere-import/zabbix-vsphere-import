@@ -222,9 +222,9 @@ class ZabbixVSphere(object):
             'hostname': self.options['vsphere']['hostname']
         }
         vpoller_data = self._call_vpoller_task(msg=msg)
-        vsphere_hosts = [h['name'] for h in vpoller_data]
-        
-        missing_hosts = set(vsphere_hosts) - set(zabbix_hosts)
+        self.vsphere_hosts = [h['name'] for h in vpoller_data]
+
+        missing_hosts = set(self.vsphere_hosts) - set(zabbix_hosts)
 
         if not missing_hosts:
             logging.info(
@@ -314,9 +314,9 @@ class ZabbixVSphere(object):
             'hostname': self.options['vsphere']['hostname']
         }
         vpoller_data = self._call_vpoller_task(msg=msg)
-        vsphere_vms = [vm['name'] for vm in vpoller_data]
+        self.vsphere_vms = [vm['name'] for vm in vpoller_data]
 
-        missing_hosts = set(vsphere_vms) - set(zabbix_hosts)
+        missing_hosts = set(self.vsphere_vms) - set(zabbix_hosts)
 
         if not missing_hosts:
             logging.info(
@@ -419,9 +419,9 @@ class ZabbixVSphere(object):
             'properties': ['info.url']
         }
         vpoller_data = self._call_vpoller_task(msg=msg)
-        vsphere_datastores = [d['info.url'] for d in vpoller_data]
+        self.vsphere_datastores = [d['info.url'] for d in vpoller_data]
 
-        missing_hosts = set(vsphere_datastores) - set(zabbix_hosts)
+        missing_hosts = set(self.vsphere_datastores) - set(zabbix_hosts)
 
         if not missing_hosts:
             logging.info(
@@ -487,6 +487,57 @@ class ZabbixVSphere(object):
             '[Datastore@%s] Import of objects completed',
             self.options['vsphere']['hostname']
         )
+
+    def check_for_extra_hosts(self, delete):
+        """
+        Check for extra hosts in Zabbix which are no longer in vSphere
+
+        Searching for extra hosts which are found in Zabbix, but are no longer
+        present on the vSphere host is done by filtering the Zabbix hosts,
+        which have the {$VSPHERE.HOST} macro and it's value is the vSphere host
+        on which they are supposed to be present.
+
+        Args:
+            delete (bool): If True, then delete found extra hosts
+
+        """
+        logging.info(
+            'Searching for extra hosts in Zabbix, which are no longer present at %s',
+            self.options['vsphere']['hostname']
+        )
+
+        # Get all vSphere objects in one place for easy comparison
+        vsphere_objects = []
+        vsphere_objects.extend(self.vsphere_hosts)
+        vsphere_objects.extend(self.vsphere_vms)
+        vsphere_objects.extend(self.vsphere_datastores)
+
+        # Get all Zabbix hosts which have macro {$VSPHERE_HOST} == self.options['vsphere']['hostname']
+        macros = self.zapi.usermacro.get(output='extend')
+        hostids = [m['hostid'] for m in macros if m['value'] == self.options['vsphere']['hostname']]
+        zabbix_data = self.zapi.host.get(output='extend', hostids=hostids)
+        zabbix_hosts = [h['name'] for h in zabbix_data]
+
+        extra_hosts = set(zabbix_hosts) - set(vsphere_objects)
+
+        if not extra_hosts:
+            return
+
+        for host in extra_hosts:
+            logging.warning(
+                "Host '%s' exists in Zabbix, but is not found in '%s'",
+                host,
+                self.options['vsphere']['hostname']
+            )
+            if delete:
+                hostid = self.zapi.host.get(filter={'host': host})[0]['hostid']
+                logging.warning(
+                    "Deleting host '%s' with hostid '%s'",
+                    host,
+                    hostid
+                )
+                self.zapi.host.delete(hostid)
+
 
     def _get_zabbix_host_options(self, name):
         """
@@ -579,14 +630,15 @@ class ZabbixVSphere(object):
 
 def main():
     usage="""
-Usage: zabbix-vsphere-import -f <config>
+Usage: zabbix-vsphere-import [-d] -f <config>
        zabbix-vsphere-import -v
        zabbix-vsphere-import -h
 
 Options:
-  -h, --help                        Display this usage info
-  -v, --version                     Display version and exit
-  -f <config>, --file <config>      Configuration file to use
+  -h, --help                    Display this usage info
+  -v, --version                 Display version and exit
+  -d, --delete                  Delete extra hosts from Zabbix which are no longer found in vSphere
+  -f <config>, --file <config>  Configuration file to use
 
 """
     
@@ -596,7 +648,7 @@ Options:
         format='[%(asctime)s] - %(levelname)s - %(message)s',
         level=logging.INFO
     )
-    
+
     try:
         with open(args['--file'], 'r') as f:
             options = yaml.load(f)
@@ -614,6 +666,9 @@ Options:
     zabbix.import_vsphere_hosts()
     zabbix.import_vsphere_vms()
     zabbix.import_vsphere_datastores()
+    zabbix.check_for_extra_hosts(delete=args['--delete'])
+
+    logging.info('Sync completed')
 
 if __name__ == '__main__':
     main()
