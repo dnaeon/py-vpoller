@@ -47,6 +47,10 @@ class ZabbixVSphere(object):
     """
     def __init__(self, options):
         self.options = options
+        self.vsphere_clusters = []
+        self.vsphere_hosts = []
+        self.vsphere_vms = []
+        self.vsphere_datastores = []
         self.zapi = pyzabbix.ZabbixAPI(
             server=self.options['zabbix']['hostname']
         )
@@ -172,9 +176,9 @@ class ZabbixVSphere(object):
             'hostname': self.options['vsphere']['hostname']
         }
         vpoller_data = self._call_vpoller_task(msg=msg)
-        vsphere_clusters = [c['name'] for c in vpoller_data]
+        self.vsphere_clusters = [c['name'] for c in vpoller_data]
 
-        missing_hostgroups = set(vsphere_clusters) - set(zabbix_hostgroups)
+        missing_hostgroups = set(self.vsphere_clusters) - set(zabbix_hostgroups)
 
         if not missing_hostgroups:
             logging.info(
@@ -537,7 +541,6 @@ class ZabbixVSphere(object):
                     hostid
                 )
                 self.zapi.host.delete(hostid)
-
 
     def _get_zabbix_host_options(self, name):
         """
