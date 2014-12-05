@@ -530,7 +530,7 @@ class ZabbixVSphere(object):
                 self.options['vsphere']['hostname']
             )
             if delete:
-                hostid = self.zapi.host.get(filter={'host': host})[0]['hostid']
+                hostid = self.zapi.host.get(filter={'name': host})[0]['hostid']
                 logging.warning(
                     "Deleting host '%s' with hostid '%s'",
                     host,
