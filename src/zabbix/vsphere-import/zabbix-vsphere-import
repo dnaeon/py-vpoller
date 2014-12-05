@@ -103,7 +103,7 @@ class ZabbixVSphere(object):
         proxies = self.zapi.proxy.get(output='extend')
 
         for proxy in proxies:
-            if proxy['name'] == name:
+            if proxy['host'] == name:
                 break
         else:
             return None
