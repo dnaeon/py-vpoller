@@ -142,6 +142,10 @@ class VSphereAgent(VConnector):
                 'method': self.resource_pool_get,
                 'required': ['hostname', 'name', 'properties'],
             },
+            'host.perf.counter.info': {
+                'method': self.host_perf_counter_info,
+                'required': ['hostname', 'name'],
+            },
             'host.discover': {
                 'method': self.host_discover,
                 'required': ['hostname'],
@@ -807,6 +811,40 @@ class VSphereAgent(VConnector):
             obj_property_name='name',
             obj_property_value=msg['name']
         )
+
+    def host_perf_counter_info(self, msg):
+        """
+        Get performance counters available for a vim.HostSystem object
+
+        Example client message would be:
+
+            {
+                "method":     "host.perf.counter.info",
+                "hostname":   "vc01.example.org",
+                "name":       "esxi01.example.org",
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.Network
+        )
+
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
+        except pyVmomi.VmomiSupport.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
+            }
+
+        counter_id = [m.counterId for m in metric_id]
+
+        return self._get_perf_counter_info(counter_id=counter_id)
 
     def net_host_get(self, msg):
         """
