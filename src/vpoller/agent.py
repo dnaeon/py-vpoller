@@ -62,6 +62,9 @@ class VSphereAgent(VConnector):
         """
         super(VSphereAgent, self).__init__(user, pwd, host)
 
+        # A list of supported performance counters by the vSphere host
+        self._perf_counter_supported = None
+
         # Message attribute types we expect to receive
         # before we start processing a task request
         self.msg_attr_types = {
@@ -231,7 +234,17 @@ class VSphereAgent(VConnector):
                 'method': self.datastore_vm_get,
                 'required': ['hostname', 'name'],
             },
+            'perf.counter.info': {
+                'method': self.perf_counter_info,
+                'required': ['hostname'],
+            },
         }
+
+    @property
+    def perf_counter_supported(self):
+        if not self._perf_counter_supported:
+            self._perf_counter_supported = [c.key for c in self.si.content.perfManager.perfCounter]
+        return self._perf_counter_supported
 
     def _validate_client_msg(self, msg, required):
         """
@@ -517,6 +530,52 @@ class VSphereAgent(VConnector):
 
         return r
 
+    def _get_perf_counter_info(self, counter_id):
+        """
+        Helper method for retrieving information about performance counter IDs
+
+        Args:
+            counter_id (list): A list of counter IDs to query
+
+        Returns:
+            Information about the specified counter IDs
+
+        """
+        logging.debug(
+            '[%s] Retrieving performance counters info for IDs %s',
+            self.host,
+            counter_id
+        )
+
+        try:
+            counter_info = self.si.content.perfManager.QueryPerfCounter(
+                counterId=counter_id
+            )
+        except Exception as e:
+            return {'success': 1, 'msg': 'Cannot get performance counter info: %s' % e}
+
+        data = []
+        for c in counter_info:
+            d = {
+                'key': c.key,
+                'nameInfo': {k: getattr(c.nameInfo, k) for k in ('label', 'summary', 'key')},
+                'groupInfo': {k: getattr(c.groupInfo, k) for k in ('label', 'summary', 'key')},
+                'unitInfo': {k: getattr(c.unitInfo, k) for k in ('label', 'summary', 'key')},
+                'rollupType': c.rollupType,
+                'statsType': c.statsType,
+                'level': c.level,
+                'perDeviceLevel': c.perDeviceLevel,
+            }
+            data.append(d)
+
+        result = {
+            'success': 0,
+            'msg': 'Successfully retrieved performance counters info',
+            'result': data
+        }
+
+        return result
+
     def event_latest(self, msg):
         """
         Get the latest event registered
@@ -656,6 +715,28 @@ class VSphereAgent(VConnector):
         )
 
         return result
+
+    def perf_counter_info(self, msg):
+        """
+        Get all performance counters supported by the vSphere host
+
+        Example client message would be:
+
+            {
+                "method":   "perf.counter.info",
+                "hostname": "vc01.example.org",
+            }
+
+        Returns:
+            The list of supported performance counters by the vSphere host
+
+        """
+        logging.info(
+            '[%s] Retrieving supported performance counters',
+            self.host
+        )
+
+        return self._get_perf_counter_info(counter_id=self.perf_counter_supported)
 
     def net_discover(self, msg):
         """
