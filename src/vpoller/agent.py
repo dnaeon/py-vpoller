@@ -242,6 +242,10 @@ class VSphereAgent(VConnector):
                 'method': self.datastore_vm_get,
                 'required': ['hostname', 'name'],
             },
+            'datastore.perf.counter.info': {
+                'method': self.datastore_perf_counter_info,
+                'required': ['hostname', 'name'],
+            },
             'perf.counter.info': {
                 'method': self.perf_counter_info,
                 'required': ['hostname'],
@@ -2449,3 +2453,37 @@ class VSphereAgent(VConnector):
         )
 
         return r
+
+    def datastore_perf_counter_info(self, msg):
+        """
+        Get performance counters available for a vim.Datastore object
+
+        Example client message would be:
+
+            {
+                "method":     "datastore.perf.counter.info",
+                "hostname":   "vc01.example.org",
+                "name":       ""ds:///vmfs/volumes/643f118a-a970df28/",
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.Datastore
+        )
+
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
+        except pyVmomi.VmomiSupport.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
+            }
+
+        counter_id = [m.counterId for m in metric_id]
+
+        return self._get_perf_counter_info(counter_id=counter_id)
