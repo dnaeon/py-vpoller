@@ -210,6 +210,10 @@ class VSphereAgent(VConnector):
                 'method': self.vm_net_get,
                 'required': ['hostname', 'name'],
             },
+            'vm.perf.counter.get': {
+                'method': self.vm_perf_counter_info,
+                'required': ['hostname', 'name'],
+            },
             'vm.process.get': {
                 'method': self.vm_process_get,
                 'required': ['hostname', 'name', 'username', 'password'],
@@ -812,40 +816,6 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
-    def host_perf_counter_info(self, msg):
-        """
-        Get performance counters available for a vim.HostSystem object
-
-        Example client message would be:
-
-            {
-                "method":     "host.perf.counter.info",
-                "hostname":   "vc01.example.org",
-                "name":       "esxi01.example.org",
-            }
-
-        Returns:
-            Information about the supported performance counters for the object
-
-        """
-        obj = self.get_object_by_property(
-            property_name='name',
-            property_value=msg['name'],
-            obj_type=pyVmomi.vim.Network
-        )
-
-        try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.VmomiSupport.InvalidArgument as e:
-            return {
-                'success': 1,
-                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
-            }
-
-        counter_id = [m.counterId for m in metric_id]
-
-        return self._get_perf_counter_info(counter_id=counter_id)
-
     def net_host_get(self, msg):
         """
         Get all Host Systems using this pyVmomi.vim.Network managed object
@@ -1316,6 +1286,40 @@ class VSphereAgent(VConnector):
 
         return result
 
+    def host_perf_counter_info(self, msg):
+        """
+        Get performance counters available for a vim.HostSystem object
+
+        Example client message would be:
+
+            {
+                "method":     "host.perf.counter.info",
+                "hostname":   "vc01.example.org",
+                "name":       "esxi01.example.org",
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.HostSystem
+        )
+
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
+        except pyVmomi.VmomiSupport.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
+            }
+
+        counter_id = [m.counterId for m in metric_id]
+
+        return self._get_perf_counter_info(counter_id=counter_id)
+
     def host_cluster_get(self, msg):
         """
         Get the cluster name for a HostSystem
@@ -1533,6 +1537,40 @@ class VSphereAgent(VConnector):
         )
 
         return result
+
+    def vm_perf_counter_info(self, msg):
+        """
+        Get performance counters available for a vim.VirtualMachine object
+
+        Example client message would be:
+
+            {
+                "method":     "vm.perf.counter.info",
+                "hostname":   "vc01.example.org",
+                "name":       "vm01.example.org",
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.VirtualMachine
+        )
+
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
+        except pyVmomi.VmomiSupport.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
+            }
+
+        counter_id = [m.counterId for m in metric_id]
+
+        return self._get_perf_counter_info(counter_id=counter_id)
 
     def vm_discover(self, msg):
         """
