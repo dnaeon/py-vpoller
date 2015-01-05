@@ -1314,7 +1314,7 @@ class VSphereAgent(VConnector):
 
         try:
             metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.VmomiSupport.InvalidArgument as e:
+        except pyVmomi.vim.InvalidArgument as e:
             return {
                 'success': 1,
                 'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
@@ -1566,7 +1566,7 @@ class VSphereAgent(VConnector):
 
         try:
             metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.VmomiSupport.InvalidArgument as e:
+        except pyVmomi.vim.InvalidArgument as e:
             return {
                 'success': 1,
                 'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
@@ -2478,7 +2478,7 @@ class VSphereAgent(VConnector):
 
         try:
             metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.VmomiSupport.InvalidArgument as e:
+        except pyVmomi.vim.InvalidArgument as e:
             return {
                 'success': 1,
                 'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
