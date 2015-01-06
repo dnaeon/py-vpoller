@@ -603,12 +603,96 @@ class VSphereAgent(VConnector):
         except pyVmomi.vim.InvalidArgument as e:
             return {
                 'success': 1,
-                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
+                'msg': 'Cannot retrieve performance metrics for %s: %s' % (msg['name'], e)
             }
 
         counter_id = [m.counterId for m in metric_id]
 
         return self._get_perf_counter_info(counter_id=counter_id)
+
+    def _entity_perf_metric_get(self, entity, counter_id, max_sample=1, instance=None):
+        """
+        Retrieve performance statistics from a managed object
+
+        Args:
+            entity     (pyVmomi.vim.*): A managed object
+            counter_id          (list): A list of counter IDs to retrieve
+            max_sample           (int): Max samples to be retrieved
+            instance             (str): Instance name
+
+        Returns:
+            The collected performance statistics from the managed object
+
+        """
+        logging.info(
+            '[%s] Retrieving performance metrics for %s: %s',
+            self.host,
+            entity.name,
+            counter_id
+        )
+
+        # Check whether the object supports real-time statistics
+        provider_summary = self.si.content.perfManager.QueryPerfProviderSummary(
+            entity=entity
+        )
+
+        if not provider_summary.currentSupported:
+            logging.info('[%s] Entity %s does not support real-time statistics', self.host, entity.name)
+            return {'success': 1, 'msg': 'Entity %s does not support real-time statistics' % entity.name }
+
+        # Get the refresh rate for this provider which we will use as the interval ID
+        refresh_rate = provider_summary.refreshRate
+
+        # Get the available performance metrics for this managed object
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=entity)
+        except pyVmomi.vim.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance metrics for %s: %s' % (msg['name'], e)
+            }
+
+        # From the requested performance counters collect only the
+        # ones that are available for this managed object
+        counter_id = [int(c) for c in counter_id]
+        available_counter_id = set([m.counterId for m in metric_id])
+        to_collect_counter_id = available_counter_id.intersection(set(counter_id))
+
+        if not to_collect_counter_id:
+            return {
+                'success': 1,
+                'msg': 'Requested performance counters are not available for entity %s' % entity.name,
+            }
+
+        # Get the metric IDs to collect and build our query spec
+        to_collect_metric_id = [m for m in metric_id for counter_id in to_collect_counter_id if m.counterId == counter_id]
+        query_spec = pyVmomi.vim.PerformanceManager.QuerySpec(
+            maxSample=max_sample,
+            entity=entity,
+            metricId=to_collect_metric_id,
+            intervalId=refresh_rate # or one of the historicalInterval for aggregated data
+        )
+
+        # Get the performance metrics and return result
+        data = self.si.content.perfManager.QueryPerf(
+            querySpec=[query_spec]
+        )
+
+        result = []
+        for sample_info, value in zip(data[0].sampleInfo, data[0].value[0].value):
+            d = {
+                'timestamp': str(sample_info.timestamp),
+                'value': value
+            }
+            result.append(d)
+
+        r = {
+            'msg': 'Successfully retrieved performance metrics',
+            'success': 0,
+            'result': result,
+        }
+
+        return r
 
     def event_latest(self, msg):
         """
