@@ -118,8 +118,16 @@ class VSphereAgent(VConnector):
                 'method': self.datacenter_get,
                 'required': ['hostname', 'name', 'properties'],
             },
+            'datacenter.perf.counter.info': {
+                'method': self.datacenter_perf_counter_info,
+                'required': ['hostname', 'name'],
+            },
             'datacenter.alarm.get': {
                 'method': self.datacenter_alarm_get,
+                'required': ['hostname', 'name'],
+            },
+            'cluster.perf.counter.info': {
+                'method': self.cluster_perf_counter_info,
                 'required': ['hostname', 'name'],
             },
             'cluster.discover': {
@@ -973,6 +981,40 @@ class VSphereAgent(VConnector):
         )
 
         return r
+
+    def datacenter_perf_counter_info(self, msg):
+        """
+        Get performance counters available for a vim.Datacenter object
+
+        Example client message would be:
+
+            {
+                "method":     "datacenter.perf.counter.info",
+                "hostname":   "vc01.example.org",
+                "name":       "MyDatacenter"
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.Datacenter
+        )
+
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
+        except pyVmomi.vim.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
+            }
+
+        counter_id = [m.counterId for m in metric_id]
+
+        return self._get_perf_counter_info(counter_id=counter_id)
 
     def datacenter_get(self, msg):
         """
