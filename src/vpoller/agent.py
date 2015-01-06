@@ -2536,7 +2536,7 @@ class VSphereAgent(VConnector):
 
         """
         obj = self.get_object_by_property(
-            property_name='name',
+            property_name='info.url',
             property_value=msg['name'],
             obj_type=pyVmomi.vim.Datastore
         )
