@@ -599,7 +599,7 @@ class VSphereAgent(VConnector):
 
         """
         try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=entity)
         except pyVmomi.vim.InvalidArgument as e:
             return {
                 'success': 1,
