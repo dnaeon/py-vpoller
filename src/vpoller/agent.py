@@ -62,9 +62,6 @@ class VSphereAgent(VConnector):
         """
         super(VSphereAgent, self).__init__(user, pwd, host)
 
-        # A list of supported performance counters by the vSphere host
-        self._perf_counter_supported = None
-
         # Message attribute types we expect to receive
         # before we start processing a task request
         self.msg_attr_types = {
@@ -259,12 +256,6 @@ class VSphereAgent(VConnector):
                 'required': ['hostname'],
             },
         }
-
-    @property
-    def perf_counter_supported(self):
-        if not self._perf_counter_supported:
-            self._perf_counter_supported = [c.key for c in self.si.content.perfManager.perfCounter]
-        return self._perf_counter_supported
 
     def _validate_client_msg(self, msg, required):
         """
@@ -778,6 +769,9 @@ class VSphereAgent(VConnector):
             '[%s] Retrieving supported performance counters',
             self.host
         )
+
+        counters = self.si.content.perfManager.perfCounter
+        counter_id = [c.key for c in counters]
 
         return self._get_perf_counter_info(counter_id=self.perf_counter_supported)
 
