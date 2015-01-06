@@ -773,7 +773,7 @@ class VSphereAgent(VConnector):
         counters = self.si.content.perfManager.perfCounter
         counter_id = [c.key for c in counters]
 
-        return self._get_perf_counter_info(counter_id=self.perf_counter_supported)
+        return self._get_perf_counter_info(counter_id=counter_id)
 
     def net_discover(self, msg):
         """
