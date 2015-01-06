@@ -1110,6 +1110,40 @@ class VSphereAgent(VConnector):
 
         return r
 
+    def cluster_perf_counter_info(self, msg):
+        """
+        Get performance counters available for a vim.ClusterComputeResource object
+
+        Example client message would be:
+
+            {
+                "method":     "cluster.perf.counter.info",
+                "hostname":   "vc01.example.org",
+                "name":       "MyCluster"
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.ClusterComputeResource
+        )
+
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
+        except pyVmomi.vim.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
+            }
+
+        counter_id = [m.counterId for m in metric_id]
+
+        return self._get_perf_counter_info(counter_id=counter_id)
+
     def cluster_get(self, msg):
         """
         Get properties of a vim.ClusterComputeResource managed object
@@ -2505,7 +2539,7 @@ class VSphereAgent(VConnector):
             {
                 "method":     "datastore.perf.counter.info",
                 "hostname":   "vc01.example.org",
-                "name":       ""ds:///vmfs/volumes/643f118a-a970df28/",
+                "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
             }
 
         Returns:
