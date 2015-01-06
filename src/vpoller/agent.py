@@ -255,6 +255,10 @@ class VSphereAgent(VConnector):
                 'method': self.perf_counter_info,
                 'required': ['hostname'],
             },
+            'perf.interval.info': {
+                'method': self.perf_interval_info,
+                'required': ['hostname'],
+            },
         }
 
     def _validate_client_msg(self, msg, required):
@@ -858,6 +862,38 @@ class VSphereAgent(VConnector):
         counter_id = [c.key for c in counters]
 
         return self._get_perf_counter_info(counter_id=counter_id)
+
+    def perf_interval_info(self, msg):
+        """
+        Get information about existing performance historical intervals
+
+        Example client message would be:
+
+            {
+                "method":   "perf.interval.info",
+                "hostname": "vc01.example.org",
+            }
+
+        Returns:
+            The existing performance historical interval on the system
+
+        """
+        logging.info(
+            '[%s] Retrieving existing performance historical intervals',
+            self.host
+        )
+
+        historical_interval = self.si.content.perfManager.historicalInterval
+
+        data = [{k: getattr(interval, k) for k in ('enabled', 'key', 'length', 'level', 'name', 'samplingPeriod')} for interval in historical_interval]
+
+        result = {
+            'msg': 'Successfully retrieved performance historical intervals',
+            'success': 0,
+            'result': data
+        }
+
+        return result
 
     def net_discover(self, msg):
         """
