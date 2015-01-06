@@ -215,7 +215,7 @@ class VSphereAgent(VConnector):
                 'method': self.vm_net_get,
                 'required': ['hostname', 'name'],
             },
-            'vm.perf.counter.get': {
+            'vm.perf.counter.info': {
                 'method': self.vm_perf_counter_info,
                 'required': ['hostname', 'name'],
             },
