@@ -596,6 +596,29 @@ class VSphereAgent(VConnector):
 
         return result
 
+    def _entity_perf_counter_info(self, entity):
+        """
+        Get info about supported performance counters for entity
+
+        Args:
+            entity (pyVmomi.vim.*): A managed object to lookup
+
+        Returns:
+            Information about supported performance counters for entity
+
+        """
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
+        except pyVmomi.vim.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
+            }
+
+        counter_id = [m.counterId for m in metric_id]
+
+        return self._get_perf_counter_info(counter_id=counter_id)
+
     def event_latest(self, msg):
         """
         Get the latest event registered
@@ -1004,17 +1027,7 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.Datacenter
         )
 
-        try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.vim.InvalidArgument as e:
-            return {
-                'success': 1,
-                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
-            }
-
-        counter_id = [m.counterId for m in metric_id]
-
-        return self._get_perf_counter_info(counter_id=counter_id)
+        return self._entity_perf_counter_info(entity=obj)
 
     def datacenter_get(self, msg):
         """
@@ -1132,17 +1145,7 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.ClusterComputeResource
         )
 
-        try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.vim.InvalidArgument as e:
-            return {
-                'success': 1,
-                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
-            }
-
-        counter_id = [m.counterId for m in metric_id]
-
-        return self._get_perf_counter_info(counter_id=counter_id)
+        return self._entity_perf_counter_info(entity=obj)
 
     def cluster_get(self, msg):
         """
@@ -1388,17 +1391,7 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.HostSystem
         )
 
-        try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.vim.InvalidArgument as e:
-            return {
-                'success': 1,
-                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
-            }
-
-        counter_id = [m.counterId for m in metric_id]
-
-        return self._get_perf_counter_info(counter_id=counter_id)
+        return self._entity_perf_counter_info(entity=obj)
 
     def host_cluster_get(self, msg):
         """
@@ -1640,17 +1633,7 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.VirtualMachine
         )
 
-        try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.vim.InvalidArgument as e:
-            return {
-                'success': 1,
-                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
-            }
-
-        counter_id = [m.counterId for m in metric_id]
-
-        return self._get_perf_counter_info(counter_id=counter_id)
+        return self._entity_perf_counter_info(entity=obj)
 
     def vm_discover(self, msg):
         """
@@ -2552,14 +2535,4 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.Datastore
         )
 
-        try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=obj)
-        except pyVmomi.vim.InvalidArgument as e:
-            return {
-                'success': 1,
-                'msg': 'Cannot retrieve performance counters for %s: %s' % (msg['name'], e)
-            }
-
-        counter_id = [m.counterId for m in metric_id]
-
-        return self._get_perf_counter_info(counter_id=counter_id)
+        return self._entity_perf_counter_info(entity=obj)
