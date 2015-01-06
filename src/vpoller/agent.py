@@ -1021,6 +1021,9 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.Datacenter
         )
 
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
+
         return self._entity_perf_counter_info(entity=obj)
 
     def datacenter_get(self, msg):
@@ -1138,6 +1141,9 @@ class VSphereAgent(VConnector):
             property_value=msg['name'],
             obj_type=pyVmomi.vim.ClusterComputeResource
         )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
         return self._entity_perf_counter_info(entity=obj)
 
@@ -1385,6 +1391,9 @@ class VSphereAgent(VConnector):
             obj_type=pyVmomi.vim.HostSystem
         )
 
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
+
         return self._entity_perf_counter_info(entity=obj)
 
     def host_cluster_get(self, msg):
@@ -1626,6 +1635,9 @@ class VSphereAgent(VConnector):
             property_value=msg['name'],
             obj_type=pyVmomi.vim.VirtualMachine
         )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
         return self._entity_perf_counter_info(entity=obj)
 
@@ -2528,5 +2540,8 @@ class VSphereAgent(VConnector):
             property_value=msg['name'],
             obj_type=pyVmomi.vim.Datastore
         )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
         return self._entity_perf_counter_info(entity=obj)
