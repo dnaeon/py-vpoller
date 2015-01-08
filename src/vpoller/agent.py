@@ -115,6 +115,10 @@ class VSphereAgent(VConnector):
                 'method': self.datacenter_get,
                 'required': ['hostname', 'name', 'properties'],
             },
+            'datacenter.perf.counter.get': {
+                'method': self.datacenter_perf_counter_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
             'datacenter.perf.counter.info': {
                 'method': self.datacenter_perf_counter_info,
                 'required': ['hostname', 'name'],
@@ -700,6 +704,8 @@ class VSphereAgent(VConnector):
             }
 
         # Get the metric IDs to collect and build our query spec
+        if not max_sample:
+            max_sample = 1
         to_collect_metric_id = [m for m in metric_id for counter_id in to_collect_counter_id if m.counterId == counter_id]
         query_spec = pyVmomi.vim.PerformanceManager.QuerySpec(
             maxSample=max_sample,
@@ -1154,6 +1160,52 @@ class VSphereAgent(VConnector):
         )
 
         return r
+
+
+    def datacenter_perf_counter_get(self, msg):
+        """
+        Get performance metrics for a vim.Datacenter managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "datacenter.perf.counter.get",
+                "hostname": "vc01.example.org",
+                "name":     "MyDatacenter",
+                "properties": [
+                    256, # VM power on count
+                    257, # VM power off count
+                    258  # VM suspend count
+                ],
+                "key": 1, # Historical performance interval with key 1 (Past day)
+                "max_sample": 1,
+                "instance": ""
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.Datacenter,
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        # Interval ID is passed as the 'key' message attribute
+        max_sample, key = msg.get('max_sample'), msg.get('key')
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=max_sample,
+            interval_key=key
+        )
 
     def datacenter_perf_counter_info(self, msg):
         """
