@@ -155,6 +155,10 @@ class VSphereAgent(VConnector):
                 'method': self.resource_pool_get,
                 'required': ['hostname', 'name', 'properties'],
             },
+            'host.perf.counter.get': {
+                'method': self.host_perf_counter_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
             'host.perf.counter.info': {
                 'method': self.host_perf_counter_info,
                 'required': ['hostname', 'name'],
@@ -676,22 +680,20 @@ class VSphereAgent(VConnector):
                 entity.name
             )
             return {'success': 1, 'msg': 'Entity %s supports historical statistics only, but no historical interval provided' % entity.name }
-        else:
-            interval_key = int(interval_key)
 
-        if interval_key not in [i.key for i in historical_interval]:
-            logging.warning(
-                '[%s] Historical interval with key %s does not exist',
-                self.host,
-                interval_key
-            )
-            return {'success': 1, 'msg': 'Historical interval with key %s does not exist' % interval_key}
 
         # For real-time statistics use the refresh rate of the provider.
         # For historical statistics use one of the existing historical
         # performance intervals on the system.
         if historical_stats_only:
-            interval_id = [i for i in historical_interval if i.key == interval_key].pop().samplingPeriod
+            if interval_key not in [str(i.key) for i in historical_interval]:
+                logging.warning(
+                    '[%s] Historical interval with key %s does not exist',
+                    self.host,
+                    interval_key
+                )
+                return {'success': 1, 'msg': 'Historical interval with key %s does not exist' % interval_key}
+            interval_id = [i for i in historical_interval if i.key == str(interval_key)].pop().samplingPeriod
         else:
             interval_id = provider_summary.refreshRate
 
@@ -1622,6 +1624,49 @@ class VSphereAgent(VConnector):
         )
 
         return result
+
+    def host_perf_counter_get(self, msg):
+        """
+        Get performance metrics for a vim.HostSystem managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "host.perf.counter.get",
+                "hostname": "vc01.example.org",
+                "name":     "esxi01.example.org",
+                "properties": [
+                    276,  # Effective memory resources
+                    277   # Total amount of CPU resources of all hosts in the cluster
+                ],
+                "key": 1, # Historical performance interval key '1' (Past day)
+                "max_sample": 1
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.HostSystem
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        # Interval ID is passed as the 'key' message attribute
+        max_sample, key = msg.get('max_sample'), msg.get('key')
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=max_sample,
+            interval_key=key
+        )
 
     def host_perf_counter_info(self, msg):
         """
