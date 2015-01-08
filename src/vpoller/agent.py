@@ -127,6 +127,10 @@ class VSphereAgent(VConnector):
                 'method': self.datacenter_alarm_get,
                 'required': ['hostname', 'name'],
             },
+            'cluster.perf.counter.get': {
+                'method': self.cluster_perf_counter_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
             'cluster.perf.counter.info': {
                 'method': self.cluster_perf_counter_info,
                 'required': ['hostname', 'name'],
@@ -1176,13 +1180,12 @@ class VSphereAgent(VConnector):
                 "hostname": "vc01.example.org",
                 "name":     "MyDatacenter",
                 "properties": [
-                    256, # VM power on count
-                    257, # VM power off count
-                    258  # VM suspend count
+                    256,  # VM power on count
+                    257,  # VM power off count
+                    258   # VM suspend count
                 ],
                 "key": 1, # Historical performance interval with key 1 (Past day)
-                "max_sample": 1,
-                "instance": ""
+                "max_sample": 1
             }
 
         Returns:
@@ -1192,7 +1195,7 @@ class VSphereAgent(VConnector):
         obj = self.get_object_by_property(
             property_name='name',
             property_value=msg['name'],
-            obj_type=pyVmomi.vim.Datacenter,
+            obj_type=pyVmomi.vim.Datacenter
         )
 
         if not obj:
@@ -1327,6 +1330,49 @@ class VSphereAgent(VConnector):
         )
 
         return r
+
+    def cluster_perf_counter_get(self, msg):
+        """
+        Get performance metrics for a vim.ClusterComputeResource managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "cluster.perf.counter.get",
+                "hostname": "vc01.example.org",
+                "name":     "MyCluster",
+                "properties": [
+                    276,  # Effective memory resources
+                    277   # Total amount of CPU resources of all hosts in the cluster
+                ],
+                "key": 1, # Historical performance interval key '1' (Past day)
+                "max_sample": 1
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.ClusterComputeResource
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        # Interval ID is passed as the 'key' message attribute
+        max_sample, key = msg.get('max_sample'), msg.get('key')
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=max_sample,
+            interval_key=key
+        )
 
     def cluster_perf_counter_info(self, msg):
         """
