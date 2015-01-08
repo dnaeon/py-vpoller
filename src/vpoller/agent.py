@@ -614,7 +614,7 @@ class VSphereAgent(VConnector):
 
         return self._get_perf_counter_info(counter_id=counter_id)
 
-    def _entity_perf_metric_get(self, entity, counter_id, max_sample=1, instance=None):
+    def _entity_perf_metric_get(self, entity, counter_id, max_sample=1, instance=None, interval_key=None):
         """
         Retrieve performance statistics from a managed object
 
@@ -623,6 +623,7 @@ class VSphereAgent(VConnector):
             counter_id          (list): A list of counter IDs to retrieve
             max_sample           (int): Max samples to be retrieved
             instance             (str): Instance name
+            interval_key         (int): Key of historical performance interval to use
 
         Returns:
             The collected performance statistics from the managed object
@@ -635,18 +636,6 @@ class VSphereAgent(VConnector):
             counter_id
         )
 
-        # Check whether the object supports real-time statistics
-        provider_summary = self.si.content.perfManager.QueryPerfProviderSummary(
-            entity=entity
-        )
-
-        if not provider_summary.currentSupported:
-            logging.info('[%s] Entity %s does not support real-time statistics', self.host, entity.name)
-            return {'success': 1, 'msg': 'Entity %s does not support real-time statistics' % entity.name }
-
-        # Get the refresh rate for this provider which we will use as the interval ID
-        refresh_rate = provider_summary.refreshRate
-
         # Get the available performance metrics for this managed object
         try:
             metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=entity)
@@ -655,6 +644,48 @@ class VSphereAgent(VConnector):
                 'success': 1,
                 'msg': 'Cannot retrieve performance metrics for %s: %s' % (msg['name'], e)
             }
+
+        # Check whether the object supports real-time statistics
+        # If the entity does not support real-time statistics then
+        # we fall back to historical stats only.
+        # For historical statistics we require a valid performance
+        # interval key to be provided
+        historical_stats_only = False
+        provider_summary = self.si.content.perfManager.QueryPerfProviderSummary(
+            entity=entity
+        )
+
+        if not provider_summary.currentSupported:
+            historical_stats_only = True
+            historical_interval = self.si.content.perfManager.historicalInterval
+            logging.info('[%s] Entity %s does not support real-time statistics', self.host, entity.name)
+            logging.info('[%s] Fall back to historical statistics only for entity %s', self.host, entity.name)
+
+        if historical_stats_only and not interval_key:
+            logging.warning(
+                '[%s] Entity %s supports only historical statistics, but no historical interval provided',
+                self.host,
+                entity.name
+            )
+            return {'success': 1, 'msg': 'Entity %s supports historical statistics only, but no historical interval provided' % entity.name }
+        else:
+            interval_key = int(interval_key)
+
+        if interval_key not in [i.key for i in historical_interval]:
+            logging.warning(
+                '[%s] Historical interval with key %s does not exist',
+                self.host,
+                interval_key
+            )
+            return {'success': 1, 'msg': 'Historical interval with key %s does not exist' % interval_key}
+
+        # For real-time statistics use the refresh rate of the provider.
+        # For historical statistics use one of the existing historical
+        # performance intervals on the system.
+        if historical_stats_only:
+            interval_id = [i for i in historical_interval if i.key == interval_key].pop().samplingPeriod
+        else:
+            interval_id = provider_summary.refreshRate
 
         # From the requested performance counters collect only the
         # ones that are available for this managed object
@@ -674,7 +705,7 @@ class VSphereAgent(VConnector):
             maxSample=max_sample,
             entity=entity,
             metricId=to_collect_metric_id,
-            intervalId=refresh_rate # or one of the historicalInterval for aggregated data
+            intervalId=interval_id
         )
 
         # Get the performance metrics and return result
@@ -683,13 +714,18 @@ class VSphereAgent(VConnector):
         )
 
         result = []
-        for sample_info, value in zip(data[0].sampleInfo, data[0].value[0].value):
-            d = {
-                'timestamp': str(sample_info.timestamp),
-                'value': value
-            }
-            result.append(d)
-
+        for sample in data:
+            sample_info, sample_value = sample.sampleInfo, sample.value
+            for value in sample_value:
+                for s, v in zip(sample_info, value.value):
+                    d = {
+                        'interval': s.interval,
+                        'timestamp': str(s.timestamp),
+                        'counterId': value.id.counterId,
+                        'instance': value.id.instance,
+                        'value': v
+                    }
+                    result.append(d)
         r = {
             'msg': 'Successfully retrieved performance metrics',
             'success': 0,
