@@ -559,17 +559,17 @@ class VSphereAgent(VConnector):
 
     def _get_perf_counter_info(self, counter_id):
         """
-        Helper method for retrieving information about performance counter IDs
+        Helper method for retrieving information about performance counters
 
         Args:
-            counter_id (list): A list of counter IDs to query
+            counter_id (list): A list of counters to query
 
         Returns:
-            Information about the specified counter IDs
+            Information about the specified counters
 
         """
         logging.debug(
-            '[%s] Retrieving performance counters info for IDs %s',
+            '[%s] Retrieving performance counters info for %s',
             self.host,
             counter_id
         )
@@ -605,26 +605,52 @@ class VSphereAgent(VConnector):
 
     def _entity_perf_counter_info(self, entity):
         """
-        Get info about supported performance counters for entity
+        Get info about supported performance metrics for a managed entity
+
+        If the managed entity supports real-time statistics then
+        return the real-time performance counters available for it,
+        otherwise fall back to historical statistics only.
 
         Args:
-            entity (pyVmomi.vim.*): A managed object to lookup
+            entity (pyVmomi.vim.*): A managed entity to lookup
 
         Returns:
-            Information about supported performance counters for entity
+            Information about supported performance counters for the entity
 
         """
+        if not isinstance(entity, pyVmomi.vim.ManagedEntity):
+            return {'success': 0, 'msg': '%s is not a managed entity' % entity}
+
+        provider_summary = self.si.content.perfManager.QueryPerfProviderSummary(
+            entity=entity
+        )
+
+        if provider_summary.currentSupported:
+            logging.info('[%s]: Entity %s supports real-time statistics', self.host, entity.name)
+            interval_id = provider_summary.refreshRate
+        else:
+            logging.info('[%s]: Entity %s supports historical statistics only', self.host, entity.name)
+            interval_id = None
+
         try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=entity)
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(
+                entity=entity,
+                intervalId=interval_id
+            )
         except pyVmomi.vim.InvalidArgument as e:
             return {
                 'success': 1,
-                'msg': 'Cannot retrieve performance metrics for %s: %s' % (msg['name'], e)
+                'msg': 'Cannot retrieve performance metrics for %s: %s' % (entity.name, e)
             }
 
-        counter_id = [m.counterId for m in metric_id]
+        data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id]
+        result = {
+            'msg': 'Successfully retrieved performance metrics',
+            'success': 0,
+            'result': data
+        }
 
-        return self._get_perf_counter_info(counter_id=counter_id)
+        return result
 
     def _entity_perf_metric_get(self, entity, counter_id, max_sample=1, instance="", interval_key=None):
         """
