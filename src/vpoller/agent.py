@@ -1928,14 +1928,71 @@ class VSphereAgent(VConnector):
 
         return result
 
-    def vm_perf_counter_info(self, msg):
+    def vm_perf_metric_get(self, msg):
+        """
+        Get performance metrics for a vim.VirtualMachine managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "vm.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "vm01.example.org",
+                "properties": [
+                    12, # CPU Ready time of the Virtual Machine
+                ],
+                "max_sample": 1,
+                "instance": ""
+            }
+
+        For historical performance statistics make sure to pass the
+        performance interval key as part of the message, e.g.:
+
+            {
+                "method":   "vm.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "vm01.example.org",
+                "properties": [
+                    12,  # CPU Ready time of the Virtual Machine
+                    24   # Memory usage as percentage of total configured or available memory
+                ],
+                "key": 1 # Historical performance interval key '1' (Past day)
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.VirtualMachine
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        # Interval ID is passed as the 'key' message attribute
+        max_sample, key, instance = msg.get('max_sample'), msg.get('key'), msg.get('instance')
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=max_sample,
+            interval_key=key,
+            instance=instance
+        )
+
+    def vm_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.VirtualMachine object
 
         Example client message would be:
 
             {
-                "method":     "vm.perf.counter.info",
+                "method":     "vm.perf.metric.info",
                 "hostname":   "vc01.example.org",
                 "name":       "vm01.example.org",
             }
@@ -1953,7 +2010,7 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_counter_info(entity=obj)
+        return self._entity_perf_metric_info(entity=obj)
 
     def vm_discover(self, msg):
         """
@@ -2833,14 +2890,14 @@ class VSphereAgent(VConnector):
 
         return r
 
-    def datastore_perf_counter_info(self, msg):
+    def datastore_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.Datastore object
 
         Example client message would be:
 
             {
-                "method":     "datastore.perf.counter.info",
+                "method":     "datastore.perf.metric.info",
                 "hostname":   "vc01.example.org",
                 "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
             }
@@ -2858,4 +2915,4 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_counter_info(entity=obj)
+        return self._entity_perf_metric_info(entity=obj)
