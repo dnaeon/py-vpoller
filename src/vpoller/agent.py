@@ -557,52 +557,6 @@ class VSphereAgent(VConnector):
 
         return r
 
-    def _get_perf_counter_info(self, counter_id):
-        """
-        Helper method for retrieving information about performance counters
-
-        Args:
-            counter_id (list): A list of counters to query
-
-        Returns:
-            Information about the specified counters
-
-        """
-        logging.debug(
-            '[%s] Retrieving performance counters info for %s',
-            self.host,
-            counter_id
-        )
-
-        try:
-            counter_info = self.si.content.perfManager.QueryPerfCounter(
-                counterId=counter_id
-            )
-        except Exception as e:
-            return {'success': 1, 'msg': 'Cannot get performance counter info: %s' % e}
-
-        data = []
-        for c in counter_info:
-            d = {
-                'key': c.key,
-                'nameInfo': {k: getattr(c.nameInfo, k) for k in ('label', 'summary', 'key')},
-                'groupInfo': {k: getattr(c.groupInfo, k) for k in ('label', 'summary', 'key')},
-                'unitInfo': {k: getattr(c.unitInfo, k) for k in ('label', 'summary', 'key')},
-                'rollupType': c.rollupType,
-                'statsType': c.statsType,
-                'level': c.level,
-                'perDeviceLevel': c.perDeviceLevel,
-            }
-            data.append(d)
-
-        result = {
-            'success': 0,
-            'msg': 'Successfully retrieved performance counters info',
-            'result': data
-        }
-
-        return result
-
     def _entity_perf_metric_info(self, entity):
         """
         Get info about supported performance metrics for a managed entity
@@ -937,10 +891,37 @@ class VSphereAgent(VConnector):
             self.host
         )
 
-        counters = self.si.content.perfManager.perfCounter
-        counter_id = [c.key for c in counters]
+        counter = self.si.content.perfManager.perfCounter
+        counter_id = [c.key for c in counter]
 
-        return self._get_perf_counter_info(counter_id=counter_id)
+        try:
+            counter_info = self.si.content.perfManager.QueryPerfCounter(
+                counterId=counter_id
+            )
+        except Exception as e:
+            return {'success': 1, 'msg': 'Cannot retrieve performance counters info: %s' % e}
+
+        data = []
+        for c in counter_info:
+            d = {
+                'key': c.key,
+                'nameInfo': {k: getattr(c.nameInfo, k) for k in ('label', 'summary', 'key')},
+                'groupInfo': {k: getattr(c.groupInfo, k) for k in ('label', 'summary', 'key')},
+                'unitInfo': {k: getattr(c.unitInfo, k) for k in ('label', 'summary', 'key')},
+                'rollupType': c.rollupType,
+                'statsType': c.statsType,
+                'level': c.level,
+                'perDeviceLevel': c.perDeviceLevel,
+            }
+            data.append(d)
+
+        result = {
+            'success': 0,
+            'msg': 'Successfully retrieved performance counters info',
+            'result': data
+        }
+
+        return result
 
     def perf_interval_info(self, msg):
         """
