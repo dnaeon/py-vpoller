@@ -115,24 +115,24 @@ class VSphereAgent(VConnector):
                 'method': self.datacenter_get,
                 'required': ['hostname', 'name', 'properties'],
             },
-            'datacenter.perf.counter.get': {
-                'method': self.datacenter_perf_counter_get,
+            'datacenter.perf.metric.get': {
+                'method': self.datacenter_perf_metric_get,
                 'required': ['hostname', 'name', 'properties'],
             },
-            'datacenter.perf.counter.info': {
-                'method': self.datacenter_perf_counter_info,
+            'datacenter.perf.metric.info': {
+                'method': self.datacenter_perf_metric_info,
                 'required': ['hostname', 'name'],
             },
             'datacenter.alarm.get': {
                 'method': self.datacenter_alarm_get,
                 'required': ['hostname', 'name'],
             },
-            'cluster.perf.counter.get': {
-                'method': self.cluster_perf_counter_get,
+            'cluster.perf.metric.get': {
+                'method': self.cluster_perf_metric_get,
                 'required': ['hostname', 'name', 'properties'],
             },
-            'cluster.perf.counter.info': {
-                'method': self.cluster_perf_counter_info,
+            'cluster.perf.metric.info': {
+                'method': self.cluster_perf_metric_info,
                 'required': ['hostname', 'name'],
             },
             'cluster.discover': {
@@ -155,12 +155,12 @@ class VSphereAgent(VConnector):
                 'method': self.resource_pool_get,
                 'required': ['hostname', 'name', 'properties'],
             },
-            'host.perf.counter.get': {
-                'method': self.host_perf_counter_get,
+            'host.perf.metric.get': {
+                'method': self.host_perf_metric_get,
                 'required': ['hostname', 'name', 'properties'],
             },
-            'host.perf.counter.info': {
-                'method': self.host_perf_counter_info,
+            'host.perf.metric.info': {
+                'method': self.host_perf_metric_info,
                 'required': ['hostname', 'name'],
             },
             'host.discover': {
@@ -227,8 +227,12 @@ class VSphereAgent(VConnector):
                 'method': self.vm_net_get,
                 'required': ['hostname', 'name'],
             },
-            'vm.perf.counter.info': {
-                'method': self.vm_perf_counter_info,
+            'vm.perf.metric.get': {
+                'method': self.vm_perf_metric_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'vm.perf.metric.info': {
+                'method': self.vm_perf_metric_info,
                 'required': ['hostname', 'name'],
             },
             'vm.process.get': {
@@ -259,12 +263,12 @@ class VSphereAgent(VConnector):
                 'method': self.datastore_vm_get,
                 'required': ['hostname', 'name'],
             },
-            'datastore.perf.counter.info': {
-                'method': self.datastore_perf_counter_info,
+            'datastore.perf.metric.info': {
+                'method': self.datastore_perf_metric_info,
                 'required': ['hostname', 'name'],
             },
-            'perf.counter.info': {
-                'method': self.perf_counter_info,
+            'perf.metric.info': {
+                'method': self.perf_metric_info,
                 'required': ['hostname'],
             },
             'perf.interval.info': {
@@ -870,14 +874,14 @@ class VSphereAgent(VConnector):
 
         return result
 
-    def perf_counter_info(self, msg):
+    def perf_metric_info(self, msg):
         """
         Get all performance counters supported by the vSphere host
 
         Example client message would be:
 
             {
-                "method":   "perf.counter.info",
+                "method":   "perf.metric.info",
                 "hostname": "vc01.example.org",
             }
 
@@ -1179,7 +1183,7 @@ class VSphereAgent(VConnector):
         return r
 
 
-    def datacenter_perf_counter_get(self, msg):
+    def datacenter_perf_metric_get(self, msg):
         """
         Get performance metrics for a vim.Datacenter managed object
 
@@ -1189,7 +1193,7 @@ class VSphereAgent(VConnector):
         Example client message would be:
 
             {
-                "method":   "datacenter.perf.counter.get",
+                "method":   "datacenter.perf.metric.get",
                 "hostname": "vc01.example.org",
                 "name":     "MyDatacenter",
                 "properties": [
@@ -1223,14 +1227,14 @@ class VSphereAgent(VConnector):
             interval_key=key
         )
 
-    def datacenter_perf_counter_info(self, msg):
+    def datacenter_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.Datacenter object
 
         Example client message would be:
 
             {
-                "method":     "datacenter.perf.counter.info",
+                "method":     "datacenter.perf.metric.info",
                 "hostname":   "vc01.example.org",
                 "name":       "MyDatacenter"
             }
@@ -1248,7 +1252,7 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_counter_info(entity=obj)
+        return self._entity_perf_metric_info(entity=obj)
 
     def datacenter_get(self, msg):
         """
@@ -1344,7 +1348,7 @@ class VSphereAgent(VConnector):
 
         return r
 
-    def cluster_perf_counter_get(self, msg):
+    def cluster_perf_metric_get(self, msg):
         """
         Get performance metrics for a vim.ClusterComputeResource managed object
 
@@ -1354,7 +1358,7 @@ class VSphereAgent(VConnector):
         Example client message would be:
 
             {
-                "method":   "cluster.perf.counter.get",
+                "method":   "cluster.perf.metric.get",
                 "hostname": "vc01.example.org",
                 "name":     "MyCluster",
                 "properties": [
@@ -1387,14 +1391,14 @@ class VSphereAgent(VConnector):
             interval_key=key
         )
 
-    def cluster_perf_counter_info(self, msg):
+    def cluster_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.ClusterComputeResource object
 
         Example client message would be:
 
             {
-                "method":     "cluster.perf.counter.info",
+                "method":     "cluster.perf.metric.info",
                 "hostname":   "vc01.example.org",
                 "name":       "MyCluster"
             }
@@ -1412,7 +1416,7 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_counter_info(entity=obj)
+        return self._entity_perf_metric_info(entity=obj)
 
     def cluster_get(self, msg):
         """
@@ -1636,7 +1640,7 @@ class VSphereAgent(VConnector):
 
         return result
 
-    def host_perf_counter_get(self, msg):
+    def host_perf_metric_get(self, msg):
         """
         Get performance metrics for a vim.HostSystem managed object
 
@@ -1646,7 +1650,7 @@ class VSphereAgent(VConnector):
         Example client message would be:
 
             {
-                "method":   "host.perf.counter.get",
+                "method":   "host.perf.metric.get",
                 "hostname": "vc01.example.org",
                 "name":     "esxi01.example.org",
                 "properties": [
@@ -1679,14 +1683,14 @@ class VSphereAgent(VConnector):
             interval_key=key
         )
 
-    def host_perf_counter_info(self, msg):
+    def host_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.HostSystem object
 
         Example client message would be:
 
             {
-                "method":     "host.perf.counter.info",
+                "method":     "host.perf.metric.info",
                 "hostname":   "vc01.example.org",
                 "name":       "esxi01.example.org",
             }
@@ -1704,7 +1708,7 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_counter_info(entity=obj)
+        return self._entity_perf_metric_info(entity=obj)
 
     def host_cluster_get(self, msg):
         """
