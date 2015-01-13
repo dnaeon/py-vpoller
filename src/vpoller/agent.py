@@ -569,7 +569,7 @@ class VSphereAgent(VConnector):
             entity (pyVmomi.vim.*): A managed entity to lookup
 
         Returns:
-            Information about supported performance counters for the entity
+            Information about supported performance metrics for the entity
 
         """
         if not isinstance(entity, pyVmomi.vim.ManagedEntity):
@@ -608,7 +608,7 @@ class VSphereAgent(VConnector):
 
     def _entity_perf_metric_get(self, entity, counter_id, max_sample=1, instance="", interval_key=None):
         """
-        Retrieve performance statistics from a managed object
+        Retrieve performance metrics from a managed object
 
         Args:
             entity     (pyVmomi.vim.*): A managed object
@@ -618,7 +618,7 @@ class VSphereAgent(VConnector):
             interval_key         (int): Key of historical performance interval to use
 
         Returns:
-            The collected performance statistics from the managed object
+            The collected performance metrics from the managed object
 
         """
         logging.info(
@@ -649,23 +649,22 @@ class VSphereAgent(VConnector):
 
         if not provider_summary.currentSupported:
             logging.info('[%s] Entity %s does not support real-time statistics', self.host, entity.name)
-            logging.info('[%s] Fall back to historical statistics only for entity %s', self.host, entity.name)
+            logging.info('[%s] Retrieving historical statistics for entity %s', self.host, entity.name)
 
         if not provider_summary.currentSupported and not interval_key:
             logging.warning(
-                '[%s] Entity %s supports only historical statistics, but no historical interval provided',
+                '[%s] Entity %s supports historical statistics only, but no historical interval provided',
                 self.host,
                 entity.name
             )
-            return {'success': 1, 'msg': 'Entity %s supports historical statistics only, but no historical interval provided' % entity.name }
+            return {'success': 1, 'msg': 'Entity %s supports historical statistics only, but no historical interval provided' % entity.name}
 
         # For real-time statistics use the refresh rate of the provider.
         # For historical statistics use one of the existing historical
         # intervals on the system.
-
-        # If an interval key is provided use the samping period as
-        # defined by the historical interval, otherwise use the
-        # providers' refresh rate value
+        # For managed entities that support both real-time and historical
+        # statistics in order to retrieve historical stats a valid
+        # interval key should be provided.
         if interval_key:
             if interval_key not in [str(i.key) for i in historical_interval]:
                 logging.warning(
@@ -691,7 +690,7 @@ class VSphereAgent(VConnector):
                 'msg': 'Requested performance counters are not available for entity %s' % entity.name,
             }
 
-        to_collect_metric_id = [pyVmomi.vim.PerformanceManager.MetricId(counterId=counter_id, instance=instance) for counter_id in to_collect_counter_id]
+        to_collect_metric_id = [pyVmomi.vim.PerformanceManager.MetricId(counterId=c_id, instance=instance) for c_id in to_collect_counter_id]
 
         # Get the metric IDs to collect and build our query spec
         if not max_sample:
