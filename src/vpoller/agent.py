@@ -603,7 +603,7 @@ class VSphereAgent(VConnector):
 
         return result
 
-    def _entity_perf_counter_info(self, entity):
+    def _entity_perf_metric_info(self, entity):
         """
         Get info about supported performance metrics for a managed entity
 
