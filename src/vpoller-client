@@ -34,6 +34,7 @@ discovering and polling of vSphere Object properties.
 
 import logging
 
+from vpoller import __version__
 from vpoller.client import VPollerClient
 from docopt import docopt
 
@@ -70,7 +71,7 @@ Examples:
 
 """
 
-    args = docopt(usage, version='0.3.5')
+    args = docopt(usage, version=__version__)
 
     level = logging.DEBUG if args['--debug'] else logging.INFO
     logging.basicConfig(

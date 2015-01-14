@@ -1,8 +1,19 @@
-from setuptools import setup
+import re
+import ast
+
+from setuptools import setup, find_packages
+
+
+_version_re = re.compile(r'__version__\s+=\s+(.*)')
+
+with open('src/vpoller/__init__.py', 'rb') as f:
+    version = str(ast.literal_eval(_version_re.search(
+        f.read().decode('utf-8')).group(1))
+    )
 
 setup(
     name='vpoller',
-    version='0.3.5',
+    version=version,
     description='Distributed VMware vSphere API Proxy',
     long_description=open('README.rst').read(),
     author='Marin Atanasov Nikolov',
@@ -10,8 +21,8 @@ setup(
     license='BSD',
     url='https://github.com/dnaeon/py-vpoller',
     download_url='https://github.com/dnaeon/py-vpoller/releases',
-    packages=['vpoller', 'vpoller.helpers'],
     package_dir={'': 'src'},
+    packages=find_packages('src'),
     scripts=[
         'src/vpoller-client',
         'src/vpoller-proxy',

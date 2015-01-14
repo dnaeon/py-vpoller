@@ -36,6 +36,7 @@ performing the actual polling from a vCenter server.
 import os
 import logging
 
+from vpoller import __version__
 from vpoller.client import VPollerClient
 from vpoller.worker import VPollerWorkerManager
 from docopt import docopt
@@ -110,7 +111,7 @@ Options:
 
 """
 
-    args = docopt(usage, version='0.3.5')
+    args = docopt(usage, version=__version__)
 
     if not os.path.exists(args['--file']):
         raise SystemExit, 'Configuration file %s does not exist' % args['--file']
