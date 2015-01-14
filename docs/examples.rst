@@ -264,3 +264,8 @@ vSphere host:
 .. code-block:: bash
 
    $ vpoller-client --method event.latest --vsphere-host vc01.example.org
+
+Performance metrics
+===================
+
+To be added.
