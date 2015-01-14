@@ -526,6 +526,7 @@ class VPollerWorker(multiprocessing.Process):
                 host=agent['host']
             )
             self.agents[a.host] = a
+            logging.info('Created vSphere Agent for %s', agent['host'])
 
     def stop_agents(self):
         """
