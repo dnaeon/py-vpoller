@@ -35,8 +35,8 @@ from platform import node
 from ConfigParser import ConfigParser
 
 import zmq
-from vpoller.core import VPollerException
 from vpoller.agent import VSphereAgent
+from vpoller.exceptions import VPollerException
 from vconnector.core import VConnectorDatabase
 
 
