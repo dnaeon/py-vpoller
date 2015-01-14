@@ -147,6 +147,15 @@ running on you could use the ``vm.host.get`` vPoller method:
    $ vpoller-client --method vm.host.get --vsphere-host vc01.example.org \
 		--name vm01.example.org
 
+The example below shows how to retrieve information about the network
+that a Virtual Machine is using along with information about it's
+IP address and MAC address:
+
+.. code-block:: bash
+
+   $ vpoller-client --method vm.guest.net.get --vsphere-host vc01.example.org \
+		--name vm01.example.org --properties network,ipAddress,macAddress
+
 Using the ``vm.process.get`` vPoller method we can get a list of all
 processes running in a Virtual Machine. Note, that we need to supply a
 username and password when using the ``vm.process.get`` method, which
