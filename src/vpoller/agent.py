@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014 Marin Atanasov Nikolov <dnaeon@gmail.com>
+# Copyright (c) 2013-2015 Marin Atanasov Nikolov <dnaeon@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
