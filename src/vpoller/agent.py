@@ -115,8 +115,24 @@ class VSphereAgent(VConnector):
                 'method': self.datacenter_get,
                 'required': ['hostname', 'name', 'properties'],
             },
+            'datacenter.perf.metric.get': {
+                'method': self.datacenter_perf_metric_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'datacenter.perf.metric.info': {
+                'method': self.datacenter_perf_metric_info,
+                'required': ['hostname', 'name'],
+            },
             'datacenter.alarm.get': {
                 'method': self.datacenter_alarm_get,
+                'required': ['hostname', 'name'],
+            },
+            'cluster.perf.metric.get': {
+                'method': self.cluster_perf_metric_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'cluster.perf.metric.info': {
+                'method': self.cluster_perf_metric_info,
                 'required': ['hostname', 'name'],
             },
             'cluster.discover': {
@@ -138,6 +154,14 @@ class VSphereAgent(VConnector):
             'resource.pool.get': {
                 'method': self.resource_pool_get,
                 'required': ['hostname', 'name', 'properties'],
+            },
+            'host.perf.metric.get': {
+                'method': self.host_perf_metric_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'host.perf.metric.info': {
+                'method': self.host_perf_metric_info,
+                'required': ['hostname', 'name'],
             },
             'host.discover': {
                 'method': self.host_discover,
@@ -203,6 +227,14 @@ class VSphereAgent(VConnector):
                 'method': self.vm_net_get,
                 'required': ['hostname', 'name'],
             },
+            'vm.perf.metric.get': {
+                'method': self.vm_perf_metric_get,
+                'required': ['hostname', 'name', 'properties'],
+            },
+            'vm.perf.metric.info': {
+                'method': self.vm_perf_metric_info,
+                'required': ['hostname', 'name'],
+            },
             'vm.process.get': {
                 'method': self.vm_process_get,
                 'required': ['hostname', 'name', 'username', 'password'],
@@ -230,6 +262,18 @@ class VSphereAgent(VConnector):
             'datastore.vm.get': {
                 'method': self.datastore_vm_get,
                 'required': ['hostname', 'name'],
+            },
+            'datastore.perf.metric.info': {
+                'method': self.datastore_perf_metric_info,
+                'required': ['hostname', 'name'],
+            },
+            'perf.metric.info': {
+                'method': self.perf_metric_info,
+                'required': ['hostname'],
+            },
+            'perf.interval.info': {
+                'method': self.perf_interval_info,
+                'required': ['hostname'],
             },
         }
 
@@ -517,6 +561,179 @@ class VSphereAgent(VConnector):
 
         return r
 
+    def _entity_perf_metric_info(self, entity):
+        """
+        Get info about supported performance metrics for a managed entity
+
+        If the managed entity supports real-time statistics then
+        return the real-time performance counters available for it,
+        otherwise fall back to historical statistics only.
+
+        Args:
+            entity (pyVmomi.vim.*): A managed entity to lookup
+
+        Returns:
+            Information about supported performance metrics for the entity
+
+        """
+        if not isinstance(entity, pyVmomi.vim.ManagedEntity):
+            return {'success': 0, 'msg': '%s is not a managed entity' % entity}
+
+        provider_summary = self.si.content.perfManager.QueryPerfProviderSummary(
+            entity=entity
+        )
+
+        if provider_summary.currentSupported:
+            logging.info('[%s]: Entity %s supports real-time statistics', self.host, entity.name)
+            interval_id = provider_summary.refreshRate
+        else:
+            logging.info('[%s]: Entity %s supports historical statistics only', self.host, entity.name)
+            interval_id = None
+
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(
+                entity=entity,
+                intervalId=interval_id
+            )
+        except pyVmomi.vim.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance metrics for %s: %s' % (entity.name, e)
+            }
+
+        data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id]
+        result = {
+            'msg': 'Successfully retrieved performance metrics',
+            'success': 0,
+            'result': data
+        }
+
+        return result
+
+    def _entity_perf_metric_get(self, entity, counter_id, max_sample=1, instance="", interval_key=None):
+        """
+        Retrieve performance metrics from a managed object
+
+        Args:
+            entity     (pyVmomi.vim.*): A managed object
+            counter_id          (list): A list of counter IDs to retrieve
+            max_sample           (int): Max samples to be retrieved
+            instance             (str): Instance name, e.g. vmnic0
+            interval_key         (int): Key of historical performance interval to use
+
+        Returns:
+            The collected performance metrics from the managed object
+
+        """
+        logging.info(
+            '[%s] Retrieving performance metrics for %s: %s',
+            self.host,
+            entity.name,
+            counter_id
+        )
+
+        # Get the available performance metrics for this managed object
+        try:
+            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=entity)
+        except pyVmomi.vim.InvalidArgument as e:
+            return {
+                'success': 1,
+                'msg': 'Cannot retrieve performance metrics for %s: %s' % (msg['name'], e)
+            }
+
+        # Check whether the object supports real-time statistics
+        # If the entity does not support real-time statistics then
+        # we fall back to historical stats only.
+        # For historical statistics we require a valid performance
+        # interval key to be provided
+        historical_interval = self.si.content.perfManager.historicalInterval
+        provider_summary = self.si.content.perfManager.QueryPerfProviderSummary(
+            entity=entity
+        )
+
+        if not provider_summary.currentSupported:
+            logging.info('[%s] Entity %s does not support real-time statistics', self.host, entity.name)
+            logging.info('[%s] Retrieving historical statistics for entity %s', self.host, entity.name)
+
+        if not provider_summary.currentSupported and not interval_key:
+            logging.warning(
+                '[%s] Entity %s supports historical statistics only, but no historical interval provided',
+                self.host,
+                entity.name
+            )
+            return {'success': 1, 'msg': 'Entity %s supports historical statistics only, but no historical interval provided' % entity.name}
+
+        # For real-time statistics use the refresh rate of the provider.
+        # For historical statistics use one of the existing historical
+        # intervals on the system.
+        # For managed entities that support both real-time and historical
+        # statistics in order to retrieve historical stats a valid
+        # interval key should be provided.
+        if interval_key:
+            if interval_key not in [str(i.key) for i in historical_interval]:
+                logging.warning(
+                    '[%s] Historical interval with key %s does not exist',
+                    self.host,
+                    interval_key
+                )
+                return {'success': 1, 'msg': 'Historical interval with key %s does not exist' % interval_key}
+            else:
+                interval_id = [i for i in historical_interval if str(i.key) == interval_key].pop().samplingPeriod
+        else:
+            interval_id = provider_summary.refreshRate
+
+        # From the requested performance counters collect only the
+        # ones that are available for this managed object
+        counter_id = [int(c) for c in counter_id]
+        available_counter_id = set([m.counterId for m in metric_id])
+        to_collect_counter_id = available_counter_id.intersection(set(counter_id))
+
+        if not to_collect_counter_id:
+            return {
+                'success': 1,
+                'msg': 'Requested performance counters are not available for entity %s' % entity.name,
+            }
+
+        to_collect_metric_id = [pyVmomi.vim.PerformanceManager.MetricId(counterId=c_id, instance=instance) for c_id in to_collect_counter_id]
+
+        # Get the metric IDs to collect and build our query spec
+        if not max_sample:
+            max_sample = 1
+
+        # TODO: Be able to specify interval with startTime and endTime as well
+        query_spec = pyVmomi.vim.PerformanceManager.QuerySpec(
+            maxSample=max_sample,
+            entity=entity,
+            metricId=to_collect_metric_id,
+            intervalId=interval_id
+        )
+
+        # Get the performance metrics and return result
+        data = self.si.content.perfManager.QueryPerf(
+            querySpec=[query_spec]
+        )
+
+        result = []
+        for sample in data:
+            sample_info, sample_value = sample.sampleInfo, sample.value
+            for value in sample_value:
+                for s, v in zip(sample_info, value.value):
+                    d = {
+                        'interval': s.interval,
+                        'timestamp': str(s.timestamp),
+                        'counterId': value.id.counterId,
+                        'instance': value.id.instance,
+                        'value': v
+                    }
+                    result.append(d)
+        r = {
+            'msg': 'Successfully retrieved performance metrics',
+            'success': 0,
+            'result': result,
+        }
+
+        return r
+
     def event_latest(self, msg):
         """
         Get the latest event registered
@@ -654,6 +871,90 @@ class VSphereAgent(VConnector):
             self.host,
             result
         )
+
+        return result
+
+    def perf_metric_info(self, msg):
+        """
+        Get all performance counters supported by the vSphere host
+
+        Example client message would be:
+
+            {
+                "method":   "perf.metric.info",
+                "hostname": "vc01.example.org",
+            }
+
+        Returns:
+            The list of supported performance counters by the vSphere host
+
+        """
+        logging.info(
+            '[%s] Retrieving supported performance counters',
+            self.host
+        )
+
+        counter = self.si.content.perfManager.perfCounter
+        counter_id = [c.key for c in counter]
+
+        try:
+            counter_info = self.si.content.perfManager.QueryPerfCounter(
+                counterId=counter_id
+            )
+        except Exception as e:
+            return {'success': 1, 'msg': 'Cannot retrieve performance counters info: %s' % e}
+
+        data = []
+        for c in counter_info:
+            d = {
+                'key': c.key,
+                'nameInfo': {k: getattr(c.nameInfo, k) for k in ('label', 'summary', 'key')},
+                'groupInfo': {k: getattr(c.groupInfo, k) for k in ('label', 'summary', 'key')},
+                'unitInfo': {k: getattr(c.unitInfo, k) for k in ('label', 'summary', 'key')},
+                'rollupType': c.rollupType,
+                'statsType': c.statsType,
+                'level': c.level,
+                'perDeviceLevel': c.perDeviceLevel,
+            }
+            data.append(d)
+
+        result = {
+            'success': 0,
+            'msg': 'Successfully retrieved performance counters info',
+            'result': data
+        }
+
+        return result
+
+    def perf_interval_info(self, msg):
+        """
+        Get information about existing performance historical intervals
+
+        Example client message would be:
+
+            {
+                "method":   "perf.interval.info",
+                "hostname": "vc01.example.org",
+            }
+
+        Returns:
+            The existing performance historical interval on the system
+
+        """
+        logging.info(
+            '[%s] Retrieving existing performance historical intervals',
+            self.host
+        )
+
+        historical_interval = self.si.content.perfManager.historicalInterval
+
+        data = [{k: getattr(interval, k) for k in ('enabled', 'key', 'length', 'level', 'name', 'samplingPeriod')} for interval in historical_interval]
+
+        result = {
+            'msg': 'Successfully retrieved performance historical intervals',
+            'success': 0,
+            'result': data
+        }
 
         return result
 
@@ -881,6 +1182,78 @@ class VSphereAgent(VConnector):
 
         return r
 
+
+    def datacenter_perf_metric_get(self, msg):
+        """
+        Get performance metrics for a vim.Datacenter managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "datacenter.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "MyDatacenter",
+                "properties": [
+                    256,  # VM power on count
+                    257,  # VM power off count
+                    258   # VM suspend count
+                ],
+                "key": 1, # Historical performance interval with key 1 (Past day)
+                "max_sample": 1
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.Datacenter
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        # Interval ID is passed as the 'key' message attribute
+        max_sample, key = msg.get('max_sample'), msg.get('key')
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=max_sample,
+            interval_key=key
+        )
+
+    def datacenter_perf_metric_info(self, msg):
+        """
+        Get performance counters available for a vim.Datacenter object
+
+        Example client message would be:
+
+            {
+                "method":     "datacenter.perf.metric.info",
+                "hostname":   "vc01.example.org",
+                "name":       "MyDatacenter"
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.Datacenter
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
+
+        return self._entity_perf_metric_info(entity=obj)
+
     def datacenter_get(self, msg):
         """
         Get properties of a single vim.Datacenter managed object
@@ -974,6 +1347,76 @@ class VSphereAgent(VConnector):
         )
 
         return r
+
+    def cluster_perf_metric_get(self, msg):
+        """
+        Get performance metrics for a vim.ClusterComputeResource managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "cluster.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "MyCluster",
+                "properties": [
+                    276,  # Effective memory resources
+                    277   # Total amount of CPU resources of all hosts in the cluster
+                ],
+                "key": 1, # Historical performance interval key '1' (Past day)
+                "max_sample": 1
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.ClusterComputeResource
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        # Interval ID is passed as the 'key' message attribute
+        max_sample, key = msg.get('max_sample'), msg.get('key')
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=max_sample,
+            interval_key=key
+        )
+
+    def cluster_perf_metric_info(self, msg):
+        """
+        Get performance counters available for a vim.ClusterComputeResource object
+
+        Example client message would be:
+
+            {
+                "method":     "cluster.perf.metric.info",
+                "hostname":   "vc01.example.org",
+                "name":       "MyCluster"
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.ClusterComputeResource
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
+
+        return self._entity_perf_metric_info(entity=obj)
 
     def cluster_get(self, msg):
         """
@@ -1197,6 +1640,76 @@ class VSphereAgent(VConnector):
 
         return result
 
+    def host_perf_metric_get(self, msg):
+        """
+        Get performance metrics for a vim.HostSystem managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "host.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "esxi01.example.org",
+                "properties": [
+                    276,  # Effective memory resources
+                    277   # Total amount of CPU resources of all hosts in the cluster
+                ],
+                "key": 1, # Historical performance interval key '1' (Past day)
+                "max_sample": 1
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.HostSystem
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        # Interval ID is passed as the 'key' message attribute
+        max_sample, key = msg.get('max_sample'), msg.get('key')
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=max_sample,
+            interval_key=key
+        )
+
+    def host_perf_metric_info(self, msg):
+        """
+        Get performance counters available for a vim.HostSystem object
+
+        Example client message would be:
+
+            {
+                "method":     "host.perf.metric.info",
+                "hostname":   "vc01.example.org",
+                "name":       "esxi01.example.org",
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.HostSystem
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
+
+        return self._entity_perf_metric_info(entity=obj)
+
     def host_cluster_get(self, msg):
         """
         Get the cluster name for a HostSystem
@@ -1414,6 +1927,90 @@ class VSphereAgent(VConnector):
         )
 
         return result
+
+    def vm_perf_metric_get(self, msg):
+        """
+        Get performance metrics for a vim.VirtualMachine managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "vm.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "vm01.example.org",
+                "properties": [
+                    12, # CPU Ready time of the Virtual Machine
+                ],
+                "max_sample": 1,
+                "instance": ""
+            }
+
+        For historical performance statistics make sure to pass the
+        performance interval key as part of the message, e.g.:
+
+            {
+                "method":   "vm.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "vm01.example.org",
+                "properties": [
+                    12,  # CPU Ready time of the Virtual Machine
+                    24   # Memory usage as percentage of total configured or available memory
+                ],
+                "key": 1 # Historical performance interval key '1' (Past day)
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.VirtualMachine
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        # Interval ID is passed as the 'key' message attribute
+        max_sample, key, instance = msg.get('max_sample'), msg.get('key'), msg.get('instance')
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=max_sample,
+            interval_key=key,
+            instance=instance
+        )
+
+    def vm_perf_metric_info(self, msg):
+        """
+        Get performance counters available for a vim.VirtualMachine object
+
+        Example client message would be:
+
+            {
+                "method":     "vm.perf.metric.info",
+                "hostname":   "vc01.example.org",
+                "name":       "vm01.example.org",
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.VirtualMachine
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
+
+        return self._entity_perf_metric_info(entity=obj)
 
     def vm_discover(self, msg):
         """
@@ -2292,3 +2889,30 @@ class VSphereAgent(VConnector):
         )
 
         return r
+
+    def datastore_perf_metric_info(self, msg):
+        """
+        Get performance counters available for a vim.Datastore object
+
+        Example client message would be:
+
+            {
+                "method":     "datastore.perf.metric.info",
+                "hostname":   "vc01.example.org",
+                "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
+            }
+
+        Returns:
+            Information about the supported performance counters for the object
+
+        """
+        obj = self.get_object_by_property(
+            property_name='info.url',
+            property_value=msg['name'],
+            obj_type=pyVmomi.vim.Datastore
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
+
+        return self._entity_perf_metric_info(entity=obj)
