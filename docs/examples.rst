@@ -35,6 +35,19 @@ links:
 .. _`Exporting Data From a VMware vSphere Environment For Fun And Profit`: http://unix-heaven.org/node/116
 .. _`VMware vSphere API documentation`: https://www.vmware.com/support/developer/vc-sdk/
 
+Getting vSphere "about" info
+============================
+
+Using the ``about`` vPoller method you can retrieve information about
+your vSphere host such as API version, vendor, build number, etc.
+
+Here is an example of using the vPoller ``about`` method:
+
+.. code-block:: bash
+
+   $ vpoller-client --method about --vsphere-host vc01.example.org \
+		--method about --properties version,fullName,apiVersion,vendor
+
 Datacenter examples
 ===================
 
@@ -103,6 +116,13 @@ specific ESXi host:
    $ vpoller-client --method host.vm.get --vsphere-host vc01.example.org \
 		--name esxi01.example.org
 
+Here is how you can get all datastores used by a specific ESXi host:
+
+.. code-block:: bash
+
+   $ vpoller-client --method host.datastore.get --vsphere-host vc01.example.org \
+		--name esxi01.example.org
+
 VirtualMachine examples
 =======================
 
@@ -155,6 +175,14 @@ IP address and MAC address:
 
    $ vpoller-client --method vm.guest.net.get --vsphere-host vc01.example.org \
 		--name vm01.example.org --properties network,ipAddress,macAddress
+
+If you want to see which datastores your Virtual Machine is using you
+can use the ``vm.datastore.get`` vPoller method, e.g.:
+
+.. code-block:: bash
+
+   $ vpoller-client --method vm.datastore.get --vsphere-host vc01.example.org \
+		--name vm01.example.org
 
 Using the ``vm.process.get`` vPoller method we can get a list of all
 processes running in a Virtual Machine. Note, that we need to supply a
@@ -225,3 +253,14 @@ for your vSphere host:
 
    $ vpoller-client --method session.get --vsphere-host vc01.example.org
 
+Getting vSphere Events
+======================
+
+With vPoller you can also retrieve vSphere events.
+
+This is how you can retrieve the last registered event from your
+vSphere host:
+
+.. code-block:: bash
+
+   $ vpoller-client --method event.latest --vsphere-host vc01.example.org
