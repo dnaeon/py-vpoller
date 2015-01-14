@@ -1,2 +1,1 @@
-__name__ = 'vpoller'
-__all__ = ['core', 'worker', 'client', 'agent', 'proxy']
+__version__ == '0.3.5'
