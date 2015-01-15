@@ -1,0 +1,15 @@
+[program:vpoller-proxy]
+command=/usr/bin/vpoller-proxy start
+redirect_stderr=true
+stdout_logfile=/var/log/vpoller/vpoller-proxy.log
+autostart=true
+;user=myusername
+stopsignal=INT
+
+[program:vpoller-worker]
+command=/usr/bin/vpoller-worker start
+redirect_stderr=true
+stdout_logfile=/var/log/vpoller/vpoller-worker.log
+autostart=true
+;user=myusername
+stopsignal=INT
