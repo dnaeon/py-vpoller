@@ -70,7 +70,7 @@ Importing the vPoller templates in Zabbix
 You can grab the latest `vPoller templates for Zabbix`_ from the Github
 repo of vPoller.
 
-.. _`vPoller templates for Zabbix`: https://github.com/dnaeon/py-vpoller/tree/master/src/zabbix/templates
+.. _`vPoller templates for Zabbix`: https://github.com/dnaeon/py-vpoller/tree/master/extra/zabbix/templates
 
 In the `vPoller templates for Zabbix`_ directory you will find two
 directories:
@@ -144,12 +144,12 @@ The next step we need to do is to grab the
 ``zabbix-2.2.5/src/modules`` directory where you have unpacked the
 Zabbix source package.
 
-.. _`vPoller loadable module for Zabbix`: https://github.com/dnaeon/py-vpoller/tree/master/src/zabbix/vpoller-module
+.. _`vPoller loadable module for Zabbix`: https://github.com/dnaeon/py-vpoller/tree/master/extra/zabbix/vpoller-module
 .. _`Github repo of vPoller`: https://github.com/dnaeon/py-vpoller
 
 .. code-block:: bash
 
-   $ cp -a py-vpoller/src/zabbix/vpoller-module zabbix-2.2.5/src/modules
+   $ cp -a py-vpoller/extra/zabbix/vpoller-module zabbix-2.2.5/src/modules
 
 Building the vPoller module for Zabbix is now easy.
 
@@ -302,8 +302,8 @@ Get the ``vpoller-zabbix`` and ``cvpoller-zabbix`` wrapper scripts
 from the links below and place them in your Zabbix
 ``externalscripts`` directory:
 
-* https://github.com/dnaeon/py-vpoller/blob/master/src/zabbix/externalscripts/vpoller-zabbix
-* https://github.com/dnaeon/py-vpoller/blob/master/src/zabbix/externalscripts/cvpoller-zabbix
+* https://github.com/dnaeon/py-vpoller/blob/master/extra/zabbix/externalscripts/vpoller-zabbix
+* https://github.com/dnaeon/py-vpoller/blob/master/extra/zabbix/externalscripts/cvpoller-zabbix
 
 You can also find user-contributed ``vpoller-zabbix`` and
 ``cvpoller-zabbix`` wrapper scripts, which come with more features
@@ -408,7 +408,7 @@ tool would be regular Zabbix hosts, which you could update -
 adding the host to groups you want, linking arbitrary
 templates to it, etc.
 
-.. _`zabbix-vsphere-import`: https://github.com/dnaeon/py-vpoller/tree/master/src/zabbix/vsphere-import
+.. _`zabbix-vsphere-import`: https://github.com/dnaeon/py-vpoller/tree/master/extra/zabbix/vsphere-import
 
 First, let's create the config file which `zabbix-vsphere-import`_
 will be using. Below is an example config file used by

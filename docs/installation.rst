@@ -38,7 +38,7 @@ installed in order to build it:
 .. _`vconnector`: https://github.com/dnaeon/py-vconnector
 .. _`pyzmq`: https://github.com/zeromq/pyzmq
 .. _`docopt`: https://github.com/docopt/docopt
-.. _`C client of vPoller`: https://github.com/dnaeon/py-vpoller/tree/master/src/vpoller-cclient
+.. _`C client of vPoller`: https://github.com/dnaeon/py-vpoller/tree/master/extra/vpoller-cclient
 .. _`ZeroMQ 4.x library`: https://github.com/zeromq/zeromq4-x
 
 Installation with pip
@@ -129,7 +129,7 @@ After that building the vPoller C client is as easy as this:
 
 .. code-block:: bash
 
-   $ cd py-vpoller/src/vpoller-cclient
+   $ cd py-vpoller/extra/vpoller-cclient
    $ make
 
 You should now have the ``vpoller-cclient`` executable in your
