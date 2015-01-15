@@ -32,7 +32,9 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | datacenter.alarm.get                 | Get all alarms for a vim.Datacenter managed object                            |
 +--------------------------------------+-------------------------------------------------------------------------------+
-| datacenter.perf.counter.info         | Get info about performance counters available for vim.Datacenter object       |
+| datacenter.perf.metric.info          | Get the available performance counters for a vim.Datacenter object            |
++--------------------------------------+-------------------------------------------------------------------------------+
+| datacenter.perf.metric.get           | Retrieve performance metrics for a vim.Datacenter object                      |
 +--------------------------------------+-------------------------------------------------------------------------------+
 | cluster.discover                     | Discover all vim.ClusterComputeResource managed objects                       |
 +--------------------------------------+-------------------------------------------------------------------------------+
@@ -40,7 +42,9 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | cluster.alarm.get                    | Get all alarms for a vim.ClusterComputeResource managed object                |
 +--------------------------------------+-------------------------------------------------------------------------------+
-| cluster.perf.counter.info            | Get info about performance counters available for a cluster                   |
+| cluster.perf.metric.info             | Get the available performance counters for a vim.ClusterComputeResource       |
++--------------------------------------+-------------------------------------------------------------------------------+
+| cluster.perf.metric.get              | Retrieve performance metrics for a vim.ClusterComputeResource object          |
 +--------------------------------------+-------------------------------------------------------------------------------+
 | resource.pool.discover               | Discover all vim.ResourcePool managed objects                                 |
 +--------------------------------------+-------------------------------------------------------------------------------+
@@ -60,7 +64,9 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | host.datastore.get                   | Get all datastores available to a vim.HostSystem                              |
 +--------------------------------------+-------------------------------------------------------------------------------+
-| host.perf.counter.info               | Get info about performance counters available for a HostSystem object         |
+| host.perf.metric.info                | Get the available performance counters for a HostSystem object                |
++--------------------------------------+-------------------------------------------------------------------------------+
+| host.perf.metric.get                 | Retrieve performance metrics for a vim.HostSystem object                      |
 +--------------------------------------+-------------------------------------------------------------------------------+
 | vm.alarm.get                         | Get all alarms for a vim.VirtualMachine managed object                        |
 +--------------------------------------+-------------------------------------------------------------------------------+
@@ -84,7 +90,9 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | vm.cpu.usage.percent                 | Get the CPU usage in percentage of a Virtual Machine                          |
 +--------------------------------------+-------------------------------------------------------------------------------+
-| vm.perf.counter.info                 | Get info about performance counters available for a VirtualMachine object     |
+| vm.perf.metric.info                  | Get the available performance counters for a VirtualMachine object            |
++--------------------------------------+-------------------------------------------------------------------------------+
+| vm.perf.metric.get                   | Retrieve performance metrics for a vim.VirtualMachine object                  |
 +--------------------------------------+-------------------------------------------------------------------------------+
 | datastore.alarm.get                  | Get all alarms for a vim.Datastore managed object                             |
 +--------------------------------------+-------------------------------------------------------------------------------+
@@ -96,5 +104,7 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | datastore.vm.get                     | Get all VirtualMachine objects using a specific datastore                     |
 +--------------------------------------+-------------------------------------------------------------------------------+
-| datastore.perf.counter.info          | Get info about performance counters available for a Datastore object          |
+| datastore.perf.metric.info           | Get the available performance counters for a vim.Datastore object             |
++--------------------------------------+-------------------------------------------------------------------------------+
+| datastore.perf.metric.get            | Retrieve performance metrics for a vim.Datastore object                       |
 +--------------------------------------+-------------------------------------------------------------------------------+
