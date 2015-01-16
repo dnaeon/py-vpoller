@@ -16,7 +16,7 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | session.get                          | Get the established vSphere sessions                                          |
 +--------------------------------------+-------------------------------------------------------------------------------+
-| perf.counter.info                    | Get info about all supported performance counters by the vSphere host         |
+| perf.metric.info                     | Get info about all supported performance counters by the vSphere host         |
 +--------------------------------------+-------------------------------------------------------------------------------+
 | net.discover                         | Discover all vim.Network managed objects                                      |
 +--------------------------------------+-------------------------------------------------------------------------------+
