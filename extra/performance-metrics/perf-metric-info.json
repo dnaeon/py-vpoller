@@ -11464,5 +11464,5 @@
       "rollupType": "average"
     }
   ],
-  "msg": "Successfully retrieved performance counters info"
+  "msg": "Successfully retrieved performance metrics info"
 }

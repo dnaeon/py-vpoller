@@ -902,7 +902,7 @@ class VSphereAgent(VConnector):
                 counterId=counter_id
             )
         except Exception as e:
-            return {'success': 1, 'msg': 'Cannot retrieve performance counters info: %s' % e}
+            return {'success': 1, 'msg': 'Cannot retrieve performance metrics info: %s' % e}
 
         data = []
         for c in counter_info:
@@ -920,7 +920,7 @@ class VSphereAgent(VConnector):
 
         result = {
             'success': 0,
-            'msg': 'Successfully retrieved performance counters info',
+            'msg': 'Successfully retrieved performance metrics info',
             'result': data
         }
 
