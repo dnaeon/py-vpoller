@@ -268,4 +268,100 @@ vSphere host:
 Performance metrics
 ===================
 
-To be added.
+Using vPoller you can retrieve various performance metrics from
+your VMware vSphere environment.
+
+In the following examples we will see how we can use vPoller in order
+to discover the supported performance metrics in our vSphere environment
+and also how to retrieve real-time and historical statistics from
+different performance providers - ESXi hosts, Virtual Machines,
+Datastores, Clusters, etc.
+
+For more information about the performance metrics in a VMware vSphere
+environment, please make sure to check the
+`VMware vSphere API documentation`_ and especially the
+`PerformanceManager documentation`_ where you can find
+information about the supported performance counters, the existing
+counter groups, description of each counter, etc.
+
+_`VMware vSphere API documentation`: https://www.vmware.com/support/developer/vc-sdk/
+_`PerformanceManager documentation`: http://pubs.vmware.com/vsphere-55/topic/com.vmware.wssdk.apiref.doc/vim.PerformanceManager.html
+
+First, let's see how to obtain all performance counters that are
+supported in our vSphere environment. Using the ``perf.metric.info``
+vPoller method we can retrieve a list of all supported performance
+counters from our vSphere environment.
+
+.. code-block:: bash
+
+   $ vpoller-client --method perf.metric.info --vsphere-host vc01.example.org
+
+The result of the above command should contain all performance metrics
+which are supported on the VMware vSphere host ``vc01.example.org``.
+
+You can find a sample with all performance metrics as discovered on a
+VMware vSphere host in the `perf-metric-info.json example file`_.
+
+.. _`perf-metric-info.json example file`: https://github.com/dnaeon/py-vpoller/blob/master/extra/performance-metrics/perf-metric-info.json
+
+We can also get the existing historical performance intervals by
+using the ``perf.interval.info`` vPoller method, e.g.:
+
+.. code-block:: bash
+
+   $ vpoller-client --method perf.interval.info --vsphere-host vc01.example.org
+
+On the screenshot below you can see an example of retrieving the
+historical performance intervals on a vSphere host.
+
+.. image:: images/vpoller-perf-interval-info.jpg
+
+The historical performance intervals are used when we need to
+retrieve historical metrics from performance providers.
+
+In order to obtain information about the supported performance metrics
+for a specific performance provider (e.g. ESXi host, Virtual Machine,
+Datastore, etc.) you can use the ``*.perf.metric.get`` vPoller methods.
+
+The following example shows how to get the available performance
+metrics for a Virtual Machine:
+
+.. code-block:: bash
+
+   $ vpoller-client --method vm.perf.metric.info --vsphere-host vc01.example.org \
+		--name vm01.example.org
+
+You can see an example result of using ``vm.perf.metric.info`` method
+in the `vm-perf-metric-info.json example file`_, which shows the
+available performance metrics for a specific Virtual Machine.
+
+.. _`vm-perf-metric-info.json example file`: https://github.com/dnaeon/py-vpoller/blob/master/extra/performance-metrics/vm-perf-metric-info.json
+
+In the `vm-perf-metric-info.json example file`_ you will see
+that each discovered performance metric has a ``counterId`` and
+``instance`` attribute, e.g.:
+
+.. code-block:: json
+
+   {
+       "counterId": 149,
+       "instance": "vmnic0"
+   }
+
+The above example metric shows that the performance counter ID is
+``149`` and the instance is ``vmnic0``.
+
+If you cross-check the above counter ID in the
+`perf-metric-info.json example file`_ you will see that this
+counter is for `"Average rate at which data was transmitted during the interval"`.
+
+Other vPoller methods that you can use in order to retrieve the
+available performance metrics for a performance provider are
+``datacenter.perf.metric.info``, ``cluster.perf.metric.info``,
+``host.perf.metric.info`` and ``datastore.perf.metric.info``.
+
+Now, that we know how to get the available performance metrics for
+our performance providers, let's now see how to retrieve the
+actual performance counters for them.
+
+< TO BE ADDED >
