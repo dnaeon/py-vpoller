@@ -561,7 +561,7 @@ class VSphereAgent(VConnector):
 
         return r
 
-    def _entity_perf_metric_info(self, entity):
+    def _entity_perf_metric_info(self, entity, counter_id=None):
         """
         Get info about supported performance metrics for a managed entity
 
@@ -570,7 +570,9 @@ class VSphereAgent(VConnector):
         otherwise fall back to historical statistics only.
 
         Args:
-            entity (pyVmomi.vim.*): A managed entity to lookup
+            entity     (pyVmomi.vim.*): A managed entity to lookup
+            counter_id           (int): If provided return only the
+                                        metrics with this counter ID
 
         Returns:
             Information about supported performance metrics for the entity
@@ -601,7 +603,11 @@ class VSphereAgent(VConnector):
                 'msg': 'Cannot retrieve performance metrics for %s: %s' % (entity.name, e)
             }
 
-        data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id]
+        if counter_id:
+            data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id if m.counterId == int(counter_id)]
+        else:
+            data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id]
+
         result = {
             'msg': 'Successfully retrieved performance metrics',
             'success': 0,
@@ -1236,7 +1242,8 @@ class VSphereAgent(VConnector):
             {
                 "method":     "datacenter.perf.metric.info",
                 "hostname":   "vc01.example.org",
-                "name":       "MyDatacenter"
+                "name":       "MyDatacenter",
+                "counter-id": <counter-id>
             }
 
         Returns:
@@ -1252,7 +1259,9 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_metric_info(entity=obj)
+        counter_id = msg.get('counter-id')
+
+        return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
     def datacenter_get(self, msg):
         """
@@ -1400,7 +1409,8 @@ class VSphereAgent(VConnector):
             {
                 "method":     "cluster.perf.metric.info",
                 "hostname":   "vc01.example.org",
-                "name":       "MyCluster"
+                "name":       "MyCluster",
+                "counter-id": <counter-id>
             }
 
         Returns:
@@ -1416,7 +1426,9 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_metric_info(entity=obj)
+        counter_id = msg.get('counter-id')
+
+        return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
     def cluster_get(self, msg):
         """
@@ -1693,6 +1705,7 @@ class VSphereAgent(VConnector):
                 "method":     "host.perf.metric.info",
                 "hostname":   "vc01.example.org",
                 "name":       "esxi01.example.org",
+                "counter-id":  <counter-id>
             }
 
         Returns:
@@ -1708,7 +1721,9 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_metric_info(entity=obj)
+        counter_id = msg.get('counter-id')
+
+        return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
     def host_cluster_get(self, msg):
         """
@@ -1995,6 +2010,7 @@ class VSphereAgent(VConnector):
                 "method":     "vm.perf.metric.info",
                 "hostname":   "vc01.example.org",
                 "name":       "vm01.example.org",
+                "counter-id": <counter-id>
             }
 
         Returns:
@@ -2010,7 +2026,9 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_metric_info(entity=obj)
+        counter_id = msg.get('counter-id')
+
+        return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
     def vm_discover(self, msg):
         """
@@ -2900,6 +2918,7 @@ class VSphereAgent(VConnector):
                 "method":     "datastore.perf.metric.info",
                 "hostname":   "vc01.example.org",
                 "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
+                "counter-id": <counter-id>
             }
 
         Returns:
@@ -2915,4 +2934,6 @@ class VSphereAgent(VConnector):
         if not obj:
             return {'success': 1, 'msg': 'Cannot find object %s' % msg['name'] }
 
-        return self._entity_perf_metric_info(entity=obj)
+        counter_id = msg.get('counter-id')
+
+        return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
