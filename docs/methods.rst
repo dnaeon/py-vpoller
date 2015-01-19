@@ -18,6 +18,8 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | perf.metric.info                     | Get info about all supported performance counters by the vSphere host         |
 +--------------------------------------+-------------------------------------------------------------------------------+
+| perf.interval.info                   | Get the existing performance historical intervals on the vSphere host         |
++--------------------------------------+-------------------------------------------------------------------------------+
 | net.discover                         | Discover all vim.Network managed objects                                      |
 +--------------------------------------+-------------------------------------------------------------------------------+
 | net.get                              | Get properties of a vim.Network managed object                                |
