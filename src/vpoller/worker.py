@@ -35,6 +35,7 @@ from platform import node
 from ConfigParser import ConfigParser
 
 import zmq
+from vpoller import __version__
 from vpoller.agent import VSphereAgent
 from vpoller.exceptions import VPollerException
 from vconnector.core import VConnectorDatabase
@@ -80,7 +81,7 @@ class VPollerWorkerManager(object):
         Start the vPoller Worker Manager and processes
 
         """
-        logging.info('Starting Worker Manager')
+        logging.info('Starting Worker Manager [%s release]', __version__)
 
         self.load_config()
         self.create_sockets()

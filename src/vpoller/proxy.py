@@ -29,10 +29,13 @@ vPoller Proxy module for the VMware vSphere Poller
 
 import logging
 import multiprocessing
+
 from platform import node
 from ConfigParser import ConfigParser
 
 import zmq
+
+from vpoller import __version__
 
 
 class VPollerProxyManager(object):
@@ -71,7 +74,7 @@ class VPollerProxyManager(object):
         Start the vPoller Proxy processes
 
         """
-        logging.info('Starting Proxy Manager')
+        logging.info('Starting Proxy Manager [%s release]', __version__)
 
         self.load_config()
         self.create_sockets()
