@@ -1,0 +1,690 @@
+{
+  "success": 0,
+  "result": [
+    {
+      "counterId": 174,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 434,
+      "instance": ""
+    },
+    {
+      "counterId": 107,
+      "instance": ""
+    },
+    {
+      "counterId": 70,
+      "instance": ""
+    },
+    {
+      "counterId": 178,
+      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+    },
+    {
+      "counterId": 2,
+      "instance": ""
+    },
+    {
+      "counterId": 469,
+      "instance": "4000"
+    },
+    {
+      "counterId": 12,
+      "instance": "0"
+    },
+    {
+      "counterId": 10,
+      "instance": ""
+    },
+    {
+      "counterId": 414,
+      "instance": ""
+    },
+    {
+      "counterId": 12,
+      "instance": ""
+    },
+    {
+      "counterId": 533,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 129,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 174,
+      "instance": ""
+    },
+    {
+      "counterId": 415,
+      "instance": ""
+    },
+    {
+      "counterId": 535,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 471,
+      "instance": "4000"
+    },
+    {
+      "counterId": 414,
+      "instance": "0"
+    },
+    {
+      "counterId": 13,
+      "instance": "0"
+    },
+    {
+      "counterId": 416,
+      "instance": ""
+    },
+    {
+      "counterId": 133,
+      "instance": ""
+    },
+    {
+      "counterId": 149,
+      "instance": "vmnic2"
+    },
+    {
+      "counterId": 149,
+      "instance": "vmnic3"
+    },
+    {
+      "counterId": 416,
+      "instance": "0"
+    },
+    {
+      "counterId": 537,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 149,
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": 474,
+      "instance": "4000"
+    },
+    {
+      "counterId": 149,
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": 417,
+      "instance": "0"
+    },
+    {
+      "counterId": 345,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 184,
+      "instance": ""
+    },
+    {
+      "counterId": 511,
+      "instance": ""
+    },
+    {
+      "counterId": 147,
+      "instance": ""
+    },
+    {
+      "counterId": 441,
+      "instance": ""
+    },
+    {
+      "counterId": 90,
+      "instance": ""
+    },
+    {
+      "counterId": 13,
+      "instance": ""
+    },
+    {
+      "counterId": 412,
+      "instance": ""
+    },
+    {
+      "counterId": 536,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 33,
+      "instance": ""
+    },
+    {
+      "counterId": 148,
+      "instance": "vmnic2"
+    },
+    {
+      "counterId": 148,
+      "instance": "vmnic3"
+    },
+    {
+      "counterId": 148,
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": 148,
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": 147,
+      "instance": "4000"
+    },
+    {
+      "counterId": 411,
+      "instance": ""
+    },
+    {
+      "counterId": 37,
+      "instance": ""
+    },
+    {
+      "counterId": 176,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 520,
+      "instance": ""
+    },
+    {
+      "counterId": 436,
+      "instance": ""
+    },
+    {
+      "counterId": 510,
+      "instance": ""
+    },
+    {
+      "counterId": 442,
+      "instance": ""
+    },
+    {
+      "counterId": 179,
+      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+    },
+    {
+      "counterId": 430,
+      "instance": ""
+    },
+    {
+      "counterId": 171,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 180,
+      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+    },
+    {
+      "counterId": 431,
+      "instance": ""
+    },
+    {
+      "counterId": 542,
+      "instance": ""
+    },
+    {
+      "counterId": 468,
+      "instance": ""
+    },
+    {
+      "counterId": 147,
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": 433,
+      "instance": ""
+    },
+    {
+      "counterId": 131,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 147,
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": 147,
+      "instance": "vmnic3"
+    },
+    {
+      "counterId": 11,
+      "instance": "0"
+    },
+    {
+      "counterId": 509,
+      "instance": ""
+    },
+    {
+      "counterId": 147,
+      "instance": "vmnic2"
+    },
+    {
+      "counterId": 474,
+      "instance": ""
+    },
+    {
+      "counterId": 470,
+      "instance": "4000"
+    },
+    {
+      "counterId": 469,
+      "instance": ""
+    },
+    {
+      "counterId": 506,
+      "instance": ""
+    },
+    {
+      "counterId": 514,
+      "instance": ""
+    },
+    {
+      "counterId": 423,
+      "instance": ""
+    },
+    {
+      "counterId": 516,
+      "instance": ""
+    },
+    {
+      "counterId": 159,
+      "instance": ""
+    },
+    {
+      "counterId": 11,
+      "instance": ""
+    },
+    {
+      "counterId": 413,
+      "instance": ""
+    },
+    {
+      "counterId": 105,
+      "instance": ""
+    },
+    {
+      "counterId": 543,
+      "instance": ""
+    },
+    {
+      "counterId": 94,
+      "instance": ""
+    },
+    {
+      "counterId": 146,
+      "instance": "vmnic2"
+    },
+    {
+      "counterId": 505,
+      "instance": ""
+    },
+    {
+      "counterId": 146,
+      "instance": "vmnic3"
+    },
+    {
+      "counterId": 471,
+      "instance": ""
+    },
+    {
+      "counterId": 415,
+      "instance": "0"
+    },
+    {
+      "counterId": 183,
+      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+    },
+    {
+      "counterId": 435,
+      "instance": ""
+    },
+    {
+      "counterId": 146,
+      "instance": "4000"
+    },
+    {
+      "counterId": 134,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 155,
+      "instance": ""
+    },
+    {
+      "counterId": 85,
+      "instance": ""
+    },
+    {
+      "counterId": 149,
+      "instance": ""
+    },
+    {
+      "counterId": 439,
+      "instance": ""
+    },
+    {
+      "counterId": 146,
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": 417,
+      "instance": ""
+    },
+    {
+      "counterId": 146,
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": 473,
+      "instance": "4000"
+    },
+    {
+      "counterId": 102,
+      "instance": ""
+    },
+    {
+      "counterId": 14,
+      "instance": "0"
+    },
+    {
+      "counterId": 469,
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": 128,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 469,
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": 508,
+      "instance": ""
+    },
+    {
+      "counterId": 469,
+      "instance": "vmnic2"
+    },
+    {
+      "counterId": 469,
+      "instance": "vmnic3"
+    },
+    {
+      "counterId": 131,
+      "instance": ""
+    },
+    {
+      "counterId": 182,
+      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+    },
+    {
+      "counterId": 148,
+      "instance": "4000"
+    },
+    {
+      "counterId": 149,
+      "instance": "4000"
+    },
+    {
+      "counterId": 10,
+      "instance": "0"
+    },
+    {
+      "counterId": 125,
+      "instance": ""
+    },
+    {
+      "counterId": 157,
+      "instance": ""
+    },
+    {
+      "counterId": 98,
+      "instance": ""
+    },
+    {
+      "counterId": 453,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 41,
+      "instance": ""
+    },
+    {
+      "counterId": 419,
+      "instance": ""
+    },
+    {
+      "counterId": 143,
+      "instance": ""
+    },
+    {
+      "counterId": 146,
+      "instance": ""
+    },
+    {
+      "counterId": 136,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 130,
+      "instance": ""
+    },
+    {
+      "counterId": 106,
+      "instance": ""
+    },
+    {
+      "counterId": 512,
+      "instance": ""
+    },
+    {
+      "counterId": 74,
+      "instance": ""
+    },
+    {
+      "counterId": 470,
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": 440,
+      "instance": ""
+    },
+    {
+      "counterId": 470,
+      "instance": "vmnic3"
+    },
+    {
+      "counterId": 470,
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": 502,
+      "instance": ""
+    },
+    {
+      "counterId": 470,
+      "instance": "vmnic2"
+    },
+    {
+      "counterId": 173,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 401,
+      "instance": "0"
+    },
+    {
+      "counterId": 181,
+      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+    },
+    {
+      "counterId": 401,
+      "instance": ""
+    },
+    {
+      "counterId": 466,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 137,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 143,
+      "instance": "4000"
+    },
+    {
+      "counterId": 6,
+      "instance": "0"
+    },
+    {
+      "counterId": 468,
+      "instance": "4000"
+    },
+    {
+      "counterId": 472,
+      "instance": "4000"
+    },
+    {
+      "counterId": 532,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 531,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 86,
+      "instance": ""
+    },
+    {
+      "counterId": 519,
+      "instance": ""
+    },
+    {
+      "counterId": 504,
+      "instance": ""
+    },
+    {
+      "counterId": 14,
+      "instance": ""
+    },
+    {
+      "counterId": 175,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 135,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 143,
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": 534,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 143,
+      "instance": "vmnic2"
+    },
+    {
+      "counterId": 143,
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": 467,
+      "instance": "4000"
+    },
+    {
+      "counterId": 473,
+      "instance": ""
+    },
+    {
+      "counterId": 517,
+      "instance": ""
+    },
+    {
+      "counterId": 143,
+      "instance": "vmnic3"
+    },
+    {
+      "counterId": 467,
+      "instance": ""
+    },
+    {
+      "counterId": 470,
+      "instance": ""
+    },
+    {
+      "counterId": 29,
+      "instance": ""
+    },
+    {
+      "counterId": 515,
+      "instance": ""
+    },
+    {
+      "counterId": 344,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 148,
+      "instance": ""
+    },
+    {
+      "counterId": 172,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 513,
+      "instance": ""
+    },
+    {
+      "counterId": 346,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 518,
+      "instance": ""
+    },
+    {
+      "counterId": 343,
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": 130,
+      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+    },
+    {
+      "counterId": 24,
+      "instance": ""
+    },
+    {
+      "counterId": 507,
+      "instance": ""
+    },
+    {
+      "counterId": 173,
+      "instance": ""
+    },
+    {
+      "counterId": 472,
+      "instance": ""
+    },
+    {
+      "counterId": 6,
+      "instance": ""
+    }
+  ],
+  "msg": "Successfully retrieved performance metrics"
+}
