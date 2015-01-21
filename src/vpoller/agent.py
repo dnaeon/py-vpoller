@@ -638,20 +638,12 @@ class VSphereAgent(VConnector):
             counter_id
         )
 
-        # Get the available performance metrics for this managed object
-        try:
-            metric_id = self.si.content.perfManager.QueryAvailablePerfMetric(entity=entity)
-        except pyVmomi.vim.InvalidArgument as e:
-            return {
-                'success': 1,
-                'msg': 'Cannot retrieve performance metrics for %s: %s' % (msg['name'], e)
-            }
-
         # Check whether the object supports real-time statistics
         # If the entity does not support real-time statistics then
         # we fall back to historical stats only.
         # For historical statistics we require a valid performance
         # interval key to be provided
+        perf_counter = [c.key for c in self.si.content.perfManager.perfCounter] # TODO: Convert perf_counter to @property
         historical_interval = self.si.content.perfManager.historicalInterval
         provider_summary = self.si.content.perfManager.QueryPerfProviderSummary(
             entity=entity
@@ -688,23 +680,13 @@ class VSphereAgent(VConnector):
         else:
             interval_id = provider_summary.refreshRate
 
-        # From the requested performance counters collect only the
-        # ones that are available for this managed object
-        counter_id = [int(c) for c in counter_id]
-        available_counter_id = set([m.counterId for m in metric_id])
-        to_collect_counter_id = available_counter_id.intersection(set(counter_id))
-
-        if not to_collect_counter_id:
+        if not all(c in perf_counter for c in counter_id):
             return {
                 'success': 1,
-                'msg': 'Requested performance counters are not available for entity %s' % entity.name,
+                'msg': 'Unknown performance counters requested'
             }
 
-        to_collect_metric_id = [pyVmomi.vim.PerformanceManager.MetricId(counterId=c_id, instance=instance) for c_id in to_collect_counter_id]
-
-        # Get the metric IDs to collect and build our query spec
-        if not max_sample:
-            max_sample = 1
+        to_collect_metric_id = [pyVmomi.vim.PerformanceManager.MetricId(counterId=c_id, instance=instance) for c_id in counter_id]
 
         # TODO: Be able to specify interval with startTime and endTime as well
         query_spec = pyVmomi.vim.PerformanceManager.QuerySpec(
@@ -732,6 +714,7 @@ class VSphereAgent(VConnector):
                         'value': v
                     }
                     result.append(d)
+
         r = {
             'msg': 'Successfully retrieved performance metrics',
             'success': 0,
