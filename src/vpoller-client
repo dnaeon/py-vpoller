@@ -57,7 +57,8 @@ Options:
     -e <endpoint>, --endpoint <endpoint>        Endpoint of vPoller Proxy/Worker the client connects to
                                                 [default: tcp://localhost:10123]
     -k <key>, --key <key>                       Provide additional key for data filtering
-    -c <counter-id>, --counter-id <counter-id>   Retrieve performance metrics with this counter ID
+    -c <counter-id>, --counter-id <counter-id>  Retrieve performance metrics with this counter ID
+    -i <instance>, --instance <instance>        Performance metric instance name
     -U <username>, --guest-username <username>  Username to use for authentication in guest system
     -P <password>, --guest-password <password>  Password to use for authentication in guest system
     -H <helper>, --helper <helper>              Specify a helper module to use for processing of the
@@ -95,7 +96,8 @@ Examples:
         'password': args['--guest-password'],
         'key': args['--key'],
         'properties': args['--properties'].split(',') if args['--properties'] else None,
-        'counter-id': args['--counter-id'],
+        'counter-id': args['--counter-id'].split(',') if args['--counter-id'] else None,
+        'instance': args['--instance'],
         'helper': args['--helper'],
     }
 
