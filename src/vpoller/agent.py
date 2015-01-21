@@ -2920,3 +2920,59 @@ class VSphereAgent(VConnector):
         counter_id = msg.get('counter-id')
 
         return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
+
+    def datastore_perf_metric_get(self, msg):
+        """
+        Get performance metrics for a vim.Datastore managed object
+
+        The properties passed in the message are the performance
+        counter IDs to be retrieved.
+
+        Example client message would be:
+
+            {
+                "method":   "datastore.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "ds:///vmfs/volumes/643f118a-a970df28/",
+                "properties": [
+                    X,
+                    Y
+                ],
+                "max_sample": 1,
+                "instance": ""
+            }
+
+        For historical performance statistics make sure to pass the
+        performance interval key as part of the message, e.g.:
+
+            {
+                "method":   "datastore.perf.metric.get",
+                "hostname": "vc01.example.org",
+                "name":     "ds:///vmfs/volumes/643f118a-a970df28/",
+                "properties": [
+                    X,
+                    Y
+                ],
+                "key": 1 # Historical performance interval key '1' (Past day)
+            }
+
+        Returns:
+            The retrieved performance metrics
+
+        """
+        obj = self.get_object_by_property(
+            property_name='name',
+            property_value=msg['info.url'],
+            obj_type=pyVmomi.vim.Datastore
+        )
+
+        if not obj:
+            return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+
+        return self._entity_perf_metric_get(
+            entity=obj,
+            counter_id=msg['properties'],
+            max_sample=msg.get('max-sample', 1),
+            instance=msg.get('instance', ''),
+            interval_key=msg.get('key'),
+        )
