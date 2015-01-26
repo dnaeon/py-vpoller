@@ -415,7 +415,7 @@ class VPollerWorker(multiprocessing.Process):
         try:
             result = h.run()
         except Exception as e:
-            logger.warning('Helper module raised an exception: %s', e)
+            logger.warning('Helper module raised an exception: %s', e.message)
             return data
 
         return result
