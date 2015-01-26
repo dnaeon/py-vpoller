@@ -32,7 +32,7 @@ from functools import wraps
 from vpoller.registry import registry
 
 
-def task(name, required):
+def task(name, required=None):
     """
     A decorator for creating new tasks
 
@@ -51,6 +51,6 @@ def task(name, required):
                 result = {'success': 1, 'msg': e.message}
             finally:
                 return result
-        registry.register(name, required, fn)
+        registry.register(name=name, fn=fn, required=required)
         return wrapper
     return decorator

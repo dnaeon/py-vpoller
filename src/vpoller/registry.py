@@ -41,14 +41,14 @@ class TaskRegistry(object):
     def __contains__(self, item):
         return item in self._registry
 
-    def register(self, name, required, fn):
+    def register(self, name, fn, required=None):
         """
         Register a new task
 
         Args:
             name          (str): Name of the task
-            required     (list): List of required message keys
             fn       (function): A function executing the task
+            required     (list): List of required message keys
 
         """
         logging.info('Registering task %s', name)
