@@ -33,6 +33,8 @@ performing the actual polling from a vCenter server.
 
 """
 
+from __future__ import print_function
+
 import os
 import logging
 
@@ -70,7 +72,7 @@ def stop(endpoint):
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run({'method': 'shutdown'})
 
-    print result
+    print('{}'.format(result))
 
 def status(endpoint):
     """
@@ -83,7 +85,7 @@ def status(endpoint):
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run({'method': 'status'})
 
-    print result
+    print('{}'.format(result))
 
 def main():
     usage="""
@@ -114,7 +116,7 @@ Options:
     args = docopt(usage, version=__version__)
 
     if not os.path.exists(args['--file']):
-        raise SystemExit, 'Configuration file %s does not exist' % args['--file']
+        raise SystemExit('Configuration file {} does not exist'.format(args['--file']))
 
     level = logging.DEBUG if args['--debug'] else logging.INFO
     logging.basicConfig(

@@ -32,6 +32,8 @@ discovering and polling of vSphere Object properties.
 
 """
 
+from __future__ import print_function
+
 import logging
 
 from vpoller import __version__
@@ -103,7 +105,7 @@ Examples:
 
     data = client.run(msg)
 
-    print data
+    print('{}'.format(data))
 
 if __name__ == '__main__':
     main()
