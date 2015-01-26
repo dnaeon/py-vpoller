@@ -38,6 +38,9 @@ class TaskRegistry(object):
     def __init__(self):
         self._registry = {}
 
+    def __contains__(self, item):
+        return item in self._registry
+
     def register(self, name, required, fn):
         """
         Register a new task
