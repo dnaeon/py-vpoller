@@ -27,7 +27,7 @@ vPoller Registry module
 
 """
 
-import logging
+from vpoller.log import logger
 
 
 class TaskRegistry(object):
@@ -51,10 +51,10 @@ class TaskRegistry(object):
             required     (list): List of required message keys
 
         """
-        logging.info('Registering task %s', name)
+        logger.info('Registering task %s', name)
 
         if not callable(fn):
-            logging.warning('Task %s is not callable', name)
+            logger.warning('Task %s is not callable', name)
             return
 
         self._registry[name] = {
@@ -70,7 +70,7 @@ class TaskRegistry(object):
             name (str): Name of the task to remove from registry
 
         """
-        logging.info('Unregistering task %s', name)
+        logger.info('Unregistering task %s', name)
         self._registry.pop(name)
 
     def tasks(self):
