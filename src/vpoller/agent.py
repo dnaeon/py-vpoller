@@ -36,12 +36,12 @@ you can request for any specific vSphere managed object
 """
 
 import types
-import logging
 
 import pyVmomi
 
 from vconnector.core import VConnector
 from vpoller.decorators import task
+from vpoller.log import logger
 
 
 class VSphereAgent(VConnector):
@@ -70,14 +70,14 @@ class VSphereAgent(VConnector):
             False otherwise
 
         """
-        logging.debug(
+        logger.debug(
             'Validating client message, required to have: %s',
             required
         )
 
         # Check if we have the required message attributes
         if not all(k in msg for k in required):
-            logging.debug('Required message attributes are missing')
+            logger.debug('Required message attributes are missing')
             return False
 
         # Check if we have correct types of the message attributes
@@ -85,10 +85,10 @@ class VSphereAgent(VConnector):
             if k not in self.msg_attr_types:
                 continue
             if not isinstance(msg[k], self.msg_attr_types.get(k)):
-                logging.debug("Incorrect type for '%s' message attribute", k)
+                logger.debug("Incorrect type for '%s' message attribute", k)
                 return False
 
-        logging.debug('Client message successfully validated')
+        logger.debug('Client message successfully validated')
 
         return True
 
@@ -108,7 +108,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.info(
+        logger.info(
             '[%s] Discovering %s managed objects',
             self.host,
             obj_type.__name__
@@ -132,7 +132,7 @@ class VSphereAgent(VConnector):
             'result': data,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             result
@@ -166,7 +166,7 @@ class VSphereAgent(VConnector):
             The collected properties for this managed object in JSON format
 
         """
-        logging.info(
+        logger.info(
             '[%s] Retrieving properties for %s managed object of type %s',
             self.host,
             obj_property_value,
@@ -210,7 +210,7 @@ class VSphereAgent(VConnector):
             'result': data,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             result
@@ -234,7 +234,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting datastores for %s managed object of type %s',
             self.host,
             name,
@@ -274,7 +274,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logger.debug('[%s] Returning result from operation: %s', self.host, r)
 
         return r
 
@@ -294,7 +294,7 @@ class VSphereAgent(VConnector):
             The triggered alarms for the Managed Object
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Retrieving alarms for %s managed object of type %s',
             self.host,
             obj_property_value,
@@ -333,7 +333,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -366,10 +366,10 @@ class VSphereAgent(VConnector):
         )
 
         if provider_summary.currentSupported:
-            logging.info('[%s]: Entity %s supports real-time statistics', self.host, entity.name)
+            logger.info('[%s]: Entity %s supports real-time statistics', self.host, entity.name)
             interval_id = provider_summary.refreshRate
         else:
-            logging.info('[%s]: Entity %s supports historical statistics only', self.host, entity.name)
+            logger.info('[%s]: Entity %s supports historical statistics only', self.host, entity.name)
             interval_id = None
 
         try:
@@ -411,7 +411,7 @@ class VSphereAgent(VConnector):
             The collected performance metrics from the managed object
 
         """
-        logging.info(
+        logger.info(
             '[%s] Retrieving performance metrics for %s: %s',
             self.host,
             entity.name,
@@ -430,11 +430,11 @@ class VSphereAgent(VConnector):
         )
 
         if not provider_summary.currentSupported:
-            logging.info('[%s] Entity %s does not support real-time statistics', self.host, entity.name)
-            logging.info('[%s] Retrieving historical statistics for entity %s', self.host, entity.name)
+            logger.info('[%s] Entity %s does not support real-time statistics', self.host, entity.name)
+            logger.info('[%s] Retrieving historical statistics for entity %s', self.host, entity.name)
 
         if not provider_summary.currentSupported and not interval_key:
-            logging.warning(
+            logger.warning(
                 '[%s] Entity %s supports historical statistics only, but no historical interval provided',
                 self.host,
                 entity.name
@@ -449,7 +449,7 @@ class VSphereAgent(VConnector):
         # interval key should be provided.
         if interval_key:
             if interval_key not in [str(i.key) for i in historical_interval]:
-                logging.warning(
+                logger.warning(
                     '[%s] Historical interval with key %s does not exist',
                     self.host,
                     interval_key
@@ -531,7 +531,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.info("[%s] Retrieving vSphere About information", self.host)
+        logger.info("[%s] Retrieving vSphere About information", self.host)
 
         # If no properties are specified just return the 'fullName' property
         if 'properties' not in msg or not msg['properties']:
@@ -546,7 +546,7 @@ class VSphereAgent(VConnector):
             'result': [about],
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             result
@@ -570,7 +570,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.info('[%s] Retrieving latest registered event', self.host)
+        logger.info('[%s] Retrieving latest registered event', self.host)
 
         e = self.si.content.eventManager.latestEvent.fullFormattedMessage
 
@@ -580,7 +580,7 @@ class VSphereAgent(VConnector):
             'result': [{'event': e}],
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             result
@@ -604,7 +604,7 @@ class VSphereAgent(VConnector):
             The established vSphere sessions in JSON format
 
         """
-        logging.info('[%s] Retrieving established sessions', self.host)
+        logger.info('[%s] Retrieving established sessions', self.host)
 
         try:
             sm = self.si.content.sessionManager
@@ -638,7 +638,7 @@ class VSphereAgent(VConnector):
             'result': sessions,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             result
@@ -662,7 +662,7 @@ class VSphereAgent(VConnector):
             The list of supported performance counters by the vSphere host
 
         """
-        logging.info(
+        logger.info(
             '[%s] Retrieving supported performance counters',
             self.host
         )
@@ -715,7 +715,7 @@ class VSphereAgent(VConnector):
             The existing performance historical interval on the system
 
         """
-        logging.info(
+        logger.info(
             '[%s] Retrieving existing performance historical intervals',
             self.host
         )
@@ -821,7 +821,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting hosts using %s vim.Network managed object',
             self.host,
             msg['name']
@@ -859,7 +859,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logger.debug('[%s] Returning result from operation: %s', self.host, r)
 
         return r
 
@@ -880,7 +880,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting VMs using %s vim.Network managed object',
             self.host,
             msg['name']
@@ -918,7 +918,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logger.debug('[%s] Returning result from operation: %s', self.host, r)
 
         return r
 
@@ -1530,7 +1530,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting cluster name for %s host',
             self.host,
             msg['name']
@@ -1560,7 +1560,7 @@ class VSphereAgent(VConnector):
             'result': [result],
         }
 
-        logging.debug('[%s] Returning result from operation: %s', self.host, r)
+        logger.debug('[%s] Returning result from operation: %s', self.host, r)
 
         return r
 
@@ -1581,7 +1581,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting VirtualMachine list running on %s host',
             self.host,
             msg['name']
@@ -1617,7 +1617,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -1642,7 +1642,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting Network list available for %s host',
             self.host,
             msg['name']
@@ -1681,7 +1681,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -1900,7 +1900,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Discovering guest disks for VirtualMachine %s',
             self.host,
             msg['name']
@@ -1937,7 +1937,7 @@ class VSphereAgent(VConnector):
             'result': [result],
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -1981,7 +1981,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Discovering network adapters for VirtualMachine %s',
             self.host,
             msg['name']
@@ -2019,7 +2019,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -2044,7 +2044,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting Networks available for %s VirtualMachine',
             self.host,
             msg['name']
@@ -2083,7 +2083,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -2141,7 +2141,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting host where %s VirtualMachine is running on',
             self.host,
             msg['name']
@@ -2171,7 +2171,7 @@ class VSphereAgent(VConnector):
             'result': [result],
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -2238,7 +2238,7 @@ class VSphereAgent(VConnector):
             The discovered objects in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting guest disk info for %s on VirtualMachine %s',
             self.host,
             msg['key'],
@@ -2280,7 +2280,7 @@ class VSphereAgent(VConnector):
             'result': [result],
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -2327,7 +2327,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting processes for VirtualMachine %s',
             self.host,
             msg['name']
@@ -2392,7 +2392,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -2419,7 +2419,7 @@ class VSphereAgent(VConnector):
             The managed object properties in JSON format
 
         """
-        logging.debug(
+        logger.debug(
             '[%s] Getting CPU usage percentage for VirtualMachine %s',
             self.host,
             msg['name']
@@ -2487,7 +2487,7 @@ class VSphereAgent(VConnector):
             'result': [result],
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -2608,7 +2608,7 @@ class VSphereAgent(VConnector):
             }
 
         """
-        logging.info(
+        logger.info(
             '[%s] Getting HostSystem list using Datastore %s',
             self.host,
             msg['name']
@@ -2651,7 +2651,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
@@ -2673,7 +2673,7 @@ class VSphereAgent(VConnector):
             }
 
         """
-        logging.info(
+        logger.info(
             '[%s] Getting VirtualMachine list using Datastore %s',
             self.host,
             msg['name']
@@ -2712,7 +2712,7 @@ class VSphereAgent(VConnector):
             'result': result,
         }
 
-        logging.debug(
+        logger.debug(
             '[%s] Returning result from operation: %s',
             self.host,
             r
