@@ -57,13 +57,6 @@ class VSphereAgent(VConnector):
         VConnector
 
     """
-    def __init__(self, user, pwd, host):
-        """
-        Initialize a new vSphere Agent
-
-        """
-        super(VSphereAgent, self).__init__(user, pwd, host)
-
     def _validate_client_msg(self, msg, required):
         """
         Helper method for validating a client message
