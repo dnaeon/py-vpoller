@@ -20,7 +20,7 @@ Requirements
 
 On the list below you can see the dependencies of vPoller:
 
-* `Python 2.7.x`_
+* `Python 2.7.x, 3.2.x or later`_
 * `pyVmomi`_
 * `vconnector`_
 * `pyzmq`_
@@ -33,7 +33,7 @@ installed in order to build it:
   provided by the ``python-dev`` package)
 * `ZeroMQ 4.x Library`_
 
-.. _`Python 2.7.x`: http://python.org/
+.. _`Python 2.7.x, 3.2.x or later`: http://python.org/
 .. _`pyVmomi`: https://github.com/vmware/pyvmomi
 .. _`vconnector`: https://github.com/dnaeon/py-vconnector
 .. _`pyzmq`: https://github.com/zeromq/pyzmq
