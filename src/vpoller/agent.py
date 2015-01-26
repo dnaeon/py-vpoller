@@ -510,39 +510,7 @@ class VSphereAgent(VConnector):
 
         return r
 
-    def event_latest(self, msg):
-        """
-        Get the latest event registered
-
-        Example client message would be:
-
-            {
-                "method":   "event.latest",
-                "hostname": "vc01.example.org",
-            }
-
-        Returns:
-            The discovered objects in JSON format
-
-        """
-        logging.info('[%s] Retrieving latest registered event', self.host)
-
-        e = self.si.content.eventManager.latestEvent.fullFormattedMessage
-
-        result = {
-            'msg': 'Successfully retrieved event',
-            'success': 0,
-            'result': [{'event': e}],
-        }
-
-        logging.debug(
-            '[%s] Returning result from operation: %s',
-            self.host,
-            result
-        )
-
-        return result
-
+    @task(name='about')
     def about(self, msg):
         """
         Get the 'about' information for the vSphere host
@@ -593,6 +561,41 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='event.latest')
+    def event_latest(self, msg):
+        """
+        Get the latest event registered
+
+        Example client message would be:
+
+            {
+                "method":   "event.latest",
+                "hostname": "vc01.example.org",
+            }
+
+        Returns:
+            The discovered objects in JSON format
+
+        """
+        logging.info('[%s] Retrieving latest registered event', self.host)
+
+        e = self.si.content.eventManager.latestEvent.fullFormattedMessage
+
+        result = {
+            'msg': 'Successfully retrieved event',
+            'success': 0,
+            'result': [{'event': e}],
+        }
+
+        logging.debug(
+            '[%s] Returning result from operation: %s',
+            self.host,
+            result
+        )
+
+        return result
+
+    @task(name='session.get')
     def session_get(self, msg):
         """
         Get the established vSphere sessions
@@ -650,6 +653,7 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='perf.metric.info')
     def perf_metric_info(self, msg):
         """
         Get all performance counters supported by the vSphere host
@@ -702,6 +706,7 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='perf.interval.info')
     def perf_interval_info(self, msg):
         """
         Get information about existing performance historical intervals
@@ -734,6 +739,7 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='net.discover')
     def net_discover(self, msg):
         """
         Discover all pyVmomi.vim.Network managed objects
@@ -772,6 +778,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='net.get', required=['name'])
     def net_get(self, msg):
         """
         Get properties of a single pyVmomi.vim.Network managed object
@@ -804,6 +811,7 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    @task(name='net.host.get', required=['name'])
     def net_host_get(self, msg):
         """
         Get all Host Systems using this pyVmomi.vim.Network managed object
@@ -862,6 +870,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='net.vm.get', required=['name'])
     def net_vm_get(self, msg):
         """
         Get all Virtual Machines using this pyVmomi.vim.Network managed object
@@ -920,6 +929,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='datacenter.discover')
     def datacenter_discover(self, msg):
         """
         Discover all vim.Datacenter managed objects
@@ -958,7 +968,7 @@ class VSphereAgent(VConnector):
 
         return r
 
-
+    @task(name='datacenter.perf.metric.get', required=['name', 'counter-id'])
     def datacenter_perf_metric_get(self, msg):
         """
         Get performance metrics for a vim.Datacenter managed object
@@ -972,7 +982,7 @@ class VSphereAgent(VConnector):
                 "method":   "datacenter.perf.metric.get",
                 "hostname": "vc01.example.org",
                 "name":     "MyDatacenter",
-                "properties": [
+                "counter-id": [
                     256,  # VM power on count
                     257,  # VM power off count
                     258   # VM suspend count
@@ -1003,6 +1013,7 @@ class VSphereAgent(VConnector):
             interval_key=key
         )
 
+    @task(name='datacenter.perf.metric.info')
     def datacenter_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.Datacenter object
@@ -1033,6 +1044,7 @@ class VSphereAgent(VConnector):
 
         return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
+    @task(name='datacenter.get', required=['name', 'properties'])
     def datacenter_get(self, msg):
         """
         Get properties of a single vim.Datacenter managed object
@@ -1065,6 +1077,7 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    @task(name='datacenter.alarm.get', required=['name'])
     def datacenter_alarm_get(self, msg):
         """
         Get all alarms for a vim.Datacenter managed object
@@ -1089,6 +1102,7 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='cluster.discover')
     def cluster_discover(self, msg):
         """
         Discover all vim.ClusterComputeResource managed objects
