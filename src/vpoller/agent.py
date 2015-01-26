@@ -39,7 +39,9 @@ import types
 import logging
 
 import pyVmomi
+
 from vconnector.core import VConnector
+from vpoller.decorators import task
 
 
 class VSphereAgent(VConnector):
@@ -61,221 +63,6 @@ class VSphereAgent(VConnector):
 
         """
         super(VSphereAgent, self).__init__(user, pwd, host)
-
-        # Message attribute types we expect to receive
-        # before we start processing a task request
-        self.msg_attr_types = {
-            'hostname': (types.StringType, types.UnicodeType),
-            'name': (types.StringType, types.UnicodeType, types.NoneType),
-            'key': (types.StringType, types.UnicodeType, types.NoneType),
-            'username': (types.StringType, types.UnicodeType, types.NoneType),
-            'password': (types.StringType, types.UnicodeType, types.NoneType),
-            'properties': (types.TupleType,  types.ListType, types.NoneType),
-        }
-
-        # Supported vSphere Agent methods where the
-        # 'method' key is a reference to the actual method
-        # which will be called and 'required' is a list of
-        # required message attributes that a client task
-        # must provide during the call
-        self.agent_methods = {
-            'about': {
-                'method': self.about,
-                'required': ['hostname'],
-            },
-            'event.latest': {
-                'method': self.event_latest,
-                'required': ['hostname'],
-            },
-            'session.get': {
-                'method': self.session_get,
-                'required': ['hostname'],
-            },
-            'net.discover': {
-                'method': self.net_discover,
-                'required': ['hostname'],
-            },
-            'net.get': {
-                'method': self.net_get,
-                'required': ['hostname', 'name'],
-            },
-            'net.host.get': {
-                'method': self.net_host_get,
-                'required': ['hostname', 'name'],
-            },
-            'net.vm.get': {
-                'method': self.net_vm_get,
-                'required': ['hostname', 'name'],
-            },
-            'datacenter.discover': {
-                'method': self.datacenter_discover,
-                'required': ['hostname'],
-            },
-            'datacenter.get': {
-                'method': self.datacenter_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'datacenter.perf.metric.get': {
-                'method': self.datacenter_perf_metric_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'datacenter.perf.metric.info': {
-                'method': self.datacenter_perf_metric_info,
-                'required': ['hostname', 'name'],
-            },
-            'datacenter.alarm.get': {
-                'method': self.datacenter_alarm_get,
-                'required': ['hostname', 'name'],
-            },
-            'cluster.perf.metric.get': {
-                'method': self.cluster_perf_metric_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'cluster.perf.metric.info': {
-                'method': self.cluster_perf_metric_info,
-                'required': ['hostname', 'name'],
-            },
-            'cluster.discover': {
-                'method': self.cluster_discover,
-                'required': ['hostname'],
-            },
-            'cluster.get': {
-                'method': self.cluster_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'cluster.alarm.get': {
-                'method': self.cluster_alarm_get,
-                'required': ['hostname', 'name'],
-            },
-            'resource.pool.discover': {
-                'method': self.resource_pool_discover,
-                'required': ['hostname'],
-            },
-            'resource.pool.get': {
-                'method': self.resource_pool_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'host.perf.metric.get': {
-                'method': self.host_perf_metric_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'host.perf.metric.info': {
-                'method': self.host_perf_metric_info,
-                'required': ['hostname', 'name'],
-            },
-            'host.discover': {
-                'method': self.host_discover,
-                'required': ['hostname'],
-            },
-            'host.alarm.get': {
-                'method': self.host_alarm_get,
-                'required': ['hostname', 'name']
-            },
-            'host.get': {
-                'method': self.host_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'host.cluster.get': {
-                'method': self.host_cluster_get,
-                'required': ['hostname', 'name'],
-            },
-            'host.vm.get': {
-                'method': self.host_vm_get,
-                'required': ['hostname', 'name'],
-            },
-            'host.datastore.get': {
-                'method': self.host_datastore_get,
-                'required': ['hostname'],
-            },
-            'host.net.get': {
-                'method': self.host_net_get,
-                'required': ['hostname', 'name'],
-            },
-            'vm.alarm.get': {
-                'method': self.vm_alarm_get,
-                'required': ['hostname', 'name'],
-            },
-            'vm.discover': {
-                'method': self.vm_discover,
-                'required': ['hostname'],
-            },
-            'vm.disk.discover': {
-                'method': self.vm_disk_discover,
-                'required': ['hostname', 'name'],
-            },
-            'vm.get': {
-                'method': self.vm_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'vm.datastore.get': {
-                'method': self.vm_datastore_get,
-                'required': ['hostname', 'name'],
-            },
-            'vm.disk.get': {
-                'method': self.vm_disk_get,
-                'required': ['hostname', 'name', 'key'],
-            },
-            'vm.host.get': {
-                'method': self.vm_host_get,
-                'required': ['hostname', 'name'],
-            },
-            'vm.guest.net.get': {
-                'method': self.vm_guest_net_get,
-                'required': ['hostname', 'name'],
-            },
-            'vm.net.get': {
-                'method': self.vm_net_get,
-                'required': ['hostname', 'name'],
-            },
-            'vm.perf.metric.get': {
-                'method': self.vm_perf_metric_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'vm.perf.metric.info': {
-                'method': self.vm_perf_metric_info,
-                'required': ['hostname', 'name'],
-            },
-            'vm.process.get': {
-                'method': self.vm_process_get,
-                'required': ['hostname', 'name', 'username', 'password'],
-            },
-            'vm.cpu.usage.percent': {
-                'method': self.vm_cpu_usage_percent,
-                'required': ['hostname', 'name'],
-            },
-            'datastore.discover': {
-                'method': self.datastore_discover,
-                'required': ['hostname'],
-            },
-            'datastore.get': {
-                'method': self.datastore_get,
-                'required': ['hostname', 'name', 'properties'],
-            },
-            'datastore.alarm.get': {
-                'method': self.datastore_alarm_get,
-                'required': ['hostname', 'name'],
-            },
-            'datastore.host.get': {
-                'method': self.datastore_host_get,
-                'required': ['hostname', 'name'],
-            },
-            'datastore.vm.get': {
-                'method': self.datastore_vm_get,
-                'required': ['hostname', 'name'],
-            },
-            'datastore.perf.metric.info': {
-                'method': self.datastore_perf_metric_info,
-                'required': ['hostname', 'name'],
-            },
-            'perf.metric.info': {
-                'method': self.perf_metric_info,
-                'required': ['hostname'],
-            },
-            'perf.interval.info': {
-                'method': self.perf_interval_info,
-                'required': ['hostname'],
-            },
-        }
 
     def _validate_client_msg(self, msg, required):
         """
@@ -1340,6 +1127,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='cluster.perf.metric.get', required=['name', 'counter-id'])
     def cluster_perf_metric_get(self, msg):
         """
         Get performance metrics for a vim.ClusterComputeResource managed object
@@ -1353,7 +1141,7 @@ class VSphereAgent(VConnector):
                 "method":   "cluster.perf.metric.get",
                 "hostname": "vc01.example.org",
                 "name":     "MyCluster",
-                "properties": [
+                "counter-id": [
                     276,  # Effective memory resources
                     277   # Total amount of CPU resources of all hosts in the cluster
                 ],
@@ -1383,6 +1171,7 @@ class VSphereAgent(VConnector):
             interval_key=key
         )
 
+    @task(name='cluster.perf.metric.info')
     def cluster_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.ClusterComputeResource object
@@ -1413,6 +1202,7 @@ class VSphereAgent(VConnector):
 
         return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
+    @task(name='cluster.get', required=['name', 'properties'])
     def cluster_get(self, msg):
         """
         Get properties of a vim.ClusterComputeResource managed object
@@ -1445,6 +1235,7 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    @task(name='cluster.alarm.get', required=['name'])
     def cluster_alarm_get(self, msg):
         """
         Get all alarms for a vim.ClusterComputeResource managed object
@@ -1469,6 +1260,7 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='resource.pool.discover')
     def resource_pool_discover(self, msg):
         """
         Discover all vim.ResourcePool managed objects
@@ -1507,6 +1299,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='resource.pool.get', required=['name', 'properties'])
     def resource_pool_get(self, msg):
         """
         Get properties of a single vim.ResourcePool managed object
@@ -1541,6 +1334,7 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    @task(name='host.discover')
     def host_discover(self, msg):
         """
         Discover all vim.HostSystem managed objects
@@ -1579,6 +1373,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='host.get', required=['name', 'properties'])
     def host_get(self, msg):
         """
         Get properties of a single vim.HostSystem managed object
@@ -1611,6 +1406,7 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    @task(name='host.alarm.get', required=['name'])
     def host_alarm_get(self, msg):
         """
         Get all alarms for a vim.HostSystem managed object
@@ -1635,6 +1431,7 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='host.perf.metric.get', required=['name', 'counter-id'])
     def host_perf_metric_get(self, msg):
         """
         Get performance metrics for a vim.HostSystem managed object
@@ -1678,6 +1475,7 @@ class VSphereAgent(VConnector):
             interval_key=key
         )
 
+    @task(name='host.perf.metric.info', required=['name'])
     def host_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.HostSystem object
@@ -1708,6 +1506,7 @@ class VSphereAgent(VConnector):
 
         return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
+    @task(name='host.cluster.get', required=['name'])
     def host_cluster_get(self, msg):
         """
         Get the cluster name for a HostSystem
@@ -1758,6 +1557,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='host.vm.get', required=['name'])
     def host_vm_get(self, msg):
         """
         Get all vim.VirtualMachine objects of a HostSystem
@@ -1818,6 +1618,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='host.net.get', required=['name'])
     def host_net_get(self, msg):
         """
         Get all Networks used by a vim.HostSystem managed object
@@ -1881,6 +1682,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='host.datastore.get', required=['name'])
     def host_datastore_get(self, msg):
         """
         Get all Datastores used by a vim.HostSystem managed object
@@ -1902,6 +1704,7 @@ class VSphereAgent(VConnector):
             name=msg['name']
         )
 
+    @task(name='vm.alarm.get', required=['name'])
     def vm_alarm_get(self, msg):
         """
         Get all alarms for a vim.VirtualMachine managed object
@@ -1926,6 +1729,7 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='vm.perf.metric.get', required=['name', 'counter-id'])
     def vm_perf_metric_get(self, msg):
         """
         Get performance metrics for a vim.VirtualMachine managed object
@@ -1939,7 +1743,7 @@ class VSphereAgent(VConnector):
                 "method":   "vm.perf.metric.get",
                 "hostname": "vc01.example.org",
                 "name":     "vm01.example.org",
-                "properties": [
+                "counter-id"
                     12, # CPU Ready time of the Virtual Machine
                 ],
                 "max_sample": 1,
@@ -1983,6 +1787,7 @@ class VSphereAgent(VConnector):
             instance=instance
         )
 
+    @task(name='vm.perf.metric.info')
     def vm_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.VirtualMachine object
@@ -2013,6 +1818,7 @@ class VSphereAgent(VConnector):
 
         return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
+    @task(name='vm.discover')
     def vm_discover(self, msg):
         """
         Discover all pyVmomi.vim.VirtualMachine managed objects
@@ -2052,6 +1858,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='vm.disk.discover', required=['name'])
     def vm_disk_discover(self, msg):
         """
         Discover all disks used by a vim.VirtualMachine managed object
@@ -2131,6 +1938,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='vm.guest.net.get', required=['name'])
     def vm_guest_net_get(self, msg):
         """
         Discover network adapters for a vim.VirtualMachine  object
@@ -2212,6 +2020,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='vm.net.get', required=['name'])
     def vm_net_get(self, msg):
         """
         Get all Networks used by a vim.VirtualMachine managed object
@@ -2275,6 +2084,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='vm.get', required=['name', 'properties'])
     def vm_get(self, msg):
         """
         Get properties for a vim.VirtualMachine managed object
@@ -2307,6 +2117,7 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    @task(name='vm.host.get', required=['name'])
     def vm_host_get(self, msg):
         """
         Get the vSphere host where a Virtual Machine is running on
@@ -2361,6 +2172,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='vm.datastore.get', required=['name'])
     def vm_datastore_get(self, msg):
         """
         Get all Datastores used by a vim.VirtualMachine managed object
@@ -2382,6 +2194,7 @@ class VSphereAgent(VConnector):
             name=msg['name']
         )
 
+    @task(name='vm.disk.get', required=['name'])
     def vm_disk_get(self, msg):
         """
         Get properties for a disk of a vim.VirtualMachine object
@@ -2468,6 +2281,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='vm.process.get', required=['name', 'username', 'password'])
     def vm_process_get(self, msg):
         """
         Get processes running on a vim.VirtualMachine managed object
@@ -2579,9 +2393,12 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='vm.cpu.usage.percent', required=['name'])
     def vm_cpu_usage_percent(self, msg):
         """
         Get the CPU usage in percentage for a VirtualMachine
+
+        NOTE: This task will be gone after the transition to performance counters
 
         Example client message would be:
 
@@ -2671,6 +2488,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='datastore.discover')
     def datastore_discover(self, msg):
         """
         Discover all pyVmomi.vim.Datastore managed objects
@@ -2710,6 +2528,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='datastore.get', required=['name', 'properties'])
     def datastore_get(self, msg):
         """
         Get properties for a vim.Datastore managed object
@@ -2743,6 +2562,7 @@ class VSphereAgent(VConnector):
             obj_property_value=msg['name']
         )
 
+    @task(name='datastore.alarm.get', required=['name'])
     def datastore_alarm_get(self, msg):
         """
         Get all alarms for a vim.Datastore managed object
@@ -2767,6 +2587,7 @@ class VSphereAgent(VConnector):
 
         return result
 
+    @task(name='datastore.host.get', required=['name'])
     def datastore_host_get(self, msg):
         """
         Get all HostSystem objects attached to a specific Datastore
@@ -2831,6 +2652,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='datastore.vm.get', required=['name'])
     def datastore_vm_get(self, msg):
         """
         Get all VirtualMachine objects using a specific Datastore
@@ -2891,6 +2713,7 @@ class VSphereAgent(VConnector):
 
         return r
 
+    @task(name='datastore.perf.metric.info', required=['name'])
     def datastore_perf_metric_info(self, msg):
         """
         Get performance counters available for a vim.Datastore object
@@ -2921,6 +2744,7 @@ class VSphereAgent(VConnector):
 
         return self._entity_perf_metric_info(entity=obj, counter_id=counter_id)
 
+    @task(name='datastore.perf.metric.get', required=['name', 'counter-id'])
     def datastore_perf_metric_get(self, msg):
         """
         Get performance metrics for a vim.Datastore managed object
@@ -2934,7 +2758,7 @@ class VSphereAgent(VConnector):
                 "method":   "datastore.perf.metric.get",
                 "hostname": "vc01.example.org",
                 "name":     "ds:///vmfs/volumes/643f118a-a970df28/",
-                "properties": [
+                "counter-id": [
                     X,
                     Y
                 ],
@@ -2976,3 +2800,4 @@ class VSphereAgent(VConnector):
             instance=msg.get('instance', ''),
             interval_key=msg.get('key'),
         )
+
