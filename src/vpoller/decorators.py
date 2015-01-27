@@ -51,6 +51,6 @@ def task(name, required=None):
                 result = {'success': 1, 'msg': e.message}
             finally:
                 return result
-        registry.register(name=name, fn=fn, required=required)
+        registry.register(name=name, fn=wrapper, required=required)
         return wrapper
     return decorator
