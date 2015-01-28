@@ -62,7 +62,7 @@ def stop(endpoint):
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run({'method': 'shutdown'})
 
-    print('{}'.format(result))
+    print(result.encode('utf-8'))
 
 def status(endpoint):
     """
@@ -75,7 +75,7 @@ def status(endpoint):
     client = VPollerClient(endpoint=endpoint, timeout=1000, retries=3)
     result = client.run({'method': 'status'})
 
-    print('{}'.format(result))
+    print(result.encode('utf-8'))
     
 def main():
 
