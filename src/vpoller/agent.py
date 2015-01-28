@@ -23,24 +23,19 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vPoller Agent module for the VMware vSphere Poller
+VMware vSphere tasks module for vPoller
 
-vPoller Agents are used by the vPoller Workers, which take care of
-establishing the connection to the vSphere hosts and do all the heavy lifting.
-
-Check the vSphere Web Services SDK API for more information on the properties
-you can request for any specific vSphere managed object
+For more information about the VMware vSphere SDK,
+which this module is using please check the link below:
 
     - https://www.vmware.com/support/developer/vc-sdk/
 
 """
 
-import types
-
 import pyVmomi
 
-from vpoller.decorators import task
 from vpoller.log import logger
+from vpoller.task.decorators import task
 
 
 def _validate_client_msg(agent, msg, required):
