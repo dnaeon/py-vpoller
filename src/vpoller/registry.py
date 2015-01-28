@@ -28,11 +28,26 @@ vPoller Registry module
 """
 
 from vpoller.log import logger
+from vpoller.exceptions import VPollerException
+
+
+class Task(object):
+    """
+    vPoller task class
+
+    """
+    def __init__(self, name, function, required=None):
+        if not callable(function):
+            raise VPollerException('Task %s is not callable', name)
+
+        self.name = name
+        self.function = function
+        self.required = required
 
 
 class TaskRegistry(object):
     """
-    A registry for the available vPoller tasks
+    A registry for the vPoller tasks
 
     """
     def __init__(self):
@@ -41,26 +56,20 @@ class TaskRegistry(object):
     def __contains__(self, item):
         return item in self._registry
 
-    def register(self, name, fn, required=None):
+    def register(self, task):
         """
         Register a new task
 
         Args:
-            name          (str): Name of the task
-            fn       (function): A function executing the task
-            required     (list): List of required message keys
+            task (Task): A Task instance to be registered
 
         """
         logger.info('Registering task %s', name)
 
-        if not callable(fn):
-            logger.warning('Task %s is not callable', name)
-            return
+        if not isinstance(task, Task):
+            raise VPollerException('The task should be an instance of Task class')
 
-        self._registry[name] = {
-            'required': required,
-            'function': fn
-        }
+        self._registry[task.name] = task
 
     def unregister(self, name):
         """
@@ -73,12 +82,12 @@ class TaskRegistry(object):
         logger.info('Unregistering task %s', name)
         self._registry.pop(name)
 
-    def tasks(self):
+    def get_task(self, name):
         """
-        Returns the registered tasks
+        Get a task by name
 
         """
-        return self._registry.keys()
+        return self._registry.get(name)
 
 
 registry = TaskRegistry()
