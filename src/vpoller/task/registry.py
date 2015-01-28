@@ -28,21 +28,10 @@ vPoller Registry module
 """
 
 from vpoller.log import logger
+from vpoller.core import Task
 from vpoller.exceptions import VPollerException
 
-
-class Task(object):
-    """
-    vPoller task class
-
-    """
-    def __init__(self, name, function, required=None):
-        if not callable(function):
-            raise VPollerException('Task %s is not callable', name)
-
-        self.name = name
-        self.function = function
-        self.required = required
+__all__ = ['TaskRegistry']
 
 
 class TaskRegistry(object):
@@ -64,7 +53,7 @@ class TaskRegistry(object):
             task (Task): A Task instance to be registered
 
         """
-        logger.info('Registering task %s', name)
+        logger.debug('Registering task %s', name)
 
         if not isinstance(task, Task):
             raise VPollerException('The task should be an instance of Task class')
@@ -79,10 +68,10 @@ class TaskRegistry(object):
             name (str): Name of the task to remove from registry
 
         """
-        logger.info('Unregistering task %s', name)
+        logger.debug('Unregistering task %s', name)
         self._registry.pop(name)
 
-    def get_task(self, name):
+    def get(self, name):
         """
         Get a task by name
 
