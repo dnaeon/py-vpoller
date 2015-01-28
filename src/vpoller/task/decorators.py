@@ -29,7 +29,10 @@ vPoller Task Decorators module
 
 from functools import wraps
 
-from vpoller.registry import registry
+from vpoller.task.core import Task
+from vpoller.task.registry import registry
+
+__all__ = ['task']
 
 
 def task(name, required=None):
@@ -51,6 +54,7 @@ def task(name, required=None):
                 result = {'success': 1, 'msg': e.message}
             finally:
                 return result
-        registry.register(name=name, fn=wrapper, required=required)
+        t = Task(name=name, function=wrapper, required=required)
+        registry.register(t)
         return wrapper
     return decorator
