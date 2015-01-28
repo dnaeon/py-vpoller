@@ -23,7 +23,7 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-vPoller Worker module for the VMware vSphere Poller
+vPoller Worker module
 
 """
 
@@ -41,11 +41,13 @@ except ImportError:
 import zmq
 
 from vpoller import __version__
-from vpoller.agent import VSphereAgent
-from vpoller.exceptions import VPollerException
 from vpoller.log import logger
-from vpoller.registry import registry
+from vpoller.exceptions import VPollerException
+from vpoller.task.registry import registry
+from vconnector.core import VConnector
 from vconnector.core import VConnectorDatabase
+
+__all__ = ['VPollerWorkerManager', 'VPollerWorker']
 
 
 class VPollerWorkerManager(object):
@@ -528,7 +530,7 @@ class VPollerWorker(multiprocessing.Process):
             )
 
         for agent in agents:
-            a = VSphereAgent(
+            a = VConnector(
                 user=agent['user'],
                 pwd=agent['pwd'],
                 host=agent['host']
@@ -553,6 +555,9 @@ class VPollerWorker(multiprocessing.Process):
         The message is passed to the VSphereAgent object of the
         respective vSphere host in order to do the actual polling.
 
+        Args:
+            msg (dict): Client message for processing
+
         An example message for discovering the hosts could be:
 
             {
@@ -569,43 +574,29 @@ class VPollerWorker(multiprocessing.Process):
                 "property": "summary.capacity"
             }
 
-        Args:
-        msg (dict): Client message for processing
-
         """
         logger.debug('Processing client message: %s', msg)
 
-        # Check whether the client message is a valid one
         if not isinstance(msg, dict):
             return {
                 'success': 1,
-                'msg': 'Expected a JSON message, received %s' % msg.__class__
+                'msg': 'Expected a JSON message, received {}'.format(msg.__class__)
             }
 
-        if 'method' not in msg:
-            return {'success': 1, 'msg': 'Missing method name'}
+        task = registry.get(msg.get('method'))
+        agent = self.agents.get(msg.get('hostname'))
 
-        # Get the vSphere Agent object for handling this request
-        requested_method = msg.get('method')
-        requested_agent = msg.get('hostname')
-        agent = self.agents.get(requested_agent)
+        if not task:
+            return {'success': 1, 'msg': 'Unknown or missing task/method name'}
 
         if not agent:
-            return {
-                'success': 1,
-                'msg': 'Unknown or missing vSphere Agent requested'
-            }
+            return {'success': 1, 'msg': 'Unknown or missing agent name'}
 
-        agent_method = agent.agent_methods.get(requested_method)
+        #
+        #if not _validate_client_msg(msg, task.required):
+        #    return {'success': 1, 'msg': 'Incorrect task request received'}
+        #
 
-        if not agent_method:
-            return {'success': 1, 'msg': 'Unknown method name requested'}
-
-        # Validate client message for required message attributes and type
-        required = agent.agent_methods.get(requested_method)['required']
-        if not agent._validate_client_msg(msg, required):
-            return {'success': 1, 'msg': 'Incorrect task request received'}
-
-        result = agent_method['method'](msg)
-
+        result = task.function(agent, msg)
+        
         return result
