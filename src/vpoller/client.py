@@ -28,9 +28,10 @@ vPoller Client module for the VMware vSphere Poller
 """
 
 import json
-import logging
 
 import zmq
+
+from vpoller.log import logger
 
 
 class VPollerClient(object):
@@ -72,10 +73,10 @@ class VPollerClient(object):
             msg (dict): The client message to send
 
         """
-        logging.debug('Endpoint to connect to: %s', self.endpoint)
-        logging.debug('Timeout of request: %s ms', self.timeout)
-        logging.debug('Number of retries: %d', self.retries)
-        logging.debug('Message to be sent: %s', msg)
+        logger.debug('Endpoint to connect to: %s', self.endpoint)
+        logger.debug('Timeout of request: %s ms', self.timeout)
+        logger.debug('Number of retries: %d', self.retries)
+        logger.debug('Message to be sent: %s', msg)
 
         self.zcontext = zmq.Context()
         self.zclient = self.zcontext.socket(zmq.REQ)
@@ -86,7 +87,7 @@ class VPollerClient(object):
         result = None
 
         while self.retries > 0:
-            logging.debug('Sending client message...')
+            logger.debug('Sending client message...')
 
             # Send our message out
             self.zclient.send_json(msg)
@@ -94,24 +95,24 @@ class VPollerClient(object):
 
             # Do we have a reply?
             if socks.get(self.zclient) == zmq.POLLIN:
-                logging.debug('Received response on client socket')
+                logger.debug('Received response on client socket')
                 result = self.zclient.recv_unicode()
-                logging.debug('Received message was: %s', result)
+                logger.debug('Received message was: %s', result)
                 break
             else:
                 # We didn't get a reply back from the server, let's retry
                 self.retries -= 1
-                logging.warning(
+                logger.warning(
                     'Did not receive response, retrying...'
                 )
 
                 # Socket is confused. Close and remove it.
-                logging.debug('Closing sockets and re-establishing connection...')
+                logger.debug('Closing sockets and re-establishing connection...')
                 self.zclient.close()
                 self.zpoller.unregister(self.zclient)
 
                 # Re-establish the connection
-                logging.debug(
+                logger.debug(
                     'Re-establishing connection to endpoint: %s',
                     self.endpoint
                 )
@@ -121,14 +122,14 @@ class VPollerClient(object):
                 self.zpoller.register(self.zclient, zmq.POLLIN)
 
         # Close the socket and terminate the context
-        logging.debug('Closing sockets and exiting')
+        logger.debug('Closing sockets and exiting')
         self.zclient.close()
         self.zpoller.unregister(self.zclient)
         self.zcontext.term()
 
         # Did we have any result reply at all?
         if result is None:
-            logging.error(
+            logger.error(
                 'Did not receive response, aborting...'
             )
             r = {
