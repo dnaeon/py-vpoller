@@ -33,6 +33,8 @@ import zmq
 
 from vpoller.log import logger
 
+__all__ = ['VPollerClient', 'validate_message']
+
 
 class VPollerClient(object):
     """
@@ -139,3 +141,29 @@ class VPollerClient(object):
             return json.dumps(r, ensure_ascii=False)
 
         return result
+
+
+def validate_message(msg, required):
+    """
+    Helper method for validating a client message
+
+    Returns:
+        bool: True if message has been successfully validated
+
+    """
+    if not required:
+        return True
+
+    logger.debug(
+        'Validating client message, required to have: %s',
+        required
+    )
+
+    # Check if we have the required message attributes
+    if not all(k in msg for k in required):
+        logger.debug('Required message keys are missing')
+        return False
+
+    logger.debug('Client message successfully validated')
+
+    return True
