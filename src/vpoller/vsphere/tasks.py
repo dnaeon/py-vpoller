@@ -38,40 +38,6 @@ from vpoller.log import logger
 from vpoller.task.decorators import task
 
 
-def _validate_client_msg(agent, msg, required):
-    """
-    Helper method for validating a client message
-
-    Checks whether the required attributes are contained
-    within the received task request and also checks whether
-    they are from the proper type.
-
-    Returns:
-        bool: True if message has been successfully validated
-
-    """
-    logger.debug(
-        'Validating client message, required to have: %s',
-        required
-    )
-
-    # Check if we have the required message attributes
-    if not all(k in msg for k in required):
-        logger.debug('Required message attributes are missing')
-        return False
-
-    # Check if we have correct types of the message attributes
-    for k in msg.keys():
-        if k not in agent.msg_attr_types:
-            continue
-        if not isinstance(msg[k], agent.msg_attr_types.get(k)):
-            logger.debug("Incorrect type for '%s' message attribute", k)
-            return False
-
-    logger.debug('Client message successfully validated')
-
-    return True
-
 def _discover_objects(agent, properties, obj_type):
     """
     Helper method to simplify discovery of vSphere managed objects
