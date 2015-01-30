@@ -47,6 +47,10 @@ used along with a description for each of them.
 +---------+--------------+-----------------------------------------------------------------------------------+
 | worker  | mgmt         | Management endpoint, used for management tasks for the ``vPoller Worker``         |
 +---------+--------------+-----------------------------------------------------------------------------------+
+| worker  | helpers      | Helper modules to be loaded and used for post-processing of any result data       |
++---------+--------------+-----------------------------------------------------------------------------------+
+| worker  | tasks        | Task modules to be loaded by the ``vPoller Worker``                               |
++---------+--------------+-----------------------------------------------------------------------------------+
 | cache   | enabled      | If True then ``vPoller Worker`` will use a cache for the vSphere managed objects  |
 +---------+--------------+-----------------------------------------------------------------------------------+
 | cache   | maxsize      | Upperbound limit on the entries stored in the cache                               |
