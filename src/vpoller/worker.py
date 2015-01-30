@@ -85,8 +85,10 @@ class VPollerWorkerManager(object):
             'proxy': 'tcp://localhost:10123',
             'helpers': None,
             'tasks': None,
+            'cache_maxsize': 0,
             'cache_enabled': False,
             'cache_ttl': 3600,
+            'cache_housekeeping': 480,
         }
 
     def start(self):
@@ -143,8 +145,10 @@ class VPollerWorkerManager(object):
         self.config['proxy'] = parser.get('worker', 'proxy')
         self.config['helpers'] = parser.get('worker', 'helpers')
         self.config['tasks'] = parser.get('worker', 'tasks')
-        self.config['cache_ttl'] = parser.getint('cache', 'ttl')
         self.config['cache_enabled'] = parser.getboolean('cache', 'enabled')
+        self.config['cache_maxsize'] = parser.getint('cache', 'maxsize')
+        self.config['cache_ttl'] = parser.getint('cache', 'ttl')
+        self.config['cache_housekeeping'] = parser.getint('cache', 'housekeeping')
 
         if self.config['helpers']:
             self.config['helpers'] = self.config['helpers'].split(',')
@@ -179,7 +183,9 @@ class VPollerWorkerManager(object):
                 helpers=self.config.get('helpers'),
                 tasks=self.config.get('tasks'),
                 cache_enabled=self.config.get('cache_enabled'),
-                cache_ttl=self.config.get('cache_ttl')
+                cache_maxsize=self.config.get('cache_maxsize'),
+                cache_ttl=self.config.get('cache_ttl'),
+                cache_housekeeping=self.config.get('cache_housekeeping')
             )
             worker.daemon = True
             self.workers.append(worker)
@@ -307,20 +313,33 @@ class VPollerWorker(multiprocessing.Process):
         run() method
 
     """
-    def __init__(self, db, proxy, helpers, tasks, cache_enabled, cache_ttl):
+    def __init__(self,
+                 db,
+                 proxy,
+                 helpers,
+                 tasks,
+                 cache_enabled,
+                 cache_maxsize,
+                 cache_ttl,
+                 cache_housekeeping,
+    ):
         """
         Initialize a new VPollerWorker object
 
         Args:
-            db             (str): Path to the vConnector database file
-            proxy          (str): Endpoint to which vPoller Workers connect
-                                  and receive new tasks for processing
-            helpers       (list): A list of helper modules to be loaded
-            task          (list): A list of task modules to be loaded
-            cache_enabled (bool): If True use an expiring cache for the
-                                  managed objects
-            cache_ttl      (int): Time in seconds after which a cached
-                                  object is considered as expired
+            db                (str): Path to the vConnector database file
+            proxy             (str): Endpoint to which vPoller Workers connect
+                                     and receive new tasks for processing
+            helpers           (list): A list of helper modules to be loaded
+            task              (list): A list of task modules to be loaded
+            cache_enabled     (bool): If True use an expiring cache for the
+                                      managed objects
+            cache_maxsize      (int): Upperbound limit on the number of items
+                                      that will be stored in the cache
+            cache_ttl          (int): Time in seconds after which a cached
+                                      object is considered as expired
+            cache_housekeeping (int): Time in minutes to perform
+                                      periodic housekeeping of the cache
 
         """
         super(VPollerWorker, self).__init__()
@@ -329,8 +348,10 @@ class VPollerWorker(multiprocessing.Process):
             'proxy': proxy,
             'helpers': helpers,
             'tasks': tasks,
-            'cache_ttl': cache_ttl,
             'cache_enabled': cache_enabled,
+            'cache_maxsize': cache_maxsize,
+            'cache_ttl': cache_ttl,
+            'cache_housekeeping': cache_housekeeping,
         }
         self.task_modules = {}
         self.helper_modules = {}
@@ -579,7 +600,9 @@ class VPollerWorker(multiprocessing.Process):
                 pwd=agent['pwd'],
                 host=agent['host'],
                 cache_enabled=self.config.get('cache_enabled'),
-                cache_ttl=self.config.get('cache_ttl')
+                cache_maxsize=self.config.get('cache_maxsize'),
+                cache_ttl=self.config.get('cache_ttl'),
+                cache_housekeeping=self.config.get('cache_housekeeping')
             )
             self.agents[a.host] = a
             logger.info('Created vSphere Agent for %s', agent['host'])
