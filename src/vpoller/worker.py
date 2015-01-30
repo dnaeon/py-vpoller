@@ -426,10 +426,6 @@ class VPollerWorker(multiprocessing.Process):
                 )
                 continue
 
-            logger.info(
-                'Helper module %s successfully loaded',
-                helper
-            )
             self.helper_modules[helper] = module
 
     def run_helper(self, helper, msg, data):
