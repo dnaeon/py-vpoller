@@ -387,7 +387,7 @@ class VPollerWorker(multiprocessing.Process):
                     e.message
                 )
                 continue
-                self.task_modules[task] = module
+            self.task_modules[task] = module
 
         if not self.task_modules:
             raise VPollerException('No task modules loaded')
