@@ -12,33 +12,51 @@ Below is an example ``vpoller.conf`` file that you can use:
 .. code-block:: ini
 
    [proxy]
-   frontend = tcp://*:10123
-   backend  = tcp://*:10124
-   mgmt     = tcp://*:9999
-   
+   frontend     = tcp://*:10123
+   backend      = tcp://*:10124
+   mgmt         = tcp://*:9999
+
    [worker]
-   db       = /var/lib/vconnector/vconnector.db
-   proxy    = tcp://localhost:10124
-   mgmt     = tcp://*:10000
+   db           = /var/lib/vconnector/vconnector.db
+   proxy        = tcp://localhost:10124
+   mgmt         = tcp://*:10000
+   helpers      = vpoller.helpers.zabbix, vpoller.helpers.czabbix
+   tasks        = vpoller.vsphere.tasks
+
+   [cache]
+   enabled      = True
+   maxsize      = 0
+   ttl          = 3600
+   housekeeping = 480
 
 The table below provides information about the config entries
 used along with a description for each of them.
 
-+---------+-----------+-----------------------------------------------------------------------------------+
-| Section | Option    | Description                                                                       |
-+=========+===========+===================================================================================+
-| proxy   | frontend  | Endpoint to which clients connect and send tasks for processing                   |
-+---------+-----------+-----------------------------------------------------------------------------------+
-| proxy   | backend   | Endpoint to which workers connect and get tasks for processing                    |
-+---------+-----------+-----------------------------------------------------------------------------------+
-| proxy   | mgmt      | Management endpoint, used for management tasks of the ``vPoller Proxy``           |
-+---------+-----------+-----------------------------------------------------------------------------------+
-| worker  | db        | Path to the ``vconnector.db`` SQLite database file                                |
-+---------+-----------+-----------------------------------------------------------------------------------+
-| worker  | proxy     | Endpoint to which workers connect and get tasks for processing                    |
-+---------+-----------+-----------------------------------------------------------------------------------+
-| worker  | mgmt      | Management endpoint, used for management tasks for the ``vPoller Worker``         |
-+---------+-----------+-----------------------------------------------------------------------------------+
++---------+--------------+-----------------------------------------------------------------------------------+
+| Section | Option       | Description                                                                       |
++=========+==============+===================================================================================+
+| proxy   | frontend     | Endpoint to which clients connect and send tasks for processing                   |
++---------+--------------+-----------------------------------------------------------------------------------+
+| proxy   | backend      | Endpoint to which workers connect and get tasks for processing                    |
++---------+--------------+-----------------------------------------------------------------------------------+
+| proxy   | mgmt         | Management endpoint, used for management tasks of the ``vPoller Proxy``           |
++---------+--------------+-----------------------------------------------------------------------------------+
+| worker  | db           | Path to the ``vconnector.db`` SQLite database file                                |
++---------+--------------+-----------------------------------------------------------------------------------+
+| worker  | proxy        | Endpoint to which workers connect and get tasks for processing                    |
++---------+--------------+-----------------------------------------------------------------------------------+
+| worker  | mgmt         | Management endpoint, used for management tasks for the ``vPoller Worker``         |
++---------+--------------+-----------------------------------------------------------------------------------+
+| cache   | enabled      | If True then ``vPoller Worker`` will use a cache for the vSphere managed objects  |
++---------+--------------+-----------------------------------------------------------------------------------+
+| cache   | maxsize      | Upperbound limit on the entries stored in the cache                               |
++---------+--------------+-----------------------------------------------------------------------------------+
+| cache   | ttl          | The TTL in seconds after which a cached object is considered as expired           |
++---------+--------------+-----------------------------------------------------------------------------------+
+| cache   | housekeeping | Time in minutes to perform periodic cache housekeeping                            |
++---------+--------------+--------------------------------------------------------------------------------------+
+
+
 
 Configuring vSphere Agents for the Workers
 ==========================================
