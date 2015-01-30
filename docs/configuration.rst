@@ -54,7 +54,7 @@ used along with a description for each of them.
 | cache   | ttl          | The TTL in seconds after which a cached object is considered as expired           |
 +---------+--------------+-----------------------------------------------------------------------------------+
 | cache   | housekeeping | Time in minutes to perform periodic cache housekeeping                            |
-+---------+--------------+--------------------------------------------------------------------------------------+
++---------+--------------+-----------------------------------------------------------------------------------+
 
 
 
