@@ -28,6 +28,7 @@ vPoller Task Decorators module
 """
 
 from functools import wraps
+from traceback import format_exc
 
 from vpoller.task.core import Task
 from vpoller.task.registry import registry
@@ -51,7 +52,10 @@ def task(name, required=None):
             try:
                 result = fn(*args, **kwargs)
             except Exception as e:
-                result = {'success': 1, 'msg': e.message}
+                result = {
+                    'success': 1,
+                    'msg': 'Task failed: {}'.format(format_exc())
+                }
             finally:
                 return result
         t = Task(name=name, function=wrapper, required=required)
