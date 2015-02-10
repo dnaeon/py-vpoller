@@ -54,7 +54,8 @@ def task(name, required=None):
             except Exception as e:
                 result = {
                     'success': 1,
-                    'msg': 'Task failed: {}'.format(format_exc())
+                    'msg': 'Task {} failed'.format(name),
+                    'traceback': format_exc()
                 }
             finally:
                 return result
