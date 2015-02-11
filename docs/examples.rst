@@ -384,7 +384,7 @@ this counter is used for, which in our case is this:
       },
       "statsType": "rate",
       "rollupType": "average"
-    },
+    }
 
 We can also request specific counters only when using the
 ``*.perf.metric.info`` methods. For example if we are only interested
@@ -457,7 +457,7 @@ should see this:
       },
       "statsType": "rate",
       "rollupType": "average"
-    },
+    }
 
 And here is how we would get three samples of the ``CPU usage in MHz``
 performance metric.
