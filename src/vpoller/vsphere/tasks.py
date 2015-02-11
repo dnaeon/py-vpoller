@@ -318,13 +318,20 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
         entity=entity
     )
 
-    if provider_summary.currentSupported:
-        logger.info('[%s]: Entity %s supports real-time statistics', agent.host, entity.name)
-        interval_id = provider_summary.refreshRate
-    else:
-        logger.info('[%s]: Entity %s supports historical statistics only', agent.host, entity.name)
-        interval_id = None
+    logger.debug(
+        '[%s] Entity %s supports real-time statistics: %s',
+        agent.host,
+        entity.name,
+        provider_summary.currentSupported
+    )
+    logger.debug(
+        '[%s] Entity %s supports historical statistics: %s',
+        agent.host,
+        entity.name,
+        provider_summary.summarySupported
+    )
 
+    interval_id = provider_summary.refreshRate if provider_summary.currentSupported else None
     try:
         metric_id = agent.si.content.perfManager.QueryAvailablePerfMetric(
             entity=entity,
