@@ -284,8 +284,8 @@ environment, please make sure to check the
 information about the supported performance counters, the existing
 counter groups, description of each counter, etc.
 
-_`VMware vSphere API documentation`: https://www.vmware.com/support/developer/vc-sdk/
-_`PerformanceManager documentation`: http://pubs.vmware.com/vsphere-55/topic/com.vmware.wssdk.apiref.doc/vim.PerformanceManager.html
+.. _`VMware vSphere API documentation`: https://www.vmware.com/support/developer/vc-sdk/
+.. _`PerformanceManager documentation`: http://pubs.vmware.com/vsphere-55/topic/com.vmware.wssdk.apiref.doc/vim.PerformanceManager.html
 
 First, let's see how to obtain all performance counters that are
 supported in our vSphere environment. Using the ``perf.metric.info``
@@ -321,7 +321,9 @@ retrieve historical metrics from performance providers.
 
 In order to obtain information about the supported performance metrics
 for a specific performance provider (e.g. ESXi host, Virtual Machine,
-Datastore, etc.) you can use the ``*.perf.metric.get`` vPoller methods.
+Datastore, etc.) you can use the respective ``*.perf.metric.info``
+vPoller methods, e.g. ``vm.perf.metric.info``, ``host.perf.metric.info``,
+etc.
 
 The following example shows how to get the available performance
 metrics for a Virtual Machine:
@@ -351,17 +353,369 @@ that each discovered performance metric has a ``counterId`` and
 The above example metric shows that the performance counter ID is
 ``149`` and the instance is ``vmnic0``.
 
-If you cross-check the above counter ID in the
-`perf-metric-info.json example file`_ you will see that this
-counter is for `"Average rate at which data was transmitted during the interval"`.
+In order to find out what each counter ID is used for you
+should lookup the counter ID in the result from the
+``perf.metric.info`` vPoller method.
 
-Other vPoller methods that you can use in order to retrieve the
-available performance metrics for a performance provider are
-``datacenter.perf.metric.info``, ``cluster.perf.metric.info``,
-``host.perf.metric.info`` and ``datastore.perf.metric.info``.
+In our example with counter ID ``149`` if we check in the result
+from the ``perf.metric.info`` vPoller method we would see what
+this counter is used for, which in our case is this:
+
+.. code-block:: json
+
+   {
+      "perDeviceLevel": 3,
+      "level": 2,
+      "key": 149,
+      "nameInfo": {
+        "label": "Data transmit rate",
+        "key": "transmitted",
+        "summary": "Average rate at which data was transmitted during the interval"
+      },
+      "groupInfo": {
+        "label": "Network",
+        "key": "net",
+        "summary": "Network"
+      },
+      "unitInfo": {
+        "label": "KBps",
+        "key": "kiloBytesPerSecond",
+        "summary": "Kilobytes per second"
+      },
+      "statsType": "rate",
+      "rollupType": "average"
+    },
+
+We can also request specific counters only when using the
+``*.perf.metric.info`` methods. For example if we are only interested
+in the counters with ID ``149`` we would execute this command instead:
+
+.. code-block:: bash
+
+   $ vpoller-client --method vm.perf.metric.info --vsphere-host vc01.example.org \
+		--name vm01.example.org --counter-id 149
+
+An example result from the above command is shown below, which
+contains all discovered counters with ID ``149`` and their instances.
+
+.. code-block:: json
+
+  {
+    "success": 0,
+    "result": [
+      {
+        "counterId": 149,
+        "instance": "vmnic0"
+      },
+      {
+        "counterId": 149,
+        "instance": "vmnic1"
+      },
+      {
+        "counterId": 149,
+        "instance": ""
+      },
+      {
+        "counterId": 149,
+        "instance": "4000"
+      }
+    ],
+    "msg": "Successfully retrieved performance metrics"
+  }
 
 Now, that we know how to get the available performance metrics for
 our performance providers, let's now see how to retrieve the
 actual performance counters for them.
 
-< TO BE ADDED >
+In the following example we will see how to get the CPU usage in MHz
+for a specific Virtual Machine.
+
+In order to do that we will use the performance counter with ID ``6``,
+which if you check in the `perf-metric-info.json example file`_ you
+should see this:
+
+.. code-block:: json
+
+    {
+      "perDeviceLevel": 3,
+      "level": 1,
+      "key": 6,
+      "nameInfo": {
+        "label": "Usage in MHz",
+        "key": "usagemhz",
+        "summary": "CPU usage in megahertz during the interval"
+      },
+      "groupInfo": {
+        "label": "CPU",
+        "key": "cpu",
+        "summary": "CPU"
+      },
+      "unitInfo": {
+        "label": "MHz",
+        "key": "megaHertz",
+        "summary": "Megahertz"
+      },
+      "statsType": "rate",
+      "rollupType": "average"
+    },
+
+And here is how we would get three samples of the ``CPU usage in MHz``
+performance metric.
+
+.. code-block:: bash
+
+   $ vpoller-client --method vm.perf.metric.get --vsphere-host vc01.example.org \
+		--name vm01.example.org --max-sample 3 --counter-id 6
+
+Here is an example result of the above command.
+
+.. image:: images/vpoller-perf-metric-vm-cpu-usage.jpg
+
+We can also retrieve the performance metrics for an instance, e.g.
+get the CPU usage per core.
+
+Running the following vPoller command would discover all instances
+of performance counter with ID ``6``, so we can later use them
+in our vPoller request.
+
+.. code-block:: bash
+
+   $ vpoller-client --method vm.perf.metric.info --vsphere-host vc01.example.org \
+		--name vm01.example.org --counter-id 6
+
+Here is an example screenshot showing the discovered instances.
+
+.. image:: images/vpoller-vm-perf-metric-info-with-counter.jpg
+
+If we want to retrieve the performance metrics for a specific
+instance we would execute a similar command instead:
+
+.. code-block:: bash
+
+   $ vpoller-client --method vm.perf.metric.get --vsphere-host vc01.example.org \
+		--name vm01.example.org --counter-id 6 --max-sample 3 --instance 0
+
+.. image:: images/vpoller-vm-perf-metric-get-with-instance.jpg
+
+We could also retrieve some interesting statistics from our
+Datacenters and Clusters as well. In the following examples we will
+see how to retrieve performance counter with ID ``256``,
+which is described below (see `perf-metric-info.json example file`_
+for more details as well):
+
+.. code-block:: json
+
+  {
+      "perDeviceLevel": 3,
+      "level": 1,
+      "key": 256,
+      "nameInfo": {
+        "label": "VM power on count",
+        "key": "numPoweron",
+        "summary": "Number of virtual machine power on operations"
+      },
+      "groupInfo": {
+        "label": "Virtual machine operations",
+        "key": "vmop",
+        "summary": "Virtual machine operations"
+      },
+      "unitInfo": {
+        "label": "Number",
+        "key": "number",
+        "summary": "Number"
+      },
+      "statsType": "absolute",
+      "rollupType": "latest"
+    }
+
+The ``vim.Datacenter`` and ``vim.ClusterComputeResource``
+managed entities support historical statistics only, so in order to
+retrieve any performance metrics for them we should specify a
+historical performance interval.
+
+The example command below retrieves performance counter with id ``256``
+for one of our Datacenters, which would give us the number of virtual
+machine power on operations for the past day.
+
+.. code-block:: bash
+
+   $ vpoller-client --method datacenter.perf.metric.get --vsphere-host vc01.example.org \
+		--name MyDatacenter --counter-id 256 --perf-interval 1
+
+Another example showing how to get performance counter with ID ``97``,
+which returns the amount of host physical memory consumed by a virtual
+machine, host, or cluster.
+
+.. code-block:: bash
+
+    $ vpoller-client --method host.perf.metric.get --vsphere-host vc01.example.org \
+		--name esxi01.example.org --counter-id 97
+
+An example result from the above command is shown below:
+
+.. code-block:: json
+
+   {
+      "success": 0,
+      "result": [
+        {
+          "instance": "",
+          "value": 23899436,
+          "interval": 20,
+          "counterId": 97,
+          "timestamp": "2015-02-10 14:52:20+00:00"
+        }
+      ],
+      "msg": "Successfully retrieved performance metrics"
+    }
+
+As our last examples we will see how to retrieve various performance
+metrics for ``vim.Datastore`` managed entities.
+
+.. note::
+
+   Some of the ``vim.Datastore`` performance metrics are retrieved
+   by using the ``datastore.perf.metric.get`` vPoller method, while
+   others are available via the ``host.perf.metric.get``, where a
+   datastore metric is retrieved by using the Datastore instance.
+
+   A ``vim.Datastore`` performance provider by itself provides only
+   historical performance statistics.
+
+   Most of the real-time statistics (e.g. ``datastoreIops``) are
+   accessed via a ``vim.HostSystem`` performance provider.
+
+The example below shows how to retrieve the ``datastoreIops`` for a
+specific datastore.
+
+In order to retrieve the ``datastoreIops`` we will use performance
+counter with ID ``185`` (refer to the example
+`perf-metric-info.json example file`_ for other metrics as well).
+
+.. code-block:: json
+
+    {
+      "perDeviceLevel": 3,
+      "level": 1,
+      "key": 185,
+      "nameInfo": {
+        "label": "Storage I/O Control aggregated IOPS",
+        "key": "datastoreIops",
+        "summary": "Storage I/O Control aggregated IOPS"
+      },
+      "groupInfo": {
+        "label": "Datastore",
+        "key": "datastore",
+        "summary": "Datastore"
+      },
+      "unitInfo": {
+        "label": "Number",
+        "key": "number",
+        "summary": "Number"
+      },
+      "statsType": "absolute",
+      "rollupType": "average"
+    }
+
+First we will discover all performance counters with ``185`` and
+their instances from our example ESXi host ``esxi01.example.org``.
+
+.. code-block:: bash
+
+  $ vpoller-client --method host.perf.metric.info --vsphere-host vc01.example.org \
+	--name esx01.example.org --counter-id 185
+
+Example result from the above command is shown below, which contains
+all instances of counters with ID ``185``, which represent our
+Datastores.
+
+.. code-block:: json
+
+   {
+    "success": 0,
+    "result": [
+      {
+        "counterId": 185,
+        "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+      },
+      {
+        "counterId": 185,
+        "instance": "5485af07-7326ddc0-6afc-d8d385bf2110"
+      },
+      {
+        "counterId": 185,
+        "instance": "5485af4f-4dbf72e3-4980-d8d385bf2110"
+      },
+      {
+        "counterId": 185,
+        "instance": "5481d078-c2a2ef40-eb45-d8d385bf2110"
+      },
+      {
+        "counterId": 185,
+        "instance": "5485ab2d-50686078-b78f-d8d385bf2110"
+      },
+      {
+        "counterId": 185,
+        "instance": "5485afa4-344d2f22-96a2-d8d385bf2110"
+      },
+      {
+        "counterId": 185,
+        "instance": "52e173ac-1458ad64-2772-d8d385bf3138"
+      },
+      {
+        "counterId": 185,
+        "instance": "5481d01f-a4dea9fb-6027-d8d385bf2110"
+      }
+    ],
+    "msg": "Successfully retrieved performance metrics"
+  }
+
+If we are interested in finding out the Datastore name for the
+``5481d059-dbd6de3d-2215-d8d385bf2110`` instance from the above
+example result we could use the ``datastore.get`` vPoller method to
+do so. For example:
+
+.. code-block:: bash
+
+   $ vpoller-client --method datastore.get --vsphere-host vc01.example.org \
+		--name ds:///vmfs/volumes/5481d059-dbd6de3d-2215-d8d385bf2110/ --properties name
+
+And the result from the above command would give us the Datastore name.
+
+.. code-block:: json
+
+   {
+    "success": 0,
+    "result": [
+      {
+        "name": "datastore1",
+        "info.url": "ds:///vmfs/volumes/5481d059-dbd6de3d-2215-d8d385bf2110/"
+      }
+    ],
+    "msg": "Successfully retrieved object properties"
+   }
+
+Now, let's get back to the ``datastoreIops`` metric and retrieve it.
+
+.. code-block:: bash
+
+   $ vpoller-client --method host.perf.metric.get --vsphere-host vc01.example.org \
+		--name esxi01.example.org --counter-id 185 --instance 5481d059-dbd6de3d-2215-d8d385bf2110
+
+And here is an example result from the above command:
+
+.. code-block:: json
+
+   {
+     "success": 0,
+     "result": [
+       {
+         "instance": "5481d059-dbd6de3d-2215-d8d385bf2110",
+	 "value": 84,
+	 "interval": 20,
+	 "counterId": 185,
+	 "timestamp": "2015-02-10 15:48:40+00:00"
+       }
+     ],
+     "msg": "Successfully retrieved performance metrics"
+   }
