@@ -35,6 +35,7 @@
 #include "module.h"
 #include "log.h"
 
+#define VPOLLER_MODULE_VERSION "0.3.9-dev"
 #define MODULE_CONFIG_FILE "/etc/zabbix/vpoller_module.conf"
 #define VPOLLER_TASK_TEMPLATE "{ \
 			           \"method\": \"%s\", \
@@ -372,6 +373,8 @@ zbx_module_vpoller_echo(AGENT_REQUEST *request, AGENT_RESULT *result)
 int
 zbx_module_init(void)
 {
+  zabbix_log(LOG_LEVEL_INFORMATION, "vPoller module version %s", VPOLLER_MODULE_VERSION);
+
   zbx_module_load_config();
   zbx_module_set_defaults();
   
