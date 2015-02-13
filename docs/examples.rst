@@ -265,6 +265,42 @@ vSphere host:
 
    $ vpoller-client --method event.latest --vsphere-host vc01.example.org
 
+Getting vSphere Alarms
+======================
+
+Using the ``*.alarm.get`` vPoller methods we can retrieve the
+triggered vSphere alarms on a ``Datacenter``,
+``ClusterComputeResource``, ``HostSystem``, ``VirtualMachine`` and
+``Datastore`` level.
+
+Here is how you could retrieve all triggered alarms for a ``Datacenter``.
+
+.. code-block:: bash
+
+   $ vpoller-client --method datacenter.alarm.get --vsphere-host vc01.example.org \
+		--name MyDatacenter
+
+An here is an example result from the above command, showing the
+triggered alarms for our Datacenter.
+
+.. code-block:: json
+
+   {
+     "success": 0,
+     "result": [
+       {
+         "overallStatus": "red",
+	 "time": "2015-02-13 09:16:50.916096+00:00",
+         "key": "alarm-4.host-30",
+         "entity": "esxi01.example.org",
+         "acknowledged": false,
+         "acknowledgedByUser": null,
+         "info": "Host memory usage"
+       }
+     ],
+     "msg": "Successfully retrieved alarms"
+   }
+
 Performance metrics
 ===================
 
