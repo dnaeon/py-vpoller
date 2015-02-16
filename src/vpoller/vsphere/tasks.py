@@ -79,12 +79,6 @@ def _discover_objects(agent, properties, obj_type):
         'result': data,
     }
 
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        result
-    )
-
     return result
 
 def _get_object_properties(agent,
@@ -158,12 +152,6 @@ def _get_object_properties(agent,
         'result': data,
     }
 
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        result
-    )
-
     return result
 
 def _object_datastore_get(agent, obj_type, name):
@@ -224,8 +212,6 @@ def _object_datastore_get(agent, obj_type, name):
         'result': result,
     }
 
-    logger.debug('[%s] Returning result from operation: %s', agent.host, r)
-
     return r
 
 def _object_alarm_get(agent,
@@ -284,12 +270,6 @@ def _object_alarm_get(agent,
         'msg': 'Successfully retrieved alarms',
         'result': result,
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
 
     return r
 
@@ -514,12 +494,6 @@ def about(agent, msg):
         'result': [data],
     }
 
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        result
-    )
-
     return result
 
 @task(name='event.latest')
@@ -547,12 +521,6 @@ def event_latest(agent, msg):
         'success': 0,
         'result': [{'event': e}],
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        result
-    )
 
     return result
 
@@ -605,12 +573,6 @@ def session_get(agent, msg):
         'success': 0,
         'result': sessions,
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        result
-    )
 
     return result
 
@@ -830,8 +792,6 @@ def net_host_get(agent, msg):
         'result': result,
     }
 
-    logger.debug('[%s] Returning result from operation: %s', agent.host, r)
-
     return r
 
 @task(name='net.vm.get', required=['name'])
@@ -889,8 +849,6 @@ def net_vm_get(agent, msg):
         'msg': 'Successfully discovered objects',
         'result': result,
     }
-
-    logger.debug('[%s] Returning result from operation: %s', agent.host, r)
 
     return r
 
@@ -1580,8 +1538,6 @@ def host_cluster_get(agent, msg):
         'result': [result],
     }
 
-    logger.debug('[%s] Returning result from operation: %s', agent.host, r)
-
     return r
 
 @task(name='host.vm.get', required=['name'])
@@ -1637,12 +1593,6 @@ def host_vm_get(agent, msg):
         'msg': 'Successfully discovered objects',
         'result': result,
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
 
     return r
 
@@ -1702,12 +1652,6 @@ def host_net_get(agent, msg):
         'msg': 'Successfully discovered objects',
         'result': result,
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
 
     return r
 
@@ -1974,12 +1918,6 @@ def vm_disk_discover(agent, msg):
         'result': [result],
     }
 
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
-
     return r
 
 @task(name='vm.guest.net.get', required=['name'])
@@ -2057,12 +1995,6 @@ def vm_guest_net_get(agent, msg):
         'result': result,
     }
 
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
-
     return r
 
 @task(name='vm.net.get', required=['name'])
@@ -2121,12 +2053,6 @@ def vm_net_get(agent, msg):
         'msg': 'Successfully discovered objects',
         'result': result,
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
 
     return r
 
@@ -2211,12 +2137,6 @@ def vm_host_get(agent, msg):
         'msg': data['msg'],
         'result': [result],
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
 
     return r
 
@@ -2321,12 +2241,6 @@ def vm_disk_get(agent, msg):
         'msg': 'Successfully retrieved properties',
         'result': [result],
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
 
     return r
 
@@ -2435,12 +2349,6 @@ def vm_process_get(agent, msg):
         'result': result,
     }
 
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
-
     return r
 
 @task(name='vm.cpu.usage.percent', required=['name'])
@@ -2530,12 +2438,6 @@ def vm_cpu_usage_percent(agent, msg):
         'msg': 'Successfully retrieved properties',
         'result': [result],
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
 
     return r
 
@@ -2699,12 +2601,6 @@ def datastore_host_get(agent, msg):
         'result': result,
     }
 
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
-
     return r
 
 @task(name='datastore.vm.get', required=['name'])
@@ -2760,12 +2656,6 @@ def datastore_vm_get(agent, msg):
         'msg': 'Successfully discovered objects',
         'result': result,
     }
-
-    logger.debug(
-        '[%s] Returning result from operation: %s',
-        agent.host,
-        r
-    )
 
     return r
 
