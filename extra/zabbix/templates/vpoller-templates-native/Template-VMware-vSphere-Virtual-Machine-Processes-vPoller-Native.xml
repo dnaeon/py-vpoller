@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-11-03T12:24:20Z</date>
+    <date>2015-02-16T13:55:59Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -30,7 +30,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;/usr/sbin/apache2&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
                     <status>0</status>
                     <value_type>3</value_type>
@@ -73,7 +73,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
                     <status>0</status>
                     <value_type>3</value_type>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-11-13T10:17:29Z</date>
+    <date>2015-02-16T13:56:38Z</date>
     <groups>
         <group>
             <name>Datastores</name>
@@ -54,7 +54,7 @@
                     <snmp_oid/>
                     <key>icmpping[{HOST.NAME},3,,,]</key>
                     <delay>60</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
                     <status>0</status>
                     <value_type>3</value_type>
@@ -97,9 +97,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;apiVersion&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>4</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -140,7 +140,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;event.latest&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;event&quot;, &quot;null&quot;]</key>
                     <delay>60</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
                     <status>0</status>
                     <value_type>2</value_type>
@@ -183,7 +183,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;fullName&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
                     <status>0</status>
                     <value_type>1</value_type>
@@ -226,9 +226,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -269,9 +269,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;osType&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -312,9 +312,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;vendor&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -355,9 +355,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;version&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -399,7 +399,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;cluster.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>0</status>
+                    <status>1</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -418,7 +418,7 @@
                     <privatekey/>
                     <port/>
                     <filter>:</filter>
-                    <lifetime>30</lifetime>
+                    <lifetime>7</lifetime>
                     <description>Discovery of clusters</description>
                     <item_prototypes>
                         <item_prototype>
@@ -429,7 +429,7 @@
                             <snmp_oid/>
                             <key>vpoller[&quot;cluster.get&quot;, &quot;{HOST.HOST}&quot;, &quot;{#VSPHERE.CLUSTER.NAME}&quot;, &quot;overallStatus&quot;, &quot;null&quot;]</key>
                             <delay>300</delay>
-                            <history>30</history>
+                            <history>7</history>
                             <trends>365</trends>
                             <status>0</status>
                             <value_type>1</value_type>
@@ -489,7 +489,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <snmp_oid/>
                     <key>vpoller[&quot;datacenter.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>0</status>
+                    <status>1</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -508,7 +508,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <privatekey/>
                     <port/>
                     <filter>:</filter>
-                    <lifetime>30</lifetime>
+                    <lifetime>7</lifetime>
                     <description>Discovery of datacenters</description>
                     <item_prototypes>
                         <item_prototype>
@@ -519,7 +519,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                             <snmp_oid/>
                             <key>vpoller[&quot;datacenter.get&quot;, &quot;{HOST.HOST}&quot;, &quot;{#VSPHERE.DATACENTER.NAME}&quot;, &quot;overallStatus&quot;, &quot;null&quot;]</key>
                             <delay>300</delay>
-                            <history>30</history>
+                            <history>7</history>
                             <trends>365</trends>
                             <status>0</status>
                             <value_type>1</value_type>
@@ -581,7 +581,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <snmp_oid/>
                     <key>vpoller[&quot;datastore.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;info.url&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>0</status>
+                    <status>1</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -600,7 +600,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <privatekey/>
                     <port/>
                     <filter>:</filter>
-                    <lifetime>30</lifetime>
+                    <lifetime>7</lifetime>
                     <description>Discovery of VMware Datastores</description>
                     <item_prototypes/>
                     <trigger_prototypes/>
@@ -633,7 +633,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <snmp_oid/>
                     <key>vpoller[&quot;host.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>0</status>
+                    <status>1</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -652,7 +652,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <privatekey/>
                     <port/>
                     <filter>:</filter>
-                    <lifetime>30</lifetime>
+                    <lifetime>7</lifetime>
                     <description>Discovery of hypervisors</description>
                     <item_prototypes/>
                     <trigger_prototypes/>
@@ -685,7 +685,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <snmp_oid/>
                     <key>vpoller[&quot;vm.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>0</status>
+                    <status>1</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -704,7 +704,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <privatekey/>
                     <port/>
                     <filter>:</filter>
-                    <lifetime>30</lifetime>
+                    <lifetime>7</lifetime>
                     <description>Discovery of VMware Virtual Machines</description>
                     <item_prototypes/>
                     <trigger_prototypes/>
@@ -756,7 +756,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                     <privatekey/>
                     <port/>
                     <filter>:</filter>
-                    <lifetime>1</lifetime>
+                    <lifetime>0</lifetime>
                     <description>Discover established vSphere sessions</description>
                     <item_prototypes>
                         <item_prototype>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2014-09-18T09:23:41Z</date>
+    <date>2015-02-16T13:57:04Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -45,9 +45,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.uuid&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -78,6 +78,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Bios version</name>
@@ -87,9 +88,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.biosInfo.biosVersion&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -120,6 +121,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Cluster Name</name>
@@ -129,7 +131,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.cluster.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cluster&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
                     <status>0</status>
                     <value_type>1</value_type>
@@ -162,6 +164,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>CPU Cores</name>
@@ -171,9 +174,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuCores&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -207,6 +210,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>CPU Frequency</name>
@@ -216,9 +220,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.hz&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
                     <units>Hz</units>
@@ -252,6 +256,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>CPU Packages</name>
@@ -261,9 +266,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuPackages&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -297,6 +302,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>CPU Power Management Policy</name>
@@ -306,9 +312,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuPowerManagementInfo.currentPolicy&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -342,6 +348,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>CPU Power Management Support</name>
@@ -351,9 +358,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuPowerManagementInfo.hardwareSupport&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -387,6 +394,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>CPU Threads</name>
@@ -396,9 +404,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuThreads&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -432,6 +440,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>CPU Utilization (Percentage)</name>
@@ -441,9 +450,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>0</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -474,6 +483,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Distributed CPU fairness</name>
@@ -483,9 +493,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.distributedCpuFairness&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
                     <units>Hz</units>
@@ -519,6 +529,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Distributed memory fairness</name>
@@ -528,9 +539,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.distributedMemoryFairness&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
                     <units>B</units>
@@ -564,6 +575,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>In Maintenance Mode</name>
@@ -573,9 +585,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.inMaintenanceMode&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -606,6 +618,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Memory Size</name>
@@ -615,9 +628,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.memorySize&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>3</value_type>
                     <allowed_hosts/>
                     <units>B</units>
@@ -651,6 +664,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Memory Usage (Percentage)</name>
@@ -660,9 +674,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsagePercentage&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>0</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -693,6 +707,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Model</name>
@@ -702,9 +717,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.model&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -735,6 +750,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Overall CPU Usage</name>
@@ -744,7 +760,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsage&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
                     <status>0</status>
                     <value_type>3</value_type>
@@ -780,6 +796,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Overall Memory Usage</name>
@@ -789,7 +806,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsage&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
                     <status>0</status>
                     <value_type>3</value_type>
@@ -825,6 +842,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Overall Status</name>
@@ -834,7 +852,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.overallStatus&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
                     <status>0</status>
                     <value_type>1</value_type>
@@ -867,6 +885,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Power state</name>
@@ -876,7 +895,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.powerState&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
                     <status>0</status>
                     <value_type>1</value_type>
@@ -909,6 +928,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Reboot Required</name>
@@ -918,9 +938,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.rebootRequired&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -951,6 +971,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Uptime</name>
@@ -960,7 +981,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.uptime&quot;, &quot;null&quot;]</key>
                     <delay>300</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>30</trends>
                     <status>0</status>
                     <value_type>3</value_type>
@@ -993,6 +1014,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>Vendor</name>
@@ -1002,9 +1024,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.vendor&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1035,6 +1057,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere API Version</name>
@@ -1044,9 +1067,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.apiVersion&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1077,6 +1100,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere FullName</name>
@@ -1086,7 +1110,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.fullName&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
                     <status>0</status>
                     <value_type>1</value_type>
@@ -1119,6 +1143,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere Name</name>
@@ -1128,9 +1153,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1161,6 +1186,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere Vendor</name>
@@ -1170,9 +1196,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.vendor&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1203,6 +1229,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
                 <item>
                     <name>VMware vSphere Version</name>
@@ -1212,9 +1239,9 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.version&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>30</history>
+                    <history>7</history>
                     <trends>365</trends>
-                    <status>0</status>
+                    <status>1</status>
                     <value_type>1</value_type>
                     <allowed_hosts/>
                     <units/>
@@ -1245,6 +1272,7 @@
                         </application>
                     </applications>
                     <valuemap/>
+                    <logtimefmt/>
                 </item>
             </items>
             <discovery_rules>
@@ -1255,7 +1283,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.datastore.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>0</status>
+                    <status>1</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -1318,6 +1346,7 @@
                                 </application>
                             </applications>
                             <valuemap/>
+                            <logtimefmt/>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes/>
@@ -1331,7 +1360,7 @@
                     <snmp_oid/>
                     <key>vpoller[&quot;host.vm.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>0</status>
+                    <status>1</status>
                     <allowed_hosts/>
                     <snmpv3_contextname/>
                     <snmpv3_securityname/>
@@ -1394,6 +1423,7 @@
                                 </application>
                             </applications>
                             <valuemap/>
+                            <logtimefmt/>
                         </item_prototype>
                     </item_prototypes>
                     <trigger_prototypes/>
