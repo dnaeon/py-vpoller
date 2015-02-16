@@ -72,6 +72,13 @@ repo of vPoller.
 
 .. _`vPoller templates for Zabbix`: https://github.com/dnaeon/py-vpoller/tree/master/extra/zabbix/templates
 
+.. note::
+
+   Some of the Zabbix items from the vPoller templates are disabled
+   by default. It is recommended that you review each vPoller
+   template and enable or disable the items that you need or
+   don't need at all.
+
 In the `vPoller templates for Zabbix`_ directory you will find two
 directories:
 
@@ -80,7 +87,9 @@ directories:
 * `vpoller-templates-native` - contains the templates with native
   vPoller support for Zabbix. It is recommended that you always use
   the native vPoller support for Zabbix.
-  
+* `vpoller-templates-native-2.4` - same as the
+  `vpoller-templates-native` templates, but for Zabbix 2.4.x releases.
+
 Once you import the templates you should see the newly imported
 vPoller templates.
 
