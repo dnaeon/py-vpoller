@@ -50,6 +50,7 @@ def task(name, required=None):
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
+            logger.debug('Executing task %s', name)
             try:
                 result = fn(*args, **kwargs)
             except Exception as e:
@@ -61,6 +62,7 @@ def task(name, required=None):
                 }
                 logger.warning('Task %s failed: %s', name, tb)
             finally:
+                logger.debug('Returning result from task %s: %s', name, result)
                 return result
         t = Task(name=name, function=wrapper, required=required)
         registry.register(t)
