@@ -336,14 +336,14 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
  *    Will echo back the first parameter you provide to it
  *
  * Return value:
- *    The value it was invoked with
+ *    The first parameter it was invoked with
  */
 int
 zbx_module_vpoller_echo(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
   const char *param;
 
-  if (request->nparam != 1) {
+  if (request->nparam < 1) {
     SET_MSG_RESULT(result, strdup("Invalid number of key parameters"));
     return (SYSINFO_RET_FAIL);
   }
