@@ -181,7 +181,7 @@ class ZabbixVSphere(object):
 
         missing_datacenters = set(self.vsphere_datacenters) - set(zabbix_hosts)
 
-        if not missing_hosts:
+        if not missing_datacenters:
             logging.info(
                 '[Datacenter@%s] Objects are in sync with Zabbix',
                 self.options['vsphere']['hostname']
@@ -191,7 +191,7 @@ class ZabbixVSphere(object):
         logging.info(
             '[Datacenter@%s] Number of objects to be imported: %d',
             self.options['vsphere']['hostname'],
-            len(missing_hosts)
+            len(missing_datacenters)
         )
 
         # Get hosts options (templates, groups, macros) from the config file
@@ -210,15 +210,15 @@ class ZabbixVSphere(object):
             }
         ]
 
-        for host in missing_hosts:
+        for datacenter in missing_datacenters:
             logging.info(
                 "[Datacenter@%s] Creating Zabbix host '%s'",
                 self.options['vsphere']['hostname'],
-                host
+                datacenter
             )
 
             params = deepcopy(host_options)
-            params['host'] = host
+            params['host'] = datacenter
 
             try:
                 result = self.zapi.host.create(params)
