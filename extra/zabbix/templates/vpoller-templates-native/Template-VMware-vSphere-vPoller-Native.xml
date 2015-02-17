@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2015-02-16T13:56:38Z</date>
+    <date>2015-02-17T12:58:52Z</date>
     <groups>
+        <group>
+            <name>Datacenters</name>
+        </group>
         <group>
             <name>Datastores</name>
         </group>
@@ -548,7 +551,7 @@ vSphere host: {$VSPHERE.HOST}</description>
                             <inventory_link>0</inventory_link>
                             <applications>
                                 <application>
-                                    <name>Datacenters</name>
+                                    <name>General</name>
                                 </application>
                             </applications>
                             <valuemap>
@@ -572,7 +575,26 @@ vSphere host: {$VSPHERE.HOST}</description>
                         </trigger_prototype>
                     </trigger_prototypes>
                     <graph_prototypes/>
-                    <host_prototypes/>
+                    <host_prototypes>
+                        <host_prototype>
+                            <host>{#VSPHERE.DATACENTER.NAME}</host>
+                            <name>{#VSPHERE.DATACENTER.NAME}</name>
+                            <status>0</status>
+                            <group_links>
+                                <group_link>
+                                    <group>
+                                        <name>Datacenters</name>
+                                    </group>
+                                </group_link>
+                            </group_links>
+                            <group_prototypes/>
+                            <templates>
+                                <template>
+                                    <name>Template VMware vSphere Datacenter - vPoller Native</name>
+                                </template>
+                            </templates>
+                        </host_prototype>
+                    </host_prototypes>
                 </discovery_rule>
                 <discovery_rule>
                     <name>Discover VMware Datastores</name>
