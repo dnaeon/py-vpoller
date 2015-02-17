@@ -47,6 +47,7 @@ class ZabbixVSphere(object):
     """
     def __init__(self, options):
         self.options = options
+        self.vsphere_datacenters = []
         self.vsphere_clusters = []
         self.vsphere_hosts = []
         self.vsphere_vms = []
@@ -155,6 +156,83 @@ class ZabbixVSphere(object):
             return None
 
         return hostgroup['groupid']
+
+    def import_vsphere_datacenters(self):
+        """
+        Import vSphere Datacenters into Zabbix
+
+        """
+        logging.info(
+            '[Datacenter@%s] Importing objects to Zabbix',
+            self.options['vsphere']['hostname']
+        )
+
+        zabbix_data  = self.zapi.host.get(
+            output='extend'
+        )
+        zabbix_hosts = [h['name'] for h in zabbix_data]
+
+        msg = {
+            'method': 'datacenter.discover',
+            'hostname': self.options['vsphere']['hostname']
+        }
+        vpoller_data = self._call_vpoller_task(msg=msg)
+        self.vsphere_datacenters = [d['name'] for d in vpoller_data]
+
+        missing_datacenters = set(self.vsphere_datacenters) - set(zabbix_hosts)
+
+        if not missing_hosts:
+            logging.info(
+                '[Datacenter@%s] Objects are in sync with Zabbix',
+                self.options['vsphere']['hostname']
+            )
+            return
+
+        logging.info(
+            '[Datacenter@%s] Number of objects to be imported: %d',
+            self.options['vsphere']['hostname'],
+            len(missing_hosts)
+        )
+
+        # Get hosts options (templates, groups, macros) from the config file
+        host_options = self._get_zabbix_host_options(
+            name='vsphere_object_datacenter'
+        )
+        # Add a default interface for the host
+        host_options['interfaces'] = [
+            {
+                'type': 1,
+                'main': 1,
+                'useip': 1,
+                'ip': '127.0.0.1',
+                'dns': '',
+                'port': '10050'
+            }
+        ]
+
+        for host in missing_hosts:
+            logging.info(
+                "[Datacenter@%s] Creating Zabbix host '%s'",
+                self.options['vsphere']['hostname'],
+                host
+            )
+
+            params = deepcopy(host_options)
+            params['host'] = host
+
+            try:
+                result = self.zapi.host.create(params)
+            except pyzabbix.ZabbixAPIException as e:
+                logging.warning(
+                    '[Datacenter@%s] Cannot create host in Zabbix: %s',
+                    self.options['vsphere']['hostname'],
+                    e
+                )
+
+        logging.info(
+            '[Datacenter@%s] Import of objects completed',
+            self.options['vsphere']['hostname']
+        )
 
     def import_vsphere_clusters(self):
         """
@@ -512,6 +590,7 @@ class ZabbixVSphere(object):
 
         # Get all vSphere objects in one place for easy comparison
         vsphere_objects = []
+        vsphere_objects.extend(self.vsphere_datacenters)
         vsphere_objects.extend(self.vsphere_hosts)
         vsphere_objects.extend(self.vsphere_vms)
         vsphere_objects.extend(self.vsphere_datastores)
@@ -665,6 +744,7 @@ Options:
 
     zabbix = ZabbixVSphere(options=options)
     zabbix.connect()
+    zabbix.import_vsphere_datacenters()
     zabbix.import_vsphere_clusters()
     zabbix.import_vsphere_hosts()
     zabbix.import_vsphere_vms()
