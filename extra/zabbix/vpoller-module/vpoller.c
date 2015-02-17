@@ -333,22 +333,25 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
  *    zbx_module_vpoller_echo()
  *
  * Purpose:
- *    Will echo back the first parameter you provide to it
+ *    Will echo back the second parameter you provide to it
+ *    First parameter should be a key that uniquely identifies an item
+ *    in Zabbix, e.g. as returned by a LLD discovery rule.
  *
  * Return value:
- *    The value it was invoked with
+ *    The second value it was called with
  */
 int
 zbx_module_vpoller_echo(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
   const char *param;
 
-  if (request->nparam != 1) {
+  if (request->nparam != 2) {
     SET_MSG_RESULT(result, strdup("Invalid number of key parameters"));
     return (SYSINFO_RET_FAIL);
   }
 
-  param = get_rparam(request, 0);
+  key = get_rparam(request, 0);
+  param = get_rparam(request, 1)
 
   SET_STR_RESULT(result, strdup(param));
 
