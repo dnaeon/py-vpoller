@@ -12,6 +12,15 @@ zabbix:
   username: Admin
   password: zabbix
 
+  vsphere_object_datacenter:
+    proxy: zbx-proxy.example.org
+    templates:
+      - Template VMware vSphere Datacenter - vPoller Native
+    macros:
+      VSPHERE.HOST: vc01.example.org
+    groups:
+      - Datacenters
+
   vsphere_object_host:
     proxy: zbx-proxy.example.org
     templates:
