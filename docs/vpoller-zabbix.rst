@@ -673,8 +673,12 @@ Machine:
 
 .. image:: images/vpoller-zabbix-data-7.jpg
 
-And one more screenshot showing information about the memory and
+Another screenshot showing information about the memory and
 VMware Tools for our Virtual Machine:
 
 .. image:: images/vpoller-zabbix-data-8.jpg
 
+On the screenshot below you can see the discovered triggered alarms
+for one of our vSphere Datacenters:
+
+.. image:: images/vpoller-datacenter-alarms.jpg
