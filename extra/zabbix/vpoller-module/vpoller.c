@@ -343,7 +343,6 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 int
 zbx_module_vpoller_echo(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
-  const char *key;
   const char *param;
 
   if (request->nparam != 2) {
