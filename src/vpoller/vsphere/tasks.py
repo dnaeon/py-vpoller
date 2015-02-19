@@ -2208,7 +2208,7 @@ def vm_disk_get(agent, msg):
     )
 
     # Discover the VM disks
-    data = agent.vm_disk_discover(msg)
+    data = vm_disk_discover(agent, msg)
 
     if data['success'] != 0:
         return data
