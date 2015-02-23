@@ -50,12 +50,7 @@ void
 usage(void)
 {
   fprintf(stderr, "Usage:\n");
-  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
-  fprintf(stderr, "                    [-p <properties>] [-n <name>] -m <method> -V <host>\n");
-  fprintf(stderr, "    vpoller-cclient [-r <retries>] [-t <timeout>] [-e <endpoint>]\n");
-  fprintf(stderr, "                    [-k <key>] [-U <username>] [-P <password>]\n");
-  fprintf(stderr, "                    -m <method> -n <name> -p <properties> -V <host>\n");
-  fprintf(stderr, "    vpoller-cclient -h\n\n");
+  fprintf(stderr, "    vpoller-cclient [options] -m <method> -V <host>\n\n");
   fprintf(stderr, "Options:\n");
   fprintf(stderr, "    -h                   Display this usage info\n");
   fprintf(stderr, "    -V <host>            The vSphere host to send the request to\n");
@@ -66,6 +61,11 @@ usage(void)
   fprintf(stderr, "    -t <timeout>         Timeout after that period of milliseconds [default: 3000]\n");
   fprintf(stderr, "    -e <endpoint>        Endpoint of vPoller Proxy/Worker the client connects to\n");
   fprintf(stderr, "                         [default: tcp://localhost:10123]\n");
+  fprintf(stderr, "    -k <key>             Provide additional key for data filtering\n");
+  fprintf(stderr, "    -s <max-sample>      Max number of performance samples to retrieve\n");
+  fprintf(stderr, "    -c <counter-id>      Retrieve performance metrics with this counter ID\n");
+  fprintf(stderr, "    -i <instance>        Performance metric instance name\n");
+  fprintf(stderr, "    -T <interval>        Historical performance interval key\n");
   fprintf(stderr, "    -U <username>        Username to use for authentication in guest system\n");
   fprintf(stderr, "    -P <password>        Password to use for authentication in guest system\n");
   fprintf(stderr, "    -H <helper>          Specify a helper module to use for processing of the\n");
@@ -75,81 +75,65 @@ usage(void)
   fprintf(stderr, "     vpoller-cclient -m vm.discover -V vc01.example.org -p runtime.powerState\n");
   fprintf(stderr, "     vpoller-cclient -m vm.get -V vc01.example.org -n vm01.example.org -p summary.overallStatus\n");
   fprintf(stderr, "     vpoller-cclient -m vm.diks.get -V vc01.example.org -n vm01.example.org -k /var\n");
-  fprintf(stderr, "     vpoller-cclient -m vm.process.get -V vc01.example.org -n vm01.example.org -U user -P pass\n");
+  fprintf(stderr, "     vpoller-cclient -m vm.process.get -V vc01.example.org -n vm01.example.org -U admin -P p4ssw0rd\n\n");
+  fprintf(stderr, "Version:\n");
+  fprintf(stderr, "     vpoller-cclient version %s\n", VERSION);
 }
 
 int
 main(int argc, char *argv[])
 {
-  void *zcontext = NULL; /* ZeroMQ Context */
-  void *zsocket  = NULL; /* ZeroMQ Socket */
-  zmq_msg_t msg_in;      /* Incoming ZeroMQ Message */
+  void *zcontext = NULL;
+  void *zsocket  = NULL;
+  zmq_msg_t msg_in;
+  unsigned int i;
+  char *params[PARAM_NUM];
+  bool got_reply = false;
+  const char *endpoint = DEFAULT_ENDPOINT;
+  int rc = EX_OK;
+  int timeout = DEFAULT_TIMEOUT;
+  int retries = DEFAULT_RETRIES;
+  int linger  = 0;
+  int msg_len = 0;
+  char msg_buf[MAX_TASK_MESSAGE];
+  char ch;
 
   /* 
-   * Template message before formatting and sending out.
-   * The message we send is in JSON format
+   * Template task message
    */
   const char *msg_out_template = ""
     "{"
-    "\"method\":      \"%s\", "
-    "\"hostname\":    \"%s\", "
-    "\"name\":        \"%s\", "
-    "\"username\":    \"%s\", "
-    "\"password\":    \"%s\", "
-    "\"key\":         \"%s\", "
-    "\"properties\": [ \"%s\" ], "
-    "\"helper\":      \"%s\" "
+    "\"method\":        \"%s\", "
+    "\"hostname\":      \"%s\", "
+    "\"name\":          \"%s\", "
+    "\"properties\":   [\"%s\"], "
+    "\"key\":           \"%s\", "
+    "\"username\":      \"%s\", "
+    "\"password\":      \"%s\", "
+    "\"counter-id\":    \"%s\", "
+    "\"instance\":      \"%s\", "
+    "\"perf-interval\": \"%s\", "
+    "\"max-sample\":    \"%s\", "
+    "\"helper\":        \"%s\" "
     "}";
 
-  const char *method,	  /* The method to be processed during the client request */
-    *hostname,            /* The vSphere host to send the request to */
-    *name,		  /* Name of the object, e.g. ESXi hostname, datastore URL, etc. */
-    *properties,	  /* Name of the properties as defined by the vSphere Web SDK */
-    *username,            /* Username to use for authentication in guest system */
-    *password,            /* Password to use for authentication in guest system */
-    *helper,              /* Specify a helper module to use for processing of result data */
-    *key;                 /* Provide additional key for data filtering */
-
-  bool got_reply = false; /* A flag to indicate whether a reply from vPoller is received or not */
-
-  /* The vPoller Proxy/Worker endpoint we connect to */
-  const char *endpoint = DEFAULT_ENDPOINT;
-
-  int rc      = EX_OK;            /* Return code */
-  int timeout = DEFAULT_TIMEOUT;  /* Timeout in msec */
-  int retries = DEFAULT_RETRIES;  /* Number of retries */
-  int linger  = 0;                /* Set the ZeroMQ socket option ZMQ_LINGER to 0 */
-  int msg_len = 0;		  /* Length of the received message */
-
-  char msg_buf[1024];		  /* Message buffer to hold the final message we send out */
-  char ch;
-
-  /* Initialize the message properties */
-  method = hostname = name = properties = username = password = key = NULL;
+  for (i = 0; i < PARAM_NUM; i++)
+    params[i] = NULL;
 
   /* By default we request the vpoller.helpers.cclient helper */
-  helper = "vpoller.helpers.cclient";
-  
+  params[PARAM_HELPER] = "vpoller.helpers.cclient";
+
   /* Get the command-line options and arguments */
-  while ((ch = getopt(argc, argv, "m:e:r:t:n:p:k:U:P:V:H:")) != -1) {
+  while ((ch = getopt(argc, argv, "m:e:r:t:n:p:k:c:i:s:T:U:P:V:H:")) != -1) {
     switch (ch) {
     case 'm':
-      method = optarg;
+      params[PARAM_METHOD] = optarg;
       break;
     case 'n':
-      name = optarg;
+      params[PARAM_NAME] = optarg;
       break;
     case 'p':
-      properties = optarg;
-      break;
-    case 'U':
-      username = optarg;
-      break;
-    case 'P':
-      password = optarg;
-      break;
-    case 'V':
-      hostname = optarg;
+      params[PARAM_PROPERTIES] = optarg;
       break;
     case 'r':
       retries = atol(optarg);
@@ -161,10 +145,31 @@ main(int argc, char *argv[])
       endpoint = optarg;
       break;
     case 'k':
-      key = optarg;
+      params[PARAM_KEY] = optarg;
+      break;
+    case 'c':
+      params[PARAM_COUNTER_ID] = optarg;
+      break;
+    case 'i':
+      params[PARAM_INSTANCE] = optarg;
+      break;
+    case 's':
+      params[PARAM_MAX_SAMPLE] = optarg;
+      break;
+    case 'T':
+      params[PARAM_PERF_INTERVAL] = optarg;
+      break;
+    case 'U':
+      params[PARAM_USERNAME] = optarg;
+      break;
+    case 'P':
+      params[PARAM_PASSWORD] = optarg;
+      break;
+    case 'V':
+      params[PARAM_HOSTNAME] = optarg;
       break;
     case 'H':
-      helper = optarg;
+      params[PARAM_HELPER] = optarg;
       break;
     default:
       usage();
@@ -175,16 +180,27 @@ main(int argc, char *argv[])
   argv += optind;
   
   /* Sanity check the provided options and arguments */
-  if (method == NULL || hostname == NULL) {
+  if (params[PARAM_METHOD] == NULL || params[PARAM_HOSTNAME] == NULL) {
     usage();
     return (EX_USAGE);
   }
 
   /* Create the message to send out */
-  snprintf(msg_buf, 1023, msg_out_template,
-	   method, hostname, name,
-	   username, password, key, properties, helper);
-    
+  snprintf(msg_buf, MAX_TASK_MESSAGE - 1, msg_out_template,
+	   params[PARAM_METHOD],
+	   params[PARAM_HOSTNAME],
+	   params[PARAM_NAME],
+	   params[PARAM_PROPERTIES],
+	   params[PARAM_KEY],
+	   params[PARAM_USERNAME],
+	   params[PARAM_PASSWORD],
+	   params[PARAM_COUNTER_ID],
+	   params[PARAM_INSTANCE],
+	   params[PARAM_PERF_INTERVAL],
+	   params[PARAM_MAX_SAMPLE],
+	   params[PARAM_HELPER]
+	   );
+
   /* Create a new ZeroMQ Context and Socket */
   zcontext = zmq_ctx_new();
   
