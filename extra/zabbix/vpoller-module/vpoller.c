@@ -37,6 +37,7 @@
 
 #define VPOLLER_MODULE_VERSION "0.3.9-dev"
 #define MODULE_CONFIG_FILE "/etc/zabbix/vpoller_module.conf"
+
 #define VPOLLER_TASK_TEMPLATE "{ \
 			           \"method\": \"%s\", \
 			           \"hostname\": \"%s\", \
@@ -45,11 +46,29 @@
 			           \"key\": \"%s\", \
                                    \"username\": \"%s\", \
                                    \"password\": \"%s\", \
+                                   \"counter-id\": \"%s\", \
+                                   \"instance\": \"%s\", \
+                                   \"perf-interval\": \"%s\", \
+                                   \"max-sample\": \"1\", \
 			           \"helper\": \"vpoller.helpers.czabbix\" \
                                }"
 
 int zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result);
 int zbx_module_vpoller_echo(AGENT_REQUEST *request, AGENT_RESULT *result);
+
+typedef enum {
+  PARAM_METHOD = 0,
+  PARAM_HOSTNAME,
+  PARAM_NAME,
+  PARAM_PROPERTIES,
+  PARAM_KEY,
+  PARAM_USERNAME,
+  PARAM_PASSWORD,
+  PARAM_COUNTER_ID,
+  PARAM_INSTANCE,
+  PARAM_PERF_INTERVAL,
+  PARAM_NUM,
+} item_params;
 
 /* The variable keeps timeout setting for item processing */
 static int item_timeout = 0;
@@ -171,7 +190,7 @@ zbx_module_item_list(void)
  *    The `vpoller` key expects the following parameters
  *    when called through Zabbix:
  *
- *    vpoller[method, hostname, name, properties, <key>, <username>, <password>]
+ *    vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-id>, <instance>, <perf-interval>]
  * 
  *    And the parameters that it expects are these:
  *
@@ -182,74 +201,58 @@ zbx_module_item_list(void)
  *    <key> - Additional information passed as a 'key' to vPoller
  *    <username> - Username to use when logging into the guest system
  *    <password> - Password to use when logging into the guest system
+ *    <counter-id> - Performance counter ID to be retrieved
+ *    <instance> - Performance counter instance
+ *    <perf-interval> - Historical performance interval
  */
 int
 zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
+  unsigned int i;
   void *zsocket = NULL;    /* ZeroMQ socket */
   zmq_msg_t msg_in;        /* Incoming ZeroMQ message from vPoller */
 
-  char *method,            /* vPoller method to be processed */
-    *hostname,             /* VMware vSphere server hostname */
-    *name,		   /* Name of the vSphere object, e.g. VM name, ESXi name */
-    *properties,	   /* vSphere properties to be collected */
-    *key,                  /* Provide additional data to vPoller as a 'key' */
-    *key_esc,              /* Escaped version of the 'key' passed to vPoller */
-    *username,             /* Username for logging into the guest system */
-    *password;             /* Password for logging into the guest system */
+  char *params[PARAM_NUM]; /* Params received from Zabbix */
+  char *key_esc;
+  bool got_reply = false;   /* A flag to indicate whether a reply from vPoller was received or not */
 
-  bool got_reply = false;  /* A flag to indicate whether a reply from vPoller was received or not */
-  
-  int retries = CONFIG_VPOLLER_RETRIES;  /* Number of retries */
-  int linger = 0;                        /* Set the ZeroMQ socket option ZMQ_LINGER to 0 */
-  int msg_len = 0;                       /* Length of the received message */
+  int retries = CONFIG_VPOLLER_RETRIES; /* Number of retries */
+  int linger = 0;                       /* Set the ZeroMQ socket option ZMQ_LINGER to 0 */
+  int msg_len = 0;                      /* Length of the received message */
+  char msg_buf[MAX_BUFFER_LEN];         /* Buffer to hold the final message we send out to vPoller */
 
-  char msg_buf[MAX_BUFFER_LEN];          /* Buffer to hold the final message we send out to vPoller */
-
-  method = hostname = name = properties = key = key_esc = username = password = "(null)";
+  for (i = 0; i < PARAM_NUM; i++)
+    params[i] = "(null)";
 
   /*
    * The Zabbix `vpoller` key expects these parameters
    * in the following order:
    *
-   * vpoller[method, hostname, name, properties, <key>, <username>, <password>]
+   * vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-id>, <instance>, <perf-interval>]
    */
-  if (request->nparam == 4) {
-    method = get_rparam(request, 0);
-    hostname = get_rparam(request, 1);
-    name = get_rparam(request, 2);
-    properties = get_rparam(request, 3);
-  } else if (request->nparam == 5) {
-    method = get_rparam(request, 0);
-    hostname = get_rparam(request, 1);
-    name = get_rparam(request, 2);
-    properties = get_rparam(request, 3);
-    key = get_rparam(request, 4);
-  } else if (request->nparam == 7) {
-    method = get_rparam(request, 0);
-    hostname = get_rparam(request, 1);
-    name = get_rparam(request, 2);
-    properties = get_rparam(request, 3);
-    key = get_rparam(request, 4);
-    username = get_rparam(request, 5);
-    password = get_rparam(request, 6);
-  } else {
-    SET_MSG_RESULT(result, strdup("Invalid number of key parameters"));
+  if ((request->nparam < 4) || (request->nparam > PARAM_NUM)) {
+    SET_MSG_RESULT(result, strdup("Invalid number of arguments"));
     return (SYSINFO_RET_FAIL);
   }
+
+  for (i = 0; i < request->nparam; i++)
+    params[i] = get_rparam(request, i);
 
   /* 
    * Create the task request which we send to vPoller
    */
-  key_esc = zbx_dyn_escape_string(key, "\\");
+  key_esc = zbx_dyn_escape_string(params[PARAM_KEY], "\\");
   zbx_snprintf(msg_buf, sizeof(msg_buf), VPOLLER_TASK_TEMPLATE,
-	       method,
-	       hostname,
-	       name,
-	       properties,
+	       params[PARAM_METHOD],
+	       params[PARAM_HOSTNAME],
+	       params[PARAM_NAME],
+	       params[PARAM_PROPERTIES],
 	       key_esc,
-	       username,
-	       password);
+	       params[PARAM_USERNAME],
+	       params[PARAM_PASSWORD],
+	       params[PARAM_COUNTER_ID],
+	       params[PARAM_INSTANCE],
+	       params[PARAM_PERF_INTERVAL]);
   zbx_free(key_esc);
 
   zabbix_log(LOG_LEVEL_DEBUG, "Creating a ZeroMQ socket for connecting to vPoller");
