@@ -254,27 +254,33 @@ The ``vpoller[*]`` Zabbix key has the following form:
 
 .. code-block:: bash
 
-   vpoller[method, hostname, name, properties, <key>, <username>, <password>]
+   vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-id>, <instance>, <perf-interval>]
 
 And the parameters that ``vpoller[*]`` key expects are these.
 
-+------------+------------------------------------------------------+----------+
-| Parameter  | Description                                          | Required |
-+============+======================================================+==========+
-| method     | vPoller method to be processed                       | True     |
-+------------+------------------------------------------------------+----------+
-| hostname   | VMware vSphere server hostname                       | True     |
-+------------+------------------------------------------------------+----------+
-| name       | Name of the vSphere object (e.g. VM name, ESXi name) | True     |
-+------------+------------------------------------------------------+----------+
-| properties | vSphere object properties to be collected by vPoller | True     |
-+------------+------------------------------------------------------+----------+
-| <key>      | Additional information to be passed to vPoller       | False    |
-+------------+------------------------------------------------------+----------+
-| <username> | Username to use when logging into the guest system   | False    |
-+------------+------------------------------------------------------+----------+
-| <password> | Password to use when logging into the guest system   | False    |
-+------------+------------------------------------------------------+----------+
++-----------------+------------------------------------------------------+----------+
+| Parameter       | Description                                          | Required |
++=================+======================================================+==========+
+| method          | vPoller method to be processed                       | True     |
++-----------------+------------------------------------------------------+----------+
+| hostname        | VMware vSphere server hostname                       | True     |
++-----------------+------------------------------------------------------+----------+
+| name            | Name of the vSphere object (e.g. VM name, ESXi name) | True     |
++-----------------+------------------------------------------------------+----------+
+| properties      | vSphere object properties to be collected by vPoller | True     |
++-----------------+------------------------------------------------------+----------+
+| <key>           | Additional information to be passed to vPoller       | False    |
++-----------------+------------------------------------------------------+----------+
+| <username>      | Username to use when logging into the guest system   | False    |
++-----------------+------------------------------------------------------+----------+
+| <password>      | Password to use when logging into the guest system   | False    |
++-----------------+------------------------------------------------------+----------+
+| <counter-id>    | Performance counter ID to be retrieved               | False    |
++-----------------+------------------------------------------------------+----------+
+| <instance>      | Performance counter instance                         | False    |
++-----------------+------------------------------------------------------+----------+
+| <perf-interval> | Historical performance interval                      | False    |
++-----------------+------------------------------------------------------+----------+
 
 Note that some of the above parameters are mandatory and some are
 optional depending on what vPoller method you are requesting to be
