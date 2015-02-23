@@ -688,3 +688,13 @@ On the screenshot below you can see the discovered triggered alarms
 for one of our vSphere Datacenters:
 
 .. image:: images/vpoller-datacenter-alarms.jpg
+
+The screenshot below shows the Virtual Machine operations for the
+past day for one of our VMware vSphere Datacenters:
+
+.. image:: images/vpoller-datacenter-vm-operations.jpg
+
+From the screenshot below we can see the data traffic for one of
+our Virtual Machines.
+
+.. image:: images/vpoller-vm-data-traffic.jpg
