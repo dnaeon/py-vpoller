@@ -1,7 +1,7 @@
 #ifndef _VPOLLER_CCLIENT_H_
 #define _VPOLLER_CCLIENT_H_
 
-#define VERSION "0.3.9-dev"
+#define VERSION "0.5.1"
 #define MAX_TASK_MESSAGE 8192                     /* Max size of the task message */
 #define DEFAULT_TIMEOUT  10000 			  /* Timeout is in msec */
 #define DEFAULT_RETRIES  3    			  /* Number of retries before giving up */
