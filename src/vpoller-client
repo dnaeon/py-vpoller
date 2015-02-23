@@ -55,7 +55,7 @@ Options:
     -n <name>, --name <name>                    Name of the object, e.g. ESXi hostname, datastore URL, etc.
     -p <properties>, --properties <properties>  Name of the property as defined by the vSphere Web SDK
     -r <retries>, --retries <retries>           Number of times to retry if a request times out [default: 3]
-    -t <timeout>, --timeout <timeout>           Timeout after that period of milliseconds [default: 3000]
+    -t <timeout>, --timeout <timeout>           Timeout after that period of milliseconds [default: 10000]
     -e <endpoint>, --endpoint <endpoint>        Endpoint of vPoller Proxy/Worker the client connects to
                                                 [default: tcp://localhost:10123]
     -k <key>, --key <key>                       Provide additional key for data filtering
