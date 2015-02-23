@@ -62,7 +62,7 @@ Options:
     -c <counter-id>, --counter-id <counter-id>  Retrieve performance metrics with this counter ID
     -s <max-sample>, --max-sample <max-sample>  Max number of performance samples to retrieve
     -i <instance>, --instance <instance>        Performance metric instance name
-    -t <interval> --perf-interval <interval>    Historical performance interval key
+    -T <interval> --perf-interval <interval>    Historical performance interval key
     -U <username>, --guest-username <username>  Username to use for authentication in guest system
     -P <password>, --guest-password <password>  Password to use for authentication in guest system
     -H <helper>, --helper <helper>              Specify a helper module to use for processing of the
