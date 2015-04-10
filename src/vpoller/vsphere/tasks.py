@@ -1948,7 +1948,8 @@ def vm_guest_net_get(agent, msg):
                 "network",
                 "connected",
                 "macAddress",
-                "ipConfig"
+                "ipv4",
+                "ipv6"
             ]
         }
 
@@ -1987,7 +1988,16 @@ def vm_guest_net_get(agent, msg):
     # Get the requested properties
     result = {}
     result['name'] = vm_name
-    result['net'] = [{prop: getattr(net, prop, '(null)') for prop in properties} for net in vm_networks]
+        result['net'] = []
+    for net in vm_networks :
+        ipv4 = getattr(net,'ipConfig').ipAddress[0].ipAddress
+        ipv6 = getattr(net,'ipConfig').ipAddress[1].ipAddress
+        tresult = {}
+        for prop in properties :
+            tresult[prop] = getattr(net, prop, '(null)')
+            if 'ipv4' == prop : tresult['ipv4'] = ipv4
+            if 'ipv6' == prop : tresult['ipv6'] = ipv6
+        result['net'].append(tresult)
 
     r = {
         'success': 0,
