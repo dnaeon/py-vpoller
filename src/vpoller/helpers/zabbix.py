@@ -157,8 +157,8 @@ class HelperAgent(object):
             The property value from the result message
 
         """
-        property_name = self.msg['properties'][-1]
-        result = self.data['result'][0]
+        property_name = self.msg['properties'][0]
+        result = self.data['result'][-1]
 
         return result.get(property_name)
 
