@@ -1,690 +1,1346 @@
 {
-  "success": 0,
   "result": [
     {
-      "counterId": 174,
+      "counterId": "cpu.wait.millisecond",
+      "instance": ""
+    },
+    {
+      "counterId": "datastore.numberWriteAveraged.number",
+      "instance": "5190e2a7-d2b7c58e-b1e2-90b11c29079d"
+    },
+    {
+      "counterId": "mem.llSwapUsed.kiloBytes",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
       "instance": "scsi0:0"
     },
     {
-      "counterId": 434,
+      "counterId": "rescpu.actpk5.percent",
       "instance": ""
     },
     {
-      "counterId": 107,
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "disk.numberReadAveraged.number",
+      "instance": "naa.5000c5004e569534"
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "mem.zero.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 70,
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "cpu.used.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "mem.zipSaved.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 178,
-      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+      "counterId": "cpu.used.millisecond",
+      "instance": "0"
     },
     {
-      "counterId": 2,
+      "counterId": "cpu.costop.millisecond",
       "instance": ""
     },
     {
-      "counterId": 469,
+      "counterId": "rescpu.maxLimited15.percent",
+      "instance": ""
+    },
+    {
+      "counterId": "datastore.totalReadLatency.millisecond",
+      "instance": "5190e2a7-d2b7c58e-b1e2-90b11c29079d"
+    },
+    {
+      "counterId": "net.droppedRx.number",
       "instance": "4000"
     },
     {
-      "counterId": 12,
-      "instance": "0"
-    },
-    {
-      "counterId": 10,
+      "counterId": "mem.shared.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 414,
+      "counterId": "rescpu.actav5.percent",
       "instance": ""
     },
     {
-      "counterId": 12,
-      "instance": ""
-    },
-    {
-      "counterId": 533,
-      "instance": "scsi0:0"
-    },
-    {
-      "counterId": 129,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
-    },
-    {
-      "counterId": 174,
-      "instance": ""
-    },
-    {
-      "counterId": 415,
-      "instance": ""
-    },
-    {
-      "counterId": 535,
-      "instance": "scsi0:0"
-    },
-    {
-      "counterId": 471,
-      "instance": "4000"
-    },
-    {
-      "counterId": 414,
-      "instance": "0"
-    },
-    {
-      "counterId": 13,
-      "instance": "0"
-    },
-    {
-      "counterId": 416,
-      "instance": ""
-    },
-    {
-      "counterId": 133,
-      "instance": ""
-    },
-    {
-      "counterId": 149,
-      "instance": "vmnic2"
-    },
-    {
-      "counterId": 149,
-      "instance": "vmnic3"
-    },
-    {
-      "counterId": 416,
-      "instance": "0"
-    },
-    {
-      "counterId": 537,
-      "instance": "scsi0:0"
-    },
-    {
-      "counterId": 149,
+      "counterId": "net.bytesTx.kiloBytesPerSecond",
       "instance": "vmnic0"
     },
     {
-      "counterId": 474,
-      "instance": "4000"
-    },
-    {
-      "counterId": 149,
+      "counterId": "net.bytesTx.kiloBytesPerSecond",
       "instance": "vmnic1"
     },
     {
-      "counterId": 417,
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "net.multicastTx.number",
+      "instance": "4000"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "cpu.system.millisecond",
+      "instance": ""
+    },
+    {
+      "counterId": "net.droppedTx.number",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "virtualDisk.largeSeeks.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "net.packetsTx.number",
+      "instance": "4000"
+    },
+    {
+      "counterId": "sys.heartbeat.number",
+      "instance": ""
+    },
+    {
+      "counterId": "mem.swapoutRate.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "net.packetsRx.number",
+      "instance": "4000"
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "mem.latency.percent",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "disk.commandsAborted.number",
+      "instance": "naa.5000c5004e569534"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "cpu.idle.millisecond",
       "instance": "0"
     },
     {
-      "counterId": 345,
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "cpu.idle.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "net.usage.kiloBytesPerSecond",
+      "instance": "4000"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
       "instance": "scsi0:0"
     },
     {
-      "counterId": 184,
+      "counterId": "cpu.maxlimited.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "net.broadcastRx.number",
+      "instance": "4000"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "net.multicastRx.number",
+      "instance": "4000"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "cpu.latency.percent",
       "instance": ""
     },
     {
-      "counterId": 511,
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "net.transmitted.kiloBytesPerSecond",
+      "instance": "4000"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "datastore.numberReadAveraged.number",
+      "instance": "5190e2a7-d2b7c58e-b1e2-90b11c29079d"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "mem.llSwapInRate.kiloBytesPerSecond",
       "instance": ""
     },
     {
-      "counterId": 147,
+      "counterId": "cpu.demand.megaHertz",
       "instance": ""
     },
     {
-      "counterId": 441,
-      "instance": ""
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:8"
     },
     {
-      "counterId": 90,
-      "instance": ""
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:5"
     },
     {
-      "counterId": 13,
-      "instance": ""
+      "counterId": "cpu.maxlimited.millisecond",
+      "instance": "0"
     },
     {
-      "counterId": 412,
-      "instance": ""
-    },
-    {
-      "counterId": 536,
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
       "instance": "scsi0:0"
     },
     {
-      "counterId": 33,
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.writeIOSize.number",
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "rescpu.runpk15.percent",
       "instance": ""
     },
     {
-      "counterId": 148,
-      "instance": "vmnic2"
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:0"
     },
     {
-      "counterId": 148,
-      "instance": "vmnic3"
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:12"
     },
     {
-      "counterId": 148,
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "disk.busResets.number",
+      "instance": "naa.5000c5004e569534"
+    },
+    {
+      "counterId": "mem.usage.percent",
+      "instance": ""
+    },
+    {
+      "counterId": "disk.write.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "net.received.kiloBytesPerSecond",
+      "instance": "4000"
+    },
+    {
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "net.bytesRx.kiloBytesPerSecond",
       "instance": "vmnic0"
     },
     {
-      "counterId": 148,
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "net.bytesRx.kiloBytesPerSecond",
       "instance": "vmnic1"
     },
     {
-      "counterId": 147,
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "cpu.idle.millisecond",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.numberReadAveraged.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "mem.activewrite.kiloBytes",
+      "instance": ""
+    },
+    {
+      "counterId": "mem.vmmemctltarget.kiloBytes",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "cpu.overlap.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "cpu.overlap.millisecond",
+      "instance": "0"
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "rescpu.runav5.percent",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "net.bytesRx.kiloBytesPerSecond",
       "instance": "4000"
     },
     {
-      "counterId": 411,
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "mem.overheadMax.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 37,
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "rescpu.runav1.percent",
       "instance": ""
     },
     {
-      "counterId": 176,
-      "instance": "scsi0:0"
-    },
-    {
-      "counterId": 520,
+      "counterId": "cpu.entitlement.megaHertz",
       "instance": ""
     },
     {
-      "counterId": 436,
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "rescpu.actav15.percent",
       "instance": ""
     },
     {
-      "counterId": 510,
+      "counterId": "power.energy.joule",
       "instance": ""
     },
     {
-      "counterId": 442,
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.writeLoadMetric.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "net.bytesTx.kiloBytesPerSecond",
       "instance": ""
     },
     {
-      "counterId": 179,
-      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
-    },
-    {
-      "counterId": 430,
+      "counterId": "mem.entitlement.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 171,
-      "instance": "scsi0:0"
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:10"
     },
     {
-      "counterId": 180,
-      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+      "counterId": "cpu.usagemhz.megaHertz",
+      "instance": "1"
     },
     {
-      "counterId": 431,
+      "counterId": "rescpu.samplePeriod.millisecond",
       "instance": ""
     },
     {
-      "counterId": 542,
+      "counterId": "cpu.usagemhz.megaHertz",
       "instance": ""
     },
     {
-      "counterId": 468,
+      "counterId": "cpu.usagemhz.megaHertz",
+      "instance": "0"
+    },
+    {
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "sys.uptime.second",
       "instance": ""
     },
     {
-      "counterId": 147,
-      "instance": "vmnic1"
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:2"
     },
     {
-      "counterId": 433,
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "cpu.swapwait.millisecond",
       "instance": ""
     },
     {
-      "counterId": 131,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+      "counterId": "mem.decompressionRate.kiloBytesPerSecond",
+      "instance": ""
     },
     {
-      "counterId": 147,
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "mem.llSwapOutRate.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "net.droppedRx.number",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "net.bytesRx.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "cpu.run.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "cpu.run.millisecond",
+      "instance": "0"
+    },
+    {
+      "counterId": "net.usage.kiloBytesPerSecond",
       "instance": "vmnic0"
     },
     {
-      "counterId": 147,
-      "instance": "vmnic3"
-    },
-    {
-      "counterId": 11,
-      "instance": "0"
-    },
-    {
-      "counterId": 509,
-      "instance": ""
-    },
-    {
-      "counterId": 147,
-      "instance": "vmnic2"
-    },
-    {
-      "counterId": 474,
-      "instance": ""
-    },
-    {
-      "counterId": 470,
-      "instance": "4000"
-    },
-    {
-      "counterId": 469,
-      "instance": ""
-    },
-    {
-      "counterId": 506,
-      "instance": ""
-    },
-    {
-      "counterId": 514,
-      "instance": ""
-    },
-    {
-      "counterId": 423,
-      "instance": ""
-    },
-    {
-      "counterId": 516,
-      "instance": ""
-    },
-    {
-      "counterId": 159,
-      "instance": ""
-    },
-    {
-      "counterId": 11,
-      "instance": ""
-    },
-    {
-      "counterId": 413,
-      "instance": ""
-    },
-    {
-      "counterId": 105,
-      "instance": ""
-    },
-    {
-      "counterId": 543,
-      "instance": ""
-    },
-    {
-      "counterId": 94,
-      "instance": ""
-    },
-    {
-      "counterId": 146,
-      "instance": "vmnic2"
-    },
-    {
-      "counterId": 505,
-      "instance": ""
-    },
-    {
-      "counterId": 146,
-      "instance": "vmnic3"
-    },
-    {
-      "counterId": 471,
-      "instance": ""
-    },
-    {
-      "counterId": 415,
-      "instance": "0"
-    },
-    {
-      "counterId": 183,
-      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
-    },
-    {
-      "counterId": 435,
-      "instance": ""
-    },
-    {
-      "counterId": 146,
-      "instance": "4000"
-    },
-    {
-      "counterId": 134,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
-    },
-    {
-      "counterId": 155,
-      "instance": ""
-    },
-    {
-      "counterId": 85,
-      "instance": ""
-    },
-    {
-      "counterId": 149,
-      "instance": ""
-    },
-    {
-      "counterId": 439,
-      "instance": ""
-    },
-    {
-      "counterId": 146,
-      "instance": "vmnic0"
-    },
-    {
-      "counterId": 417,
-      "instance": ""
-    },
-    {
-      "counterId": 146,
+      "counterId": "net.usage.kiloBytesPerSecond",
       "instance": "vmnic1"
     },
     {
-      "counterId": 473,
-      "instance": "4000"
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:0"
     },
     {
-      "counterId": 102,
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": "virtualDisk.totalWriteLatency.millisecond",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "mem.overheadTouched.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 14,
-      "instance": "0"
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:4"
     },
     {
-      "counterId": 469,
-      "instance": "vmnic0"
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:3"
     },
     {
-      "counterId": 128,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
-    },
-    {
-      "counterId": 469,
+      "counterId": "net.packetsTx.number",
       "instance": "vmnic1"
     },
     {
-      "counterId": 508,
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "net.multicastRx.number",
       "instance": ""
     },
     {
-      "counterId": 469,
-      "instance": "vmnic2"
-    },
-    {
-      "counterId": 469,
-      "instance": "vmnic3"
-    },
-    {
-      "counterId": 131,
-      "instance": ""
-    },
-    {
-      "counterId": 182,
-      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
-    },
-    {
-      "counterId": 148,
-      "instance": "4000"
-    },
-    {
-      "counterId": 149,
-      "instance": "4000"
-    },
-    {
-      "counterId": 10,
-      "instance": "0"
-    },
-    {
-      "counterId": 125,
-      "instance": ""
-    },
-    {
-      "counterId": 157,
-      "instance": ""
-    },
-    {
-      "counterId": 98,
-      "instance": ""
-    },
-    {
-      "counterId": 453,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
-    },
-    {
-      "counterId": 41,
-      "instance": ""
-    },
-    {
-      "counterId": 419,
-      "instance": ""
-    },
-    {
-      "counterId": 143,
-      "instance": ""
-    },
-    {
-      "counterId": 146,
-      "instance": ""
-    },
-    {
-      "counterId": 136,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
-    },
-    {
-      "counterId": 130,
-      "instance": ""
-    },
-    {
-      "counterId": 106,
-      "instance": ""
-    },
-    {
-      "counterId": 512,
-      "instance": ""
-    },
-    {
-      "counterId": 74,
-      "instance": ""
-    },
-    {
-      "counterId": 470,
+      "counterId": "net.packetsTx.number",
       "instance": "vmnic0"
     },
     {
-      "counterId": 440,
+      "counterId": "mem.swaptarget.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 470,
-      "instance": "vmnic3"
+      "counterId": "datastore.totalWriteLatency.millisecond",
+      "instance": "5190e2a7-d2b7c58e-b1e2-90b11c29079d"
     },
     {
-      "counterId": 470,
-      "instance": "vmnic1"
-    },
-    {
-      "counterId": 502,
+      "counterId": "power.power.watt",
       "instance": ""
     },
     {
-      "counterId": 470,
-      "instance": "vmnic2"
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:8"
     },
     {
-      "counterId": 173,
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "net.broadcastTx.number",
+      "instance": ""
+    },
+    {
+      "counterId": "disk.read.kiloBytesPerSecond",
+      "instance": "naa.5000c5004e569534"
+    },
+    {
+      "counterId": "mem.consumed.kiloBytes",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.readLoadMetric.number",
       "instance": "scsi0:0"
     },
     {
-      "counterId": 401,
+      "counterId": "cpu.system.millisecond",
       "instance": "0"
     },
     {
-      "counterId": 181,
-      "instance": "5481d059-dbd6de3d-2215-d8d385bf2110"
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:10"
     },
     {
-      "counterId": 401,
+      "counterId": "cpu.system.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "mem.swapinRate.kiloBytesPerSecond",
       "instance": ""
     },
     {
-      "counterId": 466,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+      "counterId": "disk.commandsAveraged.number",
+      "instance": "naa.5000c5004e569534"
     },
     {
-      "counterId": 137,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
-    },
-    {
-      "counterId": 143,
-      "instance": "4000"
-    },
-    {
-      "counterId": 6,
-      "instance": "0"
-    },
-    {
-      "counterId": 468,
-      "instance": "4000"
-    },
-    {
-      "counterId": 472,
-      "instance": "4000"
-    },
-    {
-      "counterId": 532,
-      "instance": "scsi0:0"
-    },
-    {
-      "counterId": 531,
-      "instance": "scsi0:0"
-    },
-    {
-      "counterId": 86,
+      "counterId": "net.packetsRx.number",
       "instance": ""
     },
     {
-      "counterId": 519,
+      "counterId": "mem.active.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 504,
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.readIOSize.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "datastore.read.kiloBytesPerSecond",
+      "instance": "5190e2a7-d2b7c58e-b1e2-90b11c29079d"
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "net.multicastTx.number",
       "instance": ""
     },
     {
-      "counterId": 14,
-      "instance": ""
-    },
-    {
-      "counterId": 175,
-      "instance": "scsi0:0"
-    },
-    {
-      "counterId": 135,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
-    },
-    {
-      "counterId": 143,
+      "counterId": "net.received.kiloBytesPerSecond",
       "instance": "vmnic0"
     },
     {
-      "counterId": 534,
-      "instance": "scsi0:0"
-    },
-    {
-      "counterId": 143,
-      "instance": "vmnic2"
-    },
-    {
-      "counterId": 143,
+      "counterId": "net.received.kiloBytesPerSecond",
       "instance": "vmnic1"
     },
     {
-      "counterId": 467,
+      "counterId": "rescpu.runav15.percent",
+      "instance": ""
+    },
+    {
+      "counterId": "rescpu.sampleCount.number",
+      "instance": ""
+    },
+    {
+      "counterId": "disk.maxTotalLatency.millisecond",
+      "instance": ""
+    },
+    {
+      "counterId": "mem.compressionRate.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "net.received.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "disk.commands.number",
+      "instance": "naa.5000c5004e569534"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": "cpu.swapwait.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "cpu.swapwait.millisecond",
+      "instance": "0"
+    },
+    {
+      "counterId": "mem.compressed.kiloBytes",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "rescpu.runpk5.percent",
+      "instance": ""
+    },
+    {
+      "counterId": "mem.swapin.kiloBytes",
+      "instance": ""
+    },
+    {
+      "counterId": "rescpu.runpk1.percent",
+      "instance": ""
+    },
+    {
+      "counterId": "disk.usage.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "mem.swapped.kiloBytes",
+      "instance": ""
+    },
+    {
+      "counterId": "cpu.maxlimited.millisecond",
+      "instance": ""
+    },
+    {
+      "counterId": "net.transmitted.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:0"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.numberWriteAveraged.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "datastore.maxTotalLatency.millisecond",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.writeOIO.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "net.bytesTx.kiloBytesPerSecond",
       "instance": "4000"
     },
     {
-      "counterId": 473,
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "virtualDisk.totalReadLatency.millisecond",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "cpu.used.millisecond",
       "instance": ""
     },
     {
-      "counterId": 517,
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "mem.zipped.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 143,
-      "instance": "vmnic3"
+      "counterId": "net.droppedTx.number",
+      "instance": "4000"
     },
     {
-      "counterId": 467,
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "rescpu.maxLimited1.percent",
       "instance": ""
     },
     {
-      "counterId": 470,
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "cpu.wait.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "rescpu.actpk15.percent",
       "instance": ""
     },
     {
-      "counterId": 29,
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "rescpu.maxLimited5.percent",
       "instance": ""
     },
     {
-      "counterId": 515,
+      "counterId": "cpu.wait.millisecond",
+      "instance": "0"
+    },
+    {
+      "counterId": "cpu.overlap.millisecond",
       "instance": ""
     },
     {
-      "counterId": 344,
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.readOIO.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "virtualDisk.mediumSeeks.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "net.packetsRx.number",
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": "net.usage.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "net.packetsRx.number",
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "disk.write.kiloBytesPerSecond",
+      "instance": "naa.5000c5004e569534"
+    },
+    {
+      "counterId": "disk.read.kiloBytesPerSecond",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "cpu.costop.millisecond",
+      "instance": "0"
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
       "instance": "scsi0:0"
     },
     {
-      "counterId": 148,
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:1"
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "virtualDisk.smallSeeks.number",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "cpu.costop.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "cpu.run.millisecond",
       "instance": ""
     },
     {
-      "counterId": 172,
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.readLatencyUS.microsecond",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.read.kiloBytesPerSecond",
       "instance": "scsi0:0"
     },
     {
-      "counterId": 513,
+      "counterId": "net.broadcastRx.number",
       "instance": ""
     },
     {
-      "counterId": 346,
+      "counterId": "sys.osUptime.second",
+      "instance": ""
+    },
+    {
+      "counterId": "cpu.ready.millisecond",
+      "instance": ""
+    },
+    {
+      "counterId": "net.packetsTx.number",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "disk.numberWrite.number",
+      "instance": "naa.5000c5004e569534"
+    },
+    {
+      "counterId": "virtualDisk.write.kiloBytesPerSecond",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "disk.numberWriteAveraged.number",
+      "instance": "naa.5000c5004e569534"
+    },
+    {
+      "counterId": "cpu.usage.percent",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:14"
+    },
+    {
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:12"
+    },
+    {
+      "counterId": "virtualDisk.readLoadMetric.number",
+      "instance": "scsi0:10"
+    },
+    {
+      "counterId": "mem.swapout.kiloBytes",
+      "instance": ""
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
       "instance": "scsi0:0"
     },
     {
-      "counterId": 518,
+      "counterId": "mem.vmmemctl.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 343,
-      "instance": "scsi0:0"
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:1"
     },
     {
-      "counterId": 130,
-      "instance": "naa.6006016019b03a0096724fb78a7ce411"
+      "counterId": "cpu.ready.millisecond",
+      "instance": "0"
     },
     {
-      "counterId": 24,
+      "counterId": "rescpu.actpk1.percent",
       "instance": ""
     },
     {
-      "counterId": 507,
+      "counterId": "cpu.ready.millisecond",
+      "instance": "1"
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:6"
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:8"
+    },
+    {
+      "counterId": "net.transmitted.kiloBytesPerSecond",
+      "instance": "vmnic0"
+    },
+    {
+      "counterId": "net.transmitted.kiloBytesPerSecond",
+      "instance": "vmnic1"
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:2"
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:3"
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:4"
+    },
+    {
+      "counterId": "virtualDisk.writeLatencyUS.microsecond",
+      "instance": "scsi0:5"
+    },
+    {
+      "counterId": "mem.overhead.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 173,
+      "counterId": "mem.granted.kiloBytes",
       "instance": ""
     },
     {
-      "counterId": 472,
+      "counterId": "rescpu.actav1.percent",
       "instance": ""
     },
     {
-      "counterId": 6,
-      "instance": ""
+      "counterId": "datastore.write.kiloBytesPerSecond",
+      "instance": "5190e2a7-d2b7c58e-b1e2-90b11c29079d"
+    },
+    {
+      "counterId": "net.broadcastTx.number",
+      "instance": "4000"
+    },
+    {
+      "counterId": "disk.numberRead.number",
+      "instance": "naa.5000c5004e569534"
     }
   ],
+  "success": 0,
   "msg": "Successfully retrieved performance metrics"
 }
