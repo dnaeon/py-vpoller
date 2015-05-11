@@ -254,7 +254,7 @@ The ``vpoller[*]`` Zabbix key has the following form:
 
 .. code-block:: bash
 
-   vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-id>, <instance>, <perf-interval>]
+   vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-name>, <instance>, <perf-interval>]
 
 And the parameters that ``vpoller[*]`` key expects are these.
 
@@ -275,7 +275,7 @@ And the parameters that ``vpoller[*]`` key expects are these.
 +-----------------+------------------------------------------------------+----------+
 | <password>      | Password to use when logging into the guest system   | False    |
 +-----------------+------------------------------------------------------+----------+
-| <counter-id>    | Performance counter ID to be retrieved               | False    |
+| <counter-name>  | Performance counter name to be retrieved             | False    |
 +-----------------+------------------------------------------------------+----------+
 | <instance>      | Performance counter instance                         | False    |
 +-----------------+------------------------------------------------------+----------+
