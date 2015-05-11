@@ -1187,10 +1187,10 @@ def cluster_perf_metric_info(agent, msg):
     Example client message would be:
 
     {
-        "method":     "cluster.perf.metric.info",
-        "hostname":   "vc01.example.org",
-        "name":       "MyCluster",
-        "counter-id": <counter-id>
+        "method":      "cluster.perf.metric.info",
+        "hostname":    "vc01.example.org",
+        "name":        "MyCluster",
+        "counter-name": <counter-name>
     }
 
     Returns:
@@ -1206,7 +1206,14 @@ def cluster_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = int(msg.get('counter-id')) if msg.get('counter-id') else None
+    counter_id = None
+    counter_name = msg.get('counter-name')
+    if counter_name:
+        counter_info = _get_counter_by_name(agent=agent, name=counter_name)
+        if not counter_info:
+            return {'success': 1, 'msg': 'Unknown performance counter requested'}
+        else:
+            counter_id = counter_info.key
 
     return _entity_perf_metric_info(
         agent=agent,
