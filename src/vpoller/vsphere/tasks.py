@@ -1127,7 +1127,7 @@ def cluster_discover(agent, msg):
 
     return r
 
-@task(name='cluster.perf.metric.get', required=['name', 'counter-id'])
+@task(name='cluster.perf.metric.get', required=['name', 'counter-name', 'perf-interval'])
 def cluster_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.ClusterComputeResource managed object
@@ -1143,10 +1143,10 @@ def cluster_perf_metric_get(agent, msg):
         "hostname": "vc01.example.org",
         "name":     "MyCluster",
         "counter-id": [
-            276,  # Effective memory resources
-            277   # Total amount of CPU resources of all hosts in the cluster
+            clusterServices.effectivemem.megaBytes,  # Effective memory resources
+            cpu.totalmhz.megaHertz  # Total amount of CPU resources of all hosts in the cluster
         ],
-        "perf-interval": 1, # Historical performance interval key '1' (Past day)
+        "perf-interval": "Past day", # Historical performance interval
     }
 
     Returns:
@@ -1162,21 +1162,14 @@ def cluster_perf_metric_get(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
-    try:
-        counter_id = int(msg.get('counter-id'))
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
-    except (TypeError, ValueError):
-        logger.warning('Invalid message, cannot retrieve performance metrics')
-        return {
-            'success': 1,
-            'msg': 'Invalid message, cannot retrieve performance metrics'
-        }
+    counter_name = msg.get('counter-name')
+    interval_name = msg.get('perf-interval')
 
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
-        perf_interval_key=perf_interval_key
+        counter_name=counter_name,
+        interval_name=interval_name
     )
 
 @task(name='cluster.perf.metric.info')
@@ -1762,7 +1755,7 @@ def vm_perf_metric_get(agent, msg):
             "method":   "vm.perf.metric.get",
             "hostname": "vc01.example.org",
             "name":     "vm01.example.org",
-            "counter-id"
+            "counter-name"
                 12, # CPU Ready time of the Virtual Machine
             ],
             "max-sample": 1,
