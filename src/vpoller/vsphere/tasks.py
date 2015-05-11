@@ -610,17 +610,9 @@ def perf_metric_info(agent, msg):
     )
 
     counter = agent.si.content.perfManager.perfCounter
-    counter_id = [c.key for c in counter]
-
-    try:
-        counter_info = agent.si.content.perfManager.QueryPerfCounter(
-            counterId=counter_id
-        )
-    except Exception as e:
-        return {'success': 1, 'msg': 'Cannot retrieve performance metrics info: {}'.format(e.message)}
 
     data = []
-    for c in counter_info:
+    for c in counter:
         d = {
             'key': c.key,
             'nameInfo': {k: getattr(c.nameInfo, k) for k in ('label', 'summary', 'key')},
