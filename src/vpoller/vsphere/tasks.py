@@ -394,31 +394,29 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
 
     return result
 
-def _entity_perf_metric_get(agent, entity, counter_id, max_sample=1, instance="", perf_interval_key=None):
+def _entity_perf_metric_get(agent, entity, counter_name, max_sample=1, instance='', interval_name=None):
     """
     Retrieve performance metrics from a managed object
 
     Args:
         agent         (VConnector): A VConnector instance
         entity     (pyVmomi.vim.*): A managed entity (performance provider)
-        counter_id           (int): A counter ID to retrieve
+        counter_name         (str): A performance counter name
         max_sample           (int): Max samples to be retrieved
         instance             (str): Instance name, e.g. 'vmnic0'
-        perf_interval_key    (int): Key of historical performance interval to use
+        perf_interval_name   (str): Historical performance interval name
 
     Returns:
         The collected performance metrics from the managed object
 
     """
     logger.info(
-        '[%s] Retrieving performance metric %d for %s',
+        '[%s] Retrieving performance metric %s for %s',
         agent.host,
-        counter_id,
+        counter_name,
         entity.name,
     )
 
-    perf_counter = [c.key for c in agent.perf_counter]
-    historical_interval = agent.si.content.perfManager.historicalInterval
     provider_summary = agent.si.content.perfManager.QueryPerfProviderSummary(
         entity=entity
     )
@@ -436,7 +434,7 @@ def _entity_perf_metric_get(agent, entity, counter_id, max_sample=1, instance=""
         provider_summary.summarySupported
     )
 
-    if not provider_summary.currentSupported and not perf_interval_key:
+    if not provider_summary.currentSupported and not interval_name:
         logger.warning(
             '[%s] No historical performance interval provided for entity %s',
             agent.host,
@@ -449,30 +447,38 @@ def _entity_perf_metric_get(agent, entity, counter_id, max_sample=1, instance=""
     # intervals on the system.
     # For managed entities that support both real-time and historical
     # statistics in order to retrieve historical stats a valid
-    # interval key should be provided.
+    # interval name should be provided.
     # By default we expect that the requested performance counters
     # are real-time only, so if you need historical statistics
-    # make sure to pass a valid historical interval key.
-    if perf_interval_key:
-        if perf_interval_key not in [i.key for i in historical_interval]:
+    # make sure to pass a valid historical interval name.
+    if interval_name:
+        if interval_name not in [i.name for i in agent.perf_interval]:
             logger.warning(
-                '[%s] Historical interval with key %s does not exist',
+                '[%s] Historical interval %s does not exists',
                 agent.host,
-                perf_interval_key
+                interval_name
             )
-            return {'success': 1, 'msg': 'Historical interval with key {} does not exist'.format(perf_interval_key)}
+            return {'success': 1, 'msg': 'Historical interval {} does not exists'.format(interval_name)}
         else:
-            interval_id = [i for i in historical_interval if i.key == perf_interval_key].pop().samplingPeriod
+            interval_id = [i for i in agent.perf_interval if i.name == interval_name].pop().samplingPeriod
     else:
         interval_id = provider_summary.refreshRate
 
-    if counter_id not in perf_counter:
+    counter_info = _get_counter_by_name(
+        agent=agent,
+        name=counter_name
+    )
+
+    if not counter_info:
         return {
             'success': 1,
             'msg': 'Unknown performance counter requested'
         }
 
-    metric_id = pyVmomi.vim.PerformanceManager.MetricId(counterId=counter_id, instance=instance)
+    metric_id = pyVmomi.vim.PerformanceManager.MetricId(
+        counterId=counter_info.key,
+        instance=instance
+    )
 
     # TODO: Be able to specify interval with startTime and endTime as well
     # TODO: Might want to be able to retrieve multiple metrics as well
