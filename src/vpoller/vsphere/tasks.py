@@ -961,12 +961,8 @@ def datacenter_perf_metric_get(agent, msg):
         "method":   "datacenter.perf.metric.get",
         "hostname": "vc01.example.org",
         "name":     "MyDatacenter",
-        "counter-name": [
-            vmop.numPoweron.number,   # VM power on count
-            vmop.numPoweroff.number,  # VM power off count
-            vmop.numSuspend.number    # VM suspend count
-        ],
-        "perf-interval": "Past day",  # Historical performance interval
+        "counter-name": vmop.numPoweron.number  # VM power on count
+        "perf-interval": "Past day"  # Historical performance interval
     }
 
     Returns:
@@ -1149,11 +1145,8 @@ def cluster_perf_metric_get(agent, msg):
         "method":   "cluster.perf.metric.get",
         "hostname": "vc01.example.org",
         "name":     "MyCluster",
-        "counter-id": [
-            clusterServices.effectivemem.megaBytes,  # Effective memory resources
-            cpu.totalmhz.megaHertz  # Total amount of CPU resources of all hosts in the cluster
-        ],
-        "perf-interval": "Past day", # Historical performance interval
+        "counter-name": clusterServices.effectivemem.megaBytes  # Effective memory resources
+        "perf-interval": "Past day"  # Historical performance interval
     }
 
     Returns:
