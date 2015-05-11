@@ -501,7 +501,7 @@ def _entity_perf_metric_get(agent, entity, counter_name, max_sample=1, instance=
                 d = {
                     'interval': s.interval,
                     'timestamp': str(s.timestamp),
-                    'counterId': value.id.counterId,
+                    'counterId': counter_name,
                     'instance': value.id.instance,
                     'value': v
                 }
