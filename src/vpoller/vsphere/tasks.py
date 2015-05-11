@@ -359,6 +359,11 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
     else:
         data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id]
 
+    for e in data:
+        c_id = e['counterId']
+        c_info = _get_counter_by_id(agent=agent, counter_id=c_id)
+        e['counterId'] = '{}.{}.{}'.format(c_info.groupInfo.key, c_info.nameInfo.key, c_info.unitInfo.key)
+
     result = {
         'msg': 'Successfully retrieved performance metrics',
         'success': 0,
