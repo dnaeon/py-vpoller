@@ -335,10 +335,9 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
     otherwise fall back to historical statistics only.
 
     Args:
-        agent         (VConnector): A VConnector instance
-        entity     (pyVmomi.vim.*): A managed entity to lookup
-        counter_id           (int): If provided return only the
-                                    metrics with this counter ID
+        agent           (VConnector): A VConnector instance
+        entity       (pyVmomi.vim.*): A managed entity to lookup
+        counter_id             (int): Performance counter ID
 
     Returns:
         Information about supported performance metrics for the entity
@@ -381,6 +380,7 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
     else:
         data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id]
 
+    # Convert counter ids to human-friendly names
     for e in data:
         c_id = e['counterId']
         c_info = _get_counter_by_id(agent=agent, counter_id=c_id)
