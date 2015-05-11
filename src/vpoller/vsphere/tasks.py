@@ -395,7 +395,7 @@ def _entity_perf_metric_get(agent, entity, counter_id, max_sample=1, instance=""
         entity.name,
     )
 
-    perf_counter = [c.key for c in agent.si.content.perfManager.perfCounter] # TODO: Convert perf_counter to @property
+    perf_counter = [c.key for c in agent.perf_counter]
     historical_interval = agent.si.content.perfManager.historicalInterval
     provider_summary = agent.si.content.perfManager.QueryPerfProviderSummary(
         entity=entity
@@ -633,10 +633,8 @@ def perf_metric_info(agent, msg):
         agent.host
     )
 
-    counters = agent.si.content.perfManager.perfCounter
-
     data = []
-    for c in counters:
+    for c in agent.perf_counter:
         d = {
             'key': c.key,
             'nameInfo': {k: getattr(c.nameInfo, k) for k in ('label', 'summary', 'key')},
