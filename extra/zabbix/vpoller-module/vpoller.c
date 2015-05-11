@@ -46,7 +46,7 @@
 			           \"key\": \"%s\", \
                                    \"username\": \"%s\", \
                                    \"password\": \"%s\", \
-                                   \"counter-id\": \"%s\", \
+                                   \"counter-name\": \"%s\", \
                                    \"instance\": \"%s\", \
                                    \"perf-interval\": \"%s\", \
                                    \"max-sample\": \"1\", \
@@ -64,7 +64,7 @@ typedef enum {
   PARAM_KEY,
   PARAM_USERNAME,
   PARAM_PASSWORD,
-  PARAM_COUNTER_ID,
+  PARAM_COUNTER_NAME,
   PARAM_INSTANCE,
   PARAM_PERF_INTERVAL,
   PARAM_NUM,
@@ -190,7 +190,7 @@ zbx_module_item_list(void)
  *    The `vpoller` key expects the following parameters
  *    when called through Zabbix:
  *
- *    vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-id>, <instance>, <perf-interval>]
+ *    vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-name>, <instance>, <perf-interval>]
  * 
  *    And the parameters that it expects are these:
  *
@@ -201,7 +201,7 @@ zbx_module_item_list(void)
  *    <key> - Additional information passed as a 'key' to vPoller
  *    <username> - Username to use when logging into the guest system
  *    <password> - Password to use when logging into the guest system
- *    <counter-id> - Performance counter ID to be retrieved
+ *    <counter-name> - Performance counter name
  *    <instance> - Performance counter instance
  *    <perf-interval> - Historical performance interval
  */
@@ -228,7 +228,7 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
    * The Zabbix `vpoller` key expects these parameters
    * in the following order:
    *
-   * vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-id>, <instance>, <perf-interval>]
+   * vpoller[method, hostname, name, properties, <key>, <username>, <password>, <counter-name>, <instance>, <perf-interval>]
    */
   if ((request->nparam < 4) || (request->nparam > PARAM_NUM)) {
     SET_MSG_RESULT(result, strdup("Invalid number of arguments"));
@@ -250,7 +250,7 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 	       key_esc,
 	       params[PARAM_USERNAME],
 	       params[PARAM_PASSWORD],
-	       params[PARAM_COUNTER_ID],
+	       params[PARAM_COUNTER_NAME],
 	       params[PARAM_INSTANCE],
 	       params[PARAM_PERF_INTERVAL]);
   zbx_free(key_esc);
