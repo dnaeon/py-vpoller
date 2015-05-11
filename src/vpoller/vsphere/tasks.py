@@ -1450,7 +1450,7 @@ def host_alarm_get(agent, msg):
 
     return result
 
-@task(name='host.perf.metric.get', required=['name', 'counter-id'])
+@task(name='host.perf.metric.get', required=['name', 'counter-name'])
 def host_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.HostSystem managed object
@@ -1458,13 +1458,11 @@ def host_perf_metric_get(agent, msg):
     Example client message would be:
 
     {
-        "method":   "host.perf.metric.get",
-        "hostname": "vc01.example.org",
-        "name":     "esxi01.example.org",
-        "properties": [
-            97,  # Amount of host physical memory consumed by a virtual machine, host, or cluster
-            130  # Average number of kilobytes read from the disk each second during the collection interval
-        ],
+        "method":       "host.perf.metric.get",
+        "hostname":     "vc01.example.org",
+        "name":         "esxi01.example.org",
+        "counter-name": "net.usage.kiloBytesPerSecond",
+        "instance":     "vmnic0",
         "max_sample": 1
     }
 
@@ -1482,9 +1480,9 @@ def host_perf_metric_get(agent, msg):
         return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
     try:
-        counter_id = int(msg.get('counter-id'))
+        counter_name = msg.get('counter-name')
         max_sample = int(msg.get('max-sample')) if msg.get('max-sample') else 1
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
+        interval_name = msg.get('perf-interval')
         instance = msg.get('instance') if msg.get('instance') else ''
     except (TypeError, ValueError):
         logger.warning('Invalid message, cannot retrieve performance metrics')
@@ -1496,10 +1494,10 @@ def host_perf_metric_get(agent, msg):
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
+        counter_name=counter_name,
         max_sample=max_sample,
         instance=instance,
-        perf_interval_key=perf_interval_key
+        interval_name=interval_name
     )
 
 @task(name='host.perf.metric.info', required=['name'])
