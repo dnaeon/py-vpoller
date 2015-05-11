@@ -285,6 +285,25 @@ def _object_alarm_get(agent,
 
     return r
 
+def _get_counter_by_id(agent, counter_id):
+    """
+    Get a counter by its id
+
+    Args:
+        agent      (VConnector): A VConnector instance
+        counter_id        (int): A counter ID
+
+    Returns:
+        A vim.PerformanceManager.CounterInfo instance
+
+    """
+    counter = [c for c in agent.perf_counter if c.key == counter_id]
+
+    if not counter:
+        return None
+    else:
+        return counter.pop()
+
 def _entity_perf_metric_info(agent, entity, counter_id=None):
     """
     Get info about supported performance metrics for a managed entity
