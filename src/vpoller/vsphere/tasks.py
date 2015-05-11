@@ -309,7 +309,7 @@ def _get_counter_by_name(agent, name):
 
     A counter name is expected to be in the following form:
 
-        - <group>.<name>.<unit>
+        - <group>.<name>.<unit>.<rollup>
 
     Args:
         agent (VConnector): A VConnector instance
@@ -320,13 +320,13 @@ def _get_counter_by_name(agent, name):
 
     """
     for c in agent.perf_counter:
-        c_name = '{}.{}.{}'.format(c.groupInfo.key, c.nameInfo.key, c.unitInfo.key)
+        c_name = '{}.{}.{}.{}'.format(c.groupInfo.key, c.nameInfo.key, c.unitInfo.key, c.rollupType)
         if name == c_name:
             return c
 
     return None
 
-def _entity_perf_metric_info(agent, entity, counter_id=None):
+def _entity_perf_metric_info(agent, entity, counter_name=''):
     """
     Get info about supported performance metrics for a managed entity
 
@@ -337,7 +337,7 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
     Args:
         agent           (VConnector): A VConnector instance
         entity       (pyVmomi.vim.*): A managed entity to lookup
-        counter_id             (int): Performance counter ID
+        counter_name           (str): Performance counter name
 
     Returns:
         Information about supported performance metrics for the entity
@@ -345,6 +345,17 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
     """
     if not isinstance(entity, pyVmomi.vim.ManagedEntity):
         return {'success': 0, 'msg': '{} is not a managed entity'.format(entity)}
+
+    if counter_name:
+        counter_info = _get_counter_by_name(
+            agent=agent,
+            name=counter_name
+        )
+        if not counter_info:
+            return {
+                'success': 1,
+                'msg': 'Unknown performance counter requested'
+            }
 
     provider_summary = agent.si.content.perfManager.QueryPerfProviderSummary(
         entity=entity
@@ -375,8 +386,8 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
             'msg': 'Cannot retrieve performance metrics for {1}: {2}'.format(entity.name, e)
         }
 
-    if counter_id:
-        data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id if m.counterId == counter_id]
+    if counter_name:
+        data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id if m.counterId == counter_info.key]
     else:
         data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id]
 
@@ -384,7 +395,7 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
     for e in data:
         c_id = e['counterId']
         c_info = _get_counter_by_id(agent=agent, counter_id=c_id)
-        e['counterId'] = '{}.{}.{}'.format(c_info.groupInfo.key, c_info.nameInfo.key, c_info.unitInfo.key)
+        e['counterId'] = '{}.{}.{}.{}'.format(c_info.groupInfo.key, c_info.nameInfo.key, c_info.unitInfo.key, c_info.rollupType)
 
     result = {
         'msg': 'Successfully retrieved performance metrics',
@@ -1015,19 +1026,12 @@ def datacenter_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = None
     counter_name = msg.get('counter-name')
-    if counter_name:
-        counter_info = _get_counter_by_name(agent=agent, name=counter_name)
-        if not counter_info:
-            return {'success': 1, 'msg': 'Unknown performance counter requested'}
-        else:
-            counter_id = counter_info.key
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='datacenter.get', required=['name', 'properties'])
@@ -1199,19 +1203,12 @@ def cluster_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = None
     counter_name = msg.get('counter-name')
-    if counter_name:
-        counter_info = _get_counter_by_name(agent=agent, name=counter_name)
-        if not counter_info:
-            return {'success': 1, 'msg': 'Unknown performance counter requested'}
-        else:
-            counter_id = counter_info.key
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='cluster.get', required=['name', 'properties'])
@@ -1527,19 +1524,12 @@ def host_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = None
     counter_name = msg.get('counter-name')
-    if counter_name:
-        counter_info = _get_counter_by_name(agent=agent, name=counter_name)
-        if not counter_info:
-            return {'success': 1, 'msg': 'Unknown performance counter requested'}
-        else:
-            counter_id = counter_info.key
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='host.cluster.get', required=['name'])
@@ -1842,19 +1832,12 @@ def vm_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = None
     counter_name = msg.get('counter-name')
-    if counter_name:
-        counter_info = _get_counter_by_name(agent=agent, name=counter_name)
-        if not counter_info:
-            return {'success': 1, 'msg': 'Unknown performance counter requested'}
-        else:
-            counter_id = counter_info.key
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='vm.discover')
@@ -2739,19 +2722,12 @@ def datastore_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = None
     counter_name = msg.get('counter-name')
-    if counter_name:
-        counter_info = _get_counter_by_name(agent=agent, name=counter_name)
-        if not counter_info:
-            return {'success': 1, 'msg': 'Unknown performance counter requested'}
-        else:
-            counter_id = counter_info.key
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='datastore.perf.metric.get', required=['name', 'counter-name'])
