@@ -2754,7 +2754,7 @@ def datastore_perf_metric_info(agent, msg):
         counter_id=counter_id
     )
 
-@task(name='datastore.perf.metric.get', required=['name', 'counter-id'])
+@task(name='datastore.perf.metric.get', required=['name', 'counter-name'])
 def datastore_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.Datastore managed object
@@ -2765,29 +2765,21 @@ def datastore_perf_metric_get(agent, msg):
     Example client message would be:
 
         {
-            "method":   "datastore.perf.metric.get",
-            "hostname": "vc01.example.org",
-            "name":     "ds:///vmfs/volumes/643f118a-a970df28/",
-            "counter-id": [
-                X,
-                Y
-            ],
-            "max_sample": 1,
-            "instance": ""
+            "method":     "datastore.perf.metric.get",
+            "hostname":   "vc01.example.org",
+            "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
+            "counter-id": "datastore.numberReadAveraged.number"
         }
 
     For historical performance statistics make sure to pass the
-    performance interval key as part of the message, e.g.:
+    performance interval as part of the message, e.g.:
 
         {
             "method":   "datastore.perf.metric.get",
             "hostname": "vc01.example.org",
             "name":     "ds:///vmfs/volumes/643f118a-a970df28/",
-            "properties": [
-                X,
-                Y
-            ],
-            "key": 1 # Historical performance interval key '1' (Past day)
+            "properties": "datastore.numberReadAveraged.number",
+            "perf-interval": "Past day"
         }
 
     Returns:
@@ -2801,12 +2793,12 @@ def datastore_perf_metric_get(agent, msg):
     )
 
     if not obj:
-        return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+        return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
     try:
-        counter_id = int(msg.get('counter-id'))
+        counter_name = msg.get('counter-name')
         max_sample = int(msg.get('max-sample')) if msg.get('max-sample') else 1
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
+        interval_namea = msg.get('perf-interval')
         instance = msg.get('instance') if msg.get('instance') else ''
     except (TypeError, ValueError):
         logger.warning('Invalid message, cannot retrieve performance metrics')
@@ -2818,9 +2810,9 @@ def datastore_perf_metric_get(agent, msg):
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
+        counter_name=counter_name,
         max_sample=max_sample,
         instance=instance,
-        perf_interval_key=perf_interval_key
+        interval_name=interval_name
     )
 
