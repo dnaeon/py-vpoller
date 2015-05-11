@@ -297,12 +297,34 @@ def _get_counter_by_id(agent, counter_id):
         A vim.PerformanceManager.CounterInfo instance
 
     """
-    counter = [c for c in agent.perf_counter if c.key == counter_id]
+    for c in agent.perf_counter:
+        if c.key == counter_id:
+            return c
 
-    if not counter:
-        return None
-    else:
-        return counter.pop()
+    return None
+
+def _get_counter_by_name(agent, name):
+    """
+    Get a counter by its name
+
+    A counter name is expected to be in the following form:
+
+        - <group>.<name>.<unit>
+
+    Args:
+        agent (VConnector): A VConnector instance
+        name         (str): A counter name
+
+    Returns:
+        A vim.PerformanceManager.CounterInfo instance
+
+    """
+    for c in agent.perf_counter:
+        c_name = '{}.{}.{}'.format(c.groupInfo.key, c.nameInfo.key, c.unitInfo.key)
+        if name == c_name:
+            return c
+
+    return None
 
 def _entity_perf_metric_info(agent, entity, counter_id=None):
     """
