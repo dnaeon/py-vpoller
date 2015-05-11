@@ -946,7 +946,7 @@ def datacenter_discover(agent, msg):
 
     return r
 
-@task(name='datacenter.perf.metric.get', required=['name', 'counter-id'])
+@task(name='datacenter.perf.metric.get', required=['name', 'counter-name', 'perf-interval'])
 def datacenter_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.Datacenter managed object
@@ -961,12 +961,12 @@ def datacenter_perf_metric_get(agent, msg):
         "method":   "datacenter.perf.metric.get",
         "hostname": "vc01.example.org",
         "name":     "MyDatacenter",
-        "counter-id": [
-            256,  # VM power on count
-            257,  # VM power off count
-            258   # VM suspend count
+        "counter-name": [
+            vmop.numPoweron.number,   # VM power on count
+            vmop.numPoweroff.number,  # VM power off count
+            vmop.numSuspend.number    # VM suspend count
         ],
-        "perf-interval": 1, # Historical performance interval '1' (Past day)
+        "perf-interval": "Past day",  # Historical performance interval
     }
 
     Returns:
@@ -980,11 +980,11 @@ def datacenter_perf_metric_get(agent, msg):
     )
 
     if not obj:
-        return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+        return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
     try:
-        counter_id = int(msg.get('counter-id'))
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
+        counter_name = msg.get('counter-name')
+        interval_name = msg.get('perf-interval')
     except (TypeError, ValueError):
         logger.warning('Invalid message, cannot retrieve performance metrics')
         return {
@@ -995,8 +995,8 @@ def datacenter_perf_metric_get(agent, msg):
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
-        perf_interval_key=perf_interval_key
+        counter_name=counter_name,
+        interval_name = interval_name
     )
 
 @task(name='datacenter.perf.metric.info')
