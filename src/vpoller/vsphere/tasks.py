@@ -982,15 +982,8 @@ def datacenter_perf_metric_get(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
-    try:
-        counter_name = msg.get('counter-name')
-        interval_name = msg.get('perf-interval')
-    except (TypeError, ValueError):
-        logger.warning('Invalid message, cannot retrieve performance metrics')
-        return {
-            'success': 1,
-            'msg': 'Invalid message, cannot retrieve performance metrics'
-        }
+    counter_name = msg.get('counter-name')
+    interval_name = msg.get('perf-interval')
 
     return _entity_perf_metric_get(
         agent=agent,
