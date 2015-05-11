@@ -609,10 +609,10 @@ def perf_metric_info(agent, msg):
         agent.host
     )
 
-    counter = agent.si.content.perfManager.perfCounter
+    counters = agent.si.content.perfManager.perfCounter
 
     data = []
-    for c in counter:
+    for c in counters:
         d = {
             'key': c.key,
             'nameInfo': {k: getattr(c.nameInfo, k) for k in ('label', 'summary', 'key')},
