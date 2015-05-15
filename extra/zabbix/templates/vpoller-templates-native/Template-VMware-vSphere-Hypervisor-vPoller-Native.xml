@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2015-02-23T12:20:51Z</date>
+    <date>2015-05-11T12:49:12Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -497,7 +497,7 @@
                     <snmp_community/>
                     <multiplier>1</multiplier>
                     <snmp_oid/>
-                    <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;&quot;, &quot;&quot;]</key>
+                    <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
                     <delay>300</delay>
                     <history>7</history>
                     <trends>30</trends>
@@ -543,7 +543,7 @@
                     <snmp_community/>
                     <multiplier>1</multiplier>
                     <snmp_oid/>
-                    <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;149&quot;, &quot;&quot;, &quot;&quot;]</key>
+                    <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.transmitted.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
                     <delay>300</delay>
                     <history>7</history>
                     <trends>30</trends>
@@ -1379,7 +1379,7 @@
                     <type>3</type>
                     <snmp_community/>
                     <snmp_oid/>
-                    <key>vpoller[&quot;host.perf.metric.info&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;&quot;, &quot;&quot;]</key>
+                    <key>vpoller[&quot;host.perf.metric.info&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
                     <delay>3600</delay>
                     <status>0</status>
                     <allowed_hosts/>
@@ -1409,7 +1409,7 @@
                             <snmp_community/>
                             <multiplier>1</multiplier>
                             <snmp_oid/>
-                            <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
+                            <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
                             <delay>300</delay>
                             <history>7</history>
                             <trends>30</trends>
@@ -1455,7 +1455,7 @@
                             <snmp_community/>
                             <multiplier>1</multiplier>
                             <snmp_oid/>
-                            <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;149&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
+                            <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.transmitted.kiloBytesPerSecond.average&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
                             <delay>300</delay>
                             <history>7</history>
                             <trends>30</trends>
@@ -1525,7 +1525,7 @@
                                     <type>0</type>
                                     <item>
                                         <host>Template VMware vSphere Hypervisor - vPoller Native</host>
-                                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
+                                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
@@ -1537,7 +1537,7 @@
                                     <type>0</type>
                                     <item>
                                         <host>Template VMware vSphere Hypervisor - vPoller Native</host>
-                                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;149&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
+                                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.transmitted.kiloBytesPerSecond.average&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
@@ -1812,7 +1812,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
                     <type>0</type>
                     <item>
                         <host>Template VMware vSphere Hypervisor - vPoller Native</host>
-                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;&quot;, &quot;&quot;]</key>
+                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -1824,7 +1824,7 @@ vSphere Host: {$VSPHERE.HOST}</description>
                     <type>0</type>
                     <item>
                         <host>Template VMware vSphere Hypervisor - vPoller Native</host>
-                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;149&quot;, &quot;&quot;, &quot;&quot;]</key>
+                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.transmitted.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
                     </item>
                 </graph_item>
             </graph_items>

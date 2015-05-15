@@ -158,7 +158,7 @@ class HelperAgent(object):
 
         """
         property_name = self.msg['properties'][0]
-        result = self.data['result'][0]
+        result = self.data['result'][-1]
 
         return result.get(property_name)
 

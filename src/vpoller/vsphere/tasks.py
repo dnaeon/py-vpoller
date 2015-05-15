@@ -32,6 +32,18 @@ which this module is using please check the link below:
 
 """
 
+
+import ssl
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    # Legacy Python that doesn't verify HTTPS certificates by default
+    pass
+else:
+    # Handle target environment that doesn't support HTTPS verification
+    ssl._create_default_https_context = _create_unverified_https_context
+
 import pyVmomi
 
 from vpoller.log import logger
@@ -273,7 +285,48 @@ def _object_alarm_get(agent,
 
     return r
 
-def _entity_perf_metric_info(agent, entity, counter_id=None):
+def _get_counter_by_id(agent, counter_id):
+    """
+    Get a counter by its id
+
+    Args:
+        agent      (VConnector): A VConnector instance
+        counter_id        (int): A counter ID
+
+    Returns:
+        A vim.PerformanceManager.CounterInfo instance
+
+    """
+    for c in agent.perf_counter:
+        if c.key == counter_id:
+            return c
+
+    return None
+
+def _get_counter_by_name(agent, name):
+    """
+    Get a counter by its name
+
+    A counter name is expected to be in the following form:
+
+        - <group>.<name>.<unit>.<rollup>
+
+    Args:
+        agent (VConnector): A VConnector instance
+        name         (str): A counter name
+
+    Returns:
+        A vim.PerformanceManager.CounterInfo instance
+
+    """
+    for c in agent.perf_counter:
+        c_name = '{}.{}.{}.{}'.format(c.groupInfo.key, c.nameInfo.key, c.unitInfo.key, c.rollupType)
+        if name == c_name:
+            return c
+
+    return None
+
+def _entity_perf_metric_info(agent, entity, counter_name=''):
     """
     Get info about supported performance metrics for a managed entity
 
@@ -282,10 +335,9 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
     otherwise fall back to historical statistics only.
 
     Args:
-        agent         (VConnector): A VConnector instance
-        entity     (pyVmomi.vim.*): A managed entity to lookup
-        counter_id           (int): If provided return only the
-                                    metrics with this counter ID
+        agent           (VConnector): A VConnector instance
+        entity       (pyVmomi.vim.*): A managed entity to lookup
+        counter_name           (str): Performance counter name
 
     Returns:
         Information about supported performance metrics for the entity
@@ -293,6 +345,17 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
     """
     if not isinstance(entity, pyVmomi.vim.ManagedEntity):
         return {'success': 0, 'msg': '{} is not a managed entity'.format(entity)}
+
+    if counter_name:
+        counter_info = _get_counter_by_name(
+            agent=agent,
+            name=counter_name
+        )
+        if not counter_info:
+            return {
+                'success': 1,
+                'msg': 'Unknown performance counter requested'
+            }
 
     provider_summary = agent.si.content.perfManager.QueryPerfProviderSummary(
         entity=entity
@@ -323,10 +386,16 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
             'msg': 'Cannot retrieve performance metrics for {1}: {2}'.format(entity.name, e)
         }
 
-    if counter_id:
-        data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id if m.counterId == counter_id]
+    if counter_name:
+        data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id if m.counterId == counter_info.key]
     else:
         data = [{k: getattr(m, k) for k in ('counterId', 'instance')} for m in metric_id]
+
+    # Convert counter ids to human-friendly names
+    for e in data:
+        c_id = e['counterId']
+        c_info = _get_counter_by_id(agent=agent, counter_id=c_id)
+        e['counterId'] = '{}.{}.{}.{}'.format(c_info.groupInfo.key, c_info.nameInfo.key, c_info.unitInfo.key, c_info.rollupType)
 
     result = {
         'msg': 'Successfully retrieved performance metrics',
@@ -336,31 +405,29 @@ def _entity_perf_metric_info(agent, entity, counter_id=None):
 
     return result
 
-def _entity_perf_metric_get(agent, entity, counter_id, max_sample=1, instance="", perf_interval_key=None):
+def _entity_perf_metric_get(agent, entity, counter_name, max_sample=1, instance='', interval_name=None):
     """
     Retrieve performance metrics from a managed object
 
     Args:
         agent         (VConnector): A VConnector instance
         entity     (pyVmomi.vim.*): A managed entity (performance provider)
-        counter_id           (int): A counter ID to retrieve
+        counter_name         (str): A performance counter name
         max_sample           (int): Max samples to be retrieved
         instance             (str): Instance name, e.g. 'vmnic0'
-        perf_interval_key    (int): Key of historical performance interval to use
+        perf_interval_name   (str): Historical performance interval name
 
     Returns:
         The collected performance metrics from the managed object
 
     """
     logger.info(
-        '[%s] Retrieving performance metric %d for %s',
+        '[%s] Retrieving performance metric %s for %s',
         agent.host,
-        counter_id,
+        counter_name,
         entity.name,
     )
 
-    perf_counter = [c.key for c in agent.si.content.perfManager.perfCounter] # TODO: Convert perf_counter to @property
-    historical_interval = agent.si.content.perfManager.historicalInterval
     provider_summary = agent.si.content.perfManager.QueryPerfProviderSummary(
         entity=entity
     )
@@ -378,7 +445,7 @@ def _entity_perf_metric_get(agent, entity, counter_id, max_sample=1, instance=""
         provider_summary.summarySupported
     )
 
-    if not provider_summary.currentSupported and not perf_interval_key:
+    if not provider_summary.currentSupported and not interval_name:
         logger.warning(
             '[%s] No historical performance interval provided for entity %s',
             agent.host,
@@ -391,30 +458,38 @@ def _entity_perf_metric_get(agent, entity, counter_id, max_sample=1, instance=""
     # intervals on the system.
     # For managed entities that support both real-time and historical
     # statistics in order to retrieve historical stats a valid
-    # interval key should be provided.
+    # interval name should be provided.
     # By default we expect that the requested performance counters
     # are real-time only, so if you need historical statistics
-    # make sure to pass a valid historical interval key.
-    if perf_interval_key:
-        if perf_interval_key not in [i.key for i in historical_interval]:
+    # make sure to pass a valid historical interval name.
+    if interval_name:
+        if interval_name not in [i.name for i in agent.perf_interval]:
             logger.warning(
-                '[%s] Historical interval with key %s does not exist',
+                '[%s] Historical interval %s does not exists',
                 agent.host,
-                perf_interval_key
+                interval_name
             )
-            return {'success': 1, 'msg': 'Historical interval with key {} does not exist'.format(perf_interval_key)}
+            return {'success': 1, 'msg': 'Historical interval {} does not exists'.format(interval_name)}
         else:
-            interval_id = [i for i in historical_interval if i.key == perf_interval_key].pop().samplingPeriod
+            interval_id = [i for i in agent.perf_interval if i.name == interval_name].pop().samplingPeriod
     else:
         interval_id = provider_summary.refreshRate
 
-    if counter_id not in perf_counter:
+    counter_info = _get_counter_by_name(
+        agent=agent,
+        name=counter_name
+    )
+
+    if not counter_info:
         return {
             'success': 1,
             'msg': 'Unknown performance counter requested'
         }
 
-    metric_id = pyVmomi.vim.PerformanceManager.MetricId(counterId=counter_id, instance=instance)
+    metric_id = pyVmomi.vim.PerformanceManager.MetricId(
+        counterId=counter_info.key,
+        instance=instance
+    )
 
     # TODO: Be able to specify interval with startTime and endTime as well
     # TODO: Might want to be able to retrieve multiple metrics as well
@@ -437,7 +512,7 @@ def _entity_perf_metric_get(agent, entity, counter_id, max_sample=1, instance=""
                 d = {
                     'interval': s.interval,
                     'timestamp': str(s.timestamp),
-                    'counterId': value.id.counterId,
+                    'counterId': counter_name,
                     'instance': value.id.instance,
                     'value': v
                 }
@@ -597,18 +672,8 @@ def perf_metric_info(agent, msg):
         agent.host
     )
 
-    counter = agent.si.content.perfManager.perfCounter
-    counter_id = [c.key for c in counter]
-
-    try:
-        counter_info = agent.si.content.perfManager.QueryPerfCounter(
-            counterId=counter_id
-        )
-    except Exception as e:
-        return {'success': 1, 'msg': 'Cannot retrieve performance metrics info: {}'.format(e.message)}
-
     data = []
-    for c in counter_info:
+    for c in agent.perf_counter:
         d = {
             'key': c.key,
             'nameInfo': {k: getattr(c.nameInfo, k) for k in ('label', 'summary', 'key')},
@@ -892,7 +957,7 @@ def datacenter_discover(agent, msg):
 
     return r
 
-@task(name='datacenter.perf.metric.get', required=['name', 'counter-id'])
+@task(name='datacenter.perf.metric.get', required=['name', 'counter-name', 'perf-interval'])
 def datacenter_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.Datacenter managed object
@@ -907,12 +972,8 @@ def datacenter_perf_metric_get(agent, msg):
         "method":   "datacenter.perf.metric.get",
         "hostname": "vc01.example.org",
         "name":     "MyDatacenter",
-        "counter-id": [
-            256,  # VM power on count
-            257,  # VM power off count
-            258   # VM suspend count
-        ],
-        "perf-interval": 1, # Historical performance interval '1' (Past day)
+        "counter-name": vmop.numPoweron.number  # VM power on count
+        "perf-interval": "Past day"  # Historical performance interval
     }
 
     Returns:
@@ -926,23 +987,16 @@ def datacenter_perf_metric_get(agent, msg):
     )
 
     if not obj:
-        return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+        return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
-    try:
-        counter_id = int(msg.get('counter-id'))
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
-    except (TypeError, ValueError):
-        logger.warning('Invalid message, cannot retrieve performance metrics')
-        return {
-            'success': 1,
-            'msg': 'Invalid message, cannot retrieve performance metrics'
-        }
+    counter_name = msg.get('counter-name')
+    interval_name = msg.get('perf-interval')
 
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
-        perf_interval_key=perf_interval_key
+        counter_name=counter_name,
+        interval_name = interval_name
     )
 
 @task(name='datacenter.perf.metric.info')
@@ -953,10 +1007,10 @@ def datacenter_perf_metric_info(agent, msg):
     Example client message would be:
 
     {
-        "method":     "datacenter.perf.metric.info",
-        "hostname":   "vc01.example.org",
-        "name":       "MyDatacenter",
-        "counter-id": <counter-id>
+        "method":      "datacenter.perf.metric.info",
+        "hostname":    "vc01.example.org",
+        "name":        "MyDatacenter",
+        "counter-name": <counter-id>
     }
 
     Returns:
@@ -972,12 +1026,12 @@ def datacenter_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = int(msg.get('counter-id')) if msg.get('counter-id') else None
+    counter_name = msg.get('counter-name')
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='datacenter.get', required=['name', 'properties'])
@@ -1080,7 +1134,7 @@ def cluster_discover(agent, msg):
 
     return r
 
-@task(name='cluster.perf.metric.get', required=['name', 'counter-id'])
+@task(name='cluster.perf.metric.get', required=['name', 'counter-name', 'perf-interval'])
 def cluster_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.ClusterComputeResource managed object
@@ -1095,11 +1149,8 @@ def cluster_perf_metric_get(agent, msg):
         "method":   "cluster.perf.metric.get",
         "hostname": "vc01.example.org",
         "name":     "MyCluster",
-        "counter-id": [
-            276,  # Effective memory resources
-            277   # Total amount of CPU resources of all hosts in the cluster
-        ],
-        "perf-interval": 1, # Historical performance interval key '1' (Past day)
+        "counter-name": clusterServices.effectivemem.megaBytes  # Effective memory resources
+        "perf-interval": "Past day"  # Historical performance interval
     }
 
     Returns:
@@ -1115,21 +1166,14 @@ def cluster_perf_metric_get(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
-    try:
-        counter_id = int(msg.get('counter-id'))
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
-    except (TypeError, ValueError):
-        logger.warning('Invalid message, cannot retrieve performance metrics')
-        return {
-            'success': 1,
-            'msg': 'Invalid message, cannot retrieve performance metrics'
-        }
+    counter_name = msg.get('counter-name')
+    interval_name = msg.get('perf-interval')
 
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
-        perf_interval_key=perf_interval_key
+        counter_name=counter_name,
+        interval_name=interval_name
     )
 
 @task(name='cluster.perf.metric.info')
@@ -1140,10 +1184,10 @@ def cluster_perf_metric_info(agent, msg):
     Example client message would be:
 
     {
-        "method":     "cluster.perf.metric.info",
-        "hostname":   "vc01.example.org",
-        "name":       "MyCluster",
-        "counter-id": <counter-id>
+        "method":      "cluster.perf.metric.info",
+        "hostname":    "vc01.example.org",
+        "name":        "MyCluster",
+        "counter-name": <counter-name>
     }
 
     Returns:
@@ -1159,12 +1203,12 @@ def cluster_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = int(msg.get('counter-id')) if msg.get('counter-id') else None
+    counter_name = msg.get('counter-name')
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='cluster.get', required=['name', 'properties'])
@@ -1403,7 +1447,7 @@ def host_alarm_get(agent, msg):
 
     return result
 
-@task(name='host.perf.metric.get', required=['name', 'counter-id'])
+@task(name='host.perf.metric.get', required=['name', 'counter-name'])
 def host_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.HostSystem managed object
@@ -1411,13 +1455,11 @@ def host_perf_metric_get(agent, msg):
     Example client message would be:
 
     {
-        "method":   "host.perf.metric.get",
-        "hostname": "vc01.example.org",
-        "name":     "esxi01.example.org",
-        "properties": [
-            97,  # Amount of host physical memory consumed by a virtual machine, host, or cluster
-            130  # Average number of kilobytes read from the disk each second during the collection interval
-        ],
+        "method":       "host.perf.metric.get",
+        "hostname":     "vc01.example.org",
+        "name":         "esxi01.example.org",
+        "counter-name": "net.usage.kiloBytesPerSecond",
+        "instance":     "vmnic0",
         "max_sample": 1
     }
 
@@ -1435,9 +1477,9 @@ def host_perf_metric_get(agent, msg):
         return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
     try:
-        counter_id = int(msg.get('counter-id'))
+        counter_name = msg.get('counter-name')
         max_sample = int(msg.get('max-sample')) if msg.get('max-sample') else 1
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
+        interval_name = msg.get('perf-interval')
         instance = msg.get('instance') if msg.get('instance') else ''
     except (TypeError, ValueError):
         logger.warning('Invalid message, cannot retrieve performance metrics')
@@ -1449,10 +1491,10 @@ def host_perf_metric_get(agent, msg):
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
+        counter_name=counter_name,
         max_sample=max_sample,
         instance=instance,
-        perf_interval_key=perf_interval_key
+        interval_name=interval_name
     )
 
 @task(name='host.perf.metric.info', required=['name'])
@@ -1463,10 +1505,10 @@ def host_perf_metric_info(agent, msg):
     Example client message would be:
 
     {
-        "method":     "host.perf.metric.info",
-        "hostname":   "vc01.example.org",
-        "name":       "esxi01.example.org",
-        "counter-id":  <counter-id>
+        "method":       "host.perf.metric.info",
+        "hostname":     "vc01.example.org",
+        "name":         "esxi01.example.org",
+        "counter-name": <counter-name>
     }
 
     Returns:
@@ -1482,12 +1524,12 @@ def host_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = int(msg.get('counter-id')) if msg.get('counter-id') else None
+    counter_name = msg.get('counter-name')
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='host.cluster.get', required=['name'])
@@ -1704,7 +1746,7 @@ def vm_alarm_get(agent, msg):
 
     return result
 
-@task(name='vm.perf.metric.get', required=['name', 'counter-id'])
+@task(name='vm.perf.metric.get', required=['name', 'counter-name'])
 def vm_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.VirtualMachine managed object
@@ -1712,27 +1754,21 @@ def vm_perf_metric_get(agent, msg):
     Example client message would be:
 
         {
-            "method":   "vm.perf.metric.get",
-            "hostname": "vc01.example.org",
-            "name":     "vm01.example.org",
-            "counter-id"
-                12, # CPU Ready time of the Virtual Machine
-            ],
-            "max-sample": 1,
+            "method":       "vm.perf.metric.get",
+            "hostname":     "vc01.example.org",
+            "name":         "vm01.example.org",
+            "counter-name": "cpu.usagemhz.megaHertz"
         }
 
     For historical performance statistics make sure to pass the
-    performance interval key as part of the message, e.g.:
+    performance interval as part of the message, e.g.:
 
         {
-            "method":   "vm.perf.metric.get",
-            "hostname": "vc01.example.org",
-            "name":     "vm01.example.org",
-            "counter-id": [
-                12,  # CPU Ready time of the Virtual Machine
-                24   # Memory usage as percentage of total configured or available memory
-            ],
-            "perf-interval": 1 # Historical performance interval '1' (Past day)
+            "method":       "vm.perf.metric.get",
+            "hostname":     "vc01.example.org",
+            "name":         "vm01.example.org",
+            "counter-name": "cpu.usage.megaHertz",
+            "perf-interval": "Past day"
         }
 
     Returns:
@@ -1749,9 +1785,9 @@ def vm_perf_metric_get(agent, msg):
         return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
     try:
-        counter_id = int(msg.get('counter-id'))
+        counter_name = msg.get('counter-name')
         max_sample = int(msg.get('max-sample')) if msg.get('max-sample') else 1
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
+        interval_name = msg.get('perf-interval')
         instance = msg.get('instance') if msg.get('instance') else ''
     except (TypeError, ValueError):
         logger.warning('Invalid message, cannot retrieve performance metrics')
@@ -1763,10 +1799,10 @@ def vm_perf_metric_get(agent, msg):
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
+        counter_name=counter_name,
         max_sample=max_sample,
         instance=instance,
-        perf_interval_key=perf_interval_key
+        interval_name=interval_name
     )
 
 @task(name='vm.perf.metric.info')
@@ -1777,10 +1813,10 @@ def vm_perf_metric_info(agent, msg):
     Example client message would be:
 
         {
-            "method":     "vm.perf.metric.info",
-            "hostname":   "vc01.example.org",
-            "name":       "vm01.example.org",
-            "counter-id": "<counter-id>"
+            "method":       "vm.perf.metric.info",
+            "hostname":     "vc01.example.org",
+            "name":         "vm01.example.org",
+            "counter-name": "<counter-id>"
         }
 
     Returns:
@@ -1796,12 +1832,12 @@ def vm_perf_metric_info(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = int(msg.get('counter-id')) if msg.get('counter-id') else None
+    counter_name = msg.get('counter-name')
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
 @task(name='vm.discover')
@@ -2667,10 +2703,10 @@ def datastore_perf_metric_info(agent, msg):
     Example client message would be:
 
         {
-            "method":     "datastore.perf.metric.info",
-            "hostname":   "vc01.example.org",
-            "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
-            "counter-id": <counter-id>
+            "method":       "datastore.perf.metric.info",
+            "hostname":     "vc01.example.org",
+            "name":         "ds:///vmfs/volumes/643f118a-a970df28/",
+            "counter-name": <counter-id>
         }
 
     Returns:
@@ -2684,17 +2720,17 @@ def datastore_perf_metric_info(agent, msg):
     )
 
     if not obj:
-        return {'success': 1, 'msg': 'Cannot find object %s'.format(msg['name'])}
+        return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
 
-    counter_id = int(msg.get('counter-id')) if msg.get('counter-id') else None
+    counter_name = msg.get('counter-name')
 
     return _entity_perf_metric_info(
         agent=agent,
         entity=obj,
-        counter_id=counter_id
+        counter_name=counter_name
     )
 
-@task(name='datastore.perf.metric.get', required=['name', 'counter-id'])
+@task(name='datastore.perf.metric.get', required=['name', 'counter-name'])
 def datastore_perf_metric_get(agent, msg):
     """
     Get performance metrics for a vim.Datastore managed object
@@ -2705,29 +2741,21 @@ def datastore_perf_metric_get(agent, msg):
     Example client message would be:
 
         {
-            "method":   "datastore.perf.metric.get",
-            "hostname": "vc01.example.org",
-            "name":     "ds:///vmfs/volumes/643f118a-a970df28/",
-            "counter-id": [
-                X,
-                Y
-            ],
-            "max_sample": 1,
-            "instance": ""
+            "method":     "datastore.perf.metric.get",
+            "hostname":   "vc01.example.org",
+            "name":       "ds:///vmfs/volumes/643f118a-a970df28/",
+            "counter-id": "datastore.numberReadAveraged.number"
         }
 
     For historical performance statistics make sure to pass the
-    performance interval key as part of the message, e.g.:
+    performance interval as part of the message, e.g.:
 
         {
             "method":   "datastore.perf.metric.get",
             "hostname": "vc01.example.org",
             "name":     "ds:///vmfs/volumes/643f118a-a970df28/",
-            "properties": [
-                X,
-                Y
-            ],
-            "key": 1 # Historical performance interval key '1' (Past day)
+            "properties": "datastore.numberReadAveraged.number",
+            "perf-interval": "Past day"
         }
 
     Returns:
@@ -2741,12 +2769,12 @@ def datastore_perf_metric_get(agent, msg):
     )
 
     if not obj:
-        return {'success': 1, 'msg': 'Cannot find object: %s' % msg['name']}
+        return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
     try:
-        counter_id = int(msg.get('counter-id'))
+        counter_name = msg.get('counter-name')
         max_sample = int(msg.get('max-sample')) if msg.get('max-sample') else 1
-        perf_interval_key = int(msg.get('perf-interval')) if msg.get('perf-interval') else None
+        interval_namea = msg.get('perf-interval')
         instance = msg.get('instance') if msg.get('instance') else ''
     except (TypeError, ValueError):
         logger.warning('Invalid message, cannot retrieve performance metrics')
@@ -2758,9 +2786,9 @@ def datastore_perf_metric_get(agent, msg):
     return _entity_perf_metric_get(
         agent=agent,
         entity=obj,
-        counter_id=counter_id,
+        counter_name=counter_name,
         max_sample=max_sample,
         instance=instance,
-        perf_interval_key=perf_interval_key
+        interval_name=interval_name
     )
 
