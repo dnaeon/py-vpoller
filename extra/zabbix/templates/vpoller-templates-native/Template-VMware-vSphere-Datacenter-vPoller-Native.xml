@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>2.0</version>
-    <date>2015-02-23T12:20:33Z</date>
+    <date>2015-05-11T12:48:33Z</date>
     <groups>
         <group>
             <name>Templates</name>
@@ -31,7 +31,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;257&quot;, &quot;&quot;, &quot;1&quot;]</key>
+                    <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;vmop.numPoweroff.number.latest&quot;, &quot;&quot;, &quot;Past day&quot;]</key>
                     <delay>86400</delay>
                     <history>1</history>
                     <trends>7</trends>
@@ -74,7 +74,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;256&quot;, &quot;&quot;, &quot;1&quot;]</key>
+                    <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;vmop.numPoweron.number.latest&quot;, &quot;&quot;, &quot;Past day&quot;]</key>
                     <delay>86400</delay>
                     <history>1</history>
                     <trends>7</trends>
@@ -117,7 +117,7 @@
                     <snmp_community/>
                     <multiplier>0</multiplier>
                     <snmp_oid/>
-                    <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;258&quot;, &quot;&quot;, &quot;1&quot;]</key>
+                    <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;vmop.numSuspend.number.latest&quot;, &quot;&quot;, &quot;Past day&quot;]</key>
                     <delay>86400</delay>
                     <history>1</history>
                     <trends>7</trends>
@@ -286,7 +286,7 @@
                     <type>0</type>
                     <item>
                         <host>Template VMware vSphere Datacenter - vPoller Native</host>
-                        <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;256&quot;, &quot;&quot;, &quot;1&quot;]</key>
+                        <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;vmop.numPoweron.number.latest&quot;, &quot;&quot;, &quot;Past day&quot;]</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -298,7 +298,7 @@
                     <type>0</type>
                     <item>
                         <host>Template VMware vSphere Datacenter - vPoller Native</host>
-                        <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;257&quot;, &quot;&quot;, &quot;1&quot;]</key>
+                        <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;vmop.numPoweroff.number.latest&quot;, &quot;&quot;, &quot;Past day&quot;]</key>
                     </item>
                 </graph_item>
                 <graph_item>
@@ -310,7 +310,7 @@
                     <type>0</type>
                     <item>
                         <host>Template VMware vSphere Datacenter - vPoller Native</host>
-                        <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;258&quot;, &quot;&quot;, &quot;1&quot;]</key>
+                        <key>vpoller[&quot;datacenter.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;vmop.numSuspend.number.latest&quot;, &quot;&quot;, &quot;Past day&quot;]</key>
                     </item>
                 </graph_item>
             </graph_items>

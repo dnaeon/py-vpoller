@@ -59,10 +59,10 @@ Options:
     -e <endpoint>, --endpoint <endpoint>        Endpoint of vPoller Proxy/Worker the client connects to
                                                 [default: tcp://localhost:10123]
     -k <key>, --key <key>                       Provide additional key for data filtering
-    -c <counter-id>, --counter-id <counter-id>  Retrieve performance metrics with this counter ID
+    -c <counter>, --counter <counter>           Retrieve performance metrics with this counter name
     -s <max-sample>, --max-sample <max-sample>  Max number of performance samples to retrieve
     -i <instance>, --instance <instance>        Performance metric instance name
-    -T <interval> --perf-interval <interval>    Historical performance interval key
+    -T <interval> --perf-interval <interval>    Historical performance interval name
     -U <username>, --guest-username <username>  Username to use for authentication in guest system
     -P <password>, --guest-password <password>  Password to use for authentication in guest system
     -H <helper>, --helper <helper>              Specify a helper module to use for processing of the
@@ -100,7 +100,7 @@ Examples:
         'password': args['--guest-password'],
         'key': args['--key'],
         'properties': args['--properties'].split(',') if args['--properties'] else None,
-        'counter-id': args['--counter-id'],
+        'counter-name': args['--counter'],
         'instance': args['--instance'],
         'max-sample': args['--max-sample'],
         'perf-interval': args['--perf-interval'],
@@ -109,7 +109,7 @@ Examples:
 
     data = client.run(msg)
 
-    print(data.encode('utf-8'))
+    print(data)
 
 if __name__ == '__main__':
     main()
