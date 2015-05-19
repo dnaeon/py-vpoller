@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2015 Marin Atanasov Nikolov <dnaeon@gmail.com>
+ # Copyright (c) 2013-2015 Marin Atanasov Nikolov <dnaeon@gmail.com>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,19 +31,7 @@ which this module is using please check the link below:
     - https://www.vmware.com/support/developer/vc-sdk/
 
 """
-
-
-import ssl
-
-try:
-    _create_unverified_https_context = ssl._create_unverified_context
-except AttributeError:
-    # Legacy Python that doesn't verify HTTPS certificates by default
-    pass
-else:
-    # Handle target environment that doesn't support HTTPS verification
-    ssl._create_default_https_context = _create_unverified_https_context
-
+import re
 import pyVmomi
 
 from vpoller.log import logger
@@ -1984,7 +1972,8 @@ def vm_guest_net_get(agent, msg):
                 "network",
                 "connected",
                 "macAddress",
-                "ipConfig"
+                "ipv4",
+                "ipv6"
             ]
         }
 
@@ -2020,11 +2009,32 @@ def vm_guest_net_get(agent, msg):
     if 'properties' in msg and msg['properties']:
         properties.extend(msg['properties'])
 
+    logger.debug(
+        'Discovering network adapters for VirtualMachine %s',
+        vm_networks,
+    )
     # Get the requested properties
-    result = {}
-    result['name'] = vm_name
-    result['net'] = [{prop: getattr(net, prop, '(null)') for prop in properties} for net in vm_networks]
 
+    # REGEXP to check ip address typex
+    ipv4regex = re.compile("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$")
+    ipv6regex = re.compile("^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$")
+    ipv6 = "null"
+    ipv4 = "null"
+    
+    result = []
+    for net in vm_networks :
+        if len (getattr(net,'ipConfig').ipAddress) != 0 :
+            for ipaddress in getattr(net,'ipConfig').ipAddress :
+              if ipv4regex.match(ipaddress.ipAddress) :  ipv4 = ipaddress.ipAddress
+              if ipv6regex.match(ipaddress.ipAddress) :  ipv6 = ipaddress.ipAddress
+
+        tresult = {}
+        for prop in properties :
+            tresult[prop] = getattr(net, prop, '(null)')
+            if 'ipv4' == prop : tresult['ipv4'] = ipv4
+            if 'ipv6' == prop : tresult['ipv6'] = ipv6
+        result.append(tresult)
+            
     r = {
         'success': 0,
         'msg': 'Successfully retrieved properties',
