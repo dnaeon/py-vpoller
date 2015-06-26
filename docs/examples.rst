@@ -308,8 +308,7 @@ Performance metrics
 
    If you are running a vSphere 6.0 environment and experience issues
    with real-time performance metrics, make sure to check
-   [KB-2119264](http://kb.vmware.com/selfservice/microsites/search.do?language=en_US&cmd=displayKC&externalId=2119264)
-   for more details.
+   [KB-2119264](http://kb.vmware.com/kb/2119264) for more details.
 
 Using vPoller you can retrieve various performance metrics from
 your VMware vSphere environment.
