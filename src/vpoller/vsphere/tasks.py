@@ -2792,3 +2792,48 @@ def datastore_perf_metric_get(agent, msg):
         interval_name=interval_name
     )
 
+@task(name='vsan.health.get', required=['name'])
+def vsan_health_get(agent, msg):
+    """
+    Get VSAN health state for a host
+
+    Example client message would be:
+
+        {
+            "method":       "vsan.health.get",
+            "hostname":     "vc01.example.org",
+            "name":         "esxi01.example.org"
+        }
+
+    Returns:
+        VSAN health state for the host
+
+    """
+    logger.info(
+        '[%s] Retrieving VSAN health for %s',
+        agent.host,
+        msg['name'],
+    )
+
+    obj = agent.get_object_by_property(
+        property_name='name',
+        property_value=msg['name'],
+        obj_type=pyVmomi.vim.HostSystem
+    )
+
+    if not obj:
+        return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
+
+    status = obj.configManager.vsanSystem.QueryHostStatus()
+    health = {
+        'name': obj.name,
+        'health': status.health
+    }
+
+    result = {
+        'success': 0,
+        'msg': 'Successfully retrieved object properties',
+        'result': [health],
+    }
+
+    return result
