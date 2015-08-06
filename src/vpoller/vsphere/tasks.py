@@ -2810,24 +2810,43 @@ def vsan_health_get(agent, msg):
 
     """
     logger.info(
-        '[%s] Retrieving VSAN health for %s',
+        '[%s] Retrieving VSAN health state for %s',
         agent.host,
         msg['name'],
     )
 
-    obj = agent.get_object_by_property(
-        property_name='name',
-        property_value=msg['name'],
-        obj_type=pyVmomi.vim.HostSystem
+    properties = [
+        'name',
+        'runtime.powerState',
+        'runtime.connectionState'
+    ]
+
+    data = _get_object_properties(
+        agent=agent,
+        properties=properties,
+        obj_type=pyVmomi.vim.HostSystem,
+        obj_property_name='name',
+        obj_property_value=msg['name'],
+        include_mors=True
     )
 
-    if not obj:
-        return {'success': 1, 'msg': 'Cannot find object {}'.format(msg['name'])}
+    if data['success'] != 0:
+        return data
 
+    result = data['result'][0]
+    if result['runtime.powerState'] != pyVmomi.vim.HostSystemPowerState.poweredOn:
+        return {'success': 1, 'msg': 'Host is not powered on, cannot get VSAN health state'}
+
+    if result['runtime.connectionState'] != pyVmomi.vim.HostSystemConnectionState.connected:
+        return {'success': 1, 'msg': 'Host is not connected, cannot get VSAN health state'}
+
+    obj = result['obj']
     status = obj.configManager.vsanSystem.QueryHostStatus()
     health = {
         'name': obj.name,
-        'health': status.health
+        'uuid': status.uuid,
+        'nodeUuid': status.nodeUuid,
+        'health': status.health,
     }
 
     result = {
