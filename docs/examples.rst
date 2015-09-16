@@ -304,6 +304,12 @@ triggered alarms for our Datacenter.
 Performance metrics
 ===================
 
+.. note::
+
+   If you are running a vSphere 6.0 environment and experience issues
+   with real-time performance metrics, make sure to check
+   [KB-2119264](http://kb.vmware.com/kb/2119264) for more details.
+
 Using vPoller you can retrieve various performance metrics from
 your VMware vSphere environment.
 

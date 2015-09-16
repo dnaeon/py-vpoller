@@ -2812,3 +2812,67 @@ def datastore_perf_metric_get(agent, msg):
         interval_name=interval_name
     )
 
+@task(name='vsan.health.get', required=['name'])
+def vsan_health_get(agent, msg):
+    """
+    Get VSAN health state for a host
+
+    Example client message would be:
+
+        {
+            "method":       "vsan.health.get",
+            "hostname":     "vc01.example.org",
+            "name":         "esxi01.example.org"
+        }
+
+    Returns:
+        VSAN health state for the host
+
+    """
+    logger.info(
+        '[%s] Retrieving VSAN health state for %s',
+        agent.host,
+        msg['name'],
+    )
+
+    properties = [
+        'name',
+        'runtime.powerState',
+        'runtime.connectionState'
+    ]
+
+    data = _get_object_properties(
+        agent=agent,
+        properties=properties,
+        obj_type=pyVmomi.vim.HostSystem,
+        obj_property_name='name',
+        obj_property_value=msg['name'],
+        include_mors=True
+    )
+
+    if data['success'] != 0:
+        return data
+
+    result = data['result'][0]
+    if result['runtime.powerState'] != pyVmomi.vim.HostSystemPowerState.poweredOn:
+        return {'success': 1, 'msg': 'Host is not powered on, cannot get VSAN health state'}
+
+    if result['runtime.connectionState'] != pyVmomi.vim.HostSystemConnectionState.connected:
+        return {'success': 1, 'msg': 'Host is not connected, cannot get VSAN health state'}
+
+    obj = result['obj']
+    status = obj.configManager.vsanSystem.QueryHostStatus()
+    health = {
+        'name': obj.name,
+        'uuid': status.uuid,
+        'nodeUuid': status.nodeUuid,
+        'health': status.health,
+    }
+
+    result = {
+        'success': 0,
+        'msg': 'Successfully retrieved object properties',
+        'result': [health],
+    }
+
+    return result

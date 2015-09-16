@@ -430,6 +430,24 @@ class ZabbixVSphere(object):
 
         # Create the hosts in Zabbix
         for host in missing_hosts:
+            # Do not import Virtual Machine templates
+            msg = {
+                'method': 'vm.get',
+                'hostname': self.options['vsphere']['hostname'],
+                'name': host,
+                'properties': ['name', 'config.template'],
+            }
+            vpoller_data = self._call_vpoller_task(msg=msg)
+            vm_template = vpoller_data[0]['config.template']
+
+            if vm_template:
+                logging.info(
+                    "[VirtualMachine@%s] VM '%s' is a template, will not be imported",
+                    self.options['vsphere']['hostname'],
+                    host
+                )
+                continue
+
             logging.info(
                 "[VirtualMachine@%s] Creating Zabbix host '%s'",
                 self.options['vsphere']['hostname'],

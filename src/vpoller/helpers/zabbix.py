@@ -93,6 +93,7 @@ class HelperAgent(object):
             'datastore.vm.get': self.zabbix_lld_data,
             'datastore.perf.metric.get': self.zabbix_item_value,
             'datastore.perf.metric.info': self.zabbix_lld_data,
+            'vsan.health.get': self.zabbix_item_value,
         }
 
     def run(self):
