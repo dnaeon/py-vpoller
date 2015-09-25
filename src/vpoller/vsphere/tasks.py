@@ -2774,7 +2774,7 @@ def datastore_perf_metric_get(agent, msg):
     try:
         counter_name = msg.get('counter-name')
         max_sample = int(msg.get('max-sample')) if msg.get('max-sample') else 1
-        interval_namea = msg.get('perf-interval')
+        interval_name = msg.get('perf-interval')
         instance = msg.get('instance') if msg.get('instance') else ''
     except (TypeError, ValueError):
         logger.warning('Invalid message, cannot retrieve performance metrics')
