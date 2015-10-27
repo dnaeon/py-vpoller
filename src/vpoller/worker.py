@@ -27,6 +27,7 @@ vPoller Worker module
 
 """
 
+import time
 import json
 import importlib
 import multiprocessing
@@ -105,7 +106,8 @@ class VPollerWorkerManager(object):
         logger.info('Worker Manager is ready and running')
         while not self.time_to_die.is_set():
             try:
-                self.wait_for_mgmt_task()
+                self.wait_for_mgmt_task(1000)
+                self.check_workers()
             except KeyboardInterrupt:
                 self.signal_stop()
 
@@ -160,6 +162,40 @@ class VPollerWorkerManager(object):
             'Worker Manager configuration: %s',
             self.config
         )
+
+
+    def check_workers(self):
+        for index in range(len(self.workers)):
+            worker = self.workers[index]
+            if worker.exitcode:
+                logger.error(
+                    '%s died with signal %s. Restarting...',
+                    worker.name,
+                    worker.exitcode
+                )
+                worker.join(3)
+                time.sleep(1)
+                self.start_worker(index)
+
+
+    def start_worker(self,index):
+            worker = VPollerWorker(
+                db=self.config.get('db'),
+                proxy=self.config.get('proxy'),
+                helpers=self.config.get('helpers'),
+                tasks=self.config.get('tasks'),
+                cache_enabled=self.config.get('cache_enabled'),
+                cache_maxsize=self.config.get('cache_maxsize'),
+                cache_ttl=self.config.get('cache_ttl'),
+                cache_housekeeping=self.config.get('cache_housekeeping')
+            )
+            worker.daemon = True
+            worker.start()
+            if (index == -1):
+                self.workers.append(worker)
+            else:
+                self.workers[index] = worker
+
         
     def start_workers(self):
         """
@@ -177,19 +213,7 @@ class VPollerWorkerManager(object):
         )
 
         for i in range(self.num_workers):
-            worker = VPollerWorker(
-                db=self.config.get('db'),
-                proxy=self.config.get('proxy'),
-                helpers=self.config.get('helpers'),
-                tasks=self.config.get('tasks'),
-                cache_enabled=self.config.get('cache_enabled'),
-                cache_maxsize=self.config.get('cache_maxsize'),
-                cache_ttl=self.config.get('cache_ttl'),
-                cache_housekeeping=self.config.get('cache_housekeeping')
-            )
-            worker.daemon = True
-            self.workers.append(worker)
-            worker.start()
+            self.start_worker(-1)
 
     def stop_workers(self):
         """
@@ -226,12 +250,12 @@ class VPollerWorkerManager(object):
         self.mgmt_socket.close()
         self.zcontext.term()
 
-    def wait_for_mgmt_task(self):
+    def wait_for_mgmt_task(self,timeout):
         """
         Poll the management socket for management tasks
 
         """
-        socks = dict(self.zpoller.poll())
+        socks = dict(self.zpoller.poll(timeout))
         if socks.get(self.mgmt_socket) == zmq.POLLIN:
             try:
                 msg = self.mgmt_socket.recv_json()
