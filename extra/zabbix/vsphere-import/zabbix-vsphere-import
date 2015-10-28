@@ -435,14 +435,23 @@ class ZabbixVSphere(object):
                 'method': 'vm.get',
                 'hostname': self.options['vsphere']['hostname'],
                 'name': host,
-                'properties': ['name', 'config.template'],
+                'properties': ['name', 'config.template', 'runtime.powerState'],
             }
             vpoller_data = self._call_vpoller_task(msg=msg)
             vm_template = vpoller_data[0]['config.template']
+            vm_powerstate = vpoller_data[0]['runtime.powerState']
 
             if vm_template:
                 logging.info(
                     "[VirtualMachine@%s] VM '%s' is a template, will not be imported",
+                    self.options['vsphere']['hostname'],
+                    host
+                )
+                continue
+
+            if vm_powerstate != 'poweredOn':
+                logging.info(
+                    "[VirtualMachine@%s] VM '%s' is not powered on, will not be imported",
                     self.options['vsphere']['hostname'],
                     host
                 )
