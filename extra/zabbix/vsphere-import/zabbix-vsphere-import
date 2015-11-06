@@ -49,6 +49,7 @@ class ZabbixVSphere(object):
         self.options = options
         self.vsphere_datacenters = []
         self.vsphere_clusters = []
+        self.vsphere_clusters_as_zabbix_host = []
         self.vsphere_hosts = []
         self.vsphere_vms = []
         self.vsphere_datastores = []
@@ -284,6 +285,82 @@ class ZabbixVSphere(object):
             self.options['vsphere']['hostname']
         )
 
+    def import_vsphere_clusters_as_zabbix_host(self):
+        """
+        Import vSphere Clusters as Zabbix host
+        """
+        logging.info(
+            '[ClusterComputeResource@%s] Importing Cluster objects to Zabbix',
+            self.options['vsphere']['hostname']
+        )
+
+        zabbix_data  = self.zapi.host.get(
+            output='extend'
+        )
+        zabbix_hosts = [h['name'] for h in zabbix_data]
+
+        msg = {
+            'method': 'cluster.discover',
+            'hostname': self.options['vsphere']['hostname']
+        }
+        vpoller_data = self._call_vpoller_task(msg=msg)
+        self.clusters_as_zabbix_host = [d['name'] for d in vpoller_data]
+
+        missing_clusters = set(self.clusters_as_zabbix_host) - set(zabbix_hosts)
+
+        if not missing_clusters:
+            logging.info(
+                '[ClusterComputeResource@%s] Objects are in sync with Zabbix',
+                self.options['vsphere']['hostname']
+            )
+            return
+
+        logging.info(
+            '[ClusterComputeResource@%s] Number of objects to be imported: %d',
+            self.options['vsphere']['hostname'],
+            len(missing_clusters)
+        )
+
+        # Get hosts options (templates, groups, macros) from the config file
+        host_options = self._get_zabbix_host_options(
+            name='vsphere_object_clusters_as_zabbix_host'
+        )
+        # Add a default interface for the host
+        host_options['interfaces'] = [
+            {
+                'type': 1,
+                'main': 1,
+                'useip': 1,
+                'ip': '127.0.0.1',
+                'dns': '',
+                'port': '10050'
+            }
+        ]
+
+        for cluster in missing_clusters:
+            logging.info(
+                "[ClusterComputeResource@%s] Creating Zabbix object - ESX Cluster: '%s'",
+                self.options['vsphere']['hostname'],
+                cluster
+            )
+
+            params = deepcopy(host_options)
+            params['host'] = cluster
+
+            try:
+                result = self.zapi.host.create(params)
+            except pyzabbix.ZabbixAPIException as e:
+                logging.warning(
+                    '[ClusterComputeResource@%s] Cannot create host in Zabbix: %s',
+                    self.options['vsphere']['hostname'],
+                    e
+                )
+
+        logging.info(
+            '[ClusterComputeResource@%s] Import of objects completed',
+            self.options['vsphere']['hostname']
+        )
+        
     def import_vsphere_hosts(self):
         """
         Import vSphere hosts into Zabbix
@@ -773,6 +850,7 @@ Options:
     zabbix.connect()
     zabbix.import_vsphere_datacenters()
     zabbix.import_vsphere_clusters()
+    zabbix.import_vsphere_clusters_as_zabbix_host()
     zabbix.import_vsphere_hosts()
     zabbix.import_vsphere_vms()
     zabbix.import_vsphere_datastores()
