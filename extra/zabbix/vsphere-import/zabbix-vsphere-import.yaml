@@ -20,7 +20,16 @@ zabbix:
       VSPHERE.HOST: vc01.example.org
     groups:
       - Datacenters
-
+      
+  vsphere_object_clusters_as_zabbix_host:
+    proxy: zbx-proxy.example.org
+    templates:
+      - Template VMware vSphere Clusters - vPoller Native
+    macros:
+      VSPHERE.HOST: vc01.example.org
+    groups:
+      - Clusters
+      
   vsphere_object_host:
     proxy: zbx-proxy.example.org
     templates:
