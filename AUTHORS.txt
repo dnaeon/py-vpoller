@@ -1,3 +1,4 @@
 ## AUTHORS
 
 Marin Atanasov Nikolov <dnaeon@gmail.com>
+Alex Toderita <alex@toderita.ro>
