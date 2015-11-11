@@ -1,4 +1,6 @@
-## AUTHORS
+vPoller was written by these fine people:
 
 Marin Atanasov Nikolov <dnaeon@gmail.com>
+Kurt Dillen <kurt.dillen@dls-belgium.com>
 Alex Toderita <alex@toderita.ro>
+dav3860 <dav3860chom@yahoo.fr>
