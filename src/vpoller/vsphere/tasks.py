@@ -1790,6 +1790,12 @@ def vm_perf_metric_get(agent, msg):
     if not obj:
         return {'success': 1, 'msg': 'Cannot find object: {}'.format(msg['name'])}
 
+    if obj.runtime.powerState != pyVmomi.vim.VirtualMachinePowerState.poweredOn:
+        return {'success': 1, 'msg': 'VM is not powered on, cannot get performance metrics'}
+
+    if obj.runtime.connectionState != pyVmomi.vim.VirtualMachineConnectionState.connected:
+        return {'success': 1, 'msg': 'VM is not connected, cannot get performance metrics'}
+
     try:
         counter_name = msg.get('counter-name')
         max_sample = int(msg.get('max-sample')) if msg.get('max-sample') else 1
