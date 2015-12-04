@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'pyzmq >= 14.3.1',
         'docopt >= 0.6.2',
-        'pyvmomi >= 5.5.0-2014.1.1',
-        'vconnector >= 0.4.1',
+        'pyvmomi >= 6.0.0',
+        'vconnector >= 0.4.2',
     ]
 )
