@@ -32,6 +32,6 @@ setup(
         'pyzmq >= 14.3.1',
         'docopt >= 0.6.2',
         'pyvmomi >= 6.0.0',
-        'vconnector >= 0.4.2',
+        'vconnector >= 0.4.3',
     ]
 )
