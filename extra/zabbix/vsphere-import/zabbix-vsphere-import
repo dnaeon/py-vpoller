@@ -850,7 +850,7 @@ Options:
     zabbix.connect()
     zabbix.import_vsphere_datacenters()
     zabbix.import_vsphere_clusters()
-    zabbix.import_vsphere_clusters_as_zabbix_host()
+#    zabbix.import_vsphere_clusters_as_zabbix_host()
     zabbix.import_vsphere_hosts()
     zabbix.import_vsphere_vms()
     zabbix.import_vsphere_datastores()
