@@ -34,7 +34,7 @@ You can read `this post here`_, which outlines some very good reasons
 why you might want to have vPoller with Zabbix instead of stock
 Zabbix when it comes to VMware vSphere monitoring.
 
-.. _`this post here`: http://unix-heaven.org/node/114
+.. _`this post here`: http://dnaeon.github.io/vmware-monitoring-with-zabbix-python-and-vpoller/
 
 Prerequisites
 =============
