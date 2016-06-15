@@ -74,7 +74,7 @@ usage(void)
   fprintf(stderr, "     vpoller-cclient -m vm.discover -V vc01.example.org\n");
   fprintf(stderr, "     vpoller-cclient -m vm.discover -V vc01.example.org -p runtime.powerState\n");
   fprintf(stderr, "     vpoller-cclient -m vm.get -V vc01.example.org -n vm01.example.org -p summary.overallStatus\n");
-  fprintf(stderr, "     vpoller-cclient -m vm.diks.get -V vc01.example.org -n vm01.example.org -k /var\n");
+  fprintf(stderr, "     vpoller-cclient -m vm.disk.get -V vc01.example.org -n vm01.example.org -k /var\n");
   fprintf(stderr, "     vpoller-cclient -m vm.process.get -V vc01.example.org -n vm01.example.org -U admin -P p4ssw0rd\n\n");
   fprintf(stderr, "Version:\n");
   fprintf(stderr, "     vpoller-cclient version %s\n", VERSION);
