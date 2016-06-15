@@ -72,7 +72,7 @@ Examples:
     vpoller-client -m vm.discover -V vc01.example.org
     vpoller-client -m vm.discover -V vc01.example.org -p runtime.powerState
     vpoller-client -m vm.get -V vc01.example.org -n vm01.example.org -p summary.overallStatus
-    vpoller-client -m vm.diks.get -V vc01.example.org -n vm01.example.org -k /var
+    vpoller-client -m vm.disk.get -V vc01.example.org -n vm01.example.org -k /var
     vpoller-client -m vm.process.get -V vc01.example.org -n vm01.example.org -U user -P pass
 
 """
