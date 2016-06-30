@@ -32,6 +32,7 @@ VMware vSphere objects into a Zabbix server as regular hosts
 
 import json
 import logging
+import re
 from copy import deepcopy
 
 import yaml
@@ -473,7 +474,25 @@ class ZabbixVSphere(object):
             'hostname': self.options['vsphere']['hostname']
         }
         vpoller_data = self._call_vpoller_task(msg=msg)
-        self.vsphere_vms = [vm['name'] for vm in vpoller_data]
+
+        # Use this list of Regexes to skip adding vsphere discovered vms to zabbix (regex is compared against the vsphere virtual machine name)
+        # To remove all hosts from vpoller detection, uncomment the first list item
+        skipHostnameList = [
+#        re.compile(r'.*'),
+        re.compile(r'^replica'),
+#        re.compile(r'^View Image Name'),
+#        re.compile(r'^IT-AD2012'),
+#        re.compile(r'^ACC-AD2012'),
+#        re.compile(r'^Mar-AD2012'),
+#        re.compile(r'^pts'),
+#        re.compile(r'^acct'),
+#        re.compile(r'^ft(r|)s'),
+        ]
+        vmMinusExceptions = []
+        for h in vpoller_data:
+            if not any (regex.match(h[u'name']) for regex in skipHostnameList):
+                vmMinusExceptions.append(h['name'])
+        self.vsphere_vms = vmMinusExceptions
 
         missing_hosts = set(self.vsphere_vms) - set(zabbix_hosts)
 
@@ -492,7 +511,7 @@ class ZabbixVSphere(object):
 
         # Get hosts options (templates, groups, macros) from the config file
         host_options = self._get_zabbix_host_options('vsphere_object_vm')
-        
+
         # Add a default interface for the host
         host_options['interfaces'] = [
             {
