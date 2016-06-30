@@ -588,6 +588,23 @@ class ZabbixVSphere(object):
                 self.zapi.hostgroup.create(name=host_cluster)
                 cluster_group_id = self.get_hostgroup_id(name=host_cluster)
             params['groups'].append({'groupid': cluster_group_id})
+            msg3 = {
+                'method': 'vm.get',
+                'hostname': self.options['vsphere']['hostname'],
+                'name': host,
+                'properties': ['config.guestId'],
+            }
+            GuestOSHostGroup = self._call_vpoller_task(msg=msg3)
+            try:
+                GuestOS = GuestOSHostGroup[0][u'config.guestId']
+                if re.match(".*?(w|W)in.*?",GuestOS):
+                    params['groups'].append({'groupid':host_options['wingroup'][0]['groupid']})
+                    params['templates'].append({'templateid':host_options['wintemplate'][0]['templateid']})
+                elif re.match(".*?(debian|ubuntu|suse|other.*?Linux).*?",GuestOS):
+                    params['groups'].append({'groupid':host_options['lingroup'][0]['groupid']})
+                    params['templates'].append({'templateid':host_options['lintemplate'][0]['templateid']})
+            except IndexError:
+                print "Host has no guest OS selected, This should never occur if the VM is completely created..."
 
             try:
                 result = self.zapi.host.create(params)
