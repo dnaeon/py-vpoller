@@ -40,6 +40,14 @@ zabbix:
       - Hypervisors
 
   vsphere_object_vm:
+    wintemplate:
+      - Template OS Windows
+    lintemplate:
+      - Template OS Linux
+    wingroup:
+      - Discovered Windows VMs
+    lingroup:
+      - Discovered Linux VMs
     templates:
       - Template VMware vSphere Virtual Machine - vPoller Native
     macros:
