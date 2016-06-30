@@ -802,6 +802,54 @@ class ZabbixVSphere(object):
         if 'groups' not in self.options['zabbix'][name]:
             logging.warning("No groups defined for '%s' config entry", name)
             raise SystemExit
+        # handle wingroup if any
+          wingroup = []
+          if 'wingroup' in self.options['zabbix'][name]:
+              for group in self.options['zabbix'][name]['wingroup']:
+                  group_id = self.get_hostgroup_id(name=group)
+                  if not group_id:
+                      logging.warning("Unable to find Zabbix host group '%s'", group)
+                      logging.info("Creating Zabbix host group '%s'", group)
+                      _result = self.zapi.hostgroup.create(name=group)
+                      group_id = _result['groupids'][0]
+                  wingroup.append({'groupid': group_id})
+
+          # handle lingroup if any
+          lingroup = []
+          if 'lingroup' in self.options['zabbix'][name]:
+              for group in self.options['zabbix'][name]['lingroup']:
+                  group_id = self.get_hostgroup_id(name=group)
+                  if not group_id:
+                      logging.warning("Unable to find Zabbix host group '%s'", group)
+                      logging.info("Creating Zabbix host group '%s'", group)
+                      _result = self.zapi.hostgroup.create(name=group)
+                      group_id = _result['groupids'][0]
+                  lingroup.append({'groupid': group_id})
+
+          # handle lintemplate if any
+          lintemplate = []
+          if 'lintemplate' in self.options['zabbix'][name]:
+              for template in self.options['zabbix'][name]['lintemplate']:
+                  template_id = self.get_template_id(name=template)
+                  if not template_id:
+                      logging.warning("Unable to find Zabbix host template '%s'", group)
+                      logging.info("Creating Zabbix template '%s'", template)
+                      _result = self.zapi.template.create(name=template)
+                      template_id = _result['templateids'][0]
+                  lintemplate.append({'templateid': template_id})                            |  -----------------------------------------------------------------------------------------------------------------------------------------
+                                                                                             |  -----------------------------------------------------------------------------------------------------------------------------------------
+          # handle wintemplate if any                                                        |  -----------------------------------------------------------------------------------------------------------------------------------------
+          wintemplate = []                                                                   |  -----------------------------------------------------------------------------------------------------------------------------------------
+          if 'wintemplate' in self.options['zabbix'][name]:                                  |  -----------------------------------------------------------------------------------------------------------------------------------------
+              for template in self.options['zabbix'][name]['wintemplate']:                   |  -----------------------------------------------------------------------------------------------------------------------------------------
+                  template_id = self.get_template_id(name=template)                          |  -----------------------------------------------------------------------------------------------------------------------------------------
+                  if not template_id:                                                        |  -----------------------------------------------------------------------------------------------------------------------------------------
+                      logging.warning("Unable to find Zabbix host template '%s'", group)     |  -----------------------------------------------------------------------------------------------------------------------------------------
+                      logging.info("Creating Zabbix template '%s'", template)                |  -----------------------------------------------------------------------------------------------------------------------------------------
+                      _result = self.zapi.template.create(name=template)                     |  -----------------------------------------------------------------------------------------------------------------------------------------
+                      template_id = _result['templateids'][0]
+                  wintemplate.append({'templateid': template_id})
+
 
         groups = []
         for group in self.options['zabbix'][name]['groups']:
@@ -828,7 +876,11 @@ class ZabbixVSphere(object):
             'proxy_hostid': proxy_id,
             'templates': templates,
             'groups': groups,
-            'macros': macros
+            'macros': macros,
+            'wingroup': wingroup,
+            'lingroup': lingroup,
+            'wintemplate': wintemplate,
+            'lintemplate': lintemplate,
         }
 
         return r
