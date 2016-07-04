@@ -40,6 +40,11 @@ zabbix:
       - Hypervisors
 
   vsphere_object_vm:
+    ignore_vm: # any vsphere VM name matching the following regex patterns
+               # will not be imported, use .* with the -d option to remove all 
+               # vpoller-imported hosts
+     - ^Example-\d
+     - ^Another Example$
     templates:
       - Template VMware vSphere Virtual Machine - vPoller Native
     macros:
