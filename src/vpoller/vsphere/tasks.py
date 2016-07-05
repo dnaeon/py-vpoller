@@ -2093,6 +2093,91 @@ def vm_net_get(agent, msg):
 
     return r
 
+def _get_vm_snapshots(agent, name):
+    """
+    Gets all snapshots for a vim.VirtualMachine object
+
+    Args:
+        agent (VConnector): VConnector instance
+        name         (str): Name of the VirtualMachine object
+
+    Returns:
+        A dict containing the VirtualMachine snaphots
+
+    """
+    logger.info(
+        '[%s] Getting snapshots for %s VirtualMachine',
+        agent.host,
+        name
+    )
+
+    obj = agent.get_object_by_property(
+        property_name='name',
+        property_value=name,
+        obj_type=pyVmomi.vim.VirtualMachine
+    )
+
+    if not obj:
+        return {'success': 1, 'msg': 'Cannot find object: {}'.format(name)}
+
+    if not obj.snapshot:
+        return {'success': 1, 'msg': 'No snapshots found for: {}'.format(name)}
+
+    snapshots = []
+    for root in obj.snapshot.rootSnapshotList:
+        snapshots.append(root)
+        for child in root.childSnapshotList:
+            snapshots.append(child)
+
+    r = {
+        'success': 0,
+        'msg': 'Successfully retrieved snapshots',
+        'result': snapshots,
+    }
+
+    return r
+
+@task(name='vm.snapshot.discover', required=['name'])
+def vm_snapshot_discover(agent, msg):
+    """
+    Discovers all snapshots for a vim.VirtualMachine managed object
+
+    Example client message would be:
+
+        {
+            "method":     "vm.snapshot.discover",
+            "hostname":   "vc01.example.org",
+            "name":       "vm01.example.org",
+        }
+
+    Returns:
+        The discovered snapshots as a JSON object
+
+    """
+    data = _get_vm_snapshots(agent, name=msg['name'])
+    if data['success'] != 0:
+        return data
+
+    result = []
+    for snapshot in data['result']:
+        s = {
+            'createTime': str(snapshot.createTime),
+            'description': snapshot.description,
+            'id': snapshot.id,
+            'name': snapshot.name,
+            'quiesced': str(snapshot.quiesced),
+            'state': snapshot.state,
+        }
+        result.append(s)
+
+    r = {
+        'success': 0,
+        'msg': 'Successfully retrieved snapshots',
+        'result': result,
+    }
+
+    return r
+
 @task(name='vm.get', required=['name', 'properties'])
 def vm_get(agent, msg):
     """
