@@ -96,6 +96,8 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | vm.perf.metric.get                   | Retrieve performance metrics for a vim.VirtualMachine object                  |
 +--------------------------------------+-------------------------------------------------------------------------------+
+| vm.snapshot.get                      | Get all snapshots for a vim.VirtualMachine object                             |
++--------------------------------------+-------------------------------------------------------------------------------+
 | datastore.alarm.get                  | Get all alarms for a vim.Datastore managed object                             |
 +--------------------------------------+-------------------------------------------------------------------------------+
 | datastore.discover                   | Discover all vim.Datastore objects                                            |
