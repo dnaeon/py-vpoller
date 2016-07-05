@@ -2137,15 +2137,15 @@ def _get_vm_snapshots(agent, name):
 
     return r
 
-@task(name='vm.snapshot.discover', required=['name'])
-def vm_snapshot_discover(agent, msg):
+@task(name='vm.snapshot.get', required=['name'])
+def vm_snapshot_get(agent, msg):
     """
-    Discovers all snapshots for a vim.VirtualMachine managed object
+    Gets all snapshots for a vim.VirtualMachine managed object
 
     Example client message would be:
 
         {
-            "method":     "vm.snapshot.discover",
+            "method":     "vm.snapshot.get",
             "hostname":   "vc01.example.org",
             "name":       "vm01.example.org",
         }
