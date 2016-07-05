@@ -1969,7 +1969,7 @@ def vm_guest_net_get(agent, msg):
     Example client message would be:
 
         {
-            "method":   "vm.net.discover",
+            "method":   "vm.guest.net.get",
             "hostname": "vc01.example.org",
             "name":     "vm01.example.org"
         }
@@ -1978,7 +1978,7 @@ def vm_guest_net_get(agent, msg):
     additional properties to be collected:
 
         {
-            "method":   "vm.net.discover",
+            "method":   "vm.guest.net.get",
             "hostname": "vc01.example.org",
             "name":     "vm01.example.org",
             "properties": [
