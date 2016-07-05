@@ -85,6 +85,7 @@ class HelperAgent(object):
             'vm.cpu.usage.percent': self.zabbix_item_value,
             'vm.perf.metric.get': self.zabbix_item_value,
             'vm.perf.metric.info': self.zabbix_lld_data,
+            'vm.snapshot.get': self.zabbix_lld_data,
             'datastore.alarm.get': self.zabbix_lld_data,
             'datastore.discover': self.zabbix_lld_data,
             'datastore.get': self.zabbix_item_value,
