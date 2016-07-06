@@ -484,7 +484,7 @@ class ZabbixVSphere(object):
         vmreal = []
         for h in vpoller_data:
         # Remove hosts on the ignore list (ignore_vm key/values in config file.)                                
-        if not any(regex.match(h[u'name']) for regex in regex_list):                                         
+            if not any(regex.match(h[u'name']) for regex in regex_list):                                         
                 vmreal.append(h['name'])                                                                          
         self.vsphere_vms = vmreal                                                                                 
         missing_hosts = set(self.vsphere_vms) - set(zabbix_hosts)                                                 
