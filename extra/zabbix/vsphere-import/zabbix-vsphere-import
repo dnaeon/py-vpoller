@@ -31,6 +31,7 @@ VMware vSphere objects into a Zabbix server as regular hosts
 """
 
 import json
+import re
 import logging
 from copy import deepcopy
 
@@ -473,10 +474,21 @@ class ZabbixVSphere(object):
             'hostname': self.options['vsphere']['hostname']
         }
         vpoller_data = self._call_vpoller_task(msg=msg)
-        self.vsphere_vms = [vm['name'] for vm in vpoller_data]
-
-        missing_hosts = set(self.vsphere_vms) - set(zabbix_hosts)
-
+        # regex of all vm names where logging is not desired.                                       
+        # Get hosts options (templates, groups, macros, ignore_vm(optional))
+        host_options = self._get_zabbix_host_options('vsphere_object_vm')
+        #convert vsphere_exclude_list to regex objects)
+        regex_list = []
+        for regex in self.vsphere_exclude_list:
+            regex_list.append(re.compile(regex))
+        vmreal = []
+        for h in vpoller_data:
+        # Remove hosts on the ignore list (ignore_vm key/values in config file.)                                
+            if not any(regex.match(h[u'name']) for regex in regex_list):                                         
+                vmreal.append(h['name'])                                                                          
+        self.vsphere_vms = vmreal                                                                                 
+        missing_hosts = set(self.vsphere_vms) - set(zabbix_hosts)                                                 
+  
         if not missing_hosts:
             logging.info(
                 '[VirtualMachine@%s] Objects are in sync with Zabbix',
@@ -784,6 +796,13 @@ class ZabbixVSphere(object):
             logging.warning("No groups defined for '%s' config entry", name)
             raise SystemExit
 
+        # handle ignore_vm if any
+        ignore_vm_list = []
+        if 'ignore_vm' in self.options['zabbix'][name]:
+            for regex in self.options['zabbix'][name]['ignore_vm']:
+                ignore_vm_list.append(regex)
+            self.vsphere_exclude_list = ignore_vm_list
+            
         groups = []
         for group in self.options['zabbix'][name]['groups']:
             group_id = self.get_hostgroup_id(name=group)
@@ -809,7 +828,8 @@ class ZabbixVSphere(object):
             'proxy_hostid': proxy_id,
             'templates': templates,
             'groups': groups,
-            'macros': macros
+            'macros': macros,
+            'ignore_vm_list': ignore_vm_list,
         }
 
         return r
