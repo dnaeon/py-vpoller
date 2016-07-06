@@ -483,10 +483,8 @@ class ZabbixVSphere(object):
             regex_list.append(re.compile(regex))
         vmreal = []
         for h in vpoller_data:
-        """
-        Remove hosts on the ignore list (ignore_vm key/values in config file.)                                
-        """                                                                                                   
-            if not any (regex.match(h[u'name']) for regex in regex_list):                                         
+        # Remove hosts on the ignore list (ignore_vm key/values in config file.)                                
+        if not any(regex.match(h[u'name']) for regex in regex_list):                                         
                 vmreal.append(h['name'])                                                                          
         self.vsphere_vms = vmreal                                                                                 
         missing_hosts = set(self.vsphere_vms) - set(zabbix_hosts)                                                 
@@ -802,8 +800,6 @@ class ZabbixVSphere(object):
         ignore_vm_list = []
         if 'ignore_vm' in self.options['zabbix'][name]:
             for regex in self.options['zabbix'][name]['ignore_vm']:
-                # logging.warning("No List of VMs to Skip Detected, use the ignore_vm key in your yaml config file.")
-                # logging.info("No List of VM's for Exclusion Detected")                
                 ignore_vm_list.append(regex)
             self.vsphere_exclude_list = ignore_vm_list
             
