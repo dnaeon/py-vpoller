@@ -531,7 +531,7 @@ class VPollerWorker(multiprocessing.Process):
                 # No helper specified, dump data to JSON
                 try:
                     data = json.dumps(result, ensure_ascii=False)
-                except ValueError as e:
+                except (ValueError, TypeError) as e:
                     logger.warning('Cannot serialize result: %s', e)
                     r = {
                         'success': 1,
