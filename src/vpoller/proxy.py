@@ -27,6 +27,7 @@ vPoller Proxy module for the VMware vSphere Poller
 
 """
 
+import time
 import multiprocessing
 
 from platform import node
@@ -87,7 +88,8 @@ class VPollerProxyManager(object):
         logger.info('Proxy Manager is ready and running')
         while not self.time_to_die.is_set():
             try:
-                self.wait_for_mgmt_task()
+                self.wait_for_mgmt_task(1000)
+                self.check_proxy()
             except KeyboardInterrupt:
                 self.signal_stop()
 
@@ -130,6 +132,16 @@ class VPollerProxyManager(object):
             'Proxy Manager configuration: %s',
             self.config
         )
+
+    def check_proxy(self):
+        if self.proxy.exitcode:
+            logger.error(
+                'Proxy died with signal %s. Restarting...',
+                self.proxy.exitcode
+            )
+            self.proxy.join(3)
+            time.sleep(5)
+            self.start_proxy_process()
 
     def start_proxy_process(self):
         """
@@ -177,12 +189,12 @@ class VPollerProxyManager(object):
         self.mgmt_socket.close()
         self.zcontext.term()
 
-    def wait_for_mgmt_task(self):
+    def wait_for_mgmt_task(self,timeout):
         """
         Poll the management socket for management tasks
 
         """
-        socks = dict(self.zpoller.poll())
+        socks = dict(self.zpoller.poll(timeout))
         if socks.get(self.mgmt_socket) == zmq.POLLIN:
             try:
                 msg = self.mgmt_socket.recv_json()
