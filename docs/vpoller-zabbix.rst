@@ -434,7 +434,7 @@ will be using. Below is an example config file used by
    ---
    vsphere:
      hostname: vc01.example.org
-   
+
    vpoller:
      endpoint: tcp://localhost:10123
      retries: 3
@@ -445,30 +445,30 @@ will be using. Below is an example config file used by
      username: Admin
      password: zabbix
 
-   vsphere_object_host:
-     proxy: zbx-proxy.example.org
-     templates:
-       - Template VMware vSphere Hypervisor - vPoller Native
-     macros:
-       VSPHERE.HOST: vc01.example.org
-     groups:
-       - Hypervisors
+     vsphere_object_host:
+       proxy: zbx-proxy.example.org
+       templates:
+         - Template VMware vSphere Hypervisor - vPoller Native
+       macros:
+         VSPHERE.HOST: vc01.example.org
+       groups:
+         - Hypervisors
 
-   vsphere_object_vm:
-     templates:
-       - Template VMware vSphere Virtual Machine - vPoller Native
-     macros:
-       VSPHERE.HOST: vc01.example.org
-     groups:
-       - Virtual Machines
+     vsphere_object_vm:
+       templates:
+         - Template VMware vSphere Virtual Machine - vPoller Native
+       macros:
+         VSPHERE.HOST: vc01.example.org
+       groups:
+         - Virtual Machines
 
-   vsphere_object_datastore:
-     templates:
-       - Template VMware vSphere Datastore - vPoller Native
-     macros:
-       VSPHERE.HOST: vc01.example.org
-     groups:
-       - Datastores
+     vsphere_object_datastore:
+       templates:
+         - Template VMware vSphere Datastore - vPoller Native
+       macros:
+         VSPHERE.HOST: vc01.example.org
+       groups:
+         - Datastores
 
 In the example config file above we have defined various config
 entries - Zabbix server, Zabbix Proxy which will be used,
