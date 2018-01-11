@@ -1,0 +1,10 @@
+version: '2'
+
+volumes:
+ vpoller_vconnector:
+
+services:
+ vpoller-aio:
+  image: rockaut/vpoller-aio:xenial
+  volumes:
+   - vpoller_vconnector:/var/lib/vconnector
