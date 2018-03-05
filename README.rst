@@ -1,11 +1,11 @@
 vPoller - Distributed VMware vSphere API Proxy
 ==============================================
 
-.. image:: https://pypip.in/version/vpoller/badge.svg
+.. image:: https://img.shields.io/pypi/v/vpoller.svg
     :target: https://pypi.python.org/pypi/vpoller/
     :alt: Latest Version
 
-.. image:: https://pypip.in/download/vpoller/badge.svg
+.. image:: https://img.shields.io/pypi/dm/vpoller.svg
     :target: https://pypi.python.org/pypi/vpoller/
     :alt: Downloads
 
