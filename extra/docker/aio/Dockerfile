@@ -48,7 +48,7 @@ RUN set -x \
     && make \
     && cd ~ \
     && mkdir /usr/local/lib/zabbix \
-    && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so /usr/local/lib/zabbix \
+    && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so /var/lib/zabbix/modules/ \
     && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so ~/builds \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION}.tar.gz \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION} \
