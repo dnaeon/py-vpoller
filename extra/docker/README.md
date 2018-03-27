@@ -21,15 +21,6 @@ To get a console in this container:
 docker exec --name vpoller-test -it /bin/bash
 ~~~~
 
-# docker-compose
-After build you also may simply use docker-compose for convenience:
-~~~~
-docker-compose up    # for starting up the container or with -d for detached mode
-docker-compose stop  # for stopping the container
-docker-compose start # for restarting the container
-docker-compose down  # for deleting the container
-~~~~
-
 # CONFIG
 You always may exec in the shell and use vpollers own cli.
 
@@ -58,3 +49,29 @@ You also may execute the script while running the container with:
 ~~~~
 /import-hostsfile.sh && vconnector-cli get
 ~~~~
+
+#Zabbix Agent / integration
+There's already an zabbix agent deamon configured and vpoller.so build but you need to provide the zabbix_agentd.conf file.
+The config file should contain:
+~~~~
+Include=/etc/zabbix/zabbix_agentd.d/vpoller_module.conf
+
+LoadModulePath=/usr/local/lib/zabbix
+LoadModule=vpoller.so
+~~~~
+
+Then map the local config file to the container with
+~~~~
+./zabbix_agentd.conf:/etc/zabbix/zabbix_agentd.conf
+~~~~
+
+# docker-compose
+After build you also may simply use docker-compose for convenience:
+~~~~
+docker-compose up    # for starting up the container or with -d for detached mode
+docker-compose stop  # for stopping the container
+docker-compose start # for restarting the container
+docker-compose down  # for deleting the container
+~~~~
+
+The included docker-compose file assumes that you already have build the container image. It uses local directories for volume mapping.
