@@ -1,1 +1,0 @@
-docker build . --rm --tag vpoller/vpoller-aio:xenial
