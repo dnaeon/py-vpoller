@@ -1,19 +1,19 @@
 # BUILD
 To build the All-in-one image just use:
 ~~~~
-docker build . --rm --tag rockaut/vpoller-aio:xenial
+docker build . --rm --tag vpoller/vpoller-aio:xenial
 ~~~~
 _you can use for tag whatever you want_
 
 # RUN
 To run the container type:
 ~~~~
-docker run --rm -it --name vpoller-test rockaut/vpoller-aio:xenial
+docker run --rm -it --name vpoller-test vpoller/vpoller-aio:xenial
 ~~~~
 
 Or if you want it persistent:
 ~~~~
-docker run --name vpoller-aio -it rockaut/vpoller-aio:xenial
+docker run --name vpoller-aio -it vpoller/vpoller-aio:xenial
 ~~~~
 
 To get a console in this container:
