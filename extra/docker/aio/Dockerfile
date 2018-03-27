@@ -61,6 +61,7 @@ EXPOSE 10123/TCP
 EXPOSE 10124/TCP
 EXPOSE 9999/TCP
 EXPOSE 10000/TCP
+EXPOSE 10050/TCP
 
 VOLUME ["/var/lib/vconnector","/etc/zabbix/zabbix_agentd.d/"]
 
