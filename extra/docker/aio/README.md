@@ -52,17 +52,23 @@ You also may execute the script while running the container with:
 
 #Zabbix Agent / integration
 The image is based on the official Zabbix Agent image and zabbix_agentd is automatically started on container start.
-If you want to use vpoller integration the zabbxi agent config file should contain:
+The vPoller Zabbix module is placed in the default module path.
+If you want to use vpoller integration the zabbxi agent config file just has to contain:
 ~~~~
-Include=/etc/zabbix/zabbix_agentd.d/vpoller_module.conf
-
-LoadModulePath=/usr/local/lib/zabbix
 LoadModule=vpoller.so
 ~~~~
 
-Then map the local config file to the container with
+If you want a module config map the agent config path and place it there
 ~~~~
-./zabbix_agentd.conf:/etc/zabbix/zabbix_agentd.conf
+./zabbix_agentd.d:/etc/zabbix/zabbix_agentd.d/
+~~~~
+
+You may also just use Zabbix Agents own environment variables:
+~~~~
+environment:
+  - ZBX_SERVER_HOST=zabbix-server
+  - ZBX_HOSTNAME=vPoller
+  - ZBX_LOADMODULE=vpoller.so
 ~~~~
 
 # docker-compose
