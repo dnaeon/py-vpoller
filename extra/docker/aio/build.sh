@@ -1,1 +1,1 @@
-docker build . --rm --tag vpoller/vpoller-aio:zbxagent
+docker build . --rm --tag vpoller/vpoller:aio
