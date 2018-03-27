@@ -1,32 +1,9 @@
-FROM ubuntu:xenial
+FROM 'zabbix/zabbix-agent:ubuntu-3.4.7'
 
-ENV ZBX_CLIENT_VERSION 3.4
 ENV ZBX_SOURCE_VERSION 3.4.7
 
 RUN set -x \
-	&& apt-get update && apt-get install -y --no-install-recommends python-pip supervisor wget \
-    && wget http://repo.zabbix.com/zabbix/${ZBX_CLIENT_VERSION}/ubuntu/pool/main/z/zabbix-release/zabbix-release_${ZBX_CLIENT_VERSION}-1+xenial_all.deb \
-    && dpkg -i zabbix-release_${ZBX_CLIENT_VERSION}-1+xenial_all.deb \
-    && rm -rf zabbix-release_${ZBX_CLIENT_VERSION}-1+xenial_all.deb \
-    && apt-get update && apt-get install -y zabbix-agent \
-    && apt-get purge -y --auto-remove \
-    && rm -rf /var/lib/apt/lists/* \
-    && addgroup --system --quiet zabbix \
-    && adduser --quiet \
-            --system --disabled-login \
-            --ingroup zabbix \
-            --home /var/lib/zabbix/ \
-        zabbix \
-    && pip install --upgrade pip \
-    && pip install setuptools \
-    && pip install pyzmq docopt pyVmomi vconnector
-
-RUN apt-get update && apt-get install -y --no-install-recommends git make libtool dh-autoreconf build-essential \
-    && cd ~ \
-    && mkdir ~/builds \
-    && git clone https://github.com/dnaeon/py-vpoller.git \
-    && cd py-vpoller \
-    && python setup.py install \
+    && apt-get update && apt-get install -y --no-install-recommends git make libtool dh-autoreconf build-essential ca-certificates \
     && cd ~ \
     && git clone https://github.com/zeromq/zeromq4-x.git \
     && cd ~/zeromq4-x \
@@ -34,6 +11,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends git make libtoo
     && ./configure \
     && make && make install && make clean \
     && ldconfig \
+    && cd ~ \
+    && rm -rf ~/zeromq4-x \
+    && apt-get update && apt-get remove -y git make libtool dh-autoreconf build-essential \
+    && apt-get purge -y --auto-remove \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -x \
+    && apt-get update && apt-get install -y --no-install-recommends python-pip wget build-essential gcc python-dev \
+    && pip install --upgrade pip \
+    && pip install --upgrade setuptools \
+    && pip install pyzmq docopt pyVmomi vconnector \
+    && apt-get update && apt-get remove -y python-pip build-essential gcc python-dev \
+    && apt-get purge -y --auto-remove \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN set -x \
+    && apt-get update && apt-get install -y --no-install-recommends python-pip git make libtool dh-autoreconf build-essential supervisor \
+    && cd ~ \
+    && mkdir ~/builds \
+    && git clone https://github.com/dnaeon/py-vpoller.git \
+    && cd py-vpoller \
+    && python setup.py install \
     && cd ~/py-vpoller/extra/vpoller-cclient \
     && make \
     && cp vpoller-cclient /usr/local/bin/ \
@@ -43,15 +42,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends git make libtoo
     && tar zxvf zabbix-${ZBX_SOURCE_VERSION}.tar.gz \
     && cd zabbix-${ZBX_SOURCE_VERSION} \
     && ./configure \
+    && cd ~ \
     && cp -a ~/py-vpoller/extra/zabbix/vpoller-module ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules \
     && cd ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module \
     && make \
+    && cd ~ \
     && mkdir /usr/local/lib/zabbix \
     && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so /usr/local/lib/zabbix \
     && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so ~/builds \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION}.tar.gz \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION} \
-    && rm -rf ~/zeromq4-x \
     && rm -rf ~/py-vpoller \
     && apt-get update && apt-get remove -y git make libtool dh-autoreconf build-essential \
     && rm -rf /var/lib/apt/lists/* \

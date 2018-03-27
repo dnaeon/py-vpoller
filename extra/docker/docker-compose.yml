@@ -1,8 +1,0 @@
-version: '2'
-
-services:
-  vpoller-aio:
-    image: vpoller/vpoller-aio:xenial
-    volumes:
-    - ./vpoller_vconnector:/var/lib/vconnector
-    - ./zabbix_agentd.conf:/etc/zabbix/zabbix_agentd.conf

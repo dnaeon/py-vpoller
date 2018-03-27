@@ -1,19 +1,19 @@
 # BUILD
 To build the All-in-one image just use:
 ~~~~
-docker build . --rm --tag vpoller/vpoller-aio:xenial
+./build
 ~~~~
 _you can use for tag whatever you want_
 
 # RUN
 To run the container type:
 ~~~~
-docker run --rm -it --name vpoller-test vpoller/vpoller-aio:xenial
+docker run --rm -it --name vpoller-test vpoller/vpoller:aio
 ~~~~
 
 Or if you want it persistent:
 ~~~~
-docker run --name vpoller-aio -it vpoller/vpoller-aio:xenial
+docker run --name vpoller-aio -it vpoller/vpoller:aio
 ~~~~
 
 To get a console in this container:
@@ -51,8 +51,8 @@ You also may execute the script while running the container with:
 ~~~~
 
 #Zabbix Agent / integration
-There's already an zabbix agent deamon configured and vpoller.so build but you need to provide the zabbix_agentd.conf file.
-The config file should contain:
+The image is based on the official Zabbix Agent image and zabbix_agentd is automatically started on container start.
+If you want to use vpoller integration the zabbxi agent config file should contain:
 ~~~~
 Include=/etc/zabbix/zabbix_agentd.d/vpoller_module.conf
 
