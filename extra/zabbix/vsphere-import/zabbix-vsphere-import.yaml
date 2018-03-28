@@ -40,6 +40,9 @@ zabbix:
       - Hypervisors
 
   vsphere_object_vm:
+    skip_vm_in_powerstate: # Skip VMs in the following power states
+      - poweredOff
+      - suspended
     ignore_vm: # any vsphere VM name matching the following regex patterns
                # will not be imported, use .* with the -d option to remove all 
                # vpoller-imported hosts
