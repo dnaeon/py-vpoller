@@ -36,8 +36,7 @@ RUN set -x \
     && python setup.py install \
     && cd ~/py-vpoller/extra/vpoller-cclient \
     && make \
-    && cp vpoller-cclient /usr/local/bin/ \
-    && cp vpoller-cclient ~/builds \
+    && cp -fv vpoller-cclient ~/builds \
     && cd ~ \
     && wget https://sourceforge.net/projects/zabbix/files/ZABBIX%20Latest%20Stable/${ZBX_SOURCE_VERSION}/zabbix-${ZBX_SOURCE_VERSION}.tar.gz/download -O zabbix-${ZBX_SOURCE_VERSION}.tar.gz \
     && tar zxvf zabbix-${ZBX_SOURCE_VERSION}.tar.gz \
@@ -49,15 +48,18 @@ RUN set -x \
     && make \
     && cd ~ \
     && mkdir /usr/local/lib/zabbix \
-    && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so /var/lib/zabbix/modules/ \
     && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so ~/builds \
-    && cp -a ~/py-vpoller/extra/zabbix/vsphere-import ~/ \
+    && cp -afv ~/py-vpoller/extra/zabbix/vsphere-import ~/ \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION}.tar.gz \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION} \
     && rm -rf ~/py-vpoller \
     && apt-get update && apt-get remove -y git make libtool dh-autoreconf build-essential \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get purge -y --auto-remove
+
+RUN set -x \
+    && cp -fv ~/builds/vpoller-cclient /usr/local/bin/ \
+    && cp -fv ~/builds/vpoller.so /var/lib/zabbix/modules/
 
 EXPOSE 10123/TCP
 EXPOSE 10124/TCP
