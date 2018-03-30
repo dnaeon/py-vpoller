@@ -49,9 +49,9 @@ RUN set -x \
     && make \
     && cd ~ \
     && mkdir /usr/local/lib/zabbix \
-    && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so /var/lib/zabbix/modules/ \
     && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so ~/builds \
     && cp -a ~/py-vpoller/extra/zabbix/vsphere-import ~/ \
+    && cp ~/builds/vpoller.so /var/lib/zabbix/modules/ \ 
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION}.tar.gz \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION} \
     && rm -rf ~/py-vpoller \
