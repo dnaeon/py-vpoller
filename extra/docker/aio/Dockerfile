@@ -28,6 +28,7 @@ RUN set -x \
 
 RUN set -x \
     && apt-get update && apt-get install -y --no-install-recommends python-pip git make libtool dh-autoreconf build-essential supervisor \
+    && pip install pyyaml pyzabbix \
     && cd ~ \
     && mkdir ~/builds \
     && git clone https://github.com/dnaeon/py-vpoller.git \
@@ -50,6 +51,7 @@ RUN set -x \
     && mkdir /usr/local/lib/zabbix \
     && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so /var/lib/zabbix/modules/ \
     && cp ~/zabbix-${ZBX_SOURCE_VERSION}/src/modules/vpoller-module/vpoller.so ~/builds \
+    && cp -a ~/py-vpoller/extra/zabbix/vsphere-import ~/ \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION}.tar.gz \
     && rm -rf ~/zabbix-${ZBX_SOURCE_VERSION} \
     && rm -rf ~/py-vpoller \
