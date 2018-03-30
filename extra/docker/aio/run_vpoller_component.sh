@@ -94,6 +94,10 @@ else
 fi
 vconnector-cli --debug get
 
+if [ ! -f /var/lib/zabbix/modules/vpoller.so ]; then
+    cp ~/builds/vpoller.so /var/lib/zabbix/modules/
+fi
+
 echo "########################################################"
 
 echo "** Executing supervisord"
