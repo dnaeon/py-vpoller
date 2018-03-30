@@ -94,6 +94,7 @@ else
 fi
 vconnector-cli --debug get
 
+# TODO: WORKAROUND... why isn't vpoller.so present after build?
 if [ ! -f /var/lib/zabbix/modules/vpoller.so ]; then
     cp ~/builds/vpoller.so /var/lib/zabbix/modules/
 fi
