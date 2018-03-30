@@ -1,11 +1,23 @@
 version: '2'
 
 services:
-  vpoller-aio:
-    image: vpoller/vpoller:aio
+  vpoller-proxy:
+    image: 'vpoller/vpoller:aio-proxy'
+    restart: unless-stopped
+    hostname: vpoller-proxy
     volumes:
-    - './vpoller_vconnector:/var/lib/vconnector'
-    - './zabbix_agentd.conf:/etc/zabbix/zabbix_agentd.conf:ro'
-    - './zabbix_agentd.d:/etc/zabbix/zabbix_agentd.d:ro'
-    - '/etc/localtime:/etc/localtime:ro'
-    - '/etc/timezone:/etc/timezone:ro'
+      - '/etc/localtime:/etc/localtime:ro'
+      - '/etc/timezone:/etc/timezone:ro'
+      - './vpoller_proxy:/var/lib/vconnector'
+    environment:
+      - ZBX_SERVER_HOST=zabbix-server
+      - ZBX_HOSTNAME=vpoller-proxy
+      - ZBX_LOADMODULE=vpoller.so
+      - ZBX_CONFIGFREQUENCY=60
+      - ZBX_DATASENDERFREQUENCY=60
+    links:
+     - 'zabbix-server:zabbix-server'
+    networks:
+     backend:
+       aliases:
+         - vpoller-proxy

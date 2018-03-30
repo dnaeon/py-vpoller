@@ -1,30 +1,47 @@
-# BUILD
+# vPoller All-In-One with Zabbix Proxy
+
+Using the zabbix proxy instead of zabbix agent may have some benefits but as always also some drawbacks.
+The biggest benefit is the ease of configuration.
+If you correctly set your nameresolution you may just create an new zabbix host item with whatever item name you want and provide the real ip/dns settings in the agent fields. Then all check items may use the correct connections without troubles. No macro fiddling or dual agent adresses.
+
+One drawback of course will be the limited features of the zabbix proxy like no computed items or custom multipliers. Well the great team of Zabbix may solve that drawback sooner than later maybe.
+
+## BUILD
+
 To build the All-in-one image just use:
-~~~~
+
+~~~~bash
 ./build
 ~~~~
-_you can use for tag whatever you want_
 
-# RUN
+You can use for tag whatever you want but for the next line we will use vpoller/vpoller:aio-proxy.
+
+## RUN
+
 To run the container type:
-~~~~
-docker run --rm -it --name vpoller-test vpoller/vpoller:aio
+
+~~~~bash
+docker run --rm -it vpoller/vpoller:aio-proxy
 ~~~~
 
 Or if you want it persistent:
-~~~~
-docker run --name vpoller-aio -it vpoller/vpoller:aio
+
+~~~~bash
+docker run --name vpoller-proxy -it vpoller/vpoller:aio-proxy
 ~~~~
 
 To get a console in this container:
-~~~~
-docker exec --name vpoller-test -it /bin/bash
+
+~~~~bash
+docker exec --name vpoller-proxy -it /bin/bash
 ~~~~
 
-# CONFIG
+## CONFIG
+
 You always may exec in the shell and use vpollers own cli.
 
 You can use environment variables for:
+
 - Default proxy frontend port:VPOLLER_PROXY_FRONTEND_PORT=10123
 - Default proxy backend port: VPOLLER_PROXY_BACKEND_PORT=10124
 - Default proxy management port: VPOLLER_PROXY_MGMT_PORT=9999
@@ -39,45 +56,60 @@ You can use environment variables for:
 
 For data persistency "/var/lib/vconnector" is exported. vconnector.db is created by the startup script if not present.
 Also you can create an hosts.file in the volume with a host list wich is imported to the vconnector on container startup.
-~~~~
+
+~~~~text
 hostname1;hostip1;user;password
 hostname2;hostip2;user;password
 ~~~~
+
 The script is also writing the hostnames for resolving to the /etc/hosts file.
 
 You also may execute the script while running the container with:
-~~~~
+
+~~~~bash
 /import-hostsfile.sh && vconnector-cli get
 ~~~~
 
-#Zabbix Agent / integration
-The image is based on the official Zabbix Agent image and zabbix_agentd is automatically started on container start.
+## Zabbix Proxy / integration
+
+The image is based on the official Zabbix Proxy image and the components are automatically started on container start.
 The vPoller Zabbix module is placed in the default module path.
-If you want to use vpoller integration the zabbxi agent config file just has to contain:
-~~~~
+If you want to use vpoller integration the zabbix proxy config file just has to contain:
+
+~~~~text
 LoadModule=vpoller.so
 ~~~~
 
 If you want a module config map the agent config path and place it there
-~~~~
-./zabbix_agentd.d:/etc/zabbix/zabbix_agentd.d/
+
+~~~~text
+./zabbix_proxy.conf.d:/usr/local/etc/zabbix_proxy.conf.d/
 ~~~~
 
-You may also just use Zabbix Agents own environment variables:
-~~~~
+You may also just use Zabbix own environment variables. For example:
+
+~~~~text
 environment:
   - ZBX_SERVER_HOST=zabbix-server
-  - ZBX_HOSTNAME=vPoller
+  - ZBX_HOSTNAME=vpoller-proxy
   - ZBX_LOADMODULE=vpoller.so
+  - ZBX_CONFIGFREQUENCY=60
+  - ZBX_DATASENDERFREQUENCY=60
 ~~~~
 
-# docker-compose
+### Word on zabbix host items
+
+- To fetch data through the proxy your items have to use the "Simple check" type!
+
+## docker-compose
+
 After build you also may simply use docker-compose for convenience:
-~~~~
-docker-compose up    # for starting up the container or with -d for detached mode
-docker-compose stop  # for stopping the container
-docker-compose start # for restarting the container
-docker-compose down  # for deleting the container
+
+~~~~bash
+docker-compose up    ## for starting up the container or with -d for detached mode
+docker-compose stop  ## for stopping the container
+docker-compose start ## for restarting the container
+docker-compose down  ## for deleting the container
 ~~~~
 
 The included docker-compose file assumes that you already have build the container image. It uses local directories for volume mapping.
