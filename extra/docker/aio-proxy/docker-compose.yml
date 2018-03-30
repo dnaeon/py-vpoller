@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  vpoller-aio:
+    image: vpoller/vpoller:aio
+    volumes:
+    - './vpoller_vconnector:/var/lib/vconnector'
+    - './zabbix_agentd.conf:/etc/zabbix/zabbix_agentd.conf:ro'
+    - './zabbix_agentd.d:/etc/zabbix/zabbix_agentd.d:ro'
+    - '/etc/localtime:/etc/localtime:ro'
+    - '/etc/timezone:/etc/timezone:ro'
