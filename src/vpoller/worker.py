@@ -39,6 +39,7 @@ except ImportError:
     from configparser import ConfigParser
 
 import zmq
+import pyVmomi
 
 from vpoller import __version__
 from vpoller.log import logger
@@ -48,8 +49,23 @@ from vpoller.task.registry import registry
 from vconnector.core import VConnector
 from vconnector.core import VConnectorDatabase
 
-__all__ = ['VPollerWorkerManager', 'VPollerWorker']
+__all__ = ['VPollerWorkerManager', 'VPollerWorker', 'DefaultJSONEncoder']
 
+class DefaultJSONEncoder(json.JSONEncoder):
+    """
+    DefaultJSONEncoder is a custom JSONEncoder class that knows how to
+    encode core custom objects.
+
+    Until pyVmomi supports encoding of core objects to JSON we cannot
+    marshal arbitrary objects on the fly, thus the need for this class.
+
+    See https://github.com/vmware/pyvmomi/issues/21 for more info.
+    """
+    def default(self, obj):
+        try:
+            return super(DefaultJSONEncoder, self).default(obj)
+        except Exception:
+            return obj.__dict__
 
 class VPollerWorkerManager(object):
     """
@@ -519,7 +535,7 @@ class VPollerWorker(multiprocessing.Process):
 
             # Process task and return result to client
             result = self.process_client_msg(msg)
-            
+
             # Process data using a helper before sending it to client?
             if 'helper' in msg and msg['helper'] in self.helper_modules:
                 data = self.run_helper(
@@ -530,7 +546,7 @@ class VPollerWorker(multiprocessing.Process):
             else:
                 # No helper specified, dump data to JSON
                 try:
-                    data = json.dumps(result, ensure_ascii=False)
+                    data = json.dumps(result, cls=DefaultJSONEncoder, ensure_ascii=False)
                 except (ValueError, TypeError) as e:
                     logger.warning('Cannot serialize result: %s', e)
                     r = {
