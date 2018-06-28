@@ -43,6 +43,9 @@ VPOLLER_CACHE_TTL=${VPOLLER_CACHE_TTL:-"3600"}
 # Default cache housekeeping time
 VPOLLER_CACHE_HOUSEKEEPING=${VPOLLER_CACHE_HOUSEKEEPING:-"480"}
 
+# Default worker concurrency
+VPOLLER_WORKER_CONCURRENCY=${VPOLLER_WORKER_CONCURRENCY:-"4"}
+
 DEFAULT_CONFIG=$(cat <<-END
 [proxy]
 frontend     = tcp://*:${VPOLLER_PROXY_FRONTEND_PORT}
@@ -98,6 +101,8 @@ vconnector-cli --debug get
 if [ ! -f /var/lib/zabbix/modules/vpoller.so ]; then
     cp ~/builds/vpoller.so /var/lib/zabbix/modules/
 fi
+
+python -v
 
 echo "########################################################"
 

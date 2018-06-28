@@ -61,6 +61,8 @@ RUN set -x \
     && cp -fv ~/builds/vpoller-cclient /usr/local/bin/ \
     && cp -fv ~/builds/vpoller.so /var/lib/zabbix/modules/
 
+ENV VPOLLER_WORKER_CONCURRENCY 4
+
 EXPOSE 10123/TCP
 EXPOSE 10124/TCP
 EXPOSE 9999/TCP
