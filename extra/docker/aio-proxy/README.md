@@ -53,6 +53,7 @@ You can use environment variables for:
 - Default cache maxsize: VPOLLER_CACHE_MAXSIZE="0"
 - Default cache ttl: VPOLLER_CACHE_TTL="3600"
 - Default cache housekeeping time: VPOLLER_CACHE_HOUSEKEEPING="480"
+- Default worker concurrency: VPOLLER_WORKER_CONCURRENCY="4"
 
 For data persistency "/var/lib/vconnector" is exported. vconnector.db is created by the startup script if not present.
 Also you can create an hosts.file in the volume with a host list wich is imported to the vconnector on container startup.
