@@ -1,6 +1,6 @@
-FROM 'zabbix/zabbix-proxy-sqlite3:ubuntu-3.4.7'
+FROM 'zabbix/zabbix-proxy-sqlite3:ubuntu-latest'
 
-ENV ZBX_SOURCE_VERSION 3.4.7
+ENV ZBX_SOURCE_VERSION 3.4.11
 
 RUN set -x \
     && apt-get update && apt-get install -y --no-install-recommends git make libtool dh-autoreconf build-essential ca-certificates \
@@ -18,11 +18,10 @@ RUN set -x \
     && rm -rf /var/lib/apt/lists/*
 
 RUN set -x \
-    && apt-get update && apt-get install -y --no-install-recommends python-pip wget build-essential gcc python-dev \
+    && apt-get update && apt-get install -y --no-install-recommends python-pip python3-pip wget build-essential gcc python-dev python-setuptools python3-setuptools \
     && pip install --upgrade pip \
-    && pip install --upgrade setuptools \
-    && pip install pyzmq docopt pyVmomi vconnector \
-    && apt-get update && apt-get remove -y python-pip build-essential gcc python-dev \
+    && pip3 install pyzmq docopt pyVmomi vconnector \
+    && apt-get update && apt-get remove -y python3-pip python-pip build-essential gcc python-dev \
     && apt-get purge -y --auto-remove \
     && rm -rf /var/lib/apt/lists/*
 
