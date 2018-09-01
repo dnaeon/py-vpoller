@@ -327,7 +327,11 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
 
   zmq_msg_close(&msg_in);
   zmq_close(zsocket);
-  
+
+  if (strcmp(result, "Task host.get failed") == 0) {
+    return (SYSINFO_RET_FAIL);
+  }
+
   return (SYSINFO_RET_OK);
 }
 
