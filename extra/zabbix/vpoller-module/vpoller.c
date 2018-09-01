@@ -332,6 +332,12 @@ zbx_module_vpoller(AGENT_REQUEST *request, AGENT_RESULT *result)
     return (SYSINFO_RET_FAIL);
   }
 
+  if( result[0] == '"' ) {
+    size_t resultlen = strlen(result);
+    memmove(result, result+1, len-2);
+    result[len-2] = 0;
+  }
+
   return (SYSINFO_RET_OK);
 }
 
