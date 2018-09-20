@@ -1,9 +1,9 @@
-FROM 'zabbix/zabbix-proxy-sqlite3:ubuntu-latest'
+FROM 'zabbix/zabbix-proxy-sqlite3:ubuntu-3.4-latest'
 
-ENV ZBX_SOURCE_VERSION 3.4.11
+ENV ZBX_SOURCE_VERSION 3.4.14
 
 RUN set -x \
-    && apt-get update && apt-get install -y --no-install-recommends git make libtool dh-autoreconf build-essential ca-certificates \
+    && apt-get update && apt-get install -y --no-install-recommends git make libtool dh-autoreconf build-essential ca-certificates jq curl wget \
     && cd ~ \
     && git clone https://github.com/zeromq/zeromq4-x.git \
     && cd ~/zeromq4-x \
