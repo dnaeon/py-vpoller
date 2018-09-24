@@ -8,7 +8,7 @@ RUN set -x \
     && curl -L https://github.com/vmware/govmomi/releases/download/v$GOVC_VERSION/govc_linux_amd64.gz --output govc_linux_amd64.gz \
     && gunzip govc_linux_amd64.gz \
     && mv govc_linux_amd64 /usr/local/bin/govc \
-    && chmod +x /usr/local/bin/govc
+    && chmod +x /usr/local/bin/govc \
     && git clone https://github.com/zeromq/zeromq4-x.git \
     && cd ~/zeromq4-x \
     && ./autogen.sh \
