@@ -4,7 +4,7 @@ ENV ZBX_SOURCE_VERSION 3.4.14
 ENV GOVC_VERSION 0.18.0
 
 RUN set -x \
-    && apt-get update && apt-get install -y --no-install-recommends git make libtool dh-autoreconf build-essential ca-certificates jq curl wget \
+    && apt-get update && apt-get install -y --no-install-recommends git make libtool dh-autoreconf build-essential ca-certificates jq curl wget libpython3.6 \
     && cd ~ \
     && curl -L https://github.com/vmware/govmomi/releases/download/v$GOVC_VERSION/govc_linux_amd64.gz --output govc_linux_amd64.gz \
     && gunzip govc_linux_amd64.gz \
