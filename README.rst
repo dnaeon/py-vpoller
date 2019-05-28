@@ -1,3 +1,9 @@
+Project status
+==============
+
+I no longer have enough spare time to manage this project, so if you are interested in it, 
+please consider becoming a maintainer.
+
 vPoller - Distributed VMware vSphere API Proxy
 ==============================================
 
