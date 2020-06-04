@@ -99,12 +99,12 @@ class VPollerWorkerManager(object):
             'db': '/var/lib/vconnector/vconnector.db',
             'mgmt': 'tcp://*:10000',
             'proxy': 'tcp://localhost:10123',
-            'helpers': None,
-            'tasks': None,
-            'cache_maxsize': 0,
-            'cache_enabled': False,
-            'cache_ttl': 3600,
-            'cache_housekeeping': 480,
+            'helpers': 'None',
+            'tasks': 'None',
+            'cache_maxsize': '0',
+            'cache_enabled': 'False',
+            'cache_ttl': '3600',
+            'cache_housekeeping': '480',
         }
 
     def start(self):
