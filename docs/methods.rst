@@ -52,6 +52,8 @@ with description for each of them.
 +--------------------------------------+-------------------------------------------------------------------------------+
 | resource.pool.get                    | Get properties of a vim.ResourcePool managed object                           |
 +--------------------------------------+-------------------------------------------------------------------------------+
+| resource.pool.vm.get                 | Get properties of Virtual Machines from a given ResourcePool                  |
++--------------------------------------+-------------------------------------------------------------------------------+
 | host.discover                        | Discover all vim.HostSystem managed objects                                   |
 +--------------------------------------+-------------------------------------------------------------------------------+
 | host.get                             | Get properties of a vim.HostSystem managed object                             |
