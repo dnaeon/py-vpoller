@@ -96,6 +96,7 @@ class HelperAgent(object):
             'vsan.health.get': self.zabbix_item_value,
             'vm.guest.net.get': self.zabbix_vm_guest_net_discover,
             'resource.pool.get': self.zabbix_item_value,
+            'resource.pool.vm.get': self.zabbix_lld_data,
         }
 
     def run(self):

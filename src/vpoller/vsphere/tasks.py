@@ -1336,6 +1336,72 @@ def resource_pool_get(agent, msg):
         obj_property_value=msg['name']
     )
 
+@task(name='resource.pool.vm.get', required=['name'])
+def resource_pool_vm_get(agent, msg):
+    """
+    Get properties for vim.VirtualMachine objects from a ResourcePool
+
+    Example client message would be:
+
+        {
+            "method":     "resource.pool.vm.get",
+            "hostname":   "vc01.example.org",
+            "name":       "MyResourcePool",
+            "properties": [
+                "name",
+                "runtime.powerState",
+                "runtime.overallStatus"
+            ]
+        }
+
+    Returns:
+        The managed object properties in JSON format
+
+    """
+    resource_pool_name = msg['name']
+    properties = ['name']
+    if 'properties' in msg and msg['properties']:
+        properties.extend(msg['properties'])
+
+    logger.debug(
+        '[%s] Getting VirtualMachine list from %s ResourcePool',
+        agent.host,
+        resource_pool_name,
+    )
+
+    # Find the ResourcePool managed object and get the 'vm' property
+    data = _get_object_properties(
+        agent=agent,
+        properties=['vm'],
+        obj_type=pyVmomi.vim.ResourcePool,
+        obj_property_name='name',
+        obj_property_value=resource_pool_name,
+    )
+
+    if data['success'] != 0:
+        return data
+
+    props = data['result'][0]
+    vms = props['vm']
+
+    # Create a list view for the VirtualMachine managed objects
+    view_ref = agent.get_list_view(obj=vms)
+    result = agent.collect_properties(
+        view_ref=view_ref,
+        obj_type=pyVmomi.vim.VirtualMachine,
+        path_set=properties,
+    )
+
+    view_ref.DestroyView()
+
+    r = {
+        'success': 0,
+        'msg': 'Successfully discovered objects',
+        'result': result,
+    }
+
+    return r
+
 @task(name='host.discover')
 def host_discover(agent, msg):
     """
