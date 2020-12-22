@@ -1394,6 +1394,10 @@ def resource_pool_vm_get(agent, msg):
 
     view_ref.DestroyView()
 
+    # Add the pool name to the properties
+    for item in result:
+        item['resourcePool.name'] = resource_pool_name
+
     r = {
         'success': 0,
         'msg': 'Successfully discovered objects',
