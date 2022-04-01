@@ -114,7 +114,11 @@ zbx_module_load_config(void)
     { NULL },
   };
   
-  parse_cfg_file(MODULE_CONFIG_FILE, cfg, ZBX_CFG_FILE_OPTIONAL, ZBX_CFG_STRICT);
+  /*
+   * A new paramter was added in zabbix 6.0 to reread the zabbix agent configuration without restarting it.
+   * see ZBXNEXT-6936
+   */
+  parse_cfg_file(MODULE_CONFIG_FILE, cfg, ZBX_CFG_FILE_OPTIONAL, ZBX_CFG_STRICT, ZBX_CFG_NO_EXIT_FAILURE);
 }
 
 /*
