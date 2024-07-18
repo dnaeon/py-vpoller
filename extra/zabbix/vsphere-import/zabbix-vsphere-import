@@ -835,7 +835,7 @@ Options:
 
     try:
         with open(args['--file'], 'r') as f:
-            options = yaml.load(f)
+            options = yaml.safe_load(f)
     except IOError as e:
         logging.warning(
             'Cannot load configuration file %s: %s',

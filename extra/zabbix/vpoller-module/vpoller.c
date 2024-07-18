@@ -36,7 +36,7 @@
 #include "zbxlog.h"
 #include "zbxstr.h"
 
-#define VPOLLER_MODULE_VERSION "0.5.7"
+#define VPOLLER_MODULE_VERSION "0.6.0"
 #define MODULE_CONFIG_FILE "/etc/zabbix/vpoller_module.conf"
 
 #define VPOLLER_TASK_TEMPLATE "{ \
