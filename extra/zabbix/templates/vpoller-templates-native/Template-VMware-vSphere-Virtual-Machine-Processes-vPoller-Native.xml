@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>2.0</version>
-    <date>2015-02-16T13:55:59Z</date>
+    <version>6.0</version>
+    <date>2024-07-18T02:09:29Z</date>
     <groups>
         <group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
             <name>Templates</name>
         </group>
     </groups>
     <templates>
         <template>
+            <uuid>e3488cf1f4a64b28924f38d8cdbb1a67</uuid>
             <template>Template VMware Virtual Machine Processes - vPoller Native</template>
             <name>Template VMware Virtual Machine Processes - vPoller Native</name>
             <groups>
@@ -16,125 +18,54 @@
                     <name>Templates</name>
                 </group>
             </groups>
-            <applications>
-                <application>
-                    <name>Processes</name>
-                </application>
-            </applications>
             <items>
                 <item>
-                    <name>Number of Apache processes</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;/usr/sbin/apache2&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Processes</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
+                    <uuid>13e5f383f60f43cbb3c78d55d0910931</uuid>
                     <name>Total number of processes</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;]</key>
                     <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Processes</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Processes</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>2449e6677e234ead94ba427cd7cdab09</uuid>
+                            <expression>last(/Template VMware Virtual Machine Processes - vPoller Native/vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;])&gt;100</expression>
+                            <name>Too many processes on {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>f25040d2d905475d8a80eae9bd2ac452</uuid>
+                    <name>Number of Apache processes</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;/usr/sbin/apache2&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Processes</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>6779c8874bc84e8d8b6724be1ffab6cb</uuid>
+                            <expression>last(/Template VMware Virtual Machine Processes - vPoller Native/vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;/usr/sbin/apache2&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;])=0</expression>
+                            <name>Apache is not running on {HOST.NAME}</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
                 </item>
             </items>
-            <discovery_rules/>
-            <macros/>
-            <templates/>
-            <screens/>
         </template>
     </templates>
-    <triggers>
-        <trigger>
-            <expression>{Template VMware Virtual Machine Processes - vPoller Native:vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;/usr/sbin/apache2&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;].last()}=0</expression>
-            <name>Apache is not running on {HOST.NAME}</name>
-            <url/>
-            <status>0</status>
-            <priority>4</priority>
-            <description/>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-        <trigger>
-            <expression>{Template VMware Virtual Machine Processes - vPoller Native:vpoller[&quot;vm.process.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cmdLine&quot;, &quot;&quot;, &quot;root&quot;, &quot;p4ssw0rd&quot;].last()}&gt;100</expression>
-            <name>Too many processes on {HOST.NAME}</name>
-            <url/>
-            <status>0</status>
-            <priority>2</priority>
-            <description/>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-    </triggers>
 </zabbix_export>
