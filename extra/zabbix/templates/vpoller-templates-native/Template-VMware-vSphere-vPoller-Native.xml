@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>2.0</version>
-    <date>2015-02-17T12:58:52Z</date>
+    <version>6.0</version>
+    <date>2024-07-18T02:11:50Z</date>
     <groups>
         <group>
+            <uuid>2f7cf7b412bc485facd6b703400abbeb</uuid>
             <name>Datacenters</name>
         </group>
         <group>
+            <uuid>eff845e03ea74765a5646b3de0aa3188</uuid>
             <name>Datastores</name>
         </group>
         <group>
+            <uuid>1b837a3c078647049a0c00c61b4d57b5</uuid>
             <name>Hypervisors</name>
         </group>
         <group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
             <name>Templates</name>
         </group>
         <group>
+            <uuid>137f19e6e2dc4219b33553b812627bc2</uuid>
             <name>Virtual machines</name>
         </group>
     </groups>
     <templates>
         <template>
+            <uuid>6d57a408fa7743339ec1e0aefa38a296</uuid>
             <template>Template VMware vSphere - vPoller Native</template>
             <name>Template VMware vSphere - vPoller Native</name>
             <groups>
@@ -28,558 +34,236 @@
                     <name>Templates</name>
                 </group>
             </groups>
-            <applications>
-                <application>
-                    <name>Clusters</name>
-                </application>
-                <application>
-                    <name>Datacenters</name>
-                </application>
-                <application>
-                    <name>Datastores</name>
-                </application>
-                <application>
-                    <name>Events</name>
-                </application>
-                <application>
-                    <name>General</name>
-                </application>
-                <application>
-                    <name>Sessions</name>
-                </application>
-            </applications>
             <items>
                 <item>
+                    <uuid>f27a1de5539f4f6e98de858e43daad9c</uuid>
                     <name>Host Availability</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>icmpping[{HOST.NAME},3,,,]</key>
                     <delay>60</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>10e1580fde6b465295fc5f34313a2a0d</uuid>
+                            <expression>min(/Template VMware vSphere - vPoller Native/icmpping[{HOST.NAME},3,,,],5s)&lt;&gt;1</expression>
+                            <name>vSphere host {HOST.NAME} is unreachable for 5 minutes</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
                 </item>
                 <item>
+                    <uuid>59d8287a769a461593a9e07bb8f8660a</uuid>
                     <name>VMware vSphere API Version</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;apiVersion&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>4</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>TEXT</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
-                    <name>VMware vSphere Events</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;event.latest&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;event&quot;, &quot;null&quot;]</key>
-                    <delay>60</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>2</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Events</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
+                    <uuid>faedbd5f07d64721bf9c406a0dc25a74</uuid>
                     <name>VMware vSphere FullName</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;fullName&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>06d942ce754f4edfbeb6a75edb862d1d</uuid>
                     <name>VMware vSphere Name</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>1398a8feaf0846bea0a1da24435a059f</uuid>
                     <name>VMware vSphere OS Type</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;osType&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>57413985868c4519ab286059eb78d6bc</uuid>
                     <name>VMware vSphere Vendor</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;vendor&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>9ba2253f675a49ff8d90fd2dcb92952b</uuid>
                     <name>VMware vSphere Version</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;about&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;version&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>cabfa597001c4f4da859896734d58ca6</uuid>
+                    <name>VMware vSphere Events</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;event.latest&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;event&quot;, &quot;null&quot;]</key>
+                    <delay>60</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Events</value>
+                        </tag>
+                    </tags>
                 </item>
             </items>
             <discovery_rules>
                 <discovery_rule>
+                    <uuid>763271c0fb454493af871d3f671cd373</uuid>
                     <name>Discover VMware Clusters</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;cluster.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>1</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>:</filter>
-                    <lifetime>7</lifetime>
+                    <status>DISABLED</status>
+                    <lifetime>7d</lifetime>
                     <description>Discovery of clusters</description>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>0f1642d2cf564afeade5f65bd43892d6</uuid>
                             <name>Status of &quot;{#VSPHERE.CLUSTER.NAME}&quot; cluster</name>
-                            <type>3</type>
-                            <snmp_community/>
-                            <multiplier>0</multiplier>
-                            <snmp_oid/>
+                            <type>SIMPLE</type>
                             <key>vpoller[&quot;cluster.get&quot;, &quot;{HOST.HOST}&quot;, &quot;{#VSPHERE.CLUSTER.NAME}&quot;, &quot;overallStatus&quot;, &quot;null&quot;]</key>
                             <delay>300</delay>
-                            <history>7</history>
-                            <trends>365</trends>
-                            <status>0</status>
-                            <value_type>1</value_type>
-                            <allowed_hosts/>
-                            <units/>
-                            <delta>0</delta>
-                            <snmpv3_contextname/>
-                            <snmpv3_securityname/>
-                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                            <snmpv3_authpassphrase/>
-                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                            <snmpv3_privpassphrase/>
-                            <formula>1</formula>
-                            <delay_flex/>
-                            <params/>
-                            <ipmi_sensor/>
-                            <data_type>0</data_type>
-                            <authtype>0</authtype>
-                            <username/>
-                            <password/>
-                            <publickey/>
-                            <privatekey/>
-                            <port/>
-                            <description/>
-                            <inventory_link>0</inventory_link>
-                            <applications>
-                                <application>
-                                    <name>Clusters</name>
-                                </application>
-                            </applications>
-                            <valuemap/>
-                            <logtimefmt/>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Clusters</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>ea40e06d7096485d9cbe3c87a71f6b05</uuid>
+                                    <expression>find(/Template VMware vSphere - vPoller Native/vpoller[&quot;cluster.get&quot;, &quot;{HOST.HOST}&quot;, &quot;{#VSPHERE.CLUSTER.NAME}&quot;, &quot;overallStatus&quot;, &quot;null&quot;],5s,&quot;iregexp&quot;,&quot;red&quot;)=1</expression>
+                                    <name>Overall status of &quot;{#VSPHERE.CLUSTER.NAME}&quot; cluster is {ITEM.LASTVALUE}</name>
+                                    <priority>HIGH</priority>
+                                    <description>Overall status of &quot;{#VSPHERE.CLUSTER.NAME}&quot; cluster is {ITEM.LASTVALUE}
+
+Cluster name: {#VSPHERE.CLUSTER.NAME}
+vSphere host: {$VSPHERE.HOST}</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                     </item_prototypes>
-                    <trigger_prototypes>
-                        <trigger_prototype>
-                            <expression>{Template VMware vSphere - vPoller Native:vpoller[&quot;cluster.get&quot;, &quot;{HOST.HOST}&quot;, &quot;{#VSPHERE.CLUSTER.NAME}&quot;, &quot;overallStatus&quot;, &quot;null&quot;].iregexp(red,5)}=1</expression>
-                            <name>Overall status of &quot;{#VSPHERE.CLUSTER.NAME}&quot; cluster is {ITEM.LASTVALUE}</name>
-                            <url/>
-                            <status>0</status>
-                            <priority>4</priority>
-                            <description>Overall status of &quot;{#VSPHERE.CLUSTER.NAME}&quot; cluster is {ITEM.LASTVALUE}&#13;
-&#13;
-Cluster name: {#VSPHERE.CLUSTER.NAME}&#13;
-vSphere host: {$VSPHERE.HOST}</description>
-                            <type>0</type>
-                        </trigger_prototype>
-                    </trigger_prototypes>
-                    <graph_prototypes/>
-                    <host_prototypes/>
                 </discovery_rule>
                 <discovery_rule>
+                    <uuid>422ccdcf5989462aa22119bfbcbc85ea</uuid>
                     <name>Discover VMware Datacenters</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;datacenter.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>1</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>:</filter>
-                    <lifetime>7</lifetime>
+                    <status>DISABLED</status>
+                    <lifetime>7d</lifetime>
                     <description>Discovery of datacenters</description>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>41efd78bcccf41b59d6b91cceb94db82</uuid>
                             <name>Status of &quot;{#VSPHERE.DATACENTER.NAME}&quot; datacenter</name>
-                            <type>3</type>
-                            <snmp_community/>
-                            <multiplier>0</multiplier>
-                            <snmp_oid/>
+                            <type>SIMPLE</type>
                             <key>vpoller[&quot;datacenter.get&quot;, &quot;{HOST.HOST}&quot;, &quot;{#VSPHERE.DATACENTER.NAME}&quot;, &quot;overallStatus&quot;, &quot;null&quot;]</key>
                             <delay>300</delay>
-                            <history>7</history>
-                            <trends>365</trends>
-                            <status>0</status>
-                            <value_type>1</value_type>
-                            <allowed_hosts/>
-                            <units/>
-                            <delta>0</delta>
-                            <snmpv3_contextname/>
-                            <snmpv3_securityname/>
-                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                            <snmpv3_authpassphrase/>
-                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                            <snmpv3_privpassphrase/>
-                            <formula>1</formula>
-                            <delay_flex/>
-                            <params/>
-                            <ipmi_sensor/>
-                            <data_type>0</data_type>
-                            <authtype>0</authtype>
-                            <username/>
-                            <password/>
-                            <publickey/>
-                            <privatekey/>
-                            <port/>
-                            <description/>
-                            <inventory_link>0</inventory_link>
-                            <applications>
-                                <application>
-                                    <name>General</name>
-                                </application>
-                            </applications>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
                             <valuemap>
                                 <name>VMware status</name>
                             </valuemap>
-                            <logtimefmt/>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>General</value>
+                                </tag>
+                            </tags>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <uuid>827e5515d38746af92f57d2b1747d0a5</uuid>
+                                    <expression>find(/Template VMware vSphere - vPoller Native/vpoller[&quot;datacenter.get&quot;, &quot;{HOST.HOST}&quot;, &quot;{#VSPHERE.DATACENTER.NAME}&quot;, &quot;overallStatus&quot;, &quot;null&quot;],5s,&quot;iregexp&quot;,&quot;red&quot;)=1</expression>
+                                    <name>Overall Status of &quot;{#VSPHERE.DATACENTER.NAME}&quot; is {ITEM.LASTVALUE}</name>
+                                    <priority>HIGH</priority>
+                                    <description>Overall status of &quot;{#VSPHERE.DATACENTER.NAME}&quot; datacenter is {ITEM.LASTVALUE}
+
+Datacenter name: {#VSPHERE.DATACENTER.NAME}
+vSphere host: {$VSPHERE.HOST}</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
                         </item_prototype>
                     </item_prototypes>
-                    <trigger_prototypes>
-                        <trigger_prototype>
-                            <expression>{Template VMware vSphere - vPoller Native:vpoller[&quot;datacenter.get&quot;, &quot;{HOST.HOST}&quot;, &quot;{#VSPHERE.DATACENTER.NAME}&quot;, &quot;overallStatus&quot;, &quot;null&quot;].iregexp(red,5)}=1</expression>
-                            <name>Overall Status of &quot;{#VSPHERE.DATACENTER.NAME}&quot; is {ITEM.LASTVALUE}</name>
-                            <url/>
-                            <status>0</status>
-                            <priority>4</priority>
-                            <description>Overall status of &quot;{#VSPHERE.DATACENTER.NAME}&quot; datacenter is {ITEM.LASTVALUE}&#13;
-&#13;
-Datacenter name: {#VSPHERE.DATACENTER.NAME}&#13;
-vSphere host: {$VSPHERE.HOST}</description>
-                            <type>0</type>
-                        </trigger_prototype>
-                    </trigger_prototypes>
-                    <graph_prototypes/>
                     <host_prototypes>
                         <host_prototype>
+                            <uuid>0d5eb46f9dcf4810897b6403084c382d</uuid>
                             <host>{#VSPHERE.DATACENTER.NAME}</host>
                             <name>{#VSPHERE.DATACENTER.NAME}</name>
-                            <status>0</status>
                             <group_links>
                                 <group_link>
                                     <group>
@@ -587,7 +271,6 @@ vSphere host: {$VSPHERE.HOST}</description>
                                     </group>
                                 </group_link>
                             </group_links>
-                            <group_prototypes/>
                             <templates>
                                 <template>
                                     <name>Template VMware vSphere Datacenter - vPoller Native</name>
@@ -597,41 +280,19 @@ vSphere host: {$VSPHERE.HOST}</description>
                     </host_prototypes>
                 </discovery_rule>
                 <discovery_rule>
+                    <uuid>56417313230847fe989d69fc9288e95b</uuid>
                     <name>Discover VMware Datastores</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;datastore.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;info.url&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>1</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>:</filter>
-                    <lifetime>7</lifetime>
+                    <status>DISABLED</status>
+                    <lifetime>7d</lifetime>
                     <description>Discovery of VMware Datastores</description>
-                    <item_prototypes/>
-                    <trigger_prototypes/>
-                    <graph_prototypes/>
                     <host_prototypes>
                         <host_prototype>
+                            <uuid>17d1b713f7fe4fea8c3833ae810627e2</uuid>
                             <host>{#VSPHERE.DATASTORE.NAME}</host>
                             <name>{#VSPHERE.DATASTORE.INFO.URL}</name>
-                            <status>0</status>
                             <group_links>
                                 <group_link>
                                     <group>
@@ -639,7 +300,6 @@ vSphere host: {$VSPHERE.HOST}</description>
                                     </group>
                                 </group_link>
                             </group_links>
-                            <group_prototypes/>
                             <templates>
                                 <template>
                                     <name>Template VMware vSphere Datastore - vPoller Native</name>
@@ -649,41 +309,19 @@ vSphere host: {$VSPHERE.HOST}</description>
                     </host_prototypes>
                 </discovery_rule>
                 <discovery_rule>
+                    <uuid>1b0597dec3c94d9a8c75e7a4cbade0cf</uuid>
                     <name>Discover VMware Hypervisors</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;host.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>1</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>:</filter>
-                    <lifetime>7</lifetime>
+                    <status>DISABLED</status>
+                    <lifetime>7d</lifetime>
                     <description>Discovery of hypervisors</description>
-                    <item_prototypes/>
-                    <trigger_prototypes/>
-                    <graph_prototypes/>
                     <host_prototypes>
                         <host_prototype>
+                            <uuid>ba35780911fc46dcb15d1ccbe61a61a0</uuid>
                             <host>{#VSPHERE.HOST.NAME}</host>
                             <name>{#VSPHERE.HOST.NAME}</name>
-                            <status>0</status>
                             <group_links>
                                 <group_link>
                                     <group>
@@ -691,7 +329,6 @@ vSphere host: {$VSPHERE.HOST}</description>
                                     </group>
                                 </group_link>
                             </group_links>
-                            <group_prototypes/>
                             <templates>
                                 <template>
                                     <name>Template VMware vSphere Hypervisor - vPoller Native</name>
@@ -701,41 +338,47 @@ vSphere host: {$VSPHERE.HOST}</description>
                     </host_prototypes>
                 </discovery_rule>
                 <discovery_rule>
+                    <uuid>20b1d66661814d9aa7d149d5b6927aa6</uuid>
+                    <name>Discover vSphere Sessions</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;session.get&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;null&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <status>DISABLED</status>
+                    <lifetime>0</lifetime>
+                    <description>Discover established vSphere sessions</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>6831f0d932654e94aadb4226054144db</uuid>
+                            <name>{#VSPHERE.SESSION.USERNAME}@{#VSPHERE.SESSION.IPADDRESS} logged in at {#VSPHERE.SESSION.LOGINTIME} [call-count: {#VSPHERE.SESSION.CALLCOUNT}] [user-agent: {#VSPHERE.SESSION.USERAGENT}]</name>
+                            <type>SIMPLE</type>
+                            <key>vpoller.echo[{#VSPHERE.SESSION.KEY}]</key>
+                            <delay>300</delay>
+                            <history>1d</history>
+                            <trends>0</trends>
+                            <value_type>TEXT</value_type>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Sessions</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <uuid>bfeefe0d528947898cefb854b67589a0</uuid>
                     <name>Discover VMware Virtual Machines</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;vm.discover&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>1</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>:</filter>
-                    <lifetime>7</lifetime>
+                    <status>DISABLED</status>
+                    <lifetime>7d</lifetime>
                     <description>Discovery of VMware Virtual Machines</description>
-                    <item_prototypes/>
-                    <trigger_prototypes/>
-                    <graph_prototypes/>
                     <host_prototypes>
                         <host_prototype>
+                            <uuid>bba9ca7d4c074bc896a1a376ad1a7f04</uuid>
                             <host>{#VSPHERE.VM.NAME}</host>
                             <name>{#VSPHERE.VM.NAME}</name>
-                            <status>0</status>
                             <group_links>
                                 <group_link>
                                     <group>
@@ -743,7 +386,6 @@ vSphere host: {$VSPHERE.HOST}</description>
                                     </group>
                                 </group_link>
                             </group_links>
-                            <group_prototypes/>
                             <templates>
                                 <template>
                                     <name>Template VMware vSphere Virtual Machine - vPoller Native</name>
@@ -752,99 +394,31 @@ vSphere host: {$VSPHERE.HOST}</description>
                         </host_prototype>
                     </host_prototypes>
                 </discovery_rule>
-                <discovery_rule>
-                    <name>Discover vSphere Sessions</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;session.get&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;null&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <status>1</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>:</filter>
-                    <lifetime>0</lifetime>
-                    <description>Discover established vSphere sessions</description>
-                    <item_prototypes>
-                        <item_prototype>
-                            <name>{#VSPHERE.SESSION.USERNAME}@{#VSPHERE.SESSION.IPADDRESS} logged in at {#VSPHERE.SESSION.LOGINTIME} [call-count: {#VSPHERE.SESSION.CALLCOUNT}] [user-agent: {#VSPHERE.SESSION.USERAGENT}]</name>
-                            <type>3</type>
-                            <snmp_community/>
-                            <multiplier>0</multiplier>
-                            <snmp_oid/>
-                            <key>vpoller.echo[{#VSPHERE.SESSION.KEY}]</key>
-                            <delay>300</delay>
-                            <history>1</history>
-                            <trends>365</trends>
-                            <status>0</status>
-                            <value_type>4</value_type>
-                            <allowed_hosts/>
-                            <units/>
-                            <delta>0</delta>
-                            <snmpv3_contextname/>
-                            <snmpv3_securityname/>
-                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                            <snmpv3_authpassphrase/>
-                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                            <snmpv3_privpassphrase/>
-                            <formula>1</formula>
-                            <delay_flex/>
-                            <params/>
-                            <ipmi_sensor/>
-                            <data_type>0</data_type>
-                            <authtype>0</authtype>
-                            <username/>
-                            <password/>
-                            <publickey/>
-                            <privatekey/>
-                            <port/>
-                            <description/>
-                            <inventory_link>0</inventory_link>
-                            <applications>
-                                <application>
-                                    <name>Sessions</name>
-                                </application>
-                            </applications>
-                            <valuemap/>
-                            <logtimefmt/>
-                        </item_prototype>
-                    </item_prototypes>
-                    <trigger_prototypes/>
-                    <graph_prototypes/>
-                    <host_prototypes/>
-                </discovery_rule>
             </discovery_rules>
-            <macros/>
-            <templates/>
-            <screens/>
+            <valuemaps>
+                <valuemap>
+                    <uuid>b02b7ab1c14d4eaeadb4ad57dd07bdfa</uuid>
+                    <name>VMware status</name>
+                    <mappings>
+                        <mapping>
+                            <value>0</value>
+                            <newvalue>gray</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>1</value>
+                            <newvalue>green</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>2</value>
+                            <newvalue>yellow</newvalue>
+                        </mapping>
+                        <mapping>
+                            <value>3</value>
+                            <newvalue>red</newvalue>
+                        </mapping>
+                    </mappings>
+                </valuemap>
+            </valuemaps>
         </template>
     </templates>
-    <triggers>
-        <trigger>
-            <expression>{Template VMware vSphere - vPoller Native:icmpping[{HOST.NAME},3,,,].min(5)}#1</expression>
-            <name>vSphere host {HOST.NAME} is unreachable for 5 minutes</name>
-            <url/>
-            <status>0</status>
-            <priority>4</priority>
-            <description/>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-    </triggers>
 </zabbix_export>

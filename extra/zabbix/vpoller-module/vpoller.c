@@ -30,10 +30,11 @@
 #include <zmq.h>
 
 #include "threads.h"
-#include "cfg.h"
-#include "sysinc.h"
+#include "zbxcfg.h"
+#include "zbxsysinc.h"
 #include "module.h"
-#include "log.h"
+#include "zbxlog.h"
+#include "zbxstr.h"
 
 #define VPOLLER_MODULE_VERSION "0.5.7"
 #define MODULE_CONFIG_FILE "/etc/zabbix/vpoller_module.conf"
@@ -103,14 +104,14 @@ zbx_module_load_config(void)
 	      MODULE_CONFIG_FILE);
 
   /*
-   * The cfg_line entries below are in the following format/order:
+   * The zbx_cfg_line_t entries below are in the following format/order:
    *
    * PARAMETER, VAR, TYPE, MANDATORY, MIN, MAX
    */
-  static struct cfg_line cfg[] = {
-    { "vPollerTimeout", &CONFIG_VPOLLER_TIMEOUT, TYPE_INT, PARM_OPT, 1000, 60000 },
-    { "vPollerRetries", &CONFIG_VPOLLER_RETRIES, TYPE_INT, PARM_OPT, 1, 100 },
-    { "vPollerProxy", &CONFIG_VPOLLER_PROXY, TYPE_STRING, PARM_OPT, 0, 0 },
+  static zbx_cfg_line_t cfg[] = {
+    { "vPollerTimeout", &CONFIG_VPOLLER_TIMEOUT, ZBX_CFG_TYPE_INT, ZBX_CONF_PARM_OPT, 1000, 60000 },
+    { "vPollerRetries", &CONFIG_VPOLLER_RETRIES, ZBX_CFG_TYPE_INT, ZBX_CONF_PARM_OPT, 1, 100 },
+    { "vPollerProxy", &CONFIG_VPOLLER_PROXY, ZBX_CFG_TYPE_STRING, ZBX_CONF_PARM_OPT, 0, 0 },
     { NULL },
   };
   
@@ -118,7 +119,7 @@ zbx_module_load_config(void)
    * A new paramter was added in zabbix 6.0 to reread the zabbix agent configuration without restarting it.
    * see ZBXNEXT-6936
    */
-  parse_cfg_file(MODULE_CONFIG_FILE, cfg, ZBX_CFG_FILE_OPTIONAL, ZBX_CFG_STRICT, ZBX_CFG_NO_EXIT_FAILURE);
+  zbx_parse_cfg_file(MODULE_CONFIG_FILE, cfg, ZBX_CFG_FILE_OPTIONAL, ZBX_CFG_STRICT, ZBX_CFG_NO_EXIT_FAILURE);
 }
 
 /*
@@ -143,13 +144,13 @@ zbx_module_set_defaults(void)
  *     Returns version number of the module interface
  *
  * Return value: 
- *     ZBX_MODULE_API_VERSION_ONE - the only version supported by
+ *     ZBX_MODULE_API_VERSION - the only version supported by
  *     Zabbix currently.
  */
 int
 zbx_module_api_version(void)
 {
-  return (ZBX_MODULE_API_VERSION_ONE);
+  return (ZBX_MODULE_API_VERSION);
 }
 
 /*
@@ -178,8 +179,7 @@ zbx_module_item_timeout(int timeout)
  * Return value: 
  *    List of item keys
  */
-ZBX_METRIC *
-zbx_module_item_list(void)
+ZBX_METRIC *zbx_module_item_list(void)
 {
   return (keys);
 }

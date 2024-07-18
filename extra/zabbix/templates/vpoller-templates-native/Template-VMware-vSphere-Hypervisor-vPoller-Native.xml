@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
-    <version>2.0</version>
-    <date>2015-05-11T12:49:12Z</date>
+    <version>6.0</version>
+    <date>2024-07-18T02:13:18Z</date>
     <groups>
         <group>
+            <uuid>7df96b18c230490a9a0a9e2307226338</uuid>
             <name>Templates</name>
         </group>
     </groups>
     <templates>
         <template>
+            <uuid>9efc476995c04f1d8fbedab6d3ce0166</uuid>
             <template>Template VMware vSphere Hypervisor - vPoller Native</template>
             <name>Template VMware vSphere Hypervisor - vPoller Native</name>
             <groups>
@@ -16,1815 +18,843 @@
                     <name>Templates</name>
                 </group>
             </groups>
-            <applications>
-                <application>
-                    <name>CPU</name>
-                </application>
-                <application>
-                    <name>Datastores</name>
-                </application>
-                <application>
-                    <name>General</name>
-                </application>
-                <application>
-                    <name>Hardware</name>
-                </application>
-                <application>
-                    <name>Memory</name>
-                </application>
-                <application>
-                    <name>Network</name>
-                </application>
-                <application>
-                    <name>Performance</name>
-                </application>
-                <application>
-                    <name>Virtual Machines</name>
-                </application>
-            </applications>
             <items>
                 <item>
-                    <name>Bios UUID</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.uuid&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Bios version</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.biosInfo.biosVersion&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
+                    <uuid>6222908d13904da39cdd9b636b60f2f3</uuid>
                     <name>Cluster Name</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;host.cluster.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;cluster&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
-                    <name>CPU Cores</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuCores&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>CPU Frequency</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.hz&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>Hz</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>CPU Packages</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuPackages&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>CPU Power Management Policy</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuPowerManagementInfo.currentPolicy&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>CPU Power Management Support</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuPowerManagementInfo.hardwareSupport&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>CPU Threads</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuThreads&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>CPU Utilization (Percentage)</name>
-                    <type>15</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params>(last(&quot;vpoller[\&quot;host.get\&quot;, \&quot;{$VSPHERE.HOST}\&quot;, \&quot;{HOST.HOST}\&quot;, \&quot;summary.quickStats.overallCpuUsage\&quot;, \&quot;null\&quot;]&quot;) / (last(&quot;vpoller[\&quot;host.get\&quot;, \&quot;{$VSPHERE.HOST}\&quot;, \&quot;{HOST.HOST}\&quot;, \&quot;hardware.cpuInfo.numCpuCores\&quot;, \&quot;null\&quot;]&quot;) * last(&quot;vpoller[\&quot;host.get\&quot;, \&quot;{$VSPHERE.HOST}\&quot;, \&quot;{HOST.HOST}\&quot;, \&quot;hardware.cpuInfo.hz\&quot;, \&quot;null\&quot;]&quot;))) * 100</params>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Data receive rate</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>1</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>Bps</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1024</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Network</name>
-                        </application>
-                        <application>
-                            <name>Performance</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Data transmit rate</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>1</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.transmitted.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>Bps</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1024</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Network</name>
-                        </application>
-                        <application>
-                            <name>Performance</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Distributed CPU fairness</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.distributedCpuFairness&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>Hz</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Distributed memory fairness</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.distributedMemoryFairness&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                        <application>
-                            <name>Memory</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>In Maintenance Mode</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.inMaintenanceMode&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Memory Size</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.memorySize&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                        <application>
-                            <name>Memory</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Memory Usage (Percentage)</name>
-                    <type>15</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsagePercentage&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>1</status>
-                    <value_type>0</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params>last(&quot;vpoller[\&quot;host.get\&quot;, \&quot;{$VSPHERE.HOST}\&quot;, \&quot;{HOST.HOST}\&quot;, \&quot;summary.quickStats.overallMemoryUsage\&quot;, \&quot;null\&quot;]&quot;) / last(&quot;vpoller[\&quot;host.get\&quot;, \&quot;{$VSPHERE.HOST}\&quot;, \&quot;{HOST.HOST}\&quot;, \&quot;hardware.memorySize\&quot;, \&quot;null\&quot;]&quot;) * 100</params>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Memory</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Model</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.model&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Overall CPU Usage</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>1</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsage&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>Hz</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1048576</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>CPU</name>
-                        </application>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Overall Memory Usage</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>1</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsage&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>B</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1048576</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                        <application>
-                            <name>Memory</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Overall Status</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.overallStatus&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Power state</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.powerState&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Reboot Required</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.rebootRequired&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Uptime</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.uptime&quot;, &quot;null&quot;]</key>
-                    <delay>300</delay>
-                    <history>7</history>
-                    <trends>30</trends>
-                    <status>0</status>
-                    <value_type>3</value_type>
-                    <allowed_hosts/>
-                    <units>uptime</units>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
-                    <name>Vendor</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.vendor&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>Hardware</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
-                </item>
-                <item>
+                    <uuid>c00fddfbde0f459182b2e8968bee57af</uuid>
                     <name>VMware vSphere API Version</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.apiVersion&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>1946e08970f24253b31301b530143855</uuid>
                     <name>VMware vSphere FullName</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.fullName&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>0</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>142891b73b5a4a8b9b48425c2a71e6ad</uuid>
                     <name>VMware vSphere Name</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.name&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>bc79541e07c94678a4f731d2e3934969</uuid>
                     <name>VMware vSphere Vendor</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.vendor&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
                 </item>
                 <item>
+                    <uuid>9ba82d4b13744214879c4245fb103be7</uuid>
                     <name>VMware vSphere Version</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <multiplier>0</multiplier>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;config.product.version&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <history>7</history>
-                    <trends>365</trends>
-                    <status>1</status>
-                    <value_type>1</value_type>
-                    <allowed_hosts/>
-                    <units/>
-                    <delta>0</delta>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <formula>1</formula>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <data_type>0</data_type>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <description/>
-                    <inventory_link>0</inventory_link>
-                    <applications>
-                        <application>
-                            <name>General</name>
-                        </application>
-                    </applications>
-                    <valuemap/>
-                    <logtimefmt/>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>03e2f3330c2a44a9988bb7ed3424666b</uuid>
+                    <name>Bios version</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.biosInfo.biosVersion&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>b8dc0ac158c644a393def21dfa875a7f</uuid>
+                    <name>CPU Frequency</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.hz&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <units>Hz</units>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>7110ad7d8d864808869ff1b377bfc733</uuid>
+                    <name>CPU Cores</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuCores&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>9caeb9e9005544b887deea0676371f29</uuid>
+                    <name>CPU Packages</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuPackages&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>b901edd1bbd34ef9a7672dea6e66c233</uuid>
+                    <name>CPU Threads</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuThreads&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>d4e21ddebd1b46e9932a0b19133259c6</uuid>
+                    <name>CPU Power Management Policy</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuPowerManagementInfo.currentPolicy&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>da3bc0d09c68465c9d014b957b79217e</uuid>
+                    <name>CPU Power Management Support</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuPowerManagementInfo.hardwareSupport&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>fb760b1cdf9f4a67aa5de9a57fabf0d2</uuid>
+                    <name>Memory Size</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.memorySize&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <units>B</units>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Memory</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>e0ebf7b9a4a14fe39a266b3ca7bcc87a</uuid>
+                    <name>Model</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.model&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>e10288d6fb2b42fbb602fa380ac36271</uuid>
+                    <name>Bios UUID</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.uuid&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>75357cb3077f4382bd74ce4662c891c6</uuid>
+                    <name>Vendor</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.systemInfo.vendor&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>7f0edce1437c4c8488d0c404af29c659</uuid>
+                    <name>In Maintenance Mode</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.inMaintenanceMode&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>66a5d60e5dac4df4b05f5b16591d7fdc</uuid>
+                            <expression>find(/Template VMware vSphere Hypervisor - vPoller Native/vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.inMaintenanceMode&quot;, &quot;null&quot;],5s,&quot;iregexp&quot;,&quot;true&quot;)=1</expression>
+                            <name>Host {HOST.NAME} is in maintenance mode</name>
+                            <priority>INFO</priority>
+                            <description>Host {HOST.NAME} is in maintenance mode
+
+Host: {HOST.NAME}
+vSphere Host: {$VSPHERE.HOST}</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>47344293b0af4de0bd88500167613f3c</uuid>
+                    <name>Power state</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.powerState&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>e3d6c37282364a4a8819f30f036d86dd</uuid>
+                            <expression>find(/Template VMware vSphere Hypervisor - vPoller Native/vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.powerState&quot;, &quot;null&quot;],5s,&quot;iregexp&quot;,&quot;poweredOff&quot;)=1</expression>
+                            <name>Host {HOST.NAME} is powered off</name>
+                            <priority>INFO</priority>
+                            <description>Host {HOST.NAME} is powered off
+
+Host: {HOST.NAME}
+vSphere Host: {$VSPHERE.HOST}</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>79c7830d827e4edf922c2bad77a416ea</uuid>
+                    <name>Overall Status</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.overallStatus&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>7e4b922a7112495fbf63ac95bc19bb49</uuid>
+                            <expression>find(/Template VMware vSphere Hypervisor - vPoller Native/vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.overallStatus&quot;, &quot;null&quot;],5s,&quot;iregexp&quot;,&quot;red&quot;)=1</expression>
+                            <name>Overall status of {HOST.NAME} is {ITEM.LASTVALUE}</name>
+                            <priority>HIGH</priority>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>6708bf1581df4c13b50e4bd4bcb667a4</uuid>
+                    <name>Distributed CPU fairness</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.distributedCpuFairness&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <units>Hz</units>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>7eca1c23a5144dd1b7014d2d53a771be</uuid>
+                    <name>Distributed memory fairness</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.distributedMemoryFairness&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <units>B</units>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Memory</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>7663a0839ed54bea8658a67f29215f03</uuid>
+                    <name>Overall CPU Usage</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsage&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <units>Hz</units>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <parameters>
+                                <parameter>1048576</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>3382208095b64a66ad372e7eacc5aee0</uuid>
+                    <name>CPU Utilization (Percentage)</name>
+                    <type>CALCULATED</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <value_type>FLOAT</value_type>
+                    <params>(last(//vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsage&quot;, &quot;null&quot;]) / (last(//vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.numCpuCores&quot;, &quot;null&quot;]) * last(//vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.cpuInfo.hz&quot;, &quot;null&quot;]))) * 100</params>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>CPU</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>72e51e9eaca54af7ae3a88d851c55a64</uuid>
+                            <expression>min(/Template VMware vSphere Hypervisor - vPoller Native/vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;, &quot;null&quot;],5s)&gt;90</expression>
+                            <name>High CPU utilization on host {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                            <description>High CPU utilization on host {HOST.NAME}
+
+Host: {HOST.NAME}
+CPU load: {ITEM.LASTVALUE}%
+vSphere Host: {$VSPHERE.HOST}</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>c96b511bea074a2b802c17849e656370</uuid>
+                    <name>Overall Memory Usage</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsage&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <units>B</units>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <parameters>
+                                <parameter>1048576</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Hardware</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Memory</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>53699ddc5cd3446aa753e91918487a86</uuid>
+                    <name>Memory Usage (Percentage)</name>
+                    <type>CALCULATED</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsagePercentage&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <status>DISABLED</status>
+                    <value_type>FLOAT</value_type>
+                    <params>last(//vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsage&quot;, &quot;null&quot;]) / last(//vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;hardware.memorySize&quot;, &quot;null&quot;]) * 100</params>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Memory</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>c4e6aef9da9d41f2beda4b6e1b467d1e</uuid>
+                            <expression>min(/Template VMware vSphere Hypervisor - vPoller Native/vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsagePercentage&quot;, &quot;null&quot;],5s)&gt;90</expression>
+                            <name>High memory usage on host {HOST.NAME}</name>
+                            <priority>WARNING</priority>
+                            <description>High memory usage on {HOST.NAME} 
+
+Host: {HOST.NAME}
+Memory usage: {ITEM.LASTVALUE}%
+vSphere Host: {$VSPHERE.HOST}</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>ca0e216c2bc040098a9bbf967c0704ac</uuid>
+                    <name>Uptime</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.uptime&quot;, &quot;null&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <units>uptime</units>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>708346476f5b4b11ac5180761c9c2a2b</uuid>
+                    <name>Reboot Required</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.rebootRequired&quot;, &quot;null&quot;]</key>
+                    <delay>3600</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>DISABLED</status>
+                    <value_type>CHAR</value_type>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>General</value>
+                        </tag>
+                    </tags>
+                    <triggers>
+                        <trigger>
+                            <uuid>3c519f60fb08471ea187771b80410fc7</uuid>
+                            <expression>find(/Template VMware vSphere Hypervisor - vPoller Native/vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.rebootRequired&quot;, &quot;null&quot;],5s,&quot;iregexp&quot;,&quot;true&quot;)=1</expression>
+                            <name>Reboot required for host {HOST.NAME}</name>
+                            <priority>INFO</priority>
+                            <description>Reboot is required for host {HOST.NAME}
+
+Host: {HOST.NAME}
+vSphere Host: {$VSPHERE.HOST}</description>
+                        </trigger>
+                    </triggers>
+                </item>
+                <item>
+                    <uuid>ad42e15bb2244efca4ba0d90d88005d0</uuid>
+                    <name>Data receive rate</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;&quot;, &quot;&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <units>Bps</units>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <parameters>
+                                <parameter>1024</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Network</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Performance</value>
+                        </tag>
+                    </tags>
+                </item>
+                <item>
+                    <uuid>4eb5ae1648054a32ab0f3e9b664bea97</uuid>
+                    <name>Data transmit rate</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;149&quot;, &quot;&quot;, &quot;&quot;]</key>
+                    <delay>300</delay>
+                    <history>7d</history>
+                    <trends>30d</trends>
+                    <units>Bps</units>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <parameters>
+                                <parameter>1024</parameter>
+                            </parameters>
+                        </step>
+                    </preprocessing>
+                    <tags>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Network</value>
+                        </tag>
+                        <tag>
+                            <tag>Application</tag>
+                            <value>Performance</value>
+                        </tag>
+                    </tags>
                 </item>
             </items>
             <discovery_rules>
                 <discovery_rule>
-                    <name>Data usage discovery</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.perf.metric.info&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
+                    <uuid>bee38adae3b642be959692c4c5bd860c</uuid>
+                    <name>Discover VMware Datastores on Hypervisor</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.datastore.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>0</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>{#VSPHERE.HOST.PERF.METRIC.INSTANCE}:vmnic</filter>
-                    <lifetime>7</lifetime>
+                    <status>DISABLED</status>
+                    <lifetime>7d</lifetime>
+                    <description>Discover VMware datastores available on the hypervisor</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <uuid>10813793ce9b40aaad7aa30cba56f4a3</uuid>
+                            <name>Datastore &quot;{#VSPHERE.HOST.DATASTORE.NAME}&quot; is used by hypervisor</name>
+                            <type>SIMPLE</type>
+                            <key>vpoller.echo[&quot;{#VSPHERE.HOST.DATASTORE.INFO.URL}&quot;]</key>
+                            <delay>3600</delay>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Datastores</value>
+                                </tag>
+                            </tags>
+                        </item_prototype>
+                    </item_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <uuid>2ddcc85281a8485cb1aa6fa242e4743f</uuid>
+                    <name>Data usage discovery</name>
+                    <type>SIMPLE</type>
+                    <key>vpoller[&quot;host.perf.metric.info&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;&quot;, &quot;&quot;]</key>
+                    <delay>3600</delay>
+                    <filter>
+                        <conditions>
+                            <condition>
+                                <macro>{#VSPHERE.HOST.PERF.METRIC.INSTANCE}</macro>
+                                <value>vmnic</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <lifetime>7d</lifetime>
                     <description>Discovers all vmnic interfaces on the ESXi Hypervisor.</description>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>54eb5271a8f74d22adc7f6e7f1ff4f73</uuid>
                             <name>Data receive rate on {#VSPHERE.HOST.PERF.METRIC.INSTANCE}</name>
-                            <type>3</type>
-                            <snmp_community/>
-                            <multiplier>1</multiplier>
-                            <snmp_oid/>
-                            <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
+                            <type>SIMPLE</type>
+                            <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
                             <delay>300</delay>
-                            <history>7</history>
-                            <trends>30</trends>
-                            <status>0</status>
-                            <value_type>3</value_type>
-                            <allowed_hosts/>
+                            <history>7d</history>
+                            <trends>30d</trends>
                             <units>Bps</units>
-                            <delta>0</delta>
-                            <snmpv3_contextname/>
-                            <snmpv3_securityname/>
-                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                            <snmpv3_authpassphrase/>
-                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                            <snmpv3_privpassphrase/>
-                            <formula>1024</formula>
-                            <delay_flex/>
-                            <params/>
-                            <ipmi_sensor/>
-                            <data_type>0</data_type>
-                            <authtype>0</authtype>
-                            <username/>
-                            <password/>
-                            <publickey/>
-                            <privatekey/>
-                            <port/>
-                            <description/>
-                            <inventory_link>0</inventory_link>
-                            <applications>
-                                <application>
-                                    <name>Network</name>
-                                </application>
-                                <application>
-                                    <name>Performance</name>
-                                </application>
-                            </applications>
-                            <valuemap/>
-                            <logtimefmt/>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <parameters>
+                                        <parameter>1024</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Network</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Performance</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                         <item_prototype>
+                            <uuid>2e04d841c1074547b847caa90b945f09</uuid>
                             <name>Data transmit rate on {#VSPHERE.HOST.PERF.METRIC.INSTANCE}</name>
-                            <type>3</type>
-                            <snmp_community/>
-                            <multiplier>1</multiplier>
-                            <snmp_oid/>
-                            <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.transmitted.kiloBytesPerSecond.average&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
+                            <type>SIMPLE</type>
+                            <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;149&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
                             <delay>300</delay>
-                            <history>7</history>
-                            <trends>30</trends>
-                            <status>0</status>
-                            <value_type>3</value_type>
-                            <allowed_hosts/>
+                            <history>7d</history>
+                            <trends>30d</trends>
                             <units>Bps</units>
-                            <delta>0</delta>
-                            <snmpv3_contextname/>
-                            <snmpv3_securityname/>
-                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                            <snmpv3_authpassphrase/>
-                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                            <snmpv3_privpassphrase/>
-                            <formula>1024</formula>
-                            <delay_flex/>
-                            <params/>
-                            <ipmi_sensor/>
-                            <data_type>0</data_type>
-                            <authtype>0</authtype>
-                            <username/>
-                            <password/>
-                            <publickey/>
-                            <privatekey/>
-                            <port/>
-                            <description/>
-                            <inventory_link>0</inventory_link>
-                            <applications>
-                                <application>
-                                    <name>Network</name>
-                                </application>
-                                <application>
-                                    <name>Performance</name>
-                                </application>
-                            </applications>
-                            <valuemap/>
-                            <logtimefmt/>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <parameters>
+                                        <parameter>1024</parameter>
+                                    </parameters>
+                                </step>
+                            </preprocessing>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Network</value>
+                                </tag>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Performance</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                     </item_prototypes>
-                    <trigger_prototypes/>
                     <graph_prototypes>
                         <graph_prototype>
+                            <uuid>baf70e61ba8f4e5390d23523082a8d98</uuid>
                             <name>Data traffic on {#VSPHERE.HOST.PERF.METRIC.INSTANCE}</name>
-                            <width>900</width>
-                            <height>200</height>
-                            <yaxismin>0.0000</yaxismin>
-                            <yaxismax>100.0000</yaxismax>
-                            <show_work_period>1</show_work_period>
-                            <show_triggers>1</show_triggers>
-                            <type>0</type>
-                            <show_legend>1</show_legend>
-                            <show_3d>0</show_3d>
-                            <percent_left>0.0000</percent_left>
-                            <percent_right>0.0000</percent_right>
-                            <ymin_type_1>0</ymin_type_1>
-                            <ymax_type_1>0</ymax_type_1>
-                            <ymin_item_1>0</ymin_item_1>
-                            <ymax_item_1>0</ymax_item_1>
                             <graph_items>
                                 <graph_item>
-                                    <sortorder>0</sortorder>
-                                    <drawtype>5</drawtype>
+                                    <drawtype>GRADIENT_LINE</drawtype>
                                     <color>00AA00</color>
-                                    <yaxisside>0</yaxisside>
-                                    <calc_fnc>2</calc_fnc>
-                                    <type>0</type>
                                     <item>
                                         <host>Template VMware vSphere Hypervisor - vPoller Native</host>
-                                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
+                                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
                                     </item>
                                 </graph_item>
                                 <graph_item>
                                     <sortorder>1</sortorder>
-                                    <drawtype>5</drawtype>
+                                    <drawtype>GRADIENT_LINE</drawtype>
                                     <color>3333FF</color>
-                                    <yaxisside>0</yaxisside>
-                                    <calc_fnc>2</calc_fnc>
-                                    <type>0</type>
                                     <item>
                                         <host>Template VMware vSphere Hypervisor - vPoller Native</host>
-                                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.transmitted.kiloBytesPerSecond.average&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
+                                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;149&quot;, &quot;{#VSPHERE.HOST.PERF.METRIC.INSTANCE}&quot;, &quot;&quot;]</key>
                                     </item>
                                 </graph_item>
                             </graph_items>
                         </graph_prototype>
                     </graph_prototypes>
-                    <host_prototypes/>
                 </discovery_rule>
                 <discovery_rule>
-                    <name>Discover VMware Datastores on Hypervisor</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
-                    <key>vpoller[&quot;host.datastore.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;null&quot;]</key>
-                    <delay>3600</delay>
-                    <status>1</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>:</filter>
-                    <lifetime>7</lifetime>
-                    <description>Discover VMware datastores available on the hypervisor</description>
-                    <item_prototypes>
-                        <item_prototype>
-                            <name>Datastore &quot;{#VSPHERE.HOST.DATASTORE.NAME}&quot; is used by hypervisor</name>
-                            <type>3</type>
-                            <snmp_community/>
-                            <multiplier>0</multiplier>
-                            <snmp_oid/>
-                            <key>vpoller.echo[&quot;{#VSPHERE.HOST.DATASTORE.INFO.URL}&quot;]</key>
-                            <delay>3600</delay>
-                            <history>7</history>
-                            <trends>365</trends>
-                            <status>0</status>
-                            <value_type>1</value_type>
-                            <allowed_hosts/>
-                            <units/>
-                            <delta>0</delta>
-                            <snmpv3_contextname/>
-                            <snmpv3_securityname/>
-                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                            <snmpv3_authpassphrase/>
-                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                            <snmpv3_privpassphrase/>
-                            <formula>1</formula>
-                            <delay_flex/>
-                            <params/>
-                            <ipmi_sensor/>
-                            <data_type>0</data_type>
-                            <authtype>0</authtype>
-                            <username/>
-                            <password/>
-                            <publickey/>
-                            <privatekey/>
-                            <port/>
-                            <description/>
-                            <inventory_link>0</inventory_link>
-                            <applications>
-                                <application>
-                                    <name>Datastores</name>
-                                </application>
-                            </applications>
-                            <valuemap/>
-                            <logtimefmt/>
-                        </item_prototype>
-                    </item_prototypes>
-                    <trigger_prototypes/>
-                    <graph_prototypes/>
-                    <host_prototypes/>
-                </discovery_rule>
-                <discovery_rule>
+                    <uuid>78578d69f95a480ca2ac26eae33a2c20</uuid>
                     <name>Discover VMware Virtual Machines on Hypervisor</name>
-                    <type>3</type>
-                    <snmp_community/>
-                    <snmp_oid/>
+                    <type>SIMPLE</type>
                     <key>vpoller[&quot;host.vm.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;null&quot;, &quot;null&quot;]</key>
                     <delay>3600</delay>
-                    <status>1</status>
-                    <allowed_hosts/>
-                    <snmpv3_contextname/>
-                    <snmpv3_securityname/>
-                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                    <snmpv3_authpassphrase/>
-                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                    <snmpv3_privpassphrase/>
-                    <delay_flex/>
-                    <params/>
-                    <ipmi_sensor/>
-                    <authtype>0</authtype>
-                    <username/>
-                    <password/>
-                    <publickey/>
-                    <privatekey/>
-                    <port/>
-                    <filter>:</filter>
-                    <lifetime>7</lifetime>
+                    <status>DISABLED</status>
+                    <lifetime>7d</lifetime>
                     <description>Discover VMware Virtual Machines running on the hypervisor</description>
                     <item_prototypes>
                         <item_prototype>
+                            <uuid>20d934ff3bdb4b0b93bc12eef6f4abc4</uuid>
                             <name>Virtual Machine &quot;{#VSPHERE.HOST.VM.NAME}&quot; runs on hypervisor</name>
-                            <type>3</type>
-                            <snmp_community/>
-                            <multiplier>0</multiplier>
-                            <snmp_oid/>
+                            <type>SIMPLE</type>
                             <key>vpoller.echo[&quot;{#VSPHERE.HOST.VM.NAME}&quot;]</key>
                             <delay>3600</delay>
-                            <history>7</history>
-                            <trends>365</trends>
-                            <status>0</status>
-                            <value_type>1</value_type>
-                            <allowed_hosts/>
-                            <units/>
-                            <delta>0</delta>
-                            <snmpv3_contextname/>
-                            <snmpv3_securityname/>
-                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
-                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
-                            <snmpv3_authpassphrase/>
-                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
-                            <snmpv3_privpassphrase/>
-                            <formula>1</formula>
-                            <delay_flex/>
-                            <params/>
-                            <ipmi_sensor/>
-                            <data_type>0</data_type>
-                            <authtype>0</authtype>
-                            <username/>
-                            <password/>
-                            <publickey/>
-                            <privatekey/>
-                            <port/>
-                            <description/>
-                            <inventory_link>0</inventory_link>
-                            <applications>
-                                <application>
-                                    <name>Virtual Machines</name>
-                                </application>
-                            </applications>
-                            <valuemap/>
-                            <logtimefmt/>
+                            <history>7d</history>
+                            <trends>0</trends>
+                            <value_type>CHAR</value_type>
+                            <tags>
+                                <tag>
+                                    <tag>Application</tag>
+                                    <value>Virtual Machines</value>
+                                </tag>
+                            </tags>
                         </item_prototype>
                     </item_prototypes>
-                    <trigger_prototypes/>
-                    <graph_prototypes/>
-                    <host_prototypes/>
                 </discovery_rule>
             </discovery_rules>
-            <macros/>
-            <templates/>
-            <screens/>
         </template>
     </templates>
-    <triggers>
-        <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallCpuUsagePercentage&quot;, &quot;null&quot;].min(5)}&gt;90</expression>
-            <name>High CPU utilization on host {HOST.NAME}</name>
-            <url/>
-            <status>0</status>
-            <priority>2</priority>
-            <description>High CPU utilization on host {HOST.NAME}&#13;
-&#13;
-Host: {HOST.NAME}&#13;
-CPU load: {ITEM.LASTVALUE}%&#13;
-vSphere Host: {$VSPHERE.HOST}</description>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-        <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.quickStats.overallMemoryUsagePercentage&quot;, &quot;null&quot;].min(5)}&gt;90</expression>
-            <name>High memory usage on host {HOST.NAME}</name>
-            <url/>
-            <status>0</status>
-            <priority>2</priority>
-            <description>High memory usage on {HOST.NAME} &#13;
-&#13;
-Host: {HOST.NAME}&#13;
-Memory usage: {ITEM.LASTVALUE}%&#13;
-vSphere Host: {$VSPHERE.HOST}</description>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-        <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.inMaintenanceMode&quot;, &quot;null&quot;].iregexp(true,5)}=1</expression>
-            <name>Host {HOST.NAME} is in maintenance mode</name>
-            <url/>
-            <status>0</status>
-            <priority>1</priority>
-            <description>Host {HOST.NAME} is in maintenance mode&#13;
-&#13;
-Host: {HOST.NAME}&#13;
-vSphere Host: {$VSPHERE.HOST}</description>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-        <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;runtime.powerState&quot;, &quot;null&quot;].iregexp(poweredOff,5)}=1</expression>
-            <name>Host {HOST.NAME} is powered off</name>
-            <url/>
-            <status>0</status>
-            <priority>1</priority>
-            <description>Host {HOST.NAME} is powered off&#13;
-&#13;
-Host: {HOST.NAME}&#13;
-vSphere Host: {$VSPHERE.HOST}</description>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-        <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.overallStatus&quot;, &quot;null&quot;].iregexp(red,5)}=1</expression>
-            <name>Overall status of {HOST.NAME} is {ITEM.LASTVALUE}</name>
-            <url/>
-            <status>0</status>
-            <priority>4</priority>
-            <description/>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-        <trigger>
-            <expression>{Template VMware vSphere Hypervisor - vPoller Native:vpoller[&quot;host.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;summary.rebootRequired&quot;, &quot;null&quot;].iregexp(true,5)}=1</expression>
-            <name>Reboot required for host {HOST.NAME}</name>
-            <url/>
-            <status>0</status>
-            <priority>1</priority>
-            <description>Reboot is required for host {HOST.NAME}&#13;
-&#13;
-Host: {HOST.NAME}&#13;
-vSphere Host: {$VSPHERE.HOST}</description>
-            <type>0</type>
-            <dependencies/>
-        </trigger>
-    </triggers>
     <graphs>
         <graph>
+            <uuid>6ac440b719e24ff9a1fabd14ce592bf2</uuid>
             <name>Data traffic</name>
-            <width>900</width>
-            <height>200</height>
-            <yaxismin>0.0000</yaxismin>
-            <yaxismax>100.0000</yaxismax>
-            <show_work_period>1</show_work_period>
-            <show_triggers>1</show_triggers>
-            <type>0</type>
-            <show_legend>1</show_legend>
-            <show_3d>0</show_3d>
-            <percent_left>0.0000</percent_left>
-            <percent_right>0.0000</percent_right>
-            <ymin_type_1>0</ymin_type_1>
-            <ymax_type_1>0</ymax_type_1>
-            <ymin_item_1>0</ymin_item_1>
-            <ymax_item_1>0</ymax_item_1>
             <graph_items>
                 <graph_item>
-                    <sortorder>0</sortorder>
-                    <drawtype>5</drawtype>
+                    <drawtype>GRADIENT_LINE</drawtype>
                     <color>00AA00</color>
-                    <yaxisside>0</yaxisside>
-                    <calc_fnc>2</calc_fnc>
-                    <type>0</type>
                     <item>
                         <host>Template VMware vSphere Hypervisor - vPoller Native</host>
-                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.received.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
+                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;148&quot;, &quot;&quot;, &quot;&quot;]</key>
                     </item>
                 </graph_item>
                 <graph_item>
                     <sortorder>1</sortorder>
-                    <drawtype>5</drawtype>
+                    <drawtype>GRADIENT_LINE</drawtype>
                     <color>3333FF</color>
-                    <yaxisside>0</yaxisside>
-                    <calc_fnc>2</calc_fnc>
-                    <type>0</type>
                     <item>
                         <host>Template VMware vSphere Hypervisor - vPoller Native</host>
-                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;net.transmitted.kiloBytesPerSecond.average&quot;, &quot;&quot;, &quot;&quot;]</key>
+                        <key>vpoller[&quot;host.perf.metric.get&quot;, &quot;{$VSPHERE.HOST}&quot;, &quot;{HOST.HOST}&quot;, &quot;value&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;149&quot;, &quot;&quot;, &quot;&quot;]</key>
                     </item>
                 </graph_item>
             </graph_items>
