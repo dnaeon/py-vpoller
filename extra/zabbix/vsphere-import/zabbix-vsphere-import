@@ -40,6 +40,19 @@ import pyzabbix
 from docopt import docopt
 from vpoller.client import VPollerClient
 
+import re
+import urllib.parse
+
+def sanitize_zabbix_hostname(name: str) -> str:
+    """
+    Sanitize a string so it is valid for use as a Zabbix host name.
+    """
+
+    decoded = urllib.parse.unquote(name)
+    sanitized = re.sub(r'[^A-Za-z0-9._-]', '_', decoded)
+    sanitized = re.sub(r'_+', '_', sanitized).strip('_')
+
+    return sanitized
 
 class ZabbixVSphere(object):
     """
@@ -79,22 +92,27 @@ class ZabbixVSphere(object):
     def connect(self):
         """
         Establish a connection to the Zabbix server
-
         """
+
         logging.info(
             'Connecting to Zabbix server at %s',
             self.options['zabbix']['hostname']
         )
-        
-        self.zapi.login(
-            user=self.options['zabbix']['username'],
-            password=self.options['zabbix']['password']
-        )
 
-        logging.info(
-            'Zabbix API version is %s',
-            self.zapi.api_version()
-        )
+        # Zabbix 7.2+ requires API token authentication
+
+        if 'api_token' in self.options['zabbix']:
+            token = self.options['zabbix']['api_token']
+            self.zapi.session.headers.update({'Authorization': f'Bearer {token}'})
+            logging.info('Authenticated to Zabbix using API token (Zabbix 7.2+)')
+        else:
+            self.zapi.login(
+                user=self.options['zabbix']['username'],
+                password=self.options['zabbix']['password']
+            )
+            logging.info('Authenticated to Zabbix using username/password (legacy mode)')
+
+        #logging.info('Zabbix API version is %s', self.zapi.api_version())
 
     def get_proxy_id(self, name):
         """
@@ -220,7 +238,7 @@ class ZabbixVSphere(object):
             )
 
             params = deepcopy(host_options)
-            params['host'] = datacenter
+            params['host'] = sanitize_zabbix_hostname(datacenter)
 
             try:
                 result = self.zapi.host.create(params)
@@ -346,7 +364,7 @@ class ZabbixVSphere(object):
             )
 
             params = deepcopy(host_options)
-            params['host'] = cluster
+            params['host'] = sanitize_zabbix_hostname(cluster)
 
             try:
                 result = self.zapi.host.create(params)
@@ -423,7 +441,7 @@ class ZabbixVSphere(object):
             )
 
             params = deepcopy(host_options)
-            params['host'] = host
+            params['host'] = sanitize_zabbix_hostname(host)
 
             # Add the host to it's respective hostgroup/cluster in Zabbix
             msg = {
@@ -539,7 +557,7 @@ class ZabbixVSphere(object):
             )
 
             params = deepcopy(host_options)
-            params['host'] = host
+            params['host'] = sanitize_zabbix_hostname(host)
 
             # Add the virtual machine to it's respective hostgroup/cluster in Zabbix
             # We do this by first finding the host this VM runs on and then we get the
@@ -700,7 +718,13 @@ class ZabbixVSphere(object):
 
         # Get all Zabbix hosts which have macro {$VSPHERE_HOST} == self.options['vsphere']['hostname']
         macros = self.zapi.usermacro.get(output='extend')
-        hostids = [m['hostid'] for m in macros if m['value'] == self.options['vsphere']['hostname']]
+        hostids = []
+        for m in macros:
+            value = m.get('value')
+            if value and value == self.options['vsphere']['hostname']:
+               hostid = m.get('hostid')
+               if hostid:
+                  hostids.append(hostid)
         zabbix_data = self.zapi.host.get(output='extend', hostids=hostids)
         zabbix_hosts = [h['name'] for h in zabbix_data]
         extra_hosts = set(zabbix_hosts) - set(vsphere_objects)
