@@ -9,6 +9,7 @@ vpoller:
 
 zabbix:
   hostname: http://zabbix.example.org/zabbix
+  api_token: YOU_API_TOKEN_HERE
   username: Admin
   password: zabbix
 
