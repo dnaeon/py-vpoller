@@ -112,7 +112,6 @@ class ZabbixVSphere(object):
             )
             logging.info('Authenticated to Zabbix using username/password (legacy mode)')
 
-        #logging.info('Zabbix API version is %s', self.zapi.api_version())
 
     def get_proxy_id(self, name):
         """
